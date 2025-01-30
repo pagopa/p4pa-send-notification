@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.send.util;
+package it.gov.pagopa.pu.send.utils;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

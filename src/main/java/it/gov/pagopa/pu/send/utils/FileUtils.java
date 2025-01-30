@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.send.util;
+package it.gov.pagopa.pu.send.utils;
 
 import java.io.File;
 import java.io.FileInputStream;

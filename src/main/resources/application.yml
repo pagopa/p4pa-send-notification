@@ -9,6 +9,19 @@ spring:
     threads:
       virtual:
         enabled: "\${VIRTUAL_THREADS_ENABLED:true}"
+    data:
+        mongodb:
+            uri: "\${MONGODB_URI:mongodb://localhost:27017}"
+            database: "\${MONGODB_DBNAME:payhub}"
+            # custom configured properties
+            config:
+              connectionPool:
+                maxSize: "\${MONGODB_CONNECTIONPOOL_MAX_SIZE:100}"
+                minSize: "\${MONGODB_CONNECTIONPOOL_MIN_SIZE:0}"
+                maxWaitTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_WAIT_MS:120000}"
+                maxConnectionLifeTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_LIFE_MS:0}"
+                maxConnectionIdleTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_IDLE_MS:120000}"
+                maxConnecting: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTING:2}"
 
 management:
     endpoints:
@@ -55,11 +68,11 @@ springdoc:
 jwt:
   access-token:
     public-key: "\${JWT_TOKEN_PUBLIC_KEY:-----BEGIN PUBLIC KEY-----
-                MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2ovm/rd3g69dq9PisinQ
-                6mWy8ZttT8D+GKXCsHZycsGnN7b74TPyYy+4+h+9cgJeizp8RDRrufHjiBrqi/2r
-                eOk/rD7ZHbpfQvHK8MYfgIVdtTxYMX/GGdOrX6/5TV2b8e2aCG6GmxF0UuEvxY9o
-                TmcZUxnIeDtl/ixz4DQ754eS363qWfEA92opW+jcYzr07sbQtR86e+Z/s/CUeX6W
-                1PHNvBqdlAgp2ecr/1DOLq1D9hEANBPSwbt+FM6FNe4vLphi7GTwiB0yaAuy+jE8
-                odND6HPvvvmgbK1/2qTHn/HJjWUm11LUC73BszR32BKbdEEhxPQnnwswVekWzPi1
-                IwIDAQAB
-                -----END PUBLIC KEY-----}"
+                  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsyutJMN8Rc4gOpnjYpKO
+                  SFUoBo7eOMGThwpDaFDoHAbihwsYwIG3f5sbT1hhseSA31nqRZwiOJO7Sf55cI1Q
+                  1pA7hcUehYBb6M06kjV42D8dnOuJjR0oNgajgclkfTayvHy21BIYo34lzRvvCszW
+                  0u1yLxGFP0PROnFdY3rgUpXus0/du0Of5gEazmclYw+qsrju8iZM7932ZbqPUy5V
+                  ulWrE/iI7DYQT9tnJEaI5qtSY8KbneVL/RH9FabM97gT5ntmS27bwOjEaFYEU4R5
+                  DXyX8coB+giRmZ+nffi8kIqZrbptiLHXE/mg3VRdX7XFF6UNsDkobw3xMJcMErsi
+                  ewIDAQAB
+                  -----END PUBLIC KEY-----}"

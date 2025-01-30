@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.send.util;
+package it.gov.pagopa.pu.send.utils;
 
 import static org.junit.jupiter.api.Assertions.*;
 

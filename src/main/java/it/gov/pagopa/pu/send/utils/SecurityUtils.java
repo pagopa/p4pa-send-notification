@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.send.util;
+package it.gov.pagopa.pu.send.utils;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;

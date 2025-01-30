@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.config;
 
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.proc.DefaultJOSEObjectTypeVerifier;
-import it.gov.pagopa.pu.send.util.CertUtils;
+import it.gov.pagopa.pu.send.utils.CertUtils;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
