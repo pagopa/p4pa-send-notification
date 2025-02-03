@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.send.utils;
+package it.gov.pagopa.pu.send.util;
 
 import java.time.ZoneId;
 

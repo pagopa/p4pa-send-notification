@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.config;
 
-import it.gov.pagopa.pu.send.utils.Constants;
+import it.gov.pagopa.pu.send.util.Constants;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
