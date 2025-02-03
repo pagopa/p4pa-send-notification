@@ -25,6 +25,7 @@ class SendNotificationControllerTest {
 
   @Test
   void givenValidNotificationRequestThenOk(){
+    // Given
     List<CreateNotificationRequest> request = List.of(CreateNotificationRequest
       .builder()
       .preloadId("TEST.pdf")
@@ -37,9 +38,10 @@ class SendNotificationControllerTest {
       .preloadRef(null)
       .status(NotificationStatus.WAITING_FILE.name())
       .build();
-
+    // When
     Mockito.when(sendNotificationServiceMock.createSendNotification(request)).thenReturn(expectedResponse);
 
+    // Then
     ResponseEntity<CreateNotificationResponse> response = sendNotificationController.createSendNotification(request);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(expectedResponse, response.getBody());
