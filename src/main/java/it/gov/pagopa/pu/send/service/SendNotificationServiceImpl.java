@@ -37,7 +37,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .builder()
       .sendNotificationId(sendNotificationId)
       .status(NotificationStatus.WAITING_FILE.name())
-      //.preloadRef() TODO comunicate url for upload file
+      //.preloadRef() TODO P4ADEV-2080 comunicate fileid and url for upload file
       .build();
   }
 }
