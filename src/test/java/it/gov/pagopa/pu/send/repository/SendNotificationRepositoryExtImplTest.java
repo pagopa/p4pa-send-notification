@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.repository;
 
+import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.model.SendNotification.Fields;
@@ -43,6 +44,13 @@ class SendNotificationRepositoryExtImplTest {
     String contetType = "application/pdf";
     String sha256 = "ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ";
 
+    CreateNotificationRequest request = CreateNotificationRequest
+      .builder()
+      .preloadId(preloadId)
+      .contentType(contetType)
+      .sha256(sha256)
+      .build();
+
     SendNotification sendNotification = SendNotification.builder()
       .sendNotificationId(sendNotificationId)
       .preloadId(preloadId)
@@ -51,20 +59,20 @@ class SendNotificationRepositoryExtImplTest {
       .build();
 
     Mockito.when(mongoTemplateMock.findAndModify(
-        Mockito.eq(Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotification.getSendNotificationId())
-          .and(Fields.preloadId).is(sendNotification.getPreloadId()))),
+        Mockito.eq(Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
+          .and(Fields.preloadId).is(request.getPreloadId()))),
         Mockito.eq(new Update()
           .setOnInsert(Fields.sendNotificationId, sendNotificationId)
-          .setOnInsert(Fields.preloadId, sendNotification.getPreloadId())
-          .setOnInsert(Fields.expectedFileDigest, sendNotification.getExpectedFileDigest())
-          .setOnInsert(Fields.contentType, sendNotification.getContentType())
+          .setOnInsert(Fields.preloadId, request.getPreloadId())
+          .setOnInsert(Fields.expectedFileDigest, request.getSha256())
+          .setOnInsert(Fields.contentType, request.getContentType())
           .setOnInsert(Fields.status, NotificationStatus.WAITING_FILE)),
         Mockito.argThat(opt -> opt.isReturnNew() && opt.isUpsert() && !opt.isRemove()),
         Mockito.eq(SendNotification.class)
       )).thenReturn(sendNotification);
 
     // When
-    SendNotification result = repository.createIfNotExists(sendNotificationId, sendNotification);
+    SendNotification result = repository.createIfNotExists(sendNotificationId, request);
     // Then
     Assertions.assertSame(sendNotification, result);
   }
