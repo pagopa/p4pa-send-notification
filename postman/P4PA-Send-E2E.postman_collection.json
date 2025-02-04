@@ -1,0 +1,153 @@
+{
+	"info": {
+		"_postman_id": "25b4e0d8-b3aa-4787-98fa-0e4e575f70a6",
+		"name": "P4PA-Send-E2E",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36568841"
+	},
+	"item": [
+		{
+			"name": "00_login",
+			"item": [
+				{
+					"name": "postToken client-credentials",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"    pm.environment.get(\"clientId\")\r",
+									"    pm.environment.get(\"clientSecret\")"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Auth - postToken - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Auth - postToken - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"token_type\").to.eq(\"bearer\");\r",
+									"    pm.expect(jsonResponse).have.property(\"expires_in\").to.eq(14400);\r",
+									"    pm.expect(jsonResponse).have.property(\"access_token\");\r",
+									"\r",
+									"    pm.collectionVariables.set(\"accessToken\", jsonResponse.access_token)\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{p4paAuthBaseUrl}}/auth/token?client_id=IPA_TEST_2SOAKTEST_CLIENTNAME_0_1732879391104&grant_type=client_credentials&scope=openid&client_secret=c76e43fb-8ef8-486e-8fae-298e143df8bf",
+							"host": [
+								"{{p4paAuthBaseUrl}}"
+							],
+							"path": [
+								"auth",
+								"token"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "IPA_TEST_2SOAKTEST_CLIENTNAME_0_1732879391104"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials"
+								},
+								{
+									"key": "scope",
+									"value": "openid"
+								},
+								{
+									"key": "client_secret",
+									"value": "c76e43fb-8ef8-486e-8fae-298e143df8bf"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "01_SendNotification",
+			"item": [
+				{
+					"name": "createSendNotification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send Notification create notification - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Send Notification - create send notification - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"sendNotificationId\");\r",
+									"    pm.expect(jsonResponse).have.property(\"preloadRef\");\r",
+									"    pm.expect(jsonResponse).have.property(\"status\").to.eq(\"WAITING_FILE\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"RSSMRA80L05F593A\"\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ==\"\r\n    },\r\n    {\r\n        \"fileName\":\"Pagamento.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ==\"\r\n    }]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/notification",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"notification"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "accessToken",
+			"value": ""
+		}
+	]
+}
