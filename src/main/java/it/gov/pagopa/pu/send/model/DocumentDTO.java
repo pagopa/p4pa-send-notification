@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.model;
 
-import it.gov.pagopa.pu.send.enums.Status;
+import it.gov.pagopa.pu.send.enums.FileStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +14,5 @@ public class DocumentDTO {
   private String fileName;
   private String digest;
   private String contentType;
-  private Status status;
+  private FileStatus status;
 }

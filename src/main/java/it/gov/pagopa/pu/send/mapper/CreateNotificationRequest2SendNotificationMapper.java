@@ -1,7 +1,8 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
-import it.gov.pagopa.pu.send.enums.Status;
+import it.gov.pagopa.pu.send.enums.FileStatus;
+import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.DocumentDTO;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
     SendNotification sendNotification = new SendNotification();
     sendNotification.setSubjectType(request.getRecipient().getRecipientType().getValue());
     sendNotification.setFiscalCode(request.getRecipient().getTaxId());
+    sendNotification.setStatus(NotificationStatus.WAITING_FILE);
 
     // set documents
     sendNotification.setDocuments(request.getDocuments().stream()
@@ -21,7 +23,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
         .fileName(document.getFileName())
         .contentType(document.getContentType())
         .digest(document.getDigest())
-        .status(Status.WAITING_FILE)
+        .status(FileStatus.WAITING)
         .build()).toList());
     return sendNotification;
   }

@@ -4,7 +4,8 @@ import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.Document;
 import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.dto.generated.Recipient.RecipientTypeEnum;
-import it.gov.pagopa.pu.send.enums.Status;
+import it.gov.pagopa.pu.send.enums.FileStatus;
+import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import java.util.Collections;
@@ -46,6 +47,7 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     Assertions.assertEquals("test.pdf", result.getDocuments().getFirst().getFileName());
     Assertions.assertEquals("application/pdf", result.getDocuments().getFirst().getContentType());
     Assertions.assertEquals("sha256", result.getDocuments().getFirst().getDigest());
-    Assertions.assertEquals(Status.WAITING_FILE, result.getDocuments().getFirst().getStatus());
+    Assertions.assertEquals(NotificationStatus.WAITING_FILE, result.getStatus());
+    Assertions.assertEquals(FileStatus.WAITING, result.getDocuments().getFirst().getStatus());
   }
 }

@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
-import it.gov.pagopa.pu.send.enums.Status;
+import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
@@ -27,7 +27,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     return CreateNotificationResponse
       .builder()
       .sendNotificationId(sendNotification.getSendNotificationId())
-      .status(Status.WAITING_FILE.name())
+      .status(NotificationStatus.WAITING_FILE.name())
       //.preloadRef() TODO P4ADEV-2080 comunicate fileName and url for upload file
       .build();
   }
