@@ -4,7 +4,6 @@ import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.enums.Status;
 import it.gov.pagopa.pu.send.model.DocumentDTO;
 import it.gov.pagopa.pu.send.model.SendNotification;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,7 +22,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
         .contentType(document.getContentType())
         .digest(document.getDigest())
         .status(Status.WAITING_FILE)
-        .build()).collect(Collectors.toList()));
+        .build()).toList());
     return sendNotification;
   }
 }

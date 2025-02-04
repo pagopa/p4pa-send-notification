@@ -22,7 +22,7 @@ class MongoHealthIndicatorTest {
   private MongoHealthIndicator mongoHealthIndicator;
 
   @Test
-  public void testDoHealthCheck() {
+  void testDoHealthCheck() {
     Document mockResult = new Document("maxWireVersion", 6);
     Mockito.when(mongoTemplate.executeCommand("{ isMaster: 1 }")).thenReturn(mockResult);
 

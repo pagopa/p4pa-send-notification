@@ -25,19 +25,13 @@ class SendNotificationControllerTest {
   @Test
   void givenValidNotificationRequestThenOk(){
     // Given
-    CreateNotificationRequest request = CreateNotificationRequest
-      .builder().build();
-    /*
-      .preloadId("TEST.pdf")
-      .contentType("application/pdf")
-      .sha256("ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ")
-      .build();
-*/
+    CreateNotificationRequest request = CreateNotificationRequest.builder().build();
     CreateNotificationResponse expectedResponse = CreateNotificationResponse.builder()
-      .sendNotificationId("dddd")
-      .preloadRef(null)
+      .sendNotificationId("SENDNOTIFICATIONID")
+      .preloadRef(null) //TODO P4ADEV-2080 comunicate fileName and url for upload file
       .status(Status.WAITING_FILE.name())
       .build();
+
     // When
     Mockito.when(sendNotificationServiceMock.createSendNotification(request)).thenReturn(expectedResponse);
 
