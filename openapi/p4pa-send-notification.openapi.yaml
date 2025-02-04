@@ -271,13 +271,6 @@ components:
           type: string
         fileName:
           type: string
-    Reference:
-      type: object
-      properties:
-        key:
-          type: string
-        versionToken:
-          type: string
     Document:
       type: object
       properties:
