@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.enums;
 
-public enum NotificationStatus {
+public enum Status {
   WAITING_FILE,
   SENDING,
   REGISTERED,

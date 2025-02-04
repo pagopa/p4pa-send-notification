@@ -2,9 +2,11 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
-import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.enums.Status;
+import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
+import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
-import java.util.List;
+import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,8 +20,9 @@ class SendNotificationServiceImplTest {
 
   @Mock
   private SendNotificationRepository sendNotificationRepositoryMock;
+
   @Mock
-  private SequenceGeneratorService sequenceGeneratorServiceMock;
+  private CreateNotificationRequest2SendNotificationMapper mapper;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -27,24 +30,19 @@ class SendNotificationServiceImplTest {
   @Test
   void givenCreateNotificationRequestWhenCreateSendNotificationThenReturnCreateNotificationResponse(){
     // Given
-    CreateNotificationRequest request = CreateNotificationRequest
-      .builder()
-      .preloadId("TEST.pdf")
-      .contentType("application/pdf")
-      .sha256("ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ")
-      .build();
-
-    Long generatedId = 1L;
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    SendNotification sendNotification = new SendNotification();
+    sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
 
     // When
-    Mockito.when(sequenceGeneratorServiceMock.generateSequence("send_notification_sequence")).thenReturn(generatedId);
+    Mockito.when(mapper.map(request)).thenReturn(sendNotification);
+    Mockito.when(sendNotificationRepositoryMock.insert(sendNotification)).thenReturn(sendNotification);
 
-    CreateNotificationResponse response = sendNotificationService.createSendNotification(List.of(request));
+    CreateNotificationResponse response = sendNotificationService.createSendNotification(request);
 
     // Then
-    Mockito.verify(sendNotificationRepositoryMock).createIfNotExists(generatedId, request);
+    Mockito.verify(sendNotificationRepositoryMock).insert(sendNotification);
     Assertions.assertNotNull(response);
-    Assertions.assertEquals(generatedId, response.getSendNotificationId());
-    Assertions.assertEquals(NotificationStatus.WAITING_FILE.name(), response.getStatus());
+    Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
   }
 }

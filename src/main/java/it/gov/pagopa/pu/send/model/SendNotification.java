@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.model;
 
-import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,10 +17,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @FieldNameConstants
 public class SendNotification {
   @Id
-  private String id;
-  private Long sendNotificationId;
-  private String preloadId;
-  private String contentType;
-  private String expectedFileDigest;
-  private NotificationStatus status;
+  private String sendNotificationId;
+  private String subjectType;
+  private String fiscalCode;
+  private List<DocumentDTO> documents;
 }

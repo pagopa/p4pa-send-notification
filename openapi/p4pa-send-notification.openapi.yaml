@@ -17,9 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CreateNotificationRequest'
+              $ref: '#/components/schemas/CreateNotificationRequest'
       responses:
         '200':
           description: OK
@@ -45,7 +43,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: OK
@@ -75,7 +73,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: OK
@@ -107,7 +105,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: OK
@@ -133,7 +131,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: OK
@@ -159,7 +157,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: OK
@@ -184,23 +182,116 @@ components:
     CreateNotificationRequest:
       type: object
       required:
-        - preloadId
-        - contentType
-        - sha256
+        - recipients
       properties:
-        preloadId:
+        recipient:
+          $ref: '#/components/schemas/Recipient'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        notificationFeePolicy:
+          type: string
+          enum: [ FLAT_RATE, DELIVERY_MODE ]
+        physicalCommunicationType:
+          type: string
+          enum: [ AR_REGISTERED_LETTER, REGISTERED_LETTER_890 ]
+        senderDenomination:
+          type: string
+        senderTaxId:
+          type: string
+        amount:
+          type: number
+        paymentExpirationDate:
+          type: string
+          format: date
+        taxonomyCode:
+          type: string
+        paFee:
+          type: integer
+        vat:
+          type: integer
+        pagoPaIntMode:
+          type: string
+          enum: [ SYNC, ASYNC, NONE ]
+    Recipient:
+      type: object
+      required:
+        - recipientType
+        - taxId
+        - denomination
+        - physicalAddress
+      properties:
+        recipientType:
+          type: string
+          enum: [PF, PG]
+        taxId:
+          type: string
+        denomination:
+          type: string
+        physicalAddress:
+          $ref: '#/components/schemas/Address'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+    Address:
+      type: object
+      properties:
+        address:
+          type: string
+        zip:
+          type: string
+        municipality:
+          type: string
+        province:
+          type: string
+    Payment:
+      type: object
+      properties:
+        pagoPa:
+          $ref: '#/components/schemas/PagoPa'
+    PagoPa:
+      type: object
+      properties:
+        noticeCode:
+          type: string
+        creditorTaxId:
+          type: string
+        applyCost:
+          type: boolean
+        attachment:
+          $ref: '#/components/schemas/Attachment'
+    Attachment:
+      type: object
+      properties:
+        digest:
           type: string
         contentType:
           type: string
-          example: "application/pdf"
-        sha256:
+        fileName:
+          type: string
+    Reference:
+      type: object
+      properties:
+        key:
+          type: string
+        versionToken:
+          type: string
+    Document:
+      type: object
+      properties:
+        digest:
+          type: string
+        contentType:
+          type: string
+        fileName:
           type: string
     CreateNotificationResponse:
       type: object
       properties:
         sendNotificationId:
-          type: integer
-          format: int64
+          type: string
         preloadRef:
           type: array
           items:
@@ -224,7 +315,6 @@ components:
       type: object
       properties:
         sendNotificationId:
-          type: integer
-          format: int64
+          type: string
         status:
           type: string
