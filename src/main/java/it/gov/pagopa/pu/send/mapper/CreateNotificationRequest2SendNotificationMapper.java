@@ -14,7 +14,10 @@ public class CreateNotificationRequest2SendNotificationMapper {
     SendNotification sendNotification = new SendNotification();
     sendNotification.setSubjectType(request.getRecipient().getRecipientType().getValue());
     sendNotification.setFiscalCode(request.getRecipient().getTaxId());
-    sendNotification.setStatus(NotificationStatus.WAITING_FILE);
+    if(request.getDocuments().isEmpty())
+      sendNotification.setStatus(NotificationStatus.SENDING);
+    else
+      sendNotification.setStatus(NotificationStatus.WAITING_FILE);
 
     // set documents
     sendNotification.setDocuments(request.getDocuments().stream()

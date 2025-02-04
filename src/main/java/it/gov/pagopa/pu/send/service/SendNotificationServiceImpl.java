@@ -27,7 +27,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     return CreateNotificationResponse
       .builder()
       .sendNotificationId(sendNotification.getSendNotificationId())
-      .status(NotificationStatus.WAITING_FILE.name())
+      .status(sendNotification.getStatus().name())
       //.preloadRef() TODO P4ADEV-2080 comunicate fileName and url for upload file
       .build();
   }
