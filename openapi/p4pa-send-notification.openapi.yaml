@@ -311,3 +311,16 @@ components:
           type: string
         status:
           type: string
+    SendNotificationErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - SEND_NOTIFICATION_BAD_REQUEST
+            - SEND_NOTIFICATION_GENERIC_ERROR
+        message:
+          type: string
