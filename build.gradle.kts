@@ -32,7 +32,6 @@ val springDocOpenApiVersion = "2.7.0"
 val openApiToolsVersion = "0.2.6"
 val micrometerVersion = "1.4.1"
 val bouncycastleVersion = "1.79"
-val commonsCodecVersion = "1.17.2"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -45,7 +44,6 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
-  implementation("commons-codec:commons-codec:$commonsCodecVersion")
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")

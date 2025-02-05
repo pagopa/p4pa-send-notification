@@ -21,7 +21,7 @@ class FileUtilsTest {
       writer.write("TEST FILE HASH P4PA SEND");
     }
 
-    String expectedHash = "ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ==";
+    String expectedHash = "9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=";
     // When
     String actualHash = FileUtils.calculateFileHash(tempFile);
 
