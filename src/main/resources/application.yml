@@ -22,7 +22,10 @@ spring:
                 maxConnectionLifeTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_LIFE_MS:0}"
                 maxConnectionIdleTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_IDLE_MS:120000}"
                 maxConnecting: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTING:2}"
-
+app:
+    send:
+        base-url: "\${SEND_BASE_URL:https://api.uat.notifichedigitali.it}"
+        api-key: "\${PU_SEND_API_KEY:d45d399f-8891-48fb-b522-0c77c4ab39a4}"
 management:
     endpoints:
       jmx:

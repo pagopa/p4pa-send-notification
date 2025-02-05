@@ -91,21 +91,13 @@ configurations {
 }
 
 tasks.compileJava {
-  dependsOn("dependenciesBuild")
-}
-
-tasks.register("dependenciesBuild") {
-  group = "AutomaticallyGeneratedCode"
-  description = "grouping all together automatically generate code tasks"
-
-  dependsOn(
-    "openApiGenerate"
-  )
+  dependsOn("openApiGenerateP4PASend","openApiGenerateSendClient")
 }
 
 configure<SourceSetContainer> {
 	named("main") {
 		java.srcDir("$projectDir/build/generated/src/main/java")
+    java.srcDir("$projectDir/build/generated/send-client/src/main/java")
 	}
 }
 
@@ -113,7 +105,10 @@ springBoot {
 	mainClass.value("it.gov.pagopa.pu.send.SendNotificationApplication")
 }
 
-openApiGenerate {
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateP4PASend") {
+  group = "openapi"
+  description = "description"
+
   generatorName.set("spring")
   inputSpec.set("$rootDir/openapi/p4pa-send-notification.openapi.yaml")
   outputDir.set("$projectDir/build/generated")
@@ -125,9 +120,31 @@ openApiGenerate {
     "useSpringBoot3" to "true",
     "interfaceOnly" to "true",
     "useTags" to "true",
-    "useBeanValidation" to "true",
     "generateConstructorWithAllArgs" to "true",
     "generatedConstructorWithRequiredArgs" to "true",
-    "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)",
+    "serializationLibrary" to "jackson"
   ))
+}
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateSendClient") {
+  group = "openapi"
+  description = "description"
+
+  generatorName.set("java")
+  inputSpec.set("$rootDir/openapi/send-api-external-b2b-pa-bundle.yaml")
+  outputDir.set("$projectDir/build/generated/send-client")
+  apiPackage.set("it.gov.pagopa.pu.send.connector.send.generated.api")
+  modelPackage.set("it.gov.pagopa.pu.send.connector.send.generated.dto")
+  modelNameSuffix.set("DTO")
+  configOptions.set(mapOf(
+    "swaggerAnnotations" to "false",
+    "openApiNullable" to "false",
+    "dateLibrary" to "java17",
+    "useSpringBoot3" to "true",
+    "useJakartaEe" to "true",
+    "serializationLibrary" to "jackson",
+    "generateSupportingFiles" to "true"
+  ))
+  library.set("resttemplate")
 }
