@@ -89,13 +89,22 @@ configurations {
 }
 
 tasks.compileJava {
-  dependsOn("openApiGenerateP4PASend","openApiGenerateSendClient")
+  dependsOn("dependenciesBuild")
+}
+
+tasks.register("dependenciesBuild") {
+  group = "AutomaticallyGeneratedCode"
+  description = "grouping all together automatically generate code tasks"
+
+  dependsOn(
+    "openApiGenerateP4PASend",
+    "openApiGenerateSendClient"
+  )
 }
 
 configure<SourceSetContainer> {
 	named("main") {
 		java.srcDir("$projectDir/build/generated/src/main/java")
-    java.srcDir("$projectDir/build/generated/send-client/src/main/java")
 	}
 }
 
@@ -131,7 +140,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
 
   generatorName.set("java")
   inputSpec.set("$rootDir/openapi/send-api-external-b2b-pa-bundle.yaml")
-  outputDir.set("$projectDir/build/generated/send-client")
+  outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.pu.send.connector.send.generated.api")
   modelPackage.set("it.gov.pagopa.pu.send.connector.send.generated.dto")
   modelNameSuffix.set("DTO")
