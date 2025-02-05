@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.model;
 
+import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import java.util.List;
 import lombok.AllArgsConstructor;

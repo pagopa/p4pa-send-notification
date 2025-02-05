@@ -2,11 +2,12 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.client.SendClientImpl;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,19 +27,26 @@ public class SendServiceImpl implements SendService{
 
   @Override
   public void preloadFiles(String sendNotificationId) {
-    List<PreLoadRequestDTO> preLoadRequest = new ArrayList<>();
+    SendNotification notification = sendNotificationRepository.findById(sendNotificationId)
+      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
 
-    sendNotificationRepository.findById(sendNotificationId).ifPresent(notification -> {
-      NotificationUtils.validateStatus(NotificationStatus.SENDING, notification.getStatus());
-      preLoadRequest.addAll(notification.getDocuments().stream().map(document -> {
-        NotificationUtils.validateStatus(FileStatus.READY,document.getStatus());
+    // Validate status
+    NotificationUtils.validateStatus(NotificationStatus.SENDING, notification.getStatus());
+    List<PreLoadRequestDTO> preLoadRequest = notification.getDocuments().stream()
+      .peek(doc -> NotificationUtils.validateStatus(FileStatus.READY, doc.getStatus()))
+      .map(doc -> {
         PreLoadRequestDTO preLoadFile = new PreLoadRequestDTO();
-        preLoadFile.setPreloadIdx(document.getFileName());
-        preLoadFile.setContentType(document.getContentType());
-        preLoadFile.setSha256(document.getDigest());
+        preLoadFile.setPreloadIdx(doc.getFileName());
+        preLoadFile.setContentType(doc.getContentType());
+        preLoadFile.setSha256(doc.getDigest());
         return preLoadFile;
-      }).toList());
-    });
-    sendClient.preloadFiles(preLoadRequest);
+      }).toList();
+
+    //Call SEND preload API
+    List<PreLoadResponseDTO> preLoadResponseDTO = sendClient.preloadFiles(preLoadRequest);
+    preLoadResponseDTO.forEach(response ->
+      sendNotificationRepository.updateFilePreloadInformation(sendNotificationId, response));
+
+    sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.REGISTERED);
   }
 }
