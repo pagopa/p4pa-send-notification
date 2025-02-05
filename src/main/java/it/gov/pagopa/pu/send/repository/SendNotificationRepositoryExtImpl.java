@@ -13,11 +13,13 @@ import org.springframework.data.mongodb.core.query.Update;
 
 public class SendNotificationRepositoryExtImpl implements SendNotificationRepositoryExt{
 
-  public static final String FIELD_DOCUMENT_ID = "%s.%s".formatted(Fields.documents, DocumentDTO.Fields.fileName);
-  public static final String FIELD_DOCUMENT_KEY = "%s.$.%s".formatted(Fields.documents, DocumentDTO.Fields.key);
-  public static final String FIELD_DOCUMENT_URL = "%s.$.%s".formatted(Fields.documents, DocumentDTO.Fields.url);
-  public static final String FIELD_DOCUMENT_SECRET = "%s.$.%s".formatted(Fields.documents, DocumentDTO.Fields.secret);
-  public static final String FIELD_DOCUMENT_HTTPMETHOD = "%s.$.%s".formatted(Fields.documents, DocumentDTO.Fields.httpMethod);
+  private static final String FIELD_TEMPLATE = "%s.$.%s";
+
+  public static final String FIELD_DOCUMENT_ID = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.fileName);
+  public static final String FIELD_DOCUMENT_KEY = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.key);
+  public static final String FIELD_DOCUMENT_URL = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.url);
+  public static final String FIELD_DOCUMENT_SECRET = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.secret);
+  public static final String FIELD_DOCUMENT_HTTPMETHOD = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.httpMethod);
 
   private final MongoTemplate mongoTemplate;
 

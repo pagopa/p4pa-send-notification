@@ -33,8 +33,8 @@ public class SendServiceImpl implements SendService{
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.SENDING, notification.getStatus());
     List<PreLoadRequestDTO> preLoadRequest = notification.getDocuments().stream()
-      .peek(doc -> NotificationUtils.validateStatus(FileStatus.READY, doc.getStatus()))
       .map(doc -> {
+        NotificationUtils.validateStatus(FileStatus.READY, doc.getStatus());
         PreLoadRequestDTO preLoadFile = new PreLoadRequestDTO();
         preLoadFile.setPreloadIdx(doc.getFileName());
         preLoadFile.setContentType(doc.getContentType());
