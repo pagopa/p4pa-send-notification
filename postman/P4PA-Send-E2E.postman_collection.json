@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "25b4e0d8-b3aa-4787-98fa-0e4e575f70a6",
+		"_postman_id": "abbf3eed-de27-4523-997e-d907c2d70c59",
 		"name": "P4PA-Send-E2E",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "36568841"
+		"_exporter_id": "15747968",
+		"_collection_link": "https://warped-astronaut-141685.postman.co/workspace/P4PA~9a8b7dd5-97b6-4dd0-b3f5-95f25fd0b455/collection/15747968-abbf3eed-de27-4523-997e-d907c2d70c59?action=share&source=collection_link&creator=15747968"
 	},
 	"item": [
 		{
@@ -122,7 +123,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"RSSMRA80L05F593A\"\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ==\"\r\n    },\r\n    {\r\n        \"fileName\":\"Pagamento.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ==\"\r\n    }]\r\n}",
+							"raw": "{\r\n    \"recipient\": {\r\n        \"denomination\": \"Maria Rossi\",\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"RSSMRA80L05F593A\",\r\n        \"physicalAddress\": {}\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ==\"\r\n    },\r\n    {\r\n        \"fileName\":\"Pagamento.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"ZjVlZjRiYjE4YTc4YTkwZTFiOGYyMTg4ZTBjYTdmOGU2MDRkZGEzMjllODRhNGQzNmE4OWNjYWY1MDA5MTBmNQ==\"\r\n    }]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -130,11 +131,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/notification",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
+								"p4pasend",
 								"notification"
 							]
 						}
