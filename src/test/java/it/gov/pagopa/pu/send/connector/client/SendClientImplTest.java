@@ -31,14 +31,13 @@ class SendClientImplTest {
 
   @BeforeEach
   public void setUp() {
-
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
     Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
     sendClient = new SendClientImpl(restTemplateBuilderMock, "sendBaseUrl", "apiKey");
   }
 
   @Test
-  public void givenValidRequestWhenPreloadFilesThenVerifyResponse() {
+  void givenValidRequestWhenPreloadFilesThenVerifyResponse() {
 
     PreLoadRequestDTO requestDTO = new PreLoadRequestDTO();
     requestDTO.setPreloadIdx("TEST");

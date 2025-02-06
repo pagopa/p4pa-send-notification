@@ -26,6 +26,8 @@ public class SendClientImpl implements SendClient{
     newNotificationApi = new NewNotificationApi(apiClient);
   }
 
+
+
   @Override
   public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO) {
     return newNotificationApi.presignedUploadRequest(preLoadRequestDTO);
