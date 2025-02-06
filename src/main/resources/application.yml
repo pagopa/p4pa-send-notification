@@ -24,8 +24,8 @@ spring:
                 maxConnecting: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTING:2}"
 app:
     send:
-        base-url: "\${SEND_BASE_URL:https://api.uat.notifichedigitali.it}"
-        api-key: "\${PU_SEND_API_KEY:d45d399f-8891-48fb-b522-0c77c4ab39a4}"
+        base-url: "\${SEND_BASE_URL:}"
+        api-key: "\${PU_SEND_API_KEY:}"
 management:
     endpoints:
       jmx:
