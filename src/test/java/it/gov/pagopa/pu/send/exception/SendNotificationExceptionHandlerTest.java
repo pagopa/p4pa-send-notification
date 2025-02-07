@@ -2,11 +2,13 @@ package it.gov.pagopa.pu.send.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.pu.send.config.json.JsonConfig;
+import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import jakarta.servlet.ServletException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import java.lang.reflect.Field;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -184,4 +186,23 @@ class SendNotificationExceptionHandlerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
     }
 
+    @Test
+    void handleInvalidStatusException() throws Exception {
+        doThrow(new InvalidStatusException(NotificationStatus.WAITING_FILE, NotificationStatus.SENDING)).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+        performRequest(DATA, MediaType.APPLICATION_JSON)
+          .andExpect(MockMvcResultMatchers.status().isConflict())
+          .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+          .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Notification status error: Expected: WAITING_FILE, Actual: SENDING"));
+      }
+
+    @Test
+    void handleIllegalArgumentException() throws Exception {
+      doThrow(new IllegalArgumentException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+      performRequest(DATA, MediaType.APPLICATION_JSON)
+        .andExpect(MockMvcResultMatchers.status().isNotFound())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
+      }
 }
