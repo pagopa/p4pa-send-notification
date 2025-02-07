@@ -320,6 +320,7 @@ components:
         code:
           type: string
           enum:
+            - SEND_NOTIFICATION_NOT_FOUND
             - SEND_NOTIFICATION_BAD_REQUEST
             - SEND_NOTIFICATION_GENERIC_ERROR
         message:
