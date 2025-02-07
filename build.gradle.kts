@@ -32,7 +32,6 @@ val springDocOpenApiVersion = "2.7.0"
 val openApiToolsVersion = "0.2.6"
 val micrometerVersion = "1.4.1"
 val bouncycastleVersion = "1.79"
-val commonsCodecVersion = "1.17.2"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
@@ -46,7 +45,6 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	implementation("org.openapitools:jackson-databind-nullable:$openApiToolsVersion")
-  implementation("commons-codec:commons-codec:$commonsCodecVersion")
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
@@ -101,7 +99,8 @@ tasks.register("dependenciesBuild") {
   description = "grouping all together automatically generate code tasks"
 
   dependsOn(
-    "openApiGenerate"
+    "openApiGenerateP4PASend",
+    "openApiGenerateSendClient"
   )
 }
 
@@ -115,7 +114,10 @@ springBoot {
 	mainClass.value("it.gov.pagopa.pu.send.SendNotificationApplication")
 }
 
-openApiGenerate {
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateP4PASend") {
+  group = "openapi"
+  description = "description"
+
   generatorName.set("spring")
   inputSpec.set("$rootDir/openapi/p4pa-send-notification.openapi.yaml")
   outputDir.set("$projectDir/build/generated")
@@ -127,9 +129,31 @@ openApiGenerate {
     "useSpringBoot3" to "true",
     "interfaceOnly" to "true",
     "useTags" to "true",
-    "useBeanValidation" to "true",
     "generateConstructorWithAllArgs" to "true",
     "generatedConstructorWithRequiredArgs" to "true",
-    "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)",
+    "serializationLibrary" to "jackson"
   ))
+}
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateSendClient") {
+  group = "openapi"
+  description = "description"
+
+  generatorName.set("java")
+  inputSpec.set("$rootDir/openapi/send-api-external-b2b-pa-bundle.yaml")
+  outputDir.set("$projectDir/build/generated")
+  apiPackage.set("it.gov.pagopa.pu.send.connector.send.generated.api")
+  modelPackage.set("it.gov.pagopa.pu.send.connector.send.generated.dto")
+  modelNameSuffix.set("DTO")
+  configOptions.set(mapOf(
+    "swaggerAnnotations" to "false",
+    "openApiNullable" to "false",
+    "dateLibrary" to "java17",
+    "useSpringBoot3" to "true",
+    "useJakartaEe" to "true",
+    "serializationLibrary" to "jackson",
+    "generateSupportingFiles" to "true"
+  ))
+  library.set("resttemplate")
 }

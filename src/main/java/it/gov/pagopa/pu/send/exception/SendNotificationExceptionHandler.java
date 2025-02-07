@@ -45,6 +45,16 @@ public class SendNotificationExceptionHandler {
         return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, SendNotificationErrorDTO.CodeEnum.GENERIC_ERROR);
     }
 
+    @ExceptionHandler(InvalidStatusException.class)
+    public ResponseEntity<SendNotificationErrorDTO> handleInvalidStatusException(InvalidStatusException ex, HttpServletRequest request) {
+      return handleException(ex, request, HttpStatus.CONFLICT, SendNotificationErrorDTO.CodeEnum.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<SendNotificationErrorDTO> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
+      return handleException(ex, request, HttpStatus.NOT_FOUND, SendNotificationErrorDTO.CodeEnum.BAD_REQUEST);
+    }
+
     static ResponseEntity<SendNotificationErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, SendNotificationErrorDTO.CodeEnum errorEnum) {
         logException(ex, request, httpStatus);
 

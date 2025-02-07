@@ -15,7 +15,6 @@ com.fasterxml.jackson:jackson-bom:2.18.2=compileClasspath
 com.fasterxml:classmate:1.7.0=compileClasspath
 com.github.stephenc.jcip:jcip-annotations:1.0-1=compileClasspath
 com.nimbusds:nimbus-jose-jwt:9.37.3=compileClasspath
-commons-codec:commons-codec:1.17.2=compileClasspath
 io.micrometer:context-propagation:1.1.2=compileClasspath
 io.micrometer:micrometer-commons:1.14.2=compileClasspath
 io.micrometer:micrometer-core:1.14.2=compileClasspath

@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.send.mapper;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.model.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import org.springframework.stereotype.Service;
 
