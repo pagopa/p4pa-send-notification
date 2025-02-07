@@ -98,7 +98,7 @@
 									"pm.test(\"Send Notification - create send notification - Verify response body\", function () {\r",
 									"    let jsonResponse = pm.response.json();\r",
 									"    pm.expect(jsonResponse).have.property(\"sendNotificationId\");\r",
-									"    pm.expect(jsonResponse).have.property(\"preloadRef\");\r",
+									"    //pm.expect(jsonResponse).have.property(\"preloadRef\"); will be implemented with P4ADEV-2080\r",
 									"    pm.expect(jsonResponse).have.property(\"status\").to.eq(\"WAITING_FILE\");\r",
 									"});"
 								],
@@ -122,7 +122,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"RSSMRA80L05F593A\"\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=\"\r\n    },\r\n    {\r\n        \"fileName\":\"Pagamento.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=\"\r\n    }]\r\n}",
+							"raw": "{\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"RSSMRA80L05F593A\",\r\n        \"denomination\": \"Mario Rossi\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00100\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        }\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=\"\r\n    },\r\n    {\r\n        \"fileName\":\"Pagamento.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=\"\r\n    }]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -130,11 +130,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/notification",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
+								"p4pasend",
 								"notification"
 							]
 						}
@@ -185,11 +186,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/send/67a23a75cef62012ef4eeb05/preload",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/67a23a75cef62012ef4eeb05/preload",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
+								"p4pasend",
 								"send",
 								"67a23a75cef62012ef4eeb05",
 								"preload"
