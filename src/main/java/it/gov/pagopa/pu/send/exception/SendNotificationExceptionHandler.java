@@ -59,6 +59,11 @@ public class SendNotificationExceptionHandler {
     return handleException(ex, request, HttpStatus.NOT_FOUND, SendNotificationErrorDTO.CodeEnum.BAD_REQUEST);
   }
 
+  @ExceptionHandler({InvalidSignatureException.class})
+  public ResponseEntity<SendNotificationErrorDTO> handleInvalidSignatureException(RuntimeException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.BAD_REQUEST, SendNotificationErrorDTO.CodeEnum.BAD_REQUEST);
+  }
+
   static ResponseEntity<SendNotificationErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, SendNotificationErrorDTO.CodeEnum errorEnum) {
     logException(ex, request, httpStatus);
 
