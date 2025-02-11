@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.UploadFileException;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
@@ -71,7 +72,7 @@ public class SendServiceImpl implements SendService{
           sendNotificationRepository.updateFileVersionId(sendNotificationId, doc.getFileName(), versionId.get());
         }
       } catch (IOException | NoSuchAlgorithmException e) {
-        throw new RuntimeException(e);
+        throw new UploadFileException(e.getMessage());
       }
     }
     sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.UPLOADED);

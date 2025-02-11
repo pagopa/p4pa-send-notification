@@ -64,6 +64,11 @@ public class SendNotificationExceptionHandler {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, SendNotificationErrorDTO.CodeEnum.BAD_REQUEST);
   }
 
+  @ExceptionHandler({UploadFileException.class})
+  public ResponseEntity<SendNotificationErrorDTO> handleUploadFileException(RuntimeException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, SendNotificationErrorDTO.CodeEnum.GENERIC_ERROR);
+  }
+
   static ResponseEntity<SendNotificationErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, SendNotificationErrorDTO.CodeEnum errorEnum) {
     logException(ex, request, httpStatus);
 

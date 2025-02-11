@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
+import it.gov.pagopa.pu.send.exception.UploadFileException;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -58,8 +59,7 @@ public class UploadServiceImpl implements UploadService{
       response = restTemplate.exchange(
         URI.create(documentDTO.getUrl()), HttpMethod.valueOf(documentDTO.getHttpMethod()), entity, String.class);
     } catch (Exception e) {
-      log.error("Failed to upload {}: {}", documentDTO.getFileName(), e.getMessage(), e);
-      return Optional.empty();
+      throw new UploadFileException(e.getMessage());
     }
 
     if(response.getStatusCode().is2xxSuccessful()) {

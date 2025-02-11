@@ -222,4 +222,14 @@ class SendNotificationExceptionHandlerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
   }
+
+  @Test
+  void handleUploadFileExceptionError() throws Exception {
+    doThrow(new UploadFileException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_GENERIC_ERROR"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
+  }
 }
