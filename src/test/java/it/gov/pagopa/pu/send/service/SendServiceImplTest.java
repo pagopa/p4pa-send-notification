@@ -13,6 +13,8 @@ import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,9 @@ class SendServiceImplTest {
 
   @Mock
   private SendClientImpl sendClient;
+
+  @Mock
+  private UploadServiceImpl uploadService;
 
   @InjectMocks
   private SendServiceImpl sendService;
@@ -84,4 +89,38 @@ class SendServiceImplTest {
 
     assertEquals("Notification not found with id: " + sendNotificationId, exception.getMessage());
   }
+
+  @Test
+  void givenValidNotificationWhenUploadFilesThenVerify()
+    throws IOException, NoSuchAlgorithmException {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String fileName = "FILENAME";
+    String versionId = "VERSIONID";
+
+    DocumentDTO documentDTO = DocumentDTO.builder()
+      .fileName(fileName)
+      .digest("digest123")
+      .contentType("application/pdf")
+      .status(FileStatus.READY)
+      .httpMethod("PUT")
+      .key("KEY")
+      .url("URL")
+      .secret("SECRET")
+      .build();
+
+    SendNotification notification = SendNotification.builder()
+      .sendNotificationId(sendNotificationId)
+      .status(NotificationStatus.REGISTERED)
+      .documents(List.of(documentDTO))
+      .build();
+
+    Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(
+      Optional.of(notification));
+    Mockito.when(uploadService.uploadFileToS3(sendNotificationId, documentDTO)).thenReturn(Optional.of(versionId));
+
+    sendService.uploadFiles(sendNotificationId);
+    Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFileVersionId(eq(sendNotificationId), eq(fileName), eq(versionId));
+    Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFileStatus(sendNotificationId, fileName, FileStatus.UPLOADED);
+  }
+
 }
