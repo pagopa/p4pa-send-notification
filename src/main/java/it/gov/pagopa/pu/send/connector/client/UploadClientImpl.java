@@ -25,7 +25,7 @@ public class UploadClientImpl implements UploadClient{
   }
 
   @Override
-  public Optional<String> uploadFileToS3(DocumentDTO doc, byte[] fileBytes) {
+  public Optional<String> upload(DocumentDTO doc, byte[] fileBytes) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.valueOf(doc.getContentType()));
     headers.add("x-amz-meta-secret", doc.getSecret());

@@ -37,7 +37,7 @@ public class UploadServiceImpl implements UploadService{
         throw new InvalidSignatureException("File "+documentDTO.getFileName()+" has not a valid signature");
 
       byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
-      return uploadClient.uploadFileToS3(documentDTO, fileBytes);
+      return uploadClient.upload(documentDTO, fileBytes);
     } catch (Exception e) {
       throw new UploadFileException(e.getMessage());
     }

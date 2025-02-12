@@ -4,5 +4,5 @@ import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import java.util.Optional;
 
 public interface UploadClient {
-  Optional<String> uploadFileToS3(DocumentDTO documentDTO, byte[] fileBytes);
+  Optional<String> upload(DocumentDTO documentDTO, byte[] fileBytes);
 }

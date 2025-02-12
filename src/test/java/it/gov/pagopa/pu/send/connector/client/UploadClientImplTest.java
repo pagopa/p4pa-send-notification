@@ -41,7 +41,7 @@ class UploadClientImplTest {
   }
 
   @Test
-  void givenValidFileWhenUploadFileToS3ThenReturnsVersionId() throws IOException {
+  void givenValidFileWhenUploadThenReturnsVersionId() throws IOException {
     //GIVEN
     String sendNotificationId = "SENDNOTIFICATIONID";
     String versionId = "VERSIONID";
@@ -72,7 +72,7 @@ class UploadClientImplTest {
         HttpMethod.PUT), any(), eq(String.class)))
       .thenReturn(responseEntity);
 
-    Optional<String> result = uploadClient.uploadFileToS3(documentDTO, fileBytes);
+    Optional<String> result = uploadClient.upload(documentDTO, fileBytes);
     // THEN
     assertTrue(result.isPresent());
     assertEquals(versionId, result.get());

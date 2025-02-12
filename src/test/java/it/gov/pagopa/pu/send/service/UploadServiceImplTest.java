@@ -53,7 +53,7 @@ class UploadServiceImplTest {
 
     byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
 
-    Mockito.when(uploadClient.uploadFileToS3(documentDTO, fileBytes)).thenReturn(versionId);
+    Mockito.when(uploadClient.upload(documentDTO, fileBytes)).thenReturn(versionId);
 
     Optional<String> result = uploadService.uploadFile(sendNotificationId, documentDTO);
     // THEN
