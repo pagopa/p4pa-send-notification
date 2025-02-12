@@ -93,7 +93,7 @@ class UploadServiceImplTest {
   }
 
   @Test
-  public void givenInvalidSignatureWhenUploadFileToS3ThenInvalidSignatureException() throws Exception {
+  void givenInvalidSignatureWhenUploadFileToS3ThenInvalidSignatureException() throws Exception {
     String sendNotificationId = "SENDNOTIFICATIONID";
     String filePath = "src/main/resources/tmp/" + sendNotificationId + "_file.pdf";
     File file = new File(filePath);
