@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.exception.UploadFileException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -43,7 +42,7 @@ class UploadClientImplTest {
   }
 
   @Test
-  void givenValidFileWhenUploadFileToS3ThenReturnsVersionId() throws IOException, NoSuchAlgorithmException {
+  void givenValidFileWhenUploadFileToS3ThenReturnsVersionId() throws IOException {
     //GIVEN
     String sendNotificationId = "SENDNOTIFICATIONID";
     String versionId = "VERSIONID";
