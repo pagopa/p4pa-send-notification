@@ -92,8 +92,7 @@ class SendServiceImplTest {
   }
 
   @Test
-  void givenValidNotificationWhenUploadFilesThenVerify()
-    throws IOException, NoSuchAlgorithmException {
+  void givenValidNotificationWhenUploadFilesThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
     String fileName = "FILENAME";
     String versionId = "VERSIONID";
@@ -117,38 +116,10 @@ class SendServiceImplTest {
 
     Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
-    Mockito.when(uploadService.uploadFileToS3(sendNotificationId, documentDTO)).thenReturn(Optional.of(versionId));
+    Mockito.when(uploadService.uploadFile(sendNotificationId, documentDTO)).thenReturn(Optional.of(versionId));
 
     sendService.uploadFiles(sendNotificationId);
     Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFileVersionId(sendNotificationId, fileName, versionId);
     Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFileStatus(sendNotificationId, fileName, FileStatus.UPLOADED);
-  }
-
-  @Test
-  void givenUploadFileFailsWhenUploadFilesThenThrowsUploadFileException() throws IOException, NoSuchAlgorithmException {
-    String sendNotificationId = "SENDNOTIFICATIONID";
-    String fileName = "FILENAME";
-
-    DocumentDTO documentDTO = DocumentDTO.builder()
-      .fileName(fileName)
-      .digest("digest123")
-      .contentType("application/pdf")
-      .status(FileStatus.READY)
-      .httpMethod("PUT")
-      .key("KEY")
-      .url("URL")
-      .secret("SECRET")
-      .build();
-
-    SendNotification notification = SendNotification.builder()
-      .sendNotificationId(sendNotificationId)
-      .status(NotificationStatus.REGISTERED)
-      .documents(List.of(documentDTO))
-      .build();
-
-    Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(Optional.of(notification));
-    Mockito.doThrow(new IOException("Upload failed")).when(uploadService).uploadFileToS3(any(), any());
-
-    assertThrows(UploadFileException.class, () -> sendService.uploadFiles(sendNotificationId));
   }
 }

@@ -6,12 +6,9 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.exception.UploadFileException;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -65,14 +62,12 @@ public class SendServiceImpl implements SendService{
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.REGISTERED, notification.getStatus());
     for(DocumentDTO doc : notification.getDocuments()){
-      try{
-        Optional<String> versionId = uploadService.uploadFileToS3(sendNotificationId, doc);
-        if (versionId.isPresent()) {
-          sendNotificationRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.UPLOADED);
-          sendNotificationRepository.updateFileVersionId(sendNotificationId, doc.getFileName(), versionId.get());
-        }
-      } catch (IOException | NoSuchAlgorithmException e) {
-        throw new UploadFileException(e.getMessage());
+      Optional<String> versionId = Optional.empty();
+      if(!doc.getStatus().equals(FileStatus.UPLOADED))
+        versionId = uploadService.uploadFile(sendNotificationId, doc);
+      if (versionId.isPresent()) {
+        sendNotificationRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.UPLOADED);
+        sendNotificationRepository.updateFileVersionId(sendNotificationId, doc.getFileName(), versionId.get());
       }
     }
     sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.UPLOADED);
