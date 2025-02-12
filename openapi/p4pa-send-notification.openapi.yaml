@@ -125,7 +125,7 @@ paths:
         - Send
       summary: load file to SEND archive process
       description: request to load file to SEND archive
-      operationId: loadSendFile
+      operationId: uploadSendFile
       parameters:
         - name: sendNotificationId
           in: path

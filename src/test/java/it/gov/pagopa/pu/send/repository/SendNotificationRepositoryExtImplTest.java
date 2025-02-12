@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import org.junit.jupiter.api.Test;
@@ -55,11 +56,42 @@ class SendNotificationRepositoryExtImplTest {
     String sendNotificationId = "SENDNOTIFICATIONID";
     NotificationStatus newStatus = NotificationStatus.SENDING;
 
-    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class)))
+    Mockito.when(mongoTemplate.updateFirst(
+      Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class)))
       .thenReturn(updateResult);
     Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateNotificationStatus(sendNotificationId, newStatus);
+
+    assertEquals(1L, result.getModifiedCount());
+    Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class));
+  }
+
+  @Test
+  void givenUpdateFileStatusThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String fileName = "FILENAME";
+    FileStatus newStatus = FileStatus.UPLOADED;
+
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class))).thenReturn(updateResult);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.updateFileStatus(sendNotificationId, fileName, newStatus);
+
+    assertEquals(1L, result.getModifiedCount());
+    Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class));
+  }
+
+  @Test
+  void givenUpdateFileVersionIdThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String fileName = "FILENAME";
+    String versionId = "VERSIONID";
+
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class))).thenReturn(updateResult);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.updateFileVersionId(sendNotificationId, fileName, versionId);
 
     assertEquals(1L, result.getModifiedCount());
     Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class));

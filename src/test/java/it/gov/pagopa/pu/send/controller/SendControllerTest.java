@@ -29,4 +29,14 @@ class SendControllerTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
   }
+
+  @Test
+  void givenSendNotificationIdWhenUploadFilesRequestThenOk(){
+    String sendNotificationId = "12345";
+    Mockito.doNothing().when(sendServiceMock).uploadFiles(sendNotificationId);
+    ResponseEntity<Void> response = sendController.uploadSendFile(sendNotificationId);
+
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
 }

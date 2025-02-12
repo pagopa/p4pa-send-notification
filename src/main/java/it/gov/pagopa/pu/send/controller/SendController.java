@@ -23,4 +23,12 @@ public class SendController implements SendApi {
     sendService.preloadFiles(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
+
+  @Override
+  public ResponseEntity<Void> uploadSendFile(String sendNotificationId) {
+    log.info("upload files to SEND safeStorage for sendNotificationId:{}", sendNotificationId);
+    sendService.uploadFiles(sendNotificationId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
 }

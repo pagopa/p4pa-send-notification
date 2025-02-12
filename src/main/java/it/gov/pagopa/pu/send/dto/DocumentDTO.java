@@ -22,4 +22,5 @@ public class DocumentDTO {
   private String httpMethod;
   private String url;
   private String key;
+  private String versionId;
 }
