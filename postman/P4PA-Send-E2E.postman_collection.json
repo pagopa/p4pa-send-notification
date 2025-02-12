@@ -154,7 +154,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"P4PA Send Notification create notification - Responses with 200\", function () {\r",
+									"pm.test(\"P4PA Send Notification preload files - Responses with 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});"
 								],
@@ -186,15 +186,68 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/67a23a75cef62012ef4eeb05/preload",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/67a6097568e52a5f0afe48a1/preload",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
 								"send",
-								"67a23a75cef62012ef4eeb05",
+								"67a6097568e52a5f0afe48a1",
 								"preload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendUploadFiles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send Notification load files - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/67a6097568e52a5f0afe48a1/load",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"67a6097568e52a5f0afe48a1",
+								"load"
 							]
 						}
 					},
