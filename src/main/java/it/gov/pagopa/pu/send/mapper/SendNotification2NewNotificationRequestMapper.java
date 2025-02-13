@@ -31,7 +31,7 @@ public class SendNotification2NewNotificationRequestMapper {
     //address domain
     NotificationPhysicalAddressDTO addressDTO = new NotificationPhysicalAddressDTO();
     addressDTO.setAddress("Via Larga 10");
-    addressDTO.setZip("00100");
+    addressDTO.setZip("00186");
     addressDTO.setMunicipality("Roma");
     addressDTO.setProvince("RM");
     recipient.setPhysicalAddress(addressDTO);
