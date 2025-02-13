@@ -1,11 +1,13 @@
 package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.client.SendClientImpl;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
@@ -21,12 +23,15 @@ public class SendServiceImpl implements SendService{
   private final SendNotificationRepository sendNotificationRepository;
   private final SendClientImpl sendClient;
   private final UploadServiceImpl uploadService;
+  private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
 
   public SendServiceImpl(SendNotificationRepository sendNotificationRepository,
-    SendClientImpl sendClient, UploadServiceImpl uploadService) {
+    SendClientImpl sendClient, UploadServiceImpl uploadService,
+    SendNotification2NewNotificationRequestMapper sendNotificationMapper) {
     this.sendNotificationRepository = sendNotificationRepository;
     this.sendClient = sendClient;
     this.uploadService = uploadService;
+    this.sendNotificationMapper = sendNotificationMapper;
   }
 
   @Override
@@ -71,5 +76,20 @@ public class SendServiceImpl implements SendService{
       }
     }
     sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.UPLOADED);
+  }
+
+  @Override
+  public void deliveryNotification(String sendNotificationId) {
+    SendNotification notification = sendNotificationRepository.findById(sendNotificationId)
+      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
+
+    // Validate status
+    NotificationUtils.validateStatus(NotificationStatus.UPLOADED, notification.getStatus());
+    NewNotificationResponseDTO responseDTO = sendClient.deliveryNotification(sendNotificationMapper.apply(notification));
+    if (responseDTO!=null){
+      sendNotificationRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
+      sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
+    }
+
   }
 }

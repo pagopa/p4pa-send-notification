@@ -2,6 +2,8 @@ package it.gov.pagopa.pu.send.connector.client;
 
 import it.gov.pagopa.pu.send.connector.send.generated.ApiClient;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import java.util.List;
@@ -26,10 +28,13 @@ public class SendClientImpl implements SendClient{
     newNotificationApi = new NewNotificationApi(apiClient);
   }
 
-
-
   @Override
   public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO) {
     return newNotificationApi.presignedUploadRequest(preLoadRequestDTO);
+  }
+
+  @Override
+  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO) {
+    return newNotificationApi.sendNewNotificationV24(newNotificationRequestV24DTO);
   }
 }
