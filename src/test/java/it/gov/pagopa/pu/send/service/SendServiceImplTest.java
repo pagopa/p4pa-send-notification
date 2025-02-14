@@ -147,5 +147,7 @@ class SendServiceImplTest {
 
     Mockito.verify(sendNotificationRepository, Mockito.times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
+    Mockito.verify(sendNotificationRepository, Mockito.times(1))
+      .updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
   }
 }
