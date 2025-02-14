@@ -33,7 +33,7 @@ public class SendController implements SendApi {
 
   @Override
   public ResponseEntity<Void> deliveryNotification(String sendNotificationId) {
-    log.info("delivery notification with sendNotificationId {} to SEND:", sendNotificationId);
+    log.info("delivery notification with sendNotificationId {} to SEND", sendNotificationId);
     sendService.deliveryNotification(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
