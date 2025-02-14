@@ -39,4 +39,14 @@ class SendControllerTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
   }
+
+  @Test
+  void givenSendNotificationIdWhenDeliveryNotificationRequestThenOk(){
+    String sendNotificationId = "12345";
+    Mockito.doNothing().when(sendServiceMock).deliveryNotification(sendNotificationId);
+    ResponseEntity<Void> response = sendController.deliveryNotification(sendNotificationId);
+
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
 }
