@@ -5,12 +5,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
 import it.gov.pagopa.pu.send.connector.client.SendClientImpl;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import java.util.List;
@@ -33,8 +35,12 @@ class SendServiceImplTest {
   @Mock
   private UploadServiceImpl uploadService;
 
+  @Mock
+  private SendNotification2NewNotificationRequestMapper sendNotificationMapper;
+
   @InjectMocks
   private SendServiceImpl sendService;
+
 
   @Test
   void givenValidNotificationWhenPreloadFilesThenVerify() {
@@ -118,5 +124,28 @@ class SendServiceImplTest {
     sendService.uploadFiles(sendNotificationId);
     Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFileVersionId(sendNotificationId, fileName, versionId);
     Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFileStatus(sendNotificationId, fileName, FileStatus.UPLOADED);
+  }
+
+  @Test
+  void givenValidNotificationWhenDeliveryNotificationThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+
+    NewNotificationResponseDTO response = new NewNotificationResponseDTO();
+    response.setNotificationRequestId("NOTIFICATIONREQUESTID");
+
+    SendNotification notification = SendNotification.builder()
+      .sendNotificationId(sendNotificationId)
+      .status(NotificationStatus.UPLOADED)
+      .build();
+
+    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    Mockito.when(sendClient.deliveryNotification(sendNotificationMapper.apply(notification))).thenReturn(response);
+
+    sendService.deliveryNotification(sendNotificationId);
+
+    Mockito.verify(sendNotificationRepository, Mockito.times(1))
+      .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
   }
 }
