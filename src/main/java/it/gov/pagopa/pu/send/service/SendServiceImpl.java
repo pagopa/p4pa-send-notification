@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class SendServiceImpl implements SendService{
 
+  private static final String NOTIFICATION_NOT_FOUND = "Notification not found with id: ";
+
   private final SendNotificationRepository sendNotificationRepository;
   private final SendClientImpl sendClient;
   private final UploadServiceImpl uploadService;
@@ -37,7 +39,7 @@ public class SendServiceImpl implements SendService{
   @Override
   public void preloadFiles(String sendNotificationId) {
     SendNotification notification = sendNotificationRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
+      .orElseThrow(() -> new IllegalArgumentException(NOTIFICATION_NOT_FOUND + sendNotificationId));
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.SENDING, notification.getStatus());
@@ -62,7 +64,7 @@ public class SendServiceImpl implements SendService{
   @Override
   public void uploadFiles(String sendNotificationId) {
     SendNotification notification = sendNotificationRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
+      .orElseThrow(() -> new IllegalArgumentException(NOTIFICATION_NOT_FOUND + sendNotificationId));
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.REGISTERED, notification.getStatus());
@@ -81,7 +83,7 @@ public class SendServiceImpl implements SendService{
   @Override
   public void deliveryNotification(String sendNotificationId) {
     SendNotification notification = sendNotificationRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
+      .orElseThrow(() -> new IllegalArgumentException(NOTIFICATION_NOT_FOUND + sendNotificationId));
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.UPLOADED, notification.getStatus());
