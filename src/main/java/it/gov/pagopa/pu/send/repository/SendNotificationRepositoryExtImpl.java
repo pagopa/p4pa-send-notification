@@ -54,6 +54,14 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
   }
 
   @Override
+  public UpdateResult updateNotificationRequestId(String sendNotificationId, String notificationRequestId) {
+    return mongoTemplate.updateFirst(
+      Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
+      new Update().set(Fields.notificationRequestId, notificationRequestId),
+      SendNotification.class);
+  }
+
+  @Override
   public UpdateResult updateFileStatus(String sendNotificationId, String fileName, FileStatus newStatus) {
     return mongoTemplate.updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)

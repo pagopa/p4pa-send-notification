@@ -32,6 +32,7 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     document.setDigest("sha256");
 
     CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setPaProtocolNumber("Prot_001");
     request.setRecipient(recipient);
     request.setDocuments(Collections.singletonList(document));
 
@@ -39,7 +40,7 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     SendNotification result = mapper.map(request);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId");
+    TestUtils.checkNotNullFields(result, "sendNotificationId","notificationRequestId");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("PF", result.getSubjectType());

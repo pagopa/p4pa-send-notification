@@ -1,6 +1,9 @@
 package it.gov.pagopa.pu.send.connector.client;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
@@ -62,6 +65,22 @@ class SendClientImplTest {
     List<PreLoadResponseDTO> result = sendClient.preloadFiles(requestList);
 
     assertEquals(responseList, result);
+  }
+
+  @Test
+  void givenValidRequestWhenDeliveryNotificationThenVerifyResponse(){
+    NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
+    NewNotificationResponseDTO response = new NewNotificationResponseDTO();
+
+    ResponseEntity<NewNotificationResponseDTO> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
+    Mockito.when(restTemplateMock.exchange(
+      Mockito.any(RequestEntity.class),
+      Mockito.eq(new ParameterizedTypeReference<NewNotificationResponseDTO>() {})
+    )).thenReturn(responseEntity);
+
+    NewNotificationResponseDTO result = sendClient.deliveryNotification(request);
+
+    assertEquals(response, result);
   }
 }
 

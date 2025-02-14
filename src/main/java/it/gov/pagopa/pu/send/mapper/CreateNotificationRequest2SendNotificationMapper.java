@@ -12,6 +12,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
 
   public SendNotification map(CreateNotificationRequest request) {
     SendNotification sendNotification = new SendNotification();
+    sendNotification.setPaProtocolNumber(request.getPaProtocolNumber());
     sendNotification.setSubjectType(request.getRecipient().getRecipientType().getValue());
     sendNotification.setFiscalCode(request.getRecipient().getTaxId());
     if(request.getDocuments().isEmpty())

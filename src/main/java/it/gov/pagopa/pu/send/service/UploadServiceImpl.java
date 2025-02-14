@@ -26,7 +26,7 @@ public class UploadServiceImpl implements UploadService{
   @Override
   public Optional<String> uploadFile(String sendNotificationId, DocumentDTO documentDTO) {
     //TODO edit file retrieve with P4ADEV-2148
-    String filePath = "src/main/resources/tmp/" + sendNotificationId + "_" + documentDTO.getFileName();
+    String filePath = "src/main/resources/tmp/" + "sendNotificationId" + "_" + documentDTO.getFileName();
     File file = new File(filePath);
     try {
 

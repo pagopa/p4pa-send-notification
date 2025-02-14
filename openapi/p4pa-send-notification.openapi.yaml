@@ -182,8 +182,11 @@ components:
     CreateNotificationRequest:
       type: object
       required:
+        - paProtocolNumber
         - recipients
       properties:
+        paProtocolNumber:
+          type: string
         recipient:
           $ref: '#/components/schemas/Recipient'
         documents:

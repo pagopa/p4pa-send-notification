@@ -20,8 +20,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class SendNotification {
   @Id
   private String sendNotificationId;
+  private String paProtocolNumber;
   private String subjectType;
   private String fiscalCode;
   private List<DocumentDTO> documents;
   private NotificationStatus status;
+  private String notificationRequestId;
 }

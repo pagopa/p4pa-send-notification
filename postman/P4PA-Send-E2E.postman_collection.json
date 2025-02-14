@@ -100,6 +100,8 @@
 									"    pm.expect(jsonResponse).have.property(\"sendNotificationId\");\r",
 									"    //pm.expect(jsonResponse).have.property(\"preloadRef\"); will be implemented with P4ADEV-2080\r",
 									"    pm.expect(jsonResponse).have.property(\"status\").to.eq(\"WAITING_FILE\");\r",
+									"\r",
+									"    pm.collectionVariables.set(\"sendNotificationId\", jsonResponse.sendNotificationId)\r",
 									"});"
 								],
 								"type": "text/javascript",
@@ -122,7 +124,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"RSSMRA80L05F593A\",\r\n        \"denomination\": \"Mario Rossi\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00100\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        }\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=\"\r\n    },\r\n    {\r\n        \"fileName\":\"Pagamento.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=\"\r\n    }]\r\n}",
+							"raw": "{\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        }\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    },\r\n    {\r\n        \"fileName\":\"Pagamento.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n    }]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -186,14 +188,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/67a6097568e52a5f0afe48a1/preload",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/preload",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
 								"send",
-								"67a6097568e52a5f0afe48a1",
+								"{{sendNotificationId}}",
 								"preload"
 							]
 						}
@@ -239,15 +241,68 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/67a6097568e52a5f0afe48a1/load",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/load",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
 								"send",
-								"67a6097568e52a5f0afe48a1",
+								"{{sendNotificationId}}",
 								"load"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendDeliveryNotification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send delivery notification - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/delivery",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"delivery"
 							]
 						}
 					},
@@ -259,6 +314,10 @@
 	"variable": [
 		{
 			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "sendNotificationId",
 			"value": ""
 		}
 	]
