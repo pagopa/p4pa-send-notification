@@ -17,11 +17,11 @@ import org.springframework.stereotype.Service;
 public class SendNotification2NewNotificationRequestMapper {
 
   public NewNotificationRequestV24DTO apply(SendNotification sendNotification) {
-    //TODO some information (only required) are mocked, other information will be implemented with P4DEV-
+    //TODO some information (only required) are mocked, other information will be implemented with P4ADEV-2185
     NewNotificationRequestV24DTO newNotification = new NewNotificationRequestV24DTO();
     newNotification.setIdempotenceToken(sendNotification.getSendNotificationId());
     newNotification.setPaProtocolNumber(sendNotification.getPaProtocolNumber());
-    newNotification.setSubject(sendNotification.getSendNotificationId());
+    newNotification.setSubject("TEST notifica PU numero "+sendNotification.getSendNotificationId());
 
     NotificationRecipientV23DTO recipient = new NotificationRecipientV23DTO();
     recipient.setRecipientType(RecipientTypeEnum.valueOf(sendNotification.getSubjectType()));
@@ -57,7 +57,7 @@ public class SendNotification2NewNotificationRequestMapper {
     //fee domain
     newNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.valueOf("FLAT_RATE"));
     newNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.valueOf("AR_REGISTERED_LETTER"));
-    newNotification.senderDenomination("SIL");
+    newNotification.senderDenomination("Ente Intermediario 2");
     newNotification.senderTaxId("00000000018");
     newNotification.setTaxonomyCode("010101P");
     //end fee domain
