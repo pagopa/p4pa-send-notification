@@ -22,10 +22,12 @@ spring:
                 maxConnectionLifeTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_LIFE_MS:0}"
                 maxConnectionIdleTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_IDLE_MS:120000}"
                 maxConnecting: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTING:2}"
+
 app:
     send:
         base-url: "\${SEND_BASE_URL:}"
         api-key: "\${PU_SEND_API_KEY:}"
+
 management:
     endpoints:
       jmx:
@@ -79,3 +81,8 @@ jwt:
                   DXyX8coB+giRmZ+nffi8kIqZrbptiLHXE/mg3VRdX7XFF6UNsDkobw3xMJcMErsi
                   ewIDAQAB
                   -----END PUBLIC KEY-----}"
+
+rest:
+  default-timeout:
+    connect-millis: "\${DEFAULT_REST_CONNECT_TIMEOUT_MILLIS:120000}"
+    read-millis: "\${DEFAULT_REST_READ_TIMEOUT_MILLIS:120000}"
