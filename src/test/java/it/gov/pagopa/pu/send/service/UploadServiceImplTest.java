@@ -32,7 +32,7 @@ class UploadServiceImplTest {
   void givenValidFileWhenUploadFileThenReturnsVersionId()
     throws IOException {
     //GIVEN
-    String sendNotificationId = "SENDNOTIFICATIONID";
+    String sendNotificationId = "sendNotificationId";
     Optional<String> versionId = Optional.of("VERSIONID");
     String filePath = "src/main/resources/tmp/" + sendNotificationId + "_file.pdf";
     File file = new File(filePath);
