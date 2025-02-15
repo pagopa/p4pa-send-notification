@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.send.connector.client.UploadClientImpl;
+import it.gov.pagopa.pu.send.connector.pagopa.send.client.UploadClientImpl;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
 import it.gov.pagopa.pu.send.exception.UploadFileException;

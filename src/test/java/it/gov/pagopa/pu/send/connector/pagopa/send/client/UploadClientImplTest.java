@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.send.connector.client;
+package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

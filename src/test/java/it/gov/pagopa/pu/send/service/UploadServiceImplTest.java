@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import it.gov.pagopa.pu.send.connector.client.UploadClientImpl;
+import it.gov.pagopa.pu.send.connector.pagopa.send.client.UploadClientImpl;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
 import java.io.File;
