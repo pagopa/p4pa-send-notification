@@ -2,63 +2,63 @@ server:
   http: "\${SERVER_PORT:8080}"
 
 spring:
-    application:
-      name: ${artifactId}
-      version: ${version}
-    jmx.enabled: true
-    threads:
-      virtual:
-        enabled: "\${VIRTUAL_THREADS_ENABLED:true}"
-    data:
-        mongodb:
-            uri: "\${MONGODB_URI:mongodb://localhost:27017}"
-            database: "\${MONGODB_DBNAME:payhub}"
-            # custom configured properties
-            config:
-              connectionPool:
-                maxSize: "\${MONGODB_CONNECTIONPOOL_MAX_SIZE:100}"
-                minSize: "\${MONGODB_CONNECTIONPOOL_MIN_SIZE:0}"
-                maxWaitTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_WAIT_MS:120000}"
-                maxConnectionLifeTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_LIFE_MS:0}"
-                maxConnectionIdleTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_IDLE_MS:120000}"
-                maxConnecting: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTING:2}"
+  application:
+    name: ${artifactId}
+    version: ${version}
+  jmx.enabled: true
+  threads:
+    virtual:
+      enabled: "\${VIRTUAL_THREADS_ENABLED:true}"
+  data:
+    mongodb:
+      uri: "\${MONGODB_URI:mongodb://localhost:27017}"
+      database: "\${MONGODB_DBNAME:payhub}"
+      # custom configured properties
+      config:
+        connectionPool:
+          maxSize: "\${MONGODB_CONNECTIONPOOL_MAX_SIZE:100}"
+          minSize: "\${MONGODB_CONNECTIONPOOL_MIN_SIZE:0}"
+          maxWaitTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_WAIT_MS:120000}"
+          maxConnectionLifeTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_LIFE_MS:0}"
+          maxConnectionIdleTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_IDLE_MS:120000}"
+          maxConnecting: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTING:2}"
 
 app:
-    send:
-        base-url: "\${SEND_BASE_URL:}"
-        api-key: "\${PU_SEND_API_KEY:}"
+  send:
+    base-url: "\${SEND_BASE_URL:}"
+    api-key: "\${PU_SEND_API_KEY:}"
 
 management:
-    endpoints:
-      jmx:
-        exposure.include: "*"
-      web:
-        exposure:
-          include: health, info, prometheus, metrics
-        base-path: /actuator
-    endpoint:
-      health:
-        probes.enabled: true
-        logging.slow-indicator-threshold: "\${HEALTH_ACTUATOR_LOGGER_TIMEOUT_DURATION:PT1S}"
-        group:
-          readiness.include: "*"
-          liveness.include: livenessState,diskSpace,ping
+  endpoints:
+    jmx:
+      exposure.include: "*"
+    web:
+      exposure:
+        include: health, info, prometheus, metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      probes.enabled: true
+      logging.slow-indicator-threshold: "\${HEALTH_ACTUATOR_LOGGER_TIMEOUT_DURATION:PT1S}"
+      group:
+        readiness.include: "*"
+        liveness.include: livenessState,diskSpace,ping
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${artifactId}
+    export:
       prometheus:
         enabled: true
-    metrics:
-      tags:
-        application: ${artifactId}
-      export:
-        prometheus:
-          enabled: true
-          step: 1m
-          descriptions: true
-      enable:
-        jvm: true
-        process: true
-        system: true
-        http: true
-        logback: true
+        step: 1m
+        descriptions: true
+    enable:
+      jvm: true
+      process: true
+      system: true
+      http: true
+      logback: true
 
 logging:
   level:
@@ -66,6 +66,11 @@ logging:
     it.gov.pagopa: "\${LOG_LEVEL_PAGOPA:INFO}"
     org.springframework: "\${LOG_LEVEL_SPRING:INFO}"
     org.springframework.boot.availability: "\${LOG_LEVEL_SPRING_BOOT_AVAILABILITY:DEBUG}"
+    it.gov.pagopa.pu.send.exception.SendNotificationExceptionHandler: "\${LOGGING_LEVEL_API_REQUEST_EXCEPTION:INFO}"
+    org.springdoc.core.utils.SpringDocAnnotationsUtils: "\${LOG_LEVEL_SPRING_DOC:ERROR}"
+    PERFORMANCE_LOG: "\${LOG_LEVEL_PERFORMANCE_LOG:INFO}"
+    PERFORMANCE_LOG.API_REQUEST: "\${LOG_LEVEL_PERFORMANCE_LOG_API_REQUEST:\${logging.level.PERFORMANCE_LOG}}"
+    PERFORMANCE_LOG.REST_INVOKE: "\${LOG_LEVEL_PERFORMANCE_LOG_REST_INVOKE:\${logging.level.PERFORMANCE_LOG}}"
 
 springdoc:
   writer-with-default-pretty-printer: true
