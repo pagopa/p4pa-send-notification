@@ -1,20 +1,9 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApiClientConfig;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Optional;
-
+import it.gov.pagopa.pu.send.exception.UploadFileException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +15,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class SendUploadClientTest {
@@ -84,5 +86,25 @@ class SendUploadClientTest {
     // THEN
     assertTrue(result.isPresent());
     assertEquals(versionId, result.get());
+  }
+
+  @Test
+  void givenErrorWhenThenThrowException(){
+    // Given
+    DocumentDTO doc = DocumentDTO.builder()
+      .fileName("file.pdf")
+      .digest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=")
+      .contentType("application/pdf")
+      .httpMethod("PUT")
+      .url("https://test.com/upload")
+      .secret("SECRET")
+      .build();
+    byte[] fileBytes = new byte[0];
+
+    Mockito.when(restTemplateMock.exchange(Mockito.eq(URI.create(doc.getUrl())), Mockito.eq(HttpMethod.PUT), any(), eq(String.class)))
+      .thenReturn(ResponseEntity.notFound().build());
+
+    // When, Then
+    Assertions.assertThrows(UploadFileException.class, () ->  sendUploadClient.upload(doc, fileBytes));
   }
 }
