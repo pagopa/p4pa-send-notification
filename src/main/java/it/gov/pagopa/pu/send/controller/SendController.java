@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
-import it.gov.pagopa.pu.send.service.SendService;
+import it.gov.pagopa.pu.send.service.SendFacadeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,30 +11,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SendController implements SendApi {
 
-  private final SendService sendService;
+  private final SendFacadeService sendFacadeService;
 
-  public SendController(SendService sendService) {
-    this.sendService = sendService;
+  public SendController(SendFacadeService sendFacadeService) {
+    this.sendFacadeService = sendFacadeService;
   }
 
   @Override
   public ResponseEntity<Void> preloadSendFile(String sendNotificationId) {
     log.info("request preload files for sendNotificationId:{}", sendNotificationId);
-    sendService.preloadFiles(sendNotificationId);
+    sendFacadeService.preloadFiles(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> uploadSendFile(String sendNotificationId) {
     log.info("upload files to SEND safeStorage for sendNotificationId:{}", sendNotificationId);
-    sendService.uploadFiles(sendNotificationId);
+    sendFacadeService.uploadFiles(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> deliveryNotification(String sendNotificationId) {
     log.info("delivery notification with sendNotificationId {} to SEND", sendNotificationId);
-    sendService.deliveryNotification(sendNotificationId);
+    sendFacadeService.deliveryNotification(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

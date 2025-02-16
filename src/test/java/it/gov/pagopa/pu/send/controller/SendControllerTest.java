@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
-import it.gov.pagopa.pu.send.service.SendService;
+import it.gov.pagopa.pu.send.service.SendFacadeService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 class SendControllerTest {
 
   @Mock
-  private SendService sendServiceMock;
+  private SendFacadeService sendFacadeServiceMock;
 
   @InjectMocks
   private SendController sendController;
@@ -23,7 +23,7 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdWhenPreloadFilesRequestThenOk() {
     String sendNotificationId = "12345";
-    Mockito.doNothing().when(sendServiceMock).preloadFiles(sendNotificationId);
+    Mockito.doNothing().when(sendFacadeServiceMock).preloadFiles(sendNotificationId);
     ResponseEntity<Void> response = sendController.preloadSendFile(sendNotificationId);
 
     Assertions.assertNotNull(response);
@@ -33,7 +33,7 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdWhenUploadFilesRequestThenOk(){
     String sendNotificationId = "12345";
-    Mockito.doNothing().when(sendServiceMock).uploadFiles(sendNotificationId);
+    Mockito.doNothing().when(sendFacadeServiceMock).uploadFiles(sendNotificationId);
     ResponseEntity<Void> response = sendController.uploadSendFile(sendNotificationId);
 
     Assertions.assertNotNull(response);
@@ -43,7 +43,7 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdWhenDeliveryNotificationRequestThenOk(){
     String sendNotificationId = "12345";
-    Mockito.doNothing().when(sendServiceMock).deliveryNotification(sendNotificationId);
+    Mockito.doNothing().when(sendFacadeServiceMock).deliveryNotification(sendNotificationId);
     ResponseEntity<Void> response = sendController.deliveryNotification(sendNotificationId);
 
     Assertions.assertNotNull(response);
