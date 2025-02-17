@@ -87,8 +87,10 @@ rest:
     connect-millis: "\${DEFAULT_REST_CONNECT_TIMEOUT_MILLIS:120000}"
     read-millis: "\${DEFAULT_REST_READ_TIMEOUT_MILLIS:120000}"
   send:
-    base-url: "\${SEND_BASE_URL:}"
     api-key: "\${PU_SEND_API_KEY:}"
-    max-attempts: "\${SEND_MAX_ATTEMPTS:3}" # It's counting also the first attempt
-    wait-time-millis: "\${SEND_WAIT_TIME_MILLIS:500}"
-    print-body-when-error: "\${SEND_PRINT_BODY_WHEN_ERROR:true}"
+  pagopa:
+    send:
+      base-url: "\${SEND_BASE_URL:}"
+      max-attempts: "\${SEND_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+      wait-time-millis: "\${SEND_WAIT_TIME_MILLIS:500}"
+      print-body-when-error: "\${SEND_PRINT_BODY_WHEN_ERROR:true}"

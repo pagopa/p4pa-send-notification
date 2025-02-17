@@ -171,6 +171,34 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
+  /send/{sendNotificationId}/status:
+    get:
+      tags:
+        - Send
+      summary: notification status
+      description: notification status
+      operationId: notificationStatus
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: 'NewNotificationRequestStatusResponse'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal server error
 security:
   - BearerAuth: []
 components:
