@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import it.gov.pagopa.pu.send.connector.client.UploadClientImpl;
+import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendUploadClient;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
 import java.io.File;
@@ -19,13 +19,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class UploadServiceImplTest {
+class SendUploadFacadeServiceImplTest {
 
   @Mock
-  private UploadClientImpl uploadClient;
+  private SendUploadClient sendUploadClient;
 
   @InjectMocks
-  private UploadServiceImpl uploadService;
+  private SendUploadFacadeServiceImpl uploadService;
 
 
   @Test
@@ -53,7 +53,7 @@ class UploadServiceImplTest {
 
     byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
 
-    Mockito.when(uploadClient.upload(documentDTO, fileBytes)).thenReturn(versionId);
+    Mockito.when(sendUploadClient.upload(documentDTO, fileBytes)).thenReturn(versionId);
 
     Optional<String> result = uploadService.uploadFile(sendNotificationId, documentDTO);
     // THEN
@@ -87,8 +87,6 @@ class UploadServiceImplTest {
     documentDTO.setFileName("file.pdf");
     documentDTO.setDigest("invalidDigest");
 
-    assertThrows(UploadFileException.class, () -> {
-      uploadService.uploadFile(sendNotificationId, documentDTO);
-    });
+    assertThrows(UploadFileException.class, () -> uploadService.uploadFile(sendNotificationId, documentDTO));
   }
 }

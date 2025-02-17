@@ -1,30 +1,34 @@
-package it.gov.pagopa.pu.send.connector.client;
+package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
+import it.gov.pagopa.pu.send.config.RestTemplateConfig;
+import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApiClientConfig;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
-
-import java.net.URI;
-import java.util.Optional;
+import it.gov.pagopa.pu.send.exception.UploadFileException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
+import java.util.Optional;
+
 @Service
 @Slf4j
-public class UploadClientImpl implements UploadClient{
+public class SendUploadClient {
 
   private final RestTemplate restTemplate;
 
-  public UploadClientImpl(RestTemplateBuilder restTemplateBuilder){
+  public SendUploadClient(
+    RestTemplateBuilder restTemplateBuilder,
+    PagopaSendApiClientConfig clientConfig
+  ){
     this.restTemplate = restTemplateBuilder.build();
+    if(clientConfig.isPrintBodyWhenError()){
+      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("SEND-UPLOAD"));
+    }
   }
 
-  @Override
   public Optional<String> upload(DocumentDTO doc, byte[] fileBytes) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.valueOf(doc.getContentType()));
@@ -39,8 +43,7 @@ public class UploadClientImpl implements UploadClient{
     if(response.getStatusCode().is2xxSuccessful()) {
       return Optional.ofNullable(response.getHeaders().getFirst("x-amz-version-id"));
     } else {
-      log.error("Upload failed for {} with status: {}", doc.getFileName(), response.getStatusCode());
-      return Optional.empty();
+      throw new UploadFileException("Something went wrong while uploading file to send: " + doc.getFileName() + ". " + response.getStatusCode());
     }
   }
 }

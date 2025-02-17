@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
-import it.gov.pagopa.pu.send.connector.client.SendClientImpl;
+import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
@@ -25,21 +25,21 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class SendServiceImplTest {
+class SendFacadeServiceImplTest {
   @Mock
   private SendNotificationRepository sendNotificationRepository;
 
   @Mock
-  private SendClientImpl sendClient;
+  private SendClient sendClient;
 
   @Mock
-  private UploadServiceImpl uploadService;
+  private SendUploadFacadeServiceImpl uploadService;
 
   @Mock
   private SendNotification2NewNotificationRequestMapper sendNotificationMapper;
 
   @InjectMocks
-  private SendServiceImpl sendService;
+  private SendFacadeServiceImpl sendService;
 
 
   @Test
@@ -87,9 +87,7 @@ class SendServiceImplTest {
     String sendNotificationId = "SENDNOTIFICATIONID";
     Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(Optional.empty());
 
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      sendService.preloadFiles(sendNotificationId);
-    });
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> sendService.preloadFiles(sendNotificationId));
 
     assertEquals("Notification not found with id: " + sendNotificationId, exception.getMessage());
   }

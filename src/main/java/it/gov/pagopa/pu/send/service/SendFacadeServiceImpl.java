@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.send.connector.client.SendClientImpl;
+import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
@@ -18,15 +18,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class SendServiceImpl implements SendService{
+public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendNotificationRepository sendNotificationRepository;
-  private final SendClientImpl sendClient;
-  private final UploadServiceImpl uploadService;
+  private final SendClient sendClient;
+  private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
 
-  public SendServiceImpl(SendNotificationRepository sendNotificationRepository,
-    SendClientImpl sendClient, UploadServiceImpl uploadService,
-    SendNotification2NewNotificationRequestMapper sendNotificationMapper) {
+  public SendFacadeServiceImpl(SendNotificationRepository sendNotificationRepository,
+                               SendClient sendClient, SendUploadFacadeServiceImpl uploadService,
+                               SendNotification2NewNotificationRequestMapper sendNotificationMapper) {
     this.sendNotificationRepository = sendNotificationRepository;
     this.sendClient = sendClient;
     this.uploadService = uploadService;

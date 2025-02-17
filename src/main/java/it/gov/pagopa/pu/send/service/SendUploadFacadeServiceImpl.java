@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.send.connector.client.UploadClientImpl;
+import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendUploadClient;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class UploadServiceImpl implements UploadService{
+public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
 
-  private final UploadClientImpl uploadClient;
+  private final SendUploadClient sendUploadClient;
 
-  public UploadServiceImpl(UploadClientImpl uploadClient) {
-    this.uploadClient = uploadClient;
+  public SendUploadFacadeServiceImpl(SendUploadClient sendUploadClient) {
+    this.sendUploadClient = sendUploadClient;
   }
 
   @Override
@@ -37,7 +37,7 @@ public class UploadServiceImpl implements UploadService{
         throw new InvalidSignatureException("File "+documentDTO.getFileName()+" has not a valid signature");
 
       byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
-      return uploadClient.upload(documentDTO, fileBytes);
+      return sendUploadClient.upload(documentDTO, fileBytes);
     } catch (Exception e) {
       throw new UploadFileException(e.getMessage());
     }
