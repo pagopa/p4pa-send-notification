@@ -17,7 +17,7 @@ public class SendClient {
   private final String apiKey;
 
   public SendClient(
-    @Value("${app.send.api-key}") String apiKey,
+    @Value("${rest.send.api-key}") String apiKey,
 
     PagopaSendApisHolder apisHolder
   ) {
