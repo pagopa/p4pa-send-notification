@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -48,5 +49,18 @@ class SendControllerTest {
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  @Test
+  void givenSendNotificationIdWhenNotificationStatusRequestThenOk(){
+    String sendNotificationId = "12345";
+    NewNotificationRequestStatusResponseV24DTO status = new NewNotificationRequestStatusResponseV24DTO();
+    Mockito.when(sendFacadeServiceMock.notificationStatus(sendNotificationId)).thenReturn(status);
+
+    ResponseEntity<NewNotificationRequestStatusResponseV24DTO> response = sendController.notificationStatus(sendNotificationId);
+
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertEquals(status, response.getBody());
   }
 }
