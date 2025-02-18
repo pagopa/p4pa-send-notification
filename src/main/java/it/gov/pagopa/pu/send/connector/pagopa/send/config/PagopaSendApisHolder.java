@@ -34,24 +34,21 @@ public class PagopaSendApisHolder {
   }
 
   public NewNotificationApi getNewNotificationApiByApiKey(String apiKey) {
-    return newNotificationApiMap.computeIfAbsent(apiKey, key -> {
-      ApiClient apiClient = new ApiClient(restTemplate);
-      apiClient.setBasePath(clientConfig.getBaseUrl());
-      apiClient.setApiKey(key);
-      apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
-      apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
-      return new NewNotificationApi(apiClient);
-    });
+    return newNotificationApiMap.computeIfAbsent(apiKey, key ->
+      new NewNotificationApi(getApiClient(key)));
   }
 
   public SenderReadB2BApi getSenderReadB2BApiByApiKey(String apiKey) {
-    return senderReadB2BApiMap.computeIfAbsent(apiKey, key -> {
-      ApiClient apiClient = new ApiClient(restTemplate);
-      apiClient.setBasePath(clientConfig.getBaseUrl());
-      apiClient.setApiKey(key);
-      apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
-      apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
-      return new SenderReadB2BApi(apiClient);
-    });
+    return senderReadB2BApiMap.computeIfAbsent(apiKey, key ->
+      new SenderReadB2BApi(getApiClient(key)));
+  }
+
+  private ApiClient getApiClient(String apiKey) {
+    ApiClient apiClient = new ApiClient(restTemplate);
+    apiClient.setBasePath(clientConfig.getBaseUrl());
+    apiClient.setApiKey(apiKey);
+    apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
+    apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
+    return apiClient;
   }
 }
