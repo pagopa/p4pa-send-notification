@@ -35,15 +35,15 @@ public class PagopaSendApisHolder {
 
   public NewNotificationApi getNewNotificationApiByApiKey(String apiKey) {
     return newNotificationApiMap.computeIfAbsent(apiKey, key ->
-      new NewNotificationApi(getApiClient(key)));
+      new NewNotificationApi(buildApiClient(key)));
   }
 
   public SenderReadB2BApi getSenderReadB2BApiByApiKey(String apiKey) {
     return senderReadB2BApiMap.computeIfAbsent(apiKey, key ->
-      new SenderReadB2BApi(getApiClient(key)));
+      new SenderReadB2BApi(buildApiClient(key)));
   }
 
-  private ApiClient getApiClient(String apiKey) {
+  private ApiClient buildApiClient(String apiKey) {
     ApiClient apiClient = new ApiClient(restTemplate);
     apiClient.setBasePath(clientConfig.getBaseUrl());
     apiClient.setApiKey(apiKey);
