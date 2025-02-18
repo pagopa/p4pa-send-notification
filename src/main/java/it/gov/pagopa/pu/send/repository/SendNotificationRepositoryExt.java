@@ -11,4 +11,5 @@ public interface SendNotificationRepositoryExt {
   UpdateResult updateNotificationRequestId(String sendNotificationId, String notificationRequestId);
   UpdateResult updateFileStatus(String sendNotificationId, String fileName, FileStatus newStatus);
   UpdateResult updateFileVersionId(String sendNotificationId, String fileName, String versionId);
+  UpdateResult updateNotificationIun(String sendNotificationId, String iun);
 }

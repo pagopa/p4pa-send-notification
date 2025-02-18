@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
@@ -86,6 +87,19 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       sendNotificationRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
       sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
     }
+  }
+
+  @Override
+  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String sendNotificationId) {
+    SendNotification notification = findSendNotification(sendNotificationId);
+
+    // Validate status
+    NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
+    NewNotificationRequestStatusResponseV24DTO notificationStatus = sendClient.notificationStatus(notification.getNotificationRequestId());
+    if(notificationStatus!=null && notificationStatus.getIun() != null)
+      sendNotificationRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
+
+    return notificationStatus;
   }
 
   private SendNotification findSendNotification(String sendNotificationId) {

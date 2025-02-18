@@ -26,4 +26,5 @@ public class SendNotification {
   private List<DocumentDTO> documents;
   private NotificationStatus status;
   private String notificationRequestId;
+  private String iun;
 }

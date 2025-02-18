@@ -78,4 +78,12 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
       new Update().set(FIELD_DOCUMENT_VERSIONID, versionId),
       SendNotification.class);
   }
+
+  @Override
+  public UpdateResult updateNotificationIun(String sendNotificationId, String iun) {
+    return mongoTemplate.updateFirst(
+      Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
+      new Update().set(Fields.iun, iun),
+      SendNotification.class);
+  }
 }

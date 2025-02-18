@@ -2,6 +2,8 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
+import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
@@ -25,12 +27,14 @@ class SendClientTest {
   private PagopaSendApisHolder apisHolder;
   @Mock
   private NewNotificationApi newNotificationApiMock;
+  @Mock
+  private SenderReadB2BApi senderReadB2BApiMock;
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     sendClient = new SendClient(apiKey, apisHolder);
   }
 
@@ -80,5 +84,24 @@ class SendClientTest {
     // Then
     assertSame(response, result);
   }
+
+  @Test
+  void givenValidRequestWhenNotificationStatusThenVerifyResponse(){
+    // Given
+    String notificationRequestId = "REQUESTID";
+    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+
+    Mockito.when(apisHolder.getSenderReadB2BApiByApiKey(apiKey))
+      .thenReturn(senderReadB2BApiMock);
+    Mockito.when(senderReadB2BApiMock.retrieveNotificationRequestStatusV24(notificationRequestId, null, null))
+      .thenReturn(response);
+
+    // When
+    NewNotificationRequestStatusResponseV24DTO result = sendClient.notificationStatus(notificationRequestId);
+
+    // Then
+    assertSame(response, result);
+  }
+
 }
 

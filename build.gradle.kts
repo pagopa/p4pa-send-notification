@@ -133,6 +133,9 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.pu.send.controller.generated")
   modelPackage.set("it.gov.pagopa.pu.send.dto.generated")
+  typeMappings.set(mapOf(
+    "NewNotificationRequestStatusResponse" to "it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO"
+  ))
   configOptions.set(mapOf(
     "dateLibrary" to "java8",
     "requestMappingMode" to "api_interface",

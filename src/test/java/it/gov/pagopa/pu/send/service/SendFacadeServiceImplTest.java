@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
@@ -17,6 +18,7 @@ import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -147,5 +149,32 @@ class SendFacadeServiceImplTest {
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
     Mockito.verify(sendNotificationRepository, Mockito.times(1))
       .updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
+  }
+
+  @Test
+  void givenValidNotificationWhenNotificationStatusThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String notificationRequestId = "REQUESTID";
+
+    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    response.setIun("IUN");
+
+    SendNotification notification = SendNotification.builder()
+      .sendNotificationId(sendNotificationId)
+      .notificationRequestId(notificationRequestId)
+      .status(NotificationStatus.COMPLETE)
+      .build();
+
+    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    Mockito.when(sendClient.notificationStatus(notificationRequestId)).thenReturn(response);
+
+    NewNotificationRequestStatusResponseV24DTO result = sendService.notificationStatus(sendNotificationId);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(response, result);
+    Mockito.verify(sendNotificationRepository, Mockito.times(1))
+      .updateNotificationIun(sendNotificationId, response.getIun());
   }
 }

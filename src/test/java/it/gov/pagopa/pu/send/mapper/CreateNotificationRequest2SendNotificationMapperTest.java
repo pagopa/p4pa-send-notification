@@ -40,7 +40,7 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     SendNotification result = mapper.map(request);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId","notificationRequestId");
+    TestUtils.checkNotNullFields(result, "sendNotificationId","notificationRequestId","iun");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("PF", result.getSubjectType());

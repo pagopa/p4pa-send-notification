@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,12 @@ public class SendController implements SendApi {
     log.info("delivery notification with sendNotificationId {} to SEND", sendNotificationId);
     sendFacadeService.deliveryNotification(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<NewNotificationRequestStatusResponseV24DTO> notificationStatus(String sendNotificationId) {
+    log.info("retrieve notification status for sendNotificationId {}", sendNotificationId);
+    return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId), HttpStatus.OK);
   }
 
 }

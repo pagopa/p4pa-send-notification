@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
@@ -17,7 +18,7 @@ public class SendClient {
   private final String apiKey;
 
   public SendClient(
-    @Value("${rest.send.api-key}") String apiKey,
+    @Value("${rest.pagopa.send.api-key}") String apiKey,
 
     PagopaSendApisHolder apisHolder
   ) {
@@ -35,4 +36,10 @@ public class SendClient {
     return apisHolder.getNewNotificationApiByApiKey(apiKey)
       .sendNewNotificationV24(newNotificationRequestV24DTO);
   }
+
+  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId) {
+    return apisHolder.getSenderReadB2BApiByApiKey(apiKey)
+      .retrieveNotificationRequestStatusV24(notificationRequestId, null, null);
+  }
+
 }

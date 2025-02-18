@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.config;
 
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import org.junit.jupiter.api.AfterEach;
@@ -38,11 +39,22 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
   }
 
   @Test
-  void whenGetOrganizationEntityControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+  void whenGetNewNotificationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> apisHolder.getNewNotificationApiByApiKey(apiKey)
         .sendNewNotificationV24(new NewNotificationRequestV24DTO()),
       NewNotificationResponseDTO.class,
+      () -> {},
+      AUTH_TYPE.API_KEY,
+      "x-api-key");
+  }
+
+  @Test
+  void whenGetSenderReadB2BApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      apiKey -> apisHolder.getSenderReadB2BApiByApiKey(apiKey)
+        .retrieveNotificationRequestStatusV24("REQUESTID",null, null),
+      NewNotificationRequestStatusResponseV24DTO.class,
       () -> {},
       AUTH_TYPE.API_KEY,
       "x-api-key");

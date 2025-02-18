@@ -110,4 +110,18 @@ class SendNotificationRepositoryExtImplTest {
     assertEquals(1L, result.getModifiedCount());
     Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class));
   }
+
+  @Test
+  void givenUpdateNotificationIunThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String iun = "IUN";
+
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class))).thenReturn(updateResult);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.updateNotificationIun(sendNotificationId,iun);
+
+    assertEquals(1L, result.getModifiedCount());
+    Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class));
+  }
 }
