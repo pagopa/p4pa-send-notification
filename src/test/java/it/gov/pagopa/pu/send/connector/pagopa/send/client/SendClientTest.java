@@ -34,7 +34,7 @@ class SendClientTest {
   private final String apiKey = "apiKey";
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     sendClient = new SendClient(apiKey, apisHolder);
   }
 
