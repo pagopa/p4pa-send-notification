@@ -307,6 +307,72 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "sendNotificationStatus",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send notification status - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"P4PA Send notification status - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"idempotenceToken\");\r",
+									"    pm.expect(jsonResponse).have.property(\"paProtocolNumber\");\r",
+									"    pm.expect(jsonResponse).have.property(\"subject\");\r",
+									"    pm.expect(jsonResponse).have.property(\"recipients\");\r",
+									"    pm.expect(jsonResponse).have.property(\"iun\");\r",
+									"    pm.expect(jsonResponse).have.property(\"notificationRequestStatus\").eq(\"ACCEPTED\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/status",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"status"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
