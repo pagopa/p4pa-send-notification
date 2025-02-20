@@ -74,6 +74,11 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoadFileRequest'
       responses:
         '200':
           description: OK
@@ -310,6 +315,15 @@ components:
         contentType:
           type: string
         fileName:
+          type: string
+    LoadFileRequest:
+      type: object
+      properties:
+        digest:
+          type: string
+        fileName:
+          type: string
+        path:
           type: string
     CreateNotificationResponse:
       type: object

@@ -213,6 +213,15 @@
             "type" : "string"
           }
         } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoadFileRequest"
+              }
+            }
+          }
+        },
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -641,6 +650,20 @@
           "workFlowId" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "LoadFileRequest" : {
+        "type" : "object",
+        "properties" : {
+          "digest" : {
+            "type" : "string"
+          },
+          "fileName" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
           }
         }
       },
