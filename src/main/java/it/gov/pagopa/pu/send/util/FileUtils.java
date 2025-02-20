@@ -24,4 +24,10 @@ public class FileUtils {
     byte[] hash = digest.digest();
     return Base64.getEncoder().encodeToString(hash);
   }
+
+  public static String calculateFileHash(String filePath)
+    throws NoSuchAlgorithmException, IOException {
+    File file = new File(filePath);
+    return calculateFileHash(file);
+  }
 }
