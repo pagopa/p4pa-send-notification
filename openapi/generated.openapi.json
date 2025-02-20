@@ -228,10 +228,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -241,10 +238,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -254,10 +248,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -267,10 +258,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -280,10 +268,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -293,10 +278,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -648,8 +630,7 @@
         "type" : "object",
         "properties" : {
           "workFlowId" : {
-            "type" : "integer",
-            "format" : "int64"
+            "type" : "string"
           }
         }
       },
