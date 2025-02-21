@@ -12,6 +12,7 @@ import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
+import java.io.File;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,7 +57,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
             filePath = "src/main/resources/tmp/"+"sendNotificationId_"+doc.getFileName();
 
           try {
-            if(!FileUtils.calculateFileHash(filePath).equals(doc.getDigest()))
+            File file = new File(filePath);
+            if(!FileUtils.calculateFileHash(file).equals(doc.getDigest()))
               throw new InvalidSignatureException("File "+doc.getFileName()+" has not a valid signature");
           } catch (Exception e) {
             throw new InvalidSignatureException("Error while validating "+doc.getFileName()+" signature");
