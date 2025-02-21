@@ -233,6 +233,16 @@
               }
             }
           },
+          "202" : {
+            "description" : "Accepted and waiting for all files",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
+                }
+              }
+            }
+          },
           "400" : {
             "description" : "Invalid request",
             "content" : {
@@ -254,7 +264,7 @@
             }
           },
           "404" : {
-            "description" : "Notification not found",
+            "description" : "Notification or File not found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -635,6 +645,7 @@
         }
       },
       "LoadFileRequest" : {
+        "required" : [ "digest", "fileName" ],
         "type" : "object",
         "properties" : {
           "digest" : {
