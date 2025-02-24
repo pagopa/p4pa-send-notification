@@ -143,6 +143,134 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "startSendNotificationNotificationFile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send Notification create notification - Responses with 202\", function () {\r",
+									"    pm.response.to.have.status(202);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n     \"digest\":\"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\",\r\n     \"fileName\": \"Notifica.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}/start",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"notification",
+								"{{sendNotificationId}}",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "startSendNotificationPagamentoFile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send Notification create notification - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Send Notification - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"workFlowId\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n     \"digest\":\"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\",\r\n     \"fileName\": \"Pagamento.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}/start",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"notification",
+								"{{sendNotificationId}}",
+								"start"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -360,14 +488,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/status",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/67a6097568e52a5f0afe48a1/status",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
 								"send",
-								"{{sendNotificationId}}",
+								"67a6097568e52a5f0afe48a1",
 								"status"
 							]
 						}

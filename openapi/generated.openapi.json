@@ -213,16 +213,32 @@
             "type" : "string"
           }
         } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoadFileRequest"
+              }
+            }
+          }
+        },
         "responses" : {
           "200" : {
             "description" : "OK",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
+                }
+              }
+            }
+          },
+          "202" : {
+            "description" : "Accepted and waiting for all files",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -232,10 +248,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -245,23 +258,17 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
           },
           "404" : {
-            "description" : "Notification not found",
+            "description" : "Notification or File not found",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -271,10 +278,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -284,10 +288,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/StartNotificationResponse"
-                  }
+                  "$ref" : "#/components/schemas/StartNotificationResponse"
                 }
               }
             }
@@ -639,8 +640,22 @@
         "type" : "object",
         "properties" : {
           "workFlowId" : {
-            "type" : "integer",
-            "format" : "int64"
+            "type" : "string"
+          }
+        }
+      },
+      "LoadFileRequest" : {
+        "required" : [ "digest", "fileName" ],
+        "type" : "object",
+        "properties" : {
+          "digest" : {
+            "type" : "string"
+          },
+          "fileName" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
           }
         }
       },

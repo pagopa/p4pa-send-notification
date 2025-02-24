@@ -74,21 +74,26 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoadFileRequest'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
                   $ref: '#/components/schemas/StartNotificationResponse'
+        '202':
+          description: Accepted and waiting for all files
         '400':
           description: Invalid request
         '403':
           description: Forbidden
         '404':
-          description: Notification not found
+          description: Notification or File not found
         '409':
           description: Wrong notification status
         '500':
@@ -311,6 +316,18 @@ components:
           type: string
         fileName:
           type: string
+    LoadFileRequest:
+      type: object
+      required:
+        - digest
+        - fileName
+      properties:
+        digest:
+          type: string
+        fileName:
+          type: string
+        path:
+          type: string
     CreateNotificationResponse:
       type: object
       properties:
@@ -326,8 +343,7 @@ components:
       type: object
       properties:
         workFlowId:
-          type: integer
-          format: int64
+          type: string
     PreloadNotificationDTO:
       type: object
       properties:
