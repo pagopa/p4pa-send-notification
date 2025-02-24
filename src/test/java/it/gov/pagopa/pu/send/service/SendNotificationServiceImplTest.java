@@ -1,7 +1,5 @@
 package it.gov.pagopa.pu.send.service;
 
-import static org.mockito.ArgumentMatchers.any;
-
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
@@ -12,7 +10,6 @@ import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
-import it.gov.pagopa.pu.send.util.FileUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,7 +57,7 @@ class SendNotificationServiceImplTest {
   }
 
   @Test
-  public void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyUpdateFileStatus()
+  void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyUpdateFileStatus()
     throws IOException {
 
     String sendNotificationId = "sendNotificationId";
@@ -87,16 +85,22 @@ class SendNotificationServiceImplTest {
 
     notification.setDocuments(List.of(documentDTO));
 
+    SendNotification notificationUpdated = notification;
+    DocumentDTO documentUpdated = documentDTO;
+    documentUpdated.setStatus(FileStatus.READY);
+    notificationUpdated.setStatus(NotificationStatus.SENDING);
+    notificationUpdated.setDocuments(List.of(documentUpdated));
+
+
     Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.of(notification));
 
     sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest);
 
-    Mockito.verify(sendNotificationRepositoryMock).updateFileStatus(sendNotificationId,
-      fileName, FileStatus.READY);
+    Mockito.verify(sendNotificationRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
   }
 
   @Test
-  public void givenStartNotificationRequestWhenStartSendNotificationThenExceptionFileNotFound() {
+  void givenStartNotificationRequestWhenStartSendNotificationThenExceptionFileNotFound() {
     String sendNotificationId = "sendNotificationId";
     LoadFileRequest loadFileRequest = new LoadFileRequest("DIGEST", "NOTEXISTS");
     SendNotification notification = new SendNotification();
@@ -114,7 +118,7 @@ class SendNotificationServiceImplTest {
   }
 
   @Test
-  public void givenStartNotificationRequestWhenStartSendNotificationThenExceptionInvalidSignature()
+  void givenStartNotificationRequestWhenStartSendNotificationThenExceptionInvalidSignature()
     throws IOException {
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
