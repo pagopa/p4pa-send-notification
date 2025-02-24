@@ -57,46 +57,22 @@ class SendNotificationServiceImplTest {
   }
 
   @Test
-  void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyUpdateFileStatus()
+  void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyAllFilesReady()
     throws IOException {
-
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
-    LoadFileRequest loadFileRequest = new LoadFileRequest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=",
-      fileName);
-    SendNotification notification = new SendNotification();
-    notification.setStatus(NotificationStatus.WAITING_FILE);
+    LoadFileRequest loadFileRequest = new LoadFileRequest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=",fileName);
+    SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
+    SendNotification updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
 
-
-    String filePath = "src/main/resources/tmp/" + sendNotificationId + "_"+ fileName;
-    File file = new File(filePath);
-    file.deleteOnExit();
-
-    try (FileWriter writer = new FileWriter(file)) {
-      writer.write("TEST FILE HASH P4PA SEND");
-    }
-
-    DocumentDTO documentDTO = DocumentDTO.builder()
-      .fileName(fileName)
-      .digest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=")
-      .contentType("application/pdf")
-      .status(FileStatus.WAITING)
-      .build();
-
-    notification.setDocuments(List.of(documentDTO));
-
-    SendNotification notificationUpdated = notification;
-    DocumentDTO documentUpdated = documentDTO;
-    documentUpdated.setStatus(FileStatus.READY);
-    notificationUpdated.setStatus(NotificationStatus.SENDING);
-    notificationUpdated.setDocuments(List.of(documentUpdated));
-
-
-    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.of(notification));
+    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification))
+      .thenReturn(Optional.of(updatedNotification));
 
     sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest);
 
     Mockito.verify(sendNotificationRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
+    Mockito.verify(sendNotificationRepositoryMock).updateNotificationStatus(sendNotificationId, NotificationStatus.SENDING);
   }
 
   @Test
@@ -123,10 +99,25 @@ class SendNotificationServiceImplTest {
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     LoadFileRequest loadFileRequest = new LoadFileRequest("DIGEST", fileName);
+    SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
+
+    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
+      Optional.of(notification));
+
+    Exception exception = Assertions.assertThrows(InvalidSignatureException.class, () -> {
+      sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest);
+    });
+
+    Assertions.assertEquals("File "+fileName+" has not a valid signature", exception.getMessage());
+  }
+
+  private SendNotification createMockNotification(String sendNotificationId, String fileName, FileStatus fileStatus)
+    throws IOException {
+
     SendNotification notification = new SendNotification();
     notification.setStatus(NotificationStatus.WAITING_FILE);
 
-    String filePath = "src/main/resources/tmp/" + sendNotificationId + "_"+fileName;
+    String filePath = "src/main/resources/tmp/" + sendNotificationId + "_"+ fileName;
     File file = new File(filePath);
     file.deleteOnExit();
 
@@ -138,18 +129,13 @@ class SendNotificationServiceImplTest {
       .fileName(fileName)
       .digest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=")
       .contentType("application/pdf")
-      .status(FileStatus.WAITING)
+      .status(fileStatus)
       .build();
 
     notification.setDocuments(List.of(documentDTO));
 
-    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
-      Optional.of(notification));
-
-    Exception exception = Assertions.assertThrows(InvalidSignatureException.class, () -> {
-      sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest);
-    });
-
-    Assertions.assertEquals("File "+fileName+" has not a valid signature", exception.getMessage());
+    return notification;
   }
+
+
 }
