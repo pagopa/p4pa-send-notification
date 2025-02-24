@@ -58,10 +58,10 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
           try {
             File file = new File(filePath);
-            if(!FileUtils.calculateFileHash(file).equals(doc.getDigest()))
+            if(!FileUtils.calculateFileHash(file).equals(loadFileRequest.getDigest()))
               throw new InvalidSignatureException("File "+doc.getFileName()+" has not a valid signature");
           } catch (Exception e) {
-            throw new InvalidSignatureException("Error while validating "+doc.getFileName()+" signature");
+            throw new InvalidSignatureException(e.getMessage());
           }
           sendNotificationRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.READY);
         }, () -> {throw new IllegalArgumentException("File not found with id: " + loadFileRequest.getFileName());}
