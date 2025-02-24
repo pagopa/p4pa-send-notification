@@ -1,5 +1,5 @@
 {
-  "openapi" : "3.0.1",
+  "openapi" : "3.1.0",
   "info" : {
     "title" : "p4pa-send-notification",
     "description" : "Api and Models",
@@ -518,7 +518,6 @@
         }
       },
       "CreateNotificationRequest" : {
-        "required" : [ "paProtocolNumber" ],
         "type" : "object",
         "properties" : {
           "paProtocolNumber" : {
@@ -569,7 +568,8 @@
             "type" : "string",
             "enum" : [ "SYNC", "ASYNC", "NONE" ]
           }
-        }
+        },
+        "required" : [ "paProtocolNumber" ]
       },
       "Document" : {
         "type" : "object",
@@ -611,7 +611,6 @@
         }
       },
       "Recipient" : {
-        "required" : [ "denomination", "physicalAddress", "recipientType", "taxId" ],
         "type" : "object",
         "properties" : {
           "recipientType" : {
@@ -633,7 +632,8 @@
               "$ref" : "#/components/schemas/Payment"
             }
           }
-        }
+        },
+        "required" : [ "denomination", "physicalAddress", "recipientType", "taxId" ]
       },
       "StartNotificationResponse" : {
         "type" : "object",
