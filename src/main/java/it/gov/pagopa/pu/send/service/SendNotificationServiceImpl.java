@@ -48,9 +48,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     notification.getDocuments().stream()
       .filter(doc -> doc.getFileName().equals(loadFileRequest.getFileName()))
       .findFirst().ifPresentOrElse(
-        doc -> {
-          updateFileStatus(sendNotificationId, doc, loadFileRequest);
-        }, () -> {throw new IllegalArgumentException("File not found with id: " + loadFileRequest.getFileName());}
+        doc -> updateFileStatus(sendNotificationId, doc, loadFileRequest),
+        () -> {throw new IllegalArgumentException("File not found with id: " + loadFileRequest.getFileName());}
       );
 
     notification = findSendNotification(sendNotificationId);
