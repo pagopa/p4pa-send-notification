@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
 import it.gov.pagopa.pu.send.dto.generated.LoadFileRequest;
@@ -48,22 +49,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .filter(doc -> doc.getFileName().equals(loadFileRequest.getFileName()))
       .findFirst().ifPresentOrElse(
         doc -> {
-          NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());
-          //TODO edit file retrieve with P4ADEV-2148, change static sendNotificationId with doc.getSendNotificationId
-          String filePath;
-          if(loadFileRequest.getPath()!=null)
-            filePath = loadFileRequest.getPath()+"sendNotificationId_"+doc.getFileName();
-          else
-            filePath = "src/main/resources/tmp/"+"sendNotificationId_"+doc.getFileName();
-
-          try {
-            File file = new File(filePath);
-            if(!FileUtils.calculateFileHash(file).equals(loadFileRequest.getDigest()))
-              throw new InvalidSignatureException("File "+doc.getFileName()+" has not a valid signature");
-          } catch (Exception e) {
-            throw new InvalidSignatureException(e.getMessage());
-          }
-          updateFileStatus(sendNotificationId, doc.getFileName());
+          updateFileStatus(sendNotificationId, doc, loadFileRequest);
         }, () -> {throw new IllegalArgumentException("File not found with id: " + loadFileRequest.getFileName());}
       );
 
@@ -85,7 +71,22 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
   }
 
-  private void updateFileStatus(String sendNotificationId, String fileName) {
-    sendNotificationRepository.updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
+  private void updateFileStatus(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest) {
+    NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());
+    //TODO edit file retrieve with P4ADEV-2148, change static sendNotificationId with doc.getSendNotificationId
+    String filePath;
+    if(loadFileRequest.getPath()!=null)
+      filePath = loadFileRequest.getPath()+"sendNotificationId_"+doc.getFileName();
+    else
+      filePath = "src/main/resources/tmp/"+"sendNotificationId_"+doc.getFileName();
+
+    try {
+      File file = new File(filePath);
+      if(!FileUtils.calculateFileHash(file).equals(loadFileRequest.getDigest()))
+        throw new InvalidSignatureException("File "+doc.getFileName()+" has not a valid signature");
+    } catch (Exception e) {
+      throw new InvalidSignatureException(e.getMessage());
+    }
+    sendNotificationRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.READY);
   }
 }
