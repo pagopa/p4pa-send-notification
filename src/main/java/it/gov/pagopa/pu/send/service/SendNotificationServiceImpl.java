@@ -63,7 +63,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
           } catch (Exception e) {
             throw new InvalidSignatureException(e.getMessage());
           }
-          sendNotificationRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.READY);
+          updateFileStatus(sendNotificationId, doc.getFileName());
         }, () -> {throw new IllegalArgumentException("File not found with id: " + loadFileRequest.getFileName());}
       );
 
@@ -83,5 +83,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private SendNotification findSendNotification(String sendNotificationId) {
     return sendNotificationRepository.findById(sendNotificationId)
       .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
+  }
+
+  private void updateFileStatus(String sendNotificationId, String fileName) {
+    sendNotificationRepository.updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
   }
 }
