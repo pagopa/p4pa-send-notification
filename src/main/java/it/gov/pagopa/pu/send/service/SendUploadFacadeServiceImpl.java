@@ -8,10 +8,9 @@ import it.gov.pagopa.pu.send.util.FileUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,11 +26,11 @@ public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
   @Override
   public Optional<String> uploadFile(String sendNotificationId, DocumentDTO documentDTO) {
     //TODO edit file retrieve with P4ADEV-2148
-    String fileName = "sendNotificationId" + "_" + documentDTO.getFileName();
-    Path resourceDirectory = Paths.get("src","main","resources","tmp");
-    log.info("File Path: {}", resourceDirectory.resolve(fileName));
+    String fileName = "tmp/sendNotificationId" + "_" + documentDTO.getFileName();
+    log.info("File Path: {}", new ClassPathResource(fileName).getPath());
+
     try {
-      File file = new File(resourceDirectory.resolve(fileName).toString());
+      File file = new ClassPathResource(fileName).getFile();
       if (!file.exists() || !file.isFile())
         throw new FileNotFoundException("File not found: " + documentDTO.getFileName());
 
