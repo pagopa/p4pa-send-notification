@@ -37,9 +37,9 @@ class SendUploadFacadeServiceImplTest {
     Optional<String> versionId = Optional.of("VERSIONID");
 
     String fileName = "sendNotificationId_file.pdf";
-    Path resourceDirectory = Paths.get("src","main","resources","tmp",fileName);
+    Path resourceDirectory = Paths.get("src","main","resources","tmp");
 
-    File file = new File(resourceDirectory.toFile().getAbsolutePath());
+    File file = new File(resourceDirectory.resolve(fileName).toString());
     file.deleteOnExit();
 
     try (FileWriter writer = new FileWriter(file)) {
