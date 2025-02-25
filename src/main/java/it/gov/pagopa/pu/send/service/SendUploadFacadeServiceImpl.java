@@ -8,9 +8,9 @@ import it.gov.pagopa.pu.send.util.FileUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,17 +26,16 @@ public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
   @Override
   public Optional<String> uploadFile(String sendNotificationId, DocumentDTO documentDTO) {
     //TODO edit file retrieve with P4ADEV-2148
-    String filePath = "src/main/resources/tmp/" + "sendNotificationId" + "_" + documentDTO.getFileName();
-    File file = new File(filePath);
+    String fileName = "tmp/sendNotificationId" + "_" + documentDTO.getFileName();
     try {
-
+      File file = new ClassPathResource(fileName).getFile();
       if (!file.exists() || !file.isFile())
         throw new FileNotFoundException("File not found: " + documentDTO.getFileName());
 
       if(!FileUtils.calculateFileHash(file).equals(documentDTO.getDigest()))
         throw new InvalidSignatureException("File "+documentDTO.getFileName()+" has not a valid signature");
 
-      byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
+      byte[] fileBytes = Files.readAllBytes(file.toPath());
       return sendUploadClient.upload(documentDTO, fileBytes);
     } catch (Exception e) {
       throw new UploadFileException(e.getMessage());
