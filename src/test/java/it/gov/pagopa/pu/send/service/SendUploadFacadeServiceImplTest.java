@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -34,8 +35,11 @@ class SendUploadFacadeServiceImplTest {
     //GIVEN
     String sendNotificationId = "sendNotificationId";
     Optional<String> versionId = Optional.of("VERSIONID");
-    String filePath = "src/main/resources/tmp/" + sendNotificationId + "_file.pdf";
-    File file = new File(filePath);
+
+    String fileName = "sendNotificationId_file.pdf";
+    Path resourceDirectory = Paths.get("src","main","resources","tmp",fileName);
+
+    File file = new File(resourceDirectory.toFile().getAbsolutePath());
     file.deleteOnExit();
 
     try (FileWriter writer = new FileWriter(file)) {
@@ -51,7 +55,7 @@ class SendUploadFacadeServiceImplTest {
       .secret("SECRET")
       .build();
 
-    byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
+    byte[] fileBytes = Files.readAllBytes(file.toPath());
 
     Mockito.when(sendUploadClient.upload(documentDTO, fileBytes)).thenReturn(versionId);
 
