@@ -9,8 +9,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +26,6 @@ class SendUploadFacadeServiceImplTest {
   @InjectMocks
   private SendUploadFacadeServiceImpl uploadService;
 
-
   @Test
   void givenValidFileWhenUploadFileThenReturnsVersionId()
     throws IOException {
@@ -36,19 +33,13 @@ class SendUploadFacadeServiceImplTest {
     String sendNotificationId = "sendNotificationId";
     Optional<String> versionId = Optional.of("VERSIONID");
 
-    String fileName = "sendNotificationId_file.pdf";
-    Path resourceDirectory = Paths.get("src","main","resources","tmp");
-
-    File file = new File(resourceDirectory.resolve(fileName).toString());
-    file.deleteOnExit();
-
-    try (FileWriter writer = new FileWriter(file)) {
-      writer.write("TEST FILE HASH P4PA SEND");
-    }
+    String fileName = "src/test/resources/tmp/sendNotificationId_file.pdf";
+    File file = new File(fileName);
+    System.out.println("File Path in test:" + file.getAbsolutePath());
 
     DocumentDTO documentDTO = DocumentDTO.builder()
       .fileName("file.pdf")
-      .digest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=")
+      .digest("YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=")
       .contentType("application/pdf")
       .httpMethod("PUT")
       .url("https://test.com/upload")

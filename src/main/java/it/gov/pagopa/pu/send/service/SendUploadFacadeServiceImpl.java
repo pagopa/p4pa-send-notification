@@ -27,8 +27,6 @@ public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
   public Optional<String> uploadFile(String sendNotificationId, DocumentDTO documentDTO) {
     //TODO edit file retrieve with P4ADEV-2148
     String fileName = "tmp/sendNotificationId" + "_" + documentDTO.getFileName();
-    log.info("File Path: {}", new ClassPathResource(fileName).getPath());
-
     try {
       File file = new ClassPathResource(fileName).getFile();
       if (!file.exists() || !file.isFile())
