@@ -35,7 +35,6 @@ class SendUploadFacadeServiceImplTest {
 
     String fileName = "src/test/resources/tmp/sendNotificationId_file.pdf";
     File file = new File(fileName);
-    System.out.println("File Path in test:" + file.getAbsolutePath());
 
     DocumentDTO documentDTO = DocumentDTO.builder()
       .fileName("file.pdf")
