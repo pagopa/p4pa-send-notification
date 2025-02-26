@@ -454,6 +454,43 @@
         "security" : [ {
           "BearerAuth" : [ ]
         } ]
+      },
+      "delete" : {
+        "tags" : [ "Notification" ],
+        "summary" : "delete send notification",
+        "description" : "delete send notification",
+        "operationId" : "deleteSendNotification",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Invalid request"
+          },
+          "403" : {
+            "description" : "Forbidden"
+          },
+          "404" : {
+            "description" : "Notification not found"
+          },
+          "409" : {
+            "description" : "Wrong notification status"
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
       }
     }
   },
@@ -645,7 +682,6 @@
         }
       },
       "LoadFileRequest" : {
-        "required" : [ "digest", "fileName" ],
         "type" : "object",
         "properties" : {
           "digest" : {
@@ -657,7 +693,8 @@
           "path" : {
             "type" : "string"
           }
-        }
+        },
+        "required" : [ "digest", "fileName" ]
       },
       "F24PaymentDTO" : {
         "type" : "object",
