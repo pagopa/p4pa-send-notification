@@ -30,6 +30,13 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
+  public ResponseEntity<Void> deleteSendNotification(String sendNotificationId) {
+    log.info("delete notification request for sendNotificationId {}", sendNotificationId);
+    sendNotificationService.deleteSendNotification(sendNotificationId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
   public ResponseEntity<StartNotificationResponse> startNotification(
     String sendNotificationId, LoadFileRequest loadFileRequest) {
     log.info("start notification request for sendNotificationId {}", sendNotificationId);

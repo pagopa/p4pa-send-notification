@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.send.dto.generated.StartNotificationResponse;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
+import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
@@ -62,6 +63,15 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       return StartNotificationResponse.builder().workFlowId(sendNotificationId).build();
     }
     return null;
+  }
+
+  @Override
+  public void deleteSendNotification(String sendNotificationId) {
+    SendNotification notification = findSendNotification(sendNotificationId);
+    if(!notification.getStatus().equals(NotificationStatus.COMPLETE))
+      sendNotificationRepository.deleteById(sendNotificationId);
+    else
+      throw new InvalidStatusException("Cannot delete notification with status complete");
   }
 
 
