@@ -84,4 +84,16 @@ class SendNotificationControllerTest {
     Assertions.assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
   }
 
+  @Test
+  void givenValidSendNotificationIdWhenDeleteNotificationThenOk(){
+    String sendNotificationId = "SENDNOTIFICATIONID";
+
+    // When
+    Mockito.doNothing().when(sendNotificationServiceMock).deleteSendNotification(sendNotificationId);
+
+    ResponseEntity<Void> response = sendNotificationController.deleteSendNotification(sendNotificationId);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
 }
