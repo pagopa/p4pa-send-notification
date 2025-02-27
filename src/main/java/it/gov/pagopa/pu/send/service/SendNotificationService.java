@@ -9,4 +9,5 @@ public interface SendNotificationService {
 
   CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest);
   StartNotificationResponse startSendNotification(String sendNotificationId, LoadFileRequest loadFileRequest);
+  void deleteSendNotification(String sendNotificationId);
 }

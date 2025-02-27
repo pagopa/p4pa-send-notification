@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.send.dto.generated.LoadFileRequest;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
+import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
@@ -108,6 +109,37 @@ class SendNotificationServiceImplTest {
     });
 
     Assertions.assertEquals("File "+fileName+" has not a valid signature", exception.getMessage());
+  }
+
+  @Test
+  void givenDeleteNotificationRequestWhenDeleteSendNotificationThenVerify()
+    throws IOException {
+    //Given
+    String sendNotificationId = "sendNotificationId";
+    String fileName = "file.pdf";
+    SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    //When
+    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
+      Optional.of(notification));
+    //Then
+    sendNotificationService.deleteSendNotification(sendNotificationId);
+    Mockito.verify(sendNotificationRepositoryMock).deleteById(sendNotificationId);
+  }
+
+  @Test
+  void givenDeleteNotificationRequestWithStatusCompleteWhenDeleteSendNotificationThenInvalidStatusException()
+    throws IOException {
+    //Given
+    String sendNotificationId = "sendNotificationId";
+    String fileName = "file.pdf";
+    SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    notification.setStatus(NotificationStatus.COMPLETE);
+    //When
+    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
+      Optional.of(notification));
+    //Then
+    Exception exception = Assertions.assertThrows(InvalidStatusException.class, () -> sendNotificationService.deleteSendNotification(sendNotificationId));
+    Assertions.assertEquals("Cannot delete notification with status complete", exception.getMessage());
   }
 
   private SendNotification createMockNotification(String sendNotificationId, String fileName, FileStatus fileStatus)

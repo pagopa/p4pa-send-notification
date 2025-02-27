@@ -8,6 +8,8 @@ public class InvalidStatusException extends RuntimeException{
     super(buildMessage(expected, actual));
   }
 
+  public InvalidStatusException(String message){super(message);}
+
   private static String buildMessage(Enum<?> expected, Enum<?> actual) {
     if (expected instanceof FileStatus) {
       return String.format("Notification file status error: Expected: %s, Actual: %s", expected, actual);
