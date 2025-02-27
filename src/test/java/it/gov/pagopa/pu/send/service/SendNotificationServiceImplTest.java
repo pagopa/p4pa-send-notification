@@ -114,13 +114,14 @@ class SendNotificationServiceImplTest {
   @Test
   void givenDeleteNotificationRequestWhenDeleteSendNotificationThenVerify()
     throws IOException {
+    //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
-
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    //When
     Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
-
+    //Then
     sendNotificationService.deleteSendNotification(sendNotificationId);
     Mockito.verify(sendNotificationRepositoryMock).deleteById(sendNotificationId);
   }
@@ -128,14 +129,15 @@ class SendNotificationServiceImplTest {
   @Test
   void givenDeleteNotificationRequestWithStatusCompleteWhenDeleteSendNotificationThenInvalidStatusException()
     throws IOException {
+    //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
-
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     notification.setStatus(NotificationStatus.COMPLETE);
+    //When
     Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
-
+    //Then
     Exception exception = Assertions.assertThrows(InvalidStatusException.class, () -> sendNotificationService.deleteSendNotification(sendNotificationId));
     Assertions.assertEquals("Cannot delete notification with status complete", exception.getMessage());
   }
