@@ -48,8 +48,16 @@ class SendNotification2NewNotificationRequestMapperTest {
     pagoPa.setAttachment(attachment);
     payment.setPagoPa(pagoPa);
 
+    DocumentDTO documentAttachment = new DocumentDTO();
+    documentAttachment.setFileName(attachment.getFileName());
+    documentAttachment.setDigest(attachment.getDigest());
+    documentAttachment.setContentType(attachment.getContentType());
+    documentAttachment.setKey("docKey");
+    documentAttachment.setVersionId("12345678");
+
     sendNotification.setPayments(Collections.singletonList(payment));
     // end payments
+
 
     DocumentDTO document = new DocumentDTO();
     document.setFileName("document");
@@ -59,6 +67,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     document.setVersionId("12345678");
 
     List<DocumentDTO> documents = new ArrayList<>();
+    documents.add(documentAttachment);
     documents.add(document);
     sendNotification.setDocuments(documents);
 
