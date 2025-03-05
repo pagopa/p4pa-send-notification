@@ -107,6 +107,19 @@
 								"type": "text/javascript",
 								"packages": {}
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const lodash = require('lodash');\r",
+									"const randomNumber = lodash.random(1000000000,9999999999)\r",
+									"const noticeCode = \"30000000\".concat(randomNumber)\r",
+									"pm.collectionVariables.set(\"noticeCode\", noticeCode)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
 						}
 					],
 					"request": {
@@ -124,7 +137,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        }\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    },\r\n    {\r\n        \"fileName\":\"Pagamento.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n    }]\r\n}",
+							"raw": "{\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        },\r\n        \"payments\": [ \r\n        {\r\n            \"pagoPa\": { \r\n                \"noticeCode\": {{noticeCode}}, \r\n                \"creditorTaxId\": \"77777777777\", \r\n                \"applyCost\": false, \r\n                \"attachment\": { \r\n                    \"fileName\":\"Pagamento.pdf\",\r\n                    \"contentType\": \"application/pdf\",\r\n                    \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n                }\r\n            }\r\n        }]\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    }]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -577,6 +590,10 @@
 		},
 		{
 			"key": "sendNotificationId",
+			"value": ""
+		},
+		{
+			"key": "noticeCode",
 			"value": ""
 		}
 	]

@@ -596,11 +596,15 @@
           },
           "paFee" : {
             "type" : "integer",
-            "format" : "int32"
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0
           },
           "vat" : {
             "type" : "integer",
-            "format" : "int32"
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0
           },
           "pagoPaIntMode" : {
             "type" : "string",
