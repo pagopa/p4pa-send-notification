@@ -270,8 +270,12 @@ components:
           type: string
         paFee:
           type: integer
+          minimum: 0
+          maximum: 100
         vat:
           type: integer
+          minimum: 0
+          maximum: 100
         pagoPaIntMode:
           type: string
           enum: [ SYNC, ASYNC, NONE ]
