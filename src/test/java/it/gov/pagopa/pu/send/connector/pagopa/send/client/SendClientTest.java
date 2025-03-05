@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
+import it.gov.pagopa.pu.send.connector.pagopa.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
@@ -9,10 +10,13 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRespons
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.pu.send.util.SecurityUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,13 +33,30 @@ class SendClientTest {
   private NewNotificationApi newNotificationApiMock;
   @Mock
   private SenderReadB2BApi senderReadB2BApiMock;
+  @Mock
+  private OrganizationService organizationService;
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
+  private MockedStatic<SecurityUtils> securityUtilsMock;
 
   @BeforeEach
   void setUp() {
-    sendClient = new SendClient(apiKey, apisHolder);
+    String organizationId = "1";
+    String accessToken = "accessToken";
+    String keyType = "SEND";
+    securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
+    securityUtilsMock.when(SecurityUtils::getCurrentUserExternalId).thenReturn(organizationId);
+    securityUtilsMock.when(SecurityUtils::getAccessToken).thenReturn(accessToken);
+
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, accessToken))
+      .thenReturn(apiKey);
+    sendClient = new SendClient(apisHolder, organizationService);
+  }
+
+  @AfterEach
+  void tearDown() {
+    securityUtilsMock.close();
   }
 
   @Test
@@ -56,7 +77,7 @@ class SendClientTest {
     List<PreLoadResponseDTO> responseList = List.of(responseDTO);
 
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
-        .thenReturn(newNotificationApiMock);
+      .thenReturn(newNotificationApiMock);
     Mockito.when(newNotificationApiMock.presignedUploadRequest(requestList))
       .thenReturn(responseList);
 
@@ -102,6 +123,4 @@ class SendClientTest {
     // Then
     assertSame(response, result);
   }
-
 }
-
