@@ -111,7 +111,8 @@ tasks.register("dependenciesBuild") {
 
   dependsOn(
     "openApiGenerateP4PASend",
-    "openApiGenerateSendClient"
+    "openApiGenerateSendClient",
+    "openApiGenerateORGANIZATION"
   )
 }
 
