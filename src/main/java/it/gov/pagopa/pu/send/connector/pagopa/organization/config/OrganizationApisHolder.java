@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.connector.pagopa.organization.config;
 
 
 import it.gov.pagopa.pu.organization.client.generated.OrganizationApi;
+import it.gov.pagopa.pu.organization.client.generated.OrganizationSearchControllerApi;
 import it.gov.pagopa.pu.organization.generated.ApiClient;
 import it.gov.pagopa.pu.send.config.RestTemplateConfig;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -18,6 +19,7 @@ public class OrganizationApisHolder {
   private final OrganizationApiClientConfig clientConfig;
 
   private final Map<String, OrganizationApi> organizationApiMap = new ConcurrentHashMap<>();
+  private final Map<String, OrganizationSearchControllerApi> organizationSearchControllerApiMap = new ConcurrentHashMap<>();
 
   public OrganizationApisHolder(
     OrganizationApiClientConfig clientConfig,
@@ -33,6 +35,11 @@ public class OrganizationApisHolder {
   public OrganizationApi getOrganizationApi(String accessToken) {
     return organizationApiMap.computeIfAbsent(accessToken, token ->
       new OrganizationApi(buildApiClient(token)));
+  }
+
+  public OrganizationSearchControllerApi getOrganizationSearchControllerApi(String accessToken) {
+    return organizationSearchControllerApiMap.computeIfAbsent(accessToken, token ->
+      new OrganizationSearchControllerApi(buildApiClient(token)));
   }
 
   private ApiClient buildApiClient(String accessToken) {
