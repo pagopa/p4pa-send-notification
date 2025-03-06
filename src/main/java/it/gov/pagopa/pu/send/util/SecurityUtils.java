@@ -35,4 +35,12 @@ public class SecurityUtils {
       ? uri.toString().replaceAll("=[^&]*", "=***")
       : null;
   }
+
+  public static String getOrganizationIpaCode() {
+    return getAuthentication()
+      .map(a -> (Jwt) a.getCredentials())
+      .map(jwt -> jwt.getClaimAsString("organizationIpaCode"))
+      .orElse(null);
+  }
+
 }

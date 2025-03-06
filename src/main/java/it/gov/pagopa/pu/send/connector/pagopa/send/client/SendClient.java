@@ -45,8 +45,8 @@ public class SendClient {
   }
 
   private String getApiKeyFromOrganization() {
-    String organizationId = SecurityUtils.getCurrentUserExternalId();
     String accessToken = SecurityUtils.getAccessToken();
+    String organizationId = SecurityUtils.getOrganizationIpaCode();
     return organizationService.getOrganizationApiKey(organizationId, KEY_TYPE, accessToken);
   }
 

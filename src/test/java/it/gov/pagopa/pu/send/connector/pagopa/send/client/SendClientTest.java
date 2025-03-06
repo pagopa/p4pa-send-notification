@@ -46,7 +46,7 @@ class SendClientTest {
     String accessToken = "accessToken";
     String keyType = "SEND";
     securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
-    securityUtilsMock.when(SecurityUtils::getCurrentUserExternalId).thenReturn(organizationId);
+    securityUtilsMock.when(SecurityUtils::getOrganizationIpaCode).thenReturn(organizationId);
     securityUtilsMock.when(SecurityUtils::getAccessToken).thenReturn(accessToken);
 
     Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, accessToken))
