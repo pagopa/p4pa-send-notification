@@ -71,4 +71,33 @@ class SecurityUtilsTest {
   void givenNullUriWhenRemovePiiFromURIThenOk(){
     Assertions.assertNull(SecurityUtils.removePiiFromURI(null));
   }
+
+  @Test
+  void givenJwtWhenGetOrganizationIpaCodeThenReturnIpaCode(){
+    // Given
+    String expectedIpaCode = "IPATEST";
+    Jwt jwtMock = Mockito.mock(Jwt.class);
+    Mockito.when(jwtMock.getClaimAsString("organizationIpaCode")).thenReturn(expectedIpaCode);
+
+    SecurityContextHolder.setContext(new SecurityContextImpl(new JwtAuthenticationToken(jwtMock)));
+
+    // When
+    String result = SecurityUtils.getOrganizationIpaCode();
+
+    // Then
+    Assertions.assertSame(expectedIpaCode, result);
+  }
+
+  @Test
+  void givenNoJwtWhenGetOrganizationIpaCodeThenReturnNull(){
+    // Given
+    SecurityContextHolder.setContext(new SecurityContextImpl());
+
+    // When
+    String result = SecurityUtils.getOrganizationIpaCode();
+
+    // Then
+    Assertions.assertNull(result);
+  }
+
 }

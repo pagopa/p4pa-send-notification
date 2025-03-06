@@ -8,7 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,5 +47,24 @@ class OrganizationApiClientTest {
 
     // Then
     assertSame(apiKey, result);
+  }
+
+  @Test
+  void givenNotExistentOrganizationIdWhenGetOrganizationApiKeyThenReturnNull() {
+    // Given
+    Long organizationId = 1L;
+    String accessToken = "accessToken";
+    String keyType = "SEND";
+
+    Mockito.when(apisHolder.getOrganizationApi(accessToken))
+      .thenReturn(organizationApiMock);
+    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, keyType))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    String result = organizationApiClient.getOrganizationApiKey(organizationId, keyType, accessToken);
+
+    // Then
+    assertNull(result);
   }
 }
