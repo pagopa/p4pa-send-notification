@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "rest.organization")
+@ConfigurationProperties(prefix = "rest.pagopa.organization")
 @SuperBuilder
 @NoArgsConstructor
 public class OrganizationApiClientConfig extends ApiClientConfig {
