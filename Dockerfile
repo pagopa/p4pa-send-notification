@@ -37,7 +37,8 @@ RUN apk add --no-cache \
     wget \
     unzip \
     bash \
-    shadow
+    shadow \
+    git
 
 # Create Gradle user
 RUN groupadd --system --gid 1000 ${APP_GROUP} && \
