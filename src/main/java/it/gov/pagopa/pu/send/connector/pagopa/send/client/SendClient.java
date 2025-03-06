@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.pagopa.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
@@ -8,7 +7,6 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequest
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import org.springframework.stereotype.Service;
 
@@ -29,30 +27,27 @@ public class SendClient {
     this.organizationService = organizationService;
   }
 
-  public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO) {
-    String apiKey = getApiKeyFromOrganization();
+  public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, Long organizationId) {
+    String apiKey = getApiKeyFromOrganization(organizationId);
     return apisHolder.getNewNotificationApiByApiKey(apiKey)
       .presignedUploadRequest(preLoadRequestDTO);
   }
 
-  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO) {
-    String apiKey = getApiKeyFromOrganization();
+  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, Long organizationId) {
+    String apiKey = getApiKeyFromOrganization(organizationId);
     return apisHolder.getNewNotificationApiByApiKey(apiKey)
       .sendNewNotificationV24(newNotificationRequestV24DTO);
   }
 
-  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId) {
-    String apiKey = getApiKeyFromOrganization();
+  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, Long organizationId) {
+    String apiKey = getApiKeyFromOrganization(organizationId);
     return apisHolder.getSenderReadB2BApiByApiKey(apiKey)
       .retrieveNotificationRequestStatusV24(notificationRequestId, null, null);
   }
 
-  private String getApiKeyFromOrganization() {
+  private String getApiKeyFromOrganization(Long organizationId) {
     String accessToken = SecurityUtils.getAccessToken();
-    String orgIpaCode = SecurityUtils.getOrganizationIpaCode();
-    Organization org = organizationService.getOrganizationByIpaCode(orgIpaCode, accessToken)
-      .orElseThrow(() -> new NotFoundException("Organization not found with ipaCode: " + orgIpaCode));
-    return organizationService.getOrganizationApiKey(org.getOrganizationId(), KEY_TYPE, accessToken);
+    return organizationService.getOrganizationApiKey(organizationId, KEY_TYPE, accessToken);
   }
 
 }

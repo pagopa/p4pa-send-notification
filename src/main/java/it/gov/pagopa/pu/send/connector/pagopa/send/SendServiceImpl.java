@@ -19,12 +19,12 @@ public class SendServiceImpl implements SendService {
   }
 
   @Override
-  public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO) {
-    return client.preloadFiles(preLoadRequestDTO);
+  public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, Long organizationId) {
+    return client.preloadFiles(preLoadRequestDTO, organizationId);
   }
 
   @Override
-  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO) {
-    return client.deliveryNotification(newNotificationRequestV24DTO);
+  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, Long organizationId) {
+    return client.deliveryNotification(newNotificationRequestV24DTO, organizationId);
   }
 }

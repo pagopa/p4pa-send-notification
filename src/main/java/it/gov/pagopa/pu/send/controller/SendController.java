@@ -19,30 +19,30 @@ public class SendController implements SendApi {
   }
 
   @Override
-  public ResponseEntity<Void> preloadSendFile(String sendNotificationId) {
-    log.info("request preload files for sendNotificationId:{}", sendNotificationId);
-    sendFacadeService.preloadFiles(sendNotificationId);
+  public ResponseEntity<Void> preloadSendFile(String sendNotificationId, Long organizationId) {
+    log.info("request preload files for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
+    sendFacadeService.preloadFiles(sendNotificationId, organizationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> uploadSendFile(String sendNotificationId) {
-    log.info("upload files to SEND safeStorage for sendNotificationId:{}", sendNotificationId);
+    log.info("upload files to SEND safeStorage for sendNotificationId {}", sendNotificationId);
     sendFacadeService.uploadFiles(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<Void> deliveryNotification(String sendNotificationId) {
-    log.info("delivery notification with sendNotificationId {} to SEND", sendNotificationId);
-    sendFacadeService.deliveryNotification(sendNotificationId);
+  public ResponseEntity<Void> deliveryNotification(String sendNotificationId, Long organizationId) {
+    log.info("delivery notification with sendNotificationId {} and organizationId {} to SEND", sendNotificationId, organizationId);
+    sendFacadeService.deliveryNotification(sendNotificationId, organizationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<NewNotificationRequestStatusResponseV24DTO> notificationStatus(String sendNotificationId) {
-    log.info("retrieve notification status for sendNotificationId {}", sendNotificationId);
-    return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId), HttpStatus.OK);
+  public ResponseEntity<NewNotificationRequestStatusResponseV24DTO> notificationStatus(String sendNotificationId, Long organizationId) {
+    log.info("retrieve notification status for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
+    return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId, organizationId), HttpStatus.OK);
   }
 
 }

@@ -123,7 +123,7 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
-  /send/{sendNotificationId}/preload:
+  /send/{sendNotificationId}/{organizationId}/preload:
     post:
       tags:
         - Send
@@ -136,6 +136,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
           description: OK
@@ -175,7 +181,7 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
-  /send/{sendNotificationId}/delivery:
+  /send/{sendNotificationId}/{organizationId}/delivery:
     post:
       tags:
         - Send
@@ -188,6 +194,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
           description: OK
@@ -201,7 +213,7 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
-  /send/{sendNotificationId}/status:
+  /send/{sendNotificationId}/{organizationId}/status:
     get:
       tags:
         - Send
@@ -214,6 +226,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
           description: OK

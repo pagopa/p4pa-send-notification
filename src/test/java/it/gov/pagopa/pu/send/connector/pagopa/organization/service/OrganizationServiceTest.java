@@ -1,8 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pagopa.organization.service;
 
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.pagopa.organization.client.OrganizationApiClient;
-import it.gov.pagopa.pu.send.connector.pagopa.organization.client.OrganizationSearchClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,23 +10,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @ExtendWith(MockitoExtension.class)
 class OrganizationServiceTest {
 
   @Mock
   private OrganizationApiClient organizationApiClientMock;
-  @Mock
-  private OrganizationSearchClient organizationSearchClientMock;
 
   private OrganizationService service;
 
   @BeforeEach
   void init(){
-    service = new OrganizationServiceImpl(organizationApiClientMock, organizationSearchClientMock);
+    service = new OrganizationServiceImpl(organizationApiClientMock);
   }
 
   @AfterEach
@@ -52,23 +44,5 @@ class OrganizationServiceTest {
 
     // Then
     Assertions.assertSame(apiKey, result);
-  }
-
-  @Test
-  void whenGetOrganizationByIpaCodeThenInvokeClient(){
-    // Given
-    String ipaCode = "ipaCode";
-    String accessToken = "accessToken";
-    Organization org = new Organization();
-
-    Mockito.when(organizationSearchClientMock.findByIpaCode(ipaCode, accessToken))
-      .thenReturn(org);
-
-    // When
-    Optional<Organization> result = service.getOrganizationByIpaCode(ipaCode, accessToken);
-
-    // Then
-    assertTrue(result.isPresent());
-    Assertions.assertEquals(org, result.get());
   }
 }

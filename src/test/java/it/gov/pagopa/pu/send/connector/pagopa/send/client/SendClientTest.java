@@ -11,23 +11,16 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRespons
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
-import it.gov.pagopa.pu.send.util.SecurityUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class SendClientTest {
@@ -43,23 +36,11 @@ class SendClientTest {
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
-  private final String ipaCode = "ipaCode";
-  private final String accessToken = "accessToken";
   private final String keyType = "SEND";
-  private MockedStatic<SecurityUtils> securityUtilsMock;
 
   @BeforeEach
   void setUp() {
-    securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
-    securityUtilsMock.when(SecurityUtils::getOrganizationIpaCode).thenReturn(ipaCode);
-    securityUtilsMock.when(SecurityUtils::getAccessToken).thenReturn(accessToken);
-
     sendClient = new SendClient(apisHolder, organizationService);
-  }
-
-  @AfterEach
-  void tearDown() {
-    securityUtilsMock.close();
   }
 
   @Test
@@ -83,9 +64,7 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(organizationService.getOrganizationByIpaCode(ipaCode, accessToken))
-      .thenReturn(Optional.of(organization));
-    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, accessToken))
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, null))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
       .thenReturn(newNotificationApiMock);
@@ -93,7 +72,7 @@ class SendClientTest {
       .thenReturn(responseList);
 
     // When
-    List<PreLoadResponseDTO> result = sendClient.preloadFiles(requestList);
+    List<PreLoadResponseDTO> result = sendClient.preloadFiles(requestList, organizationId);
 
     // Then
     assertSame(responseList, result);
@@ -109,9 +88,7 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(organizationService.getOrganizationByIpaCode(ipaCode, accessToken))
-      .thenReturn(Optional.of(organization));
-    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, accessToken))
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, null))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
       .thenReturn(newNotificationApiMock);
@@ -119,7 +96,7 @@ class SendClientTest {
       .thenReturn(response);
 
     // When
-    NewNotificationResponseDTO result = sendClient.deliveryNotification(request);
+    NewNotificationResponseDTO result = sendClient.deliveryNotification(request, organizationId);
 
     // Then
     assertSame(response, result);
@@ -135,9 +112,7 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(organizationService.getOrganizationByIpaCode(ipaCode, accessToken))
-      .thenReturn(Optional.of(organization));
-    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, accessToken))
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, null))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getSenderReadB2BApiByApiKey(apiKey))
       .thenReturn(senderReadB2BApiMock);
@@ -145,27 +120,9 @@ class SendClientTest {
       .thenReturn(response);
 
     // When
-    NewNotificationRequestStatusResponseV24DTO result = sendClient.notificationStatus(notificationRequestId);
+    NewNotificationRequestStatusResponseV24DTO result = sendClient.notificationStatus(notificationRequestId, organizationId);
 
     // Then
     assertSame(response, result);
-  }
-
-  @Test
-  void givenInvalidOrganizationWhenGetApiKeyThenThrowNotFoundException() {
-    // Given
-    Long organizationId = 1L;
-    Organization organization = new Organization();
-    organization.setOrganizationId(organizationId);
-
-    securityUtilsMock.when(SecurityUtils::getOrganizationIpaCode).thenReturn(ipaCode);
-    securityUtilsMock.when(SecurityUtils::getAccessToken).thenReturn(accessToken);
-
-    Mockito.when(organizationService.getOrganizationByIpaCode(ipaCode, accessToken))
-      .thenReturn(Optional.empty());
-
-    // When
-    NotFoundException exception = assertThrows(NotFoundException.class, () -> sendClient.notificationStatus("REQUESTID"));
-    Assertions.assertEquals("Organization not found with ipaCode: " + ipaCode, exception.getMessage());
   }
 }

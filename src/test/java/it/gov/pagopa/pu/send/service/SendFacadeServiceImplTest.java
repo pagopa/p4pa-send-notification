@@ -48,6 +48,7 @@ class SendFacadeServiceImplTest {
   void givenValidNotificationWhenPreloadFilesThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
     String fileName = "FILENAME";
+    Long orgId = 1L;
 
     DocumentDTO documentDTO = DocumentDTO.builder()
       .fileName(fileName)
@@ -76,9 +77,9 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
-    Mockito.when(sendClient.preloadFiles(List.of(preLoadRequestDTO))).thenReturn(List.of(preLoadResponse));
+    Mockito.when(sendClient.preloadFiles(List.of(preLoadRequestDTO), orgId)).thenReturn(List.of(preLoadResponse));
 
-    sendService.preloadFiles(sendNotificationId);
+    sendService.preloadFiles(sendNotificationId, orgId);
 
     Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFilePreloadInformation(eq(sendNotificationId), any(PreLoadResponseDTO.class));
     Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateNotificationStatus(sendNotificationId, NotificationStatus.REGISTERED);
@@ -87,9 +88,10 @@ class SendFacadeServiceImplTest {
   @Test
   void givenNotExistsNotificationWhenPreloadFilesThenException() {
     String sendNotificationId = "SENDNOTIFICATIONID";
+    Long orgId = 1L;
     Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(Optional.empty());
 
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> sendService.preloadFiles(sendNotificationId));
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> sendService.preloadFiles(sendNotificationId, orgId));
 
     assertEquals("Notification not found with id: " + sendNotificationId, exception.getMessage());
   }
@@ -129,6 +131,7 @@ class SendFacadeServiceImplTest {
   @Test
   void givenValidNotificationWhenDeliveryNotificationThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
+    Long orgId = 1L;
 
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
     response.setNotificationRequestId("NOTIFICATIONREQUESTID");
@@ -141,9 +144,9 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendNotificationRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
-    Mockito.when(sendClient.deliveryNotification(sendNotificationMapper.apply(notification))).thenReturn(response);
+    Mockito.when(sendClient.deliveryNotification(sendNotificationMapper.apply(notification), orgId)).thenReturn(response);
 
-    sendService.deliveryNotification(sendNotificationId);
+    sendService.deliveryNotification(sendNotificationId, orgId);
 
     Mockito.verify(sendNotificationRepository, Mockito.times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
@@ -155,6 +158,7 @@ class SendFacadeServiceImplTest {
   void givenValidNotificationWhenNotificationStatusThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
     String notificationRequestId = "REQUESTID";
+    Long orgId = 1L;
 
     NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
     response.setIun("IUN");
@@ -168,9 +172,9 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendNotificationRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
-    Mockito.when(sendClient.notificationStatus(notificationRequestId)).thenReturn(response);
+    Mockito.when(sendClient.notificationStatus(notificationRequestId, orgId)).thenReturn(response);
 
-    NewNotificationRequestStatusResponseV24DTO result = sendService.notificationStatus(sendNotificationId);
+    NewNotificationRequestStatusResponseV24DTO result = sendService.notificationStatus(sendNotificationId, orgId);
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(response, result);

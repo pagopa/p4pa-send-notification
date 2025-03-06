@@ -35,7 +35,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public void preloadFiles(String sendNotificationId) {
+  public void preloadFiles(String sendNotificationId, Long organizationId) {
     SendNotification notification = findSendNotification(sendNotificationId);
 
     // Validate status
@@ -51,7 +51,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       }).toList();
 
     //Call SEND preload API
-    List<PreLoadResponseDTO> preLoadResponseDTO = sendClient.preloadFiles(preLoadRequest);
+    List<PreLoadResponseDTO> preLoadResponseDTO = sendClient.preloadFiles(preLoadRequest, organizationId);
     preLoadResponseDTO.forEach(response ->
       sendNotificationRepository.updateFilePreloadInformation(sendNotificationId, response));
 
@@ -77,12 +77,12 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public void deliveryNotification(String sendNotificationId) {
+  public void deliveryNotification(String sendNotificationId, Long organizationId) {
     SendNotification notification = findSendNotification(sendNotificationId);
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.UPLOADED, notification.getStatus());
-    NewNotificationResponseDTO responseDTO = sendClient.deliveryNotification(sendNotificationMapper.apply(notification));
+    NewNotificationResponseDTO responseDTO = sendClient.deliveryNotification(sendNotificationMapper.apply(notification), organizationId);
     if (responseDTO!=null){
       sendNotificationRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
       sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
@@ -90,12 +90,12 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String sendNotificationId) {
+  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String sendNotificationId, Long organizationId) {
     SendNotification notification = findSendNotification(sendNotificationId);
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
-    NewNotificationRequestStatusResponseV24DTO notificationStatus = sendClient.notificationStatus(notification.getNotificationRequestId());
+    NewNotificationRequestStatusResponseV24DTO notificationStatus = sendClient.notificationStatus(notification.getNotificationRequestId(), organizationId);
     if(notificationStatus!=null && notificationStatus.getIun() != null)
       sendNotificationRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
 

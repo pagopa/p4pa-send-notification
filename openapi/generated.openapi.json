@@ -20,7 +20,7 @@
     "description" : "the Send API"
   } ],
   "paths" : {
-    "/p4pasend/send/{sendNotificationId}/preload" : {
+    "/p4pasend/send/{sendNotificationId}/{organizationId}/preload" : {
       "post" : {
         "tags" : [ "Send" ],
         "summary" : "preload file to SEND process",
@@ -32,6 +32,61 @@
           "required" : true,
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Invalid request"
+          },
+          "403" : {
+            "description" : "Forbidden"
+          },
+          "404" : {
+            "description" : "Notification not found"
+          },
+          "409" : {
+            "description" : "Wrong notification status"
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/p4pasend/send/{sendNotificationId}/{organizationId}/delivery" : {
+      "post" : {
+        "tags" : [ "Send" ],
+        "summary" : "delivery notification",
+        "description" : "delivery notification",
+        "operationId" : "deliveryNotification",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         } ],
         "responses" : {
@@ -65,45 +120,6 @@
         "summary" : "load file to SEND archive process",
         "description" : "request to load file to SEND archive",
         "operationId" : "uploadSendFile",
-        "parameters" : [ {
-          "name" : "sendNotificationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK"
-          },
-          "400" : {
-            "description" : "Invalid request"
-          },
-          "403" : {
-            "description" : "Forbidden"
-          },
-          "404" : {
-            "description" : "Notification not found"
-          },
-          "409" : {
-            "description" : "Wrong notification status"
-          },
-          "500" : {
-            "description" : "Internal server error"
-          }
-        },
-        "security" : [ {
-          "BearerAuth" : [ ]
-        } ]
-      }
-    },
-    "/p4pasend/send/{sendNotificationId}/delivery" : {
-      "post" : {
-        "tags" : [ "Send" ],
-        "summary" : "delivery notification",
-        "description" : "delivery notification",
-        "operationId" : "deliveryNotification",
         "parameters" : [ {
           "name" : "sendNotificationId",
           "in" : "path",
@@ -299,7 +315,7 @@
         } ]
       }
     },
-    "/p4pasend/send/{sendNotificationId}/status" : {
+    "/p4pasend/send/{sendNotificationId}/{organizationId}/status" : {
       "get" : {
         "tags" : [ "Send" ],
         "summary" : "notification status",
@@ -311,6 +327,14 @@
           "required" : true,
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         } ],
         "responses" : {
