@@ -29,4 +29,5 @@ public class SendNotification {
   private NotificationStatus status;
   private String notificationRequestId;
   private String iun;
+  private Long organizationId;
 }

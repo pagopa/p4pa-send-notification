@@ -19,9 +19,9 @@ public class SendController implements SendApi {
   }
 
   @Override
-  public ResponseEntity<Void> preloadSendFile(String sendNotificationId, Long organizationId) {
-    log.info("request preload files for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
-    sendFacadeService.preloadFiles(sendNotificationId, organizationId);
+  public ResponseEntity<Void> preloadSendFile(String sendNotificationId) {
+    log.info("request preload files for sendNotificationId {}", sendNotificationId);
+    sendFacadeService.preloadFiles(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
@@ -33,16 +33,16 @@ public class SendController implements SendApi {
   }
 
   @Override
-  public ResponseEntity<Void> deliveryNotification(String sendNotificationId, Long organizationId) {
-    log.info("delivery notification with sendNotificationId {} and organizationId {} to SEND", sendNotificationId, organizationId);
-    sendFacadeService.deliveryNotification(sendNotificationId, organizationId);
+  public ResponseEntity<Void> deliveryNotification(String sendNotificationId) {
+    log.info("delivery notification with sendNotificationId {} to SEND", sendNotificationId);
+    sendFacadeService.deliveryNotification(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<NewNotificationRequestStatusResponseV24DTO> notificationStatus(String sendNotificationId, Long organizationId) {
-    log.info("retrieve notification status for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
-    return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId, organizationId), HttpStatus.OK);
+  public ResponseEntity<NewNotificationRequestStatusResponseV24DTO> notificationStatus(String sendNotificationId) {
+    log.info("retrieve notification status for sendNotificationId {}", sendNotificationId);
+    return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId), HttpStatus.OK);
   }
 
 }

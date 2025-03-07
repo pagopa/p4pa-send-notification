@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CreateNotificationRequest2SendNotificationMapper {
 
-  public SendNotification map(CreateNotificationRequest request) {
+  public SendNotification map(CreateNotificationRequest request, Long organizationId) {
     SendNotification sendNotification = new SendNotification();
     sendNotification.setPaProtocolNumber(request.getPaProtocolNumber());
     sendNotification.setSubjectType(request.getRecipient().getRecipientType().getValue());
@@ -46,6 +46,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
         .build()).toList());
 
     sendNotification.setDocuments(documents);
+    sendNotification.setOrganizationId(organizationId);
 
     return sendNotification;
   }

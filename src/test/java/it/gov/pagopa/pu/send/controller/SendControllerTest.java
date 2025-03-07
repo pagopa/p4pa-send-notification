@@ -24,9 +24,8 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdWhenPreloadFilesRequestThenOk() {
     String sendNotificationId = "12345";
-    Long orgId = 1L;
-    Mockito.doNothing().when(sendFacadeServiceMock).preloadFiles(sendNotificationId, orgId);
-    ResponseEntity<Void> response = sendController.preloadSendFile(sendNotificationId, orgId);
+    Mockito.doNothing().when(sendFacadeServiceMock).preloadFiles(sendNotificationId);
+    ResponseEntity<Void> response = sendController.preloadSendFile(sendNotificationId);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -45,9 +44,8 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdWhenDeliveryNotificationRequestThenOk(){
     String sendNotificationId = "12345";
-    Long orgId = 1L;
-    Mockito.doNothing().when(sendFacadeServiceMock).deliveryNotification(sendNotificationId, orgId);
-    ResponseEntity<Void> response = sendController.deliveryNotification(sendNotificationId, orgId);
+    Mockito.doNothing().when(sendFacadeServiceMock).deliveryNotification(sendNotificationId);
+    ResponseEntity<Void> response = sendController.deliveryNotification(sendNotificationId);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -56,11 +54,10 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdWhenNotificationStatusRequestThenOk(){
     String sendNotificationId = "12345";
-    Long orgId = 1L;
     NewNotificationRequestStatusResponseV24DTO status = new NewNotificationRequestStatusResponseV24DTO();
-    Mockito.when(sendFacadeServiceMock.notificationStatus(sendNotificationId, orgId)).thenReturn(status);
+    Mockito.when(sendFacadeServiceMock.notificationStatus(sendNotificationId)).thenReturn(status);
 
-    ResponseEntity<NewNotificationRequestStatusResponseV24DTO> response = sendController.notificationStatus(sendNotificationId, orgId);
+    ResponseEntity<NewNotificationRequestStatusResponseV24DTO> response = sendController.notificationStatus(sendNotificationId);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());

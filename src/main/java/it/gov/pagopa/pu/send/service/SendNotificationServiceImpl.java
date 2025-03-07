@@ -14,7 +14,9 @@ import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
+
 import java.io.File;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,14 +26,14 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final CreateNotificationRequest2SendNotificationMapper mapper;
 
   public SendNotificationServiceImpl(SendNotificationRepository sendNotificationRepository,
-    CreateNotificationRequest2SendNotificationMapper mapper) {
+                                     CreateNotificationRequest2SendNotificationMapper mapper) {
     this.sendNotificationRepository = sendNotificationRepository;
     this.mapper = mapper;
   }
 
   @Override
-  public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest) {
-    SendNotification sendNotification = sendNotificationRepository.insert(mapper.map(createNotificationRequest));
+  public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, Long organizationId) {
+    SendNotification sendNotification = sendNotificationRepository.insert(mapper.map(createNotificationRequest, organizationId));
 
     return CreateNotificationResponse
       .builder()
@@ -42,22 +44,24 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
-  public StartNotificationResponse startSendNotification(String sendNotificationId, LoadFileRequest loadFileRequest) {
-    SendNotification notification = findSendNotification(sendNotificationId);
+  public StartNotificationResponse startSendNotification(String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest) {
+    SendNotification notification = findSendNotification(sendNotificationId, organizationId);
     NotificationUtils.validateStatus(NotificationStatus.WAITING_FILE, notification.getStatus());
 
     notification.getDocuments().stream()
       .filter(doc -> doc.getFileName().equals(loadFileRequest.getFileName()))
       .findFirst().ifPresentOrElse(
         doc -> updateFileStatus(sendNotificationId, doc, loadFileRequest),
-        () -> {throw new IllegalArgumentException("File not found with id: " + loadFileRequest.getFileName());}
+        () -> {
+          throw new IllegalArgumentException("File not found with id: " + loadFileRequest.getFileName());
+        }
       );
 
-    notification = findSendNotification(sendNotificationId);
+    notification = findSendNotification(sendNotificationId, organizationId);
     boolean allFilesReady = notification.getDocuments().stream()
       .allMatch(doc -> doc.getStatus().equals(FileStatus.READY));
 
-    if(allFilesReady) {
+    if (allFilesReady) {
       sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.SENDING);
       // TODO P4ADEV-2232 invoke temporal to start workflow
       return StartNotificationResponse.builder().workFlowId(sendNotificationId).build();
@@ -66,33 +70,33 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
-  public void deleteSendNotification(String sendNotificationId) {
-    SendNotification notification = findSendNotification(sendNotificationId);
-    if(!notification.getStatus().equals(NotificationStatus.COMPLETE))
+  public void deleteSendNotification(String sendNotificationId, Long organizationId) {
+    SendNotification notification = findSendNotification(sendNotificationId, organizationId);
+    if (!notification.getStatus().equals(NotificationStatus.COMPLETE))
       sendNotificationRepository.deleteById(sendNotificationId);
     else
       throw new InvalidStatusException("Cannot delete notification with status complete");
   }
 
 
-  private SendNotification findSendNotification(String sendNotificationId) {
-    return sendNotificationRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
+  private SendNotification findSendNotification(String sendNotificationId, Long organizationId) {
+    return sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, organizationId)
+      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId + " for organizationId: " + organizationId));
   }
 
   private void updateFileStatus(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest) {
     NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());
     //TODO edit file retrieve with P4ADEV-2148, change static sendNotificationId with doc.getSendNotificationId
     String filePath;
-    if(loadFileRequest.getPath()!=null)
-      filePath = loadFileRequest.getPath()+"sendNotificationId_"+doc.getFileName();
+    if (loadFileRequest.getPath() != null)
+      filePath = loadFileRequest.getPath() + "sendNotificationId_" + doc.getFileName();
     else
-      filePath = "src/main/resources/tmp/"+"sendNotificationId_"+doc.getFileName();
+      filePath = "src/main/resources/tmp/" + "sendNotificationId_" + doc.getFileName();
 
     try {
       File file = new File(filePath);
-      if(!FileUtils.calculateFileHash(file).equals(loadFileRequest.getDigest()))
-        throw new InvalidSignatureException("File "+doc.getFileName()+" has not a valid signature");
+      if (!FileUtils.calculateFileHash(file).equals(loadFileRequest.getDigest()))
+        throw new InvalidSignatureException("File " + doc.getFileName() + " has not a valid signature");
     } catch (Exception e) {
       throw new InvalidSignatureException(e.getMessage());
     }

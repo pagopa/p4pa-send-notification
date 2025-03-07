@@ -43,12 +43,13 @@ class SendNotificationServiceImplTest {
     SendNotification sendNotification = new SendNotification();
     sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
     sendNotification.setStatus(NotificationStatus.WAITING_FILE);
+    Long organizationId = 1L;
 
     // When
-    Mockito.when(mapper.map(request)).thenReturn(sendNotification);
+    Mockito.when(mapper.map(request, organizationId)).thenReturn(sendNotification);
     Mockito.when(sendNotificationRepositoryMock.insert(sendNotification)).thenReturn(sendNotification);
 
-    CreateNotificationResponse response = sendNotificationService.createSendNotification(request);
+    CreateNotificationResponse response = sendNotificationService.createSendNotification(request, organizationId);
 
     // Then
     Mockito.verify(sendNotificationRepositoryMock).insert(sendNotification);
@@ -64,12 +65,13 @@ class SendNotificationServiceImplTest {
     LoadFileRequest loadFileRequest = new LoadFileRequest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=",fileName);
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
     SendNotification updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    Long organizationId = 1L;
 
-    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId))
+    Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId))
       .thenReturn(Optional.of(notification))
       .thenReturn(Optional.of(updatedNotification));
 
-    sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest);
+    sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest);
 
     Mockito.verify(sendNotificationRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
     Mockito.verify(sendNotificationRepositoryMock).updateNotificationStatus(sendNotificationId, NotificationStatus.SENDING);
@@ -82,13 +84,12 @@ class SendNotificationServiceImplTest {
     SendNotification notification = new SendNotification();
     notification.setStatus(NotificationStatus.WAITING_FILE);
     notification.setDocuments(List.of());
+    Long organizationId = 1L;
 
-    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
+    Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
       Optional.of(notification));
 
-    Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest);
-    });
+    Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest));
 
     Assertions.assertEquals("File not found with id: NOTEXISTS", exception.getMessage());
   }
@@ -100,13 +101,12 @@ class SendNotificationServiceImplTest {
     String fileName = "file.pdf";
     LoadFileRequest loadFileRequest = new LoadFileRequest("DIGEST", fileName);
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
+    Long organizationId = 1L;
 
-    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
+    Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
       Optional.of(notification));
 
-    Exception exception = Assertions.assertThrows(InvalidSignatureException.class, () -> {
-      sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest);
-    });
+    Exception exception = Assertions.assertThrows(InvalidSignatureException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest));
 
     Assertions.assertEquals("File "+fileName+" has not a valid signature", exception.getMessage());
   }
@@ -117,12 +117,13 @@ class SendNotificationServiceImplTest {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
+    Long organizationId = 1L;
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     //When
-    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
+    Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
       Optional.of(notification));
     //Then
-    sendNotificationService.deleteSendNotification(sendNotificationId);
+    sendNotificationService.deleteSendNotification(sendNotificationId, organizationId);
     Mockito.verify(sendNotificationRepositoryMock).deleteById(sendNotificationId);
   }
 
@@ -132,13 +133,14 @@ class SendNotificationServiceImplTest {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
+    Long organizationId = 1L;
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     notification.setStatus(NotificationStatus.COMPLETE);
     //When
-    Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
+    Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
       Optional.of(notification));
     //Then
-    Exception exception = Assertions.assertThrows(InvalidStatusException.class, () -> sendNotificationService.deleteSendNotification(sendNotificationId));
+    Exception exception = Assertions.assertThrows(InvalidStatusException.class, () -> sendNotificationService.deleteSendNotification(sendNotificationId, organizationId));
     Assertions.assertEquals("Cannot delete notification with status complete", exception.getMessage());
   }
 
