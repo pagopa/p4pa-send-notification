@@ -1,9 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.config;
 
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,8 +42,9 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> apisHolder.getNewNotificationApiByApiKey(apiKey)
         .sendNewNotificationV24(new NewNotificationRequestV24DTO()),
-      NewNotificationResponseDTO.class,
-      () -> {},
+      new ParameterizedTypeReference<>() {},
+      () -> {
+      },
       AUTH_TYPE.API_KEY,
       "x-api-key");
   }
@@ -54,7 +54,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> apisHolder.getSenderReadB2BApiByApiKey(apiKey)
         .retrieveNotificationRequestStatusV24("REQUESTID",null, null),
-      NewNotificationRequestStatusResponseV24DTO.class,
+      new ParameterizedTypeReference<>() {},
       () -> {},
       AUTH_TYPE.API_KEY,
       "x-api-key");
