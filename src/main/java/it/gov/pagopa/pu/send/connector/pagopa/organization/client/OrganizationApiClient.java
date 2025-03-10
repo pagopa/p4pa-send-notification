@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pagopa.organization.client;
 
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.send.connector.pagopa.organization.config.OrganizationApisHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class OrganizationApiClient {
   public String getOrganizationApiKey(Long organizationId) {
     try{
       return organizationApisHolder.getOrganizationApi()
-        .getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND);
+        .getOrganizationApiKey(organizationId, OrganizationApiKeys.KeyTypeEnum.SEND.getValue());
     } catch (HttpClientErrorException.NotFound e){
       log.info("Cannot find organization having organizationId {}", organizationId);
       return null;
