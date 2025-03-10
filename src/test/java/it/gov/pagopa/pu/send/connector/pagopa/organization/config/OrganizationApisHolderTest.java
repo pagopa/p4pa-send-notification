@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.organization.config;
 
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
-import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
+import it.gov.pagopa.pu.send.connector.pagopa.organization.OrganizationBaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,10 +10,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
-class OrganizationApisHolderTest extends BaseApiHolderTest {
+class OrganizationApisHolderTest extends OrganizationBaseApiHolderTest {
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
@@ -41,9 +42,7 @@ class OrganizationApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       token -> apisHolder.getOrganizationApi(token)
         .getOrganizationApiKey(1L, OrganizationApiKeys.KeyTypeEnum.SEND.getValue()),
-      String.class,
-      () -> {},
-      AUTH_TYPE.API_KEY,
-      "x-api-key");
+      new ParameterizedTypeReference<>() {},
+      apisHolder::unload);
   }
 }
