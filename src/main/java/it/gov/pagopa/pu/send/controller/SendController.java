@@ -20,14 +20,14 @@ public class SendController implements SendApi {
 
   @Override
   public ResponseEntity<Void> preloadSendFile(String sendNotificationId) {
-    log.info("request preload files for sendNotificationId:{}", sendNotificationId);
+    log.info("request preload files for sendNotificationId {}", sendNotificationId);
     sendFacadeService.preloadFiles(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> uploadSendFile(String sendNotificationId) {
-    log.info("upload files to SEND safeStorage for sendNotificationId:{}", sendNotificationId);
+    log.info("upload files to SEND safeStorage for sendNotificationId {}", sendNotificationId);
     sendFacadeService.uploadFiles(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }

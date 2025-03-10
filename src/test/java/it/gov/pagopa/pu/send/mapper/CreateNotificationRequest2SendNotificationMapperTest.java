@@ -51,12 +51,13 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     request.setPaProtocolNumber("Prot_001");
     request.setRecipient(recipient);
     request.setDocuments(Collections.singletonList(document));
+    Long organizationId = 1L;
 
     // When
-    SendNotification result = mapper.map(request);
+    SendNotification result = mapper.map(request, organizationId);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId","notificationRequestId","iun");
+    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("PF", result.getSubjectType());

@@ -12,6 +12,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.util.Optional;
+
 public class SendNotificationRepositoryExtImpl implements SendNotificationRepositoryExt{
 
   private static final String FIELD_TEMPLATE = "%s.$.%s";
@@ -85,5 +87,14 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
       new Update().set(Fields.iun, iun),
       SendNotification.class);
+  }
+
+  @Override
+  public Optional<SendNotification> findByIdAndOrganizationId(String notificationId, Long organizationId) {
+    Query query = new Query();
+    query.addCriteria(Criteria.where(Fields.sendNotificationId).is(notificationId)
+      .and(Fields.organizationId).is(organizationId));
+
+    return Optional.ofNullable(mongoTemplate.findOne(query, SendNotification.class));
   }
 }

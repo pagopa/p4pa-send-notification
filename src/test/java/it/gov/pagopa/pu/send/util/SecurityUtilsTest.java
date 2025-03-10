@@ -71,4 +71,5 @@ class SecurityUtilsTest {
   void givenNullUriWhenRemovePiiFromURIThenOk(){
     Assertions.assertNull(SecurityUtils.removePiiFromURI(null));
   }
+
 }

@@ -51,7 +51,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       }).toList();
 
     //Call SEND preload API
-    List<PreLoadResponseDTO> preLoadResponseDTO = sendClient.preloadFiles(preLoadRequest);
+    List<PreLoadResponseDTO> preLoadResponseDTO = sendClient.preloadFiles(preLoadRequest, notification.getOrganizationId());
     preLoadResponseDTO.forEach(response ->
       sendNotificationRepository.updateFilePreloadInformation(sendNotificationId, response));
 
@@ -82,7 +82,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.UPLOADED, notification.getStatus());
-    NewNotificationResponseDTO responseDTO = sendClient.deliveryNotification(sendNotificationMapper.apply(notification));
+    NewNotificationResponseDTO responseDTO = sendClient.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId());
     if (responseDTO!=null){
       sendNotificationRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
       sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
@@ -95,7 +95,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
-    NewNotificationRequestStatusResponseV24DTO notificationStatus = sendClient.notificationStatus(notification.getNotificationRequestId());
+    NewNotificationRequestStatusResponseV24DTO notificationStatus = sendClient.notificationStatus(notification.getNotificationRequestId(), notification.getOrganizationId());
     if(notificationStatus!=null && notificationStatus.getIun() != null)
       sendNotificationRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
 

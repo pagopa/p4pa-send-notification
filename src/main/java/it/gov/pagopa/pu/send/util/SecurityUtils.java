@@ -35,4 +35,5 @@ public class SecurityUtils {
       ? uri.toString().replaceAll("=[^&]*", "=***")
       : null;
   }
+
 }

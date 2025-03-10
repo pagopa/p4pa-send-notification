@@ -18,6 +18,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.util.Optional;
+
 @ExtendWith(MockitoExtension.class)
 class SendNotificationRepositoryExtImplTest {
 
@@ -123,5 +125,39 @@ class SendNotificationRepositoryExtImplTest {
 
     assertEquals(1L, result.getModifiedCount());
     Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class));
+  }
+
+  @Test
+  void givenIdAndOrganizationIdThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    Long organizationId = 1L;
+
+    SendNotification mockNotification = new SendNotification();
+    mockNotification.setSendNotificationId(sendNotificationId);
+    mockNotification.setOrganizationId(organizationId);
+
+    Mockito.when(mongoTemplate.findOne(Mockito.any(Query.class), Mockito.eq(SendNotification.class))).thenReturn(mockNotification);
+
+    Optional<SendNotification> result = repository.findByIdAndOrganizationId(sendNotificationId, organizationId);
+
+    assertTrue(result.isPresent());
+    assertEquals(sendNotificationId, result.get().getSendNotificationId());
+    assertEquals(organizationId, result.get().getOrganizationId());
+
+    Mockito.verify(mongoTemplate, Mockito.times(1)).findOne(Mockito.any(Query.class), Mockito.eq(SendNotification.class));
+  }
+
+  @Test
+  void givenIdAndOrganizationIdThenReturnEmpty() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    Long organizationId = 1L;
+
+    Mockito.when(mongoTemplate.findOne(Mockito.any(Query.class), Mockito.eq(SendNotification.class))).thenReturn(null);
+
+    Optional<SendNotification> result = repository.findByIdAndOrganizationId(sendNotificationId, organizationId);
+
+    assertFalse(result.isPresent());
+
+    Mockito.verify(mongoTemplate, Mockito.times(1)).findOne(Mockito.any(Query.class), Mockito.eq(SendNotification.class));
   }
 }

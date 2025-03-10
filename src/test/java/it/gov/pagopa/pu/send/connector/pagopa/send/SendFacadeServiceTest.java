@@ -25,42 +25,42 @@ class SendFacadeServiceTest {
   private SendService service;
 
   @BeforeEach
-  void init(){
+  void init() {
     service = new SendServiceImpl(clientMock);
   }
 
   @AfterEach
-  void verifyNoMoreInteractions(){
+  void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(clientMock);
   }
 
   @Test
-  void whenPreloadFilesThenInvokeClient(){
+  void whenPreloadFilesThenInvokeClient() {
     // Given
     List<PreLoadRequestDTO> request = List.of();
     List<PreLoadResponseDTO> expectedResult = List.of();
 
-    Mockito.when(clientMock.preloadFiles(Mockito.same(request)))
+    Mockito.when(clientMock.preloadFiles(Mockito.same(request), Mockito.anyLong()))
       .thenReturn(expectedResult);
 
     // When
-    List<PreLoadResponseDTO> result = service.preloadFiles(request);
+    List<PreLoadResponseDTO> result = service.preloadFiles(request, 123L);
 
     // Then
     Assertions.assertSame(expectedResult, result);
   }
 
   @Test
-  void whenDeliveryNotificationThenInvokeClient(){
+  void whenDeliveryNotificationThenInvokeClient() {
     // Given
     NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
     NewNotificationResponseDTO expectedResult = new NewNotificationResponseDTO();
 
-    Mockito.when(clientMock.deliveryNotification(Mockito.same(request)))
+    Mockito.when(clientMock.deliveryNotification(Mockito.same(request), Mockito.anyLong()))
       .thenReturn(expectedResult);
 
     // When
-    NewNotificationResponseDTO result = service.deliveryNotification(request);
+    NewNotificationResponseDTO result = service.deliveryNotification(request, 123L);
 
     // Then
     Assertions.assertSame(expectedResult, result);

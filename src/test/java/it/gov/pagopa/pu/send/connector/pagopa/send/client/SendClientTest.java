@@ -1,5 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.send.connector.pagopa.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
@@ -29,13 +31,15 @@ class SendClientTest {
   private NewNotificationApi newNotificationApiMock;
   @Mock
   private SenderReadB2BApi senderReadB2BApiMock;
+  @Mock
+  private OrganizationService organizationService;
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
 
   @BeforeEach
   void setUp() {
-    sendClient = new SendClient(apiKey, apisHolder);
+    sendClient = new SendClient(apisHolder, organizationService);
   }
 
   @Test
@@ -55,13 +59,19 @@ class SendClientTest {
     responseDTO.setUrl("https://mock-url.com");
     List<PreLoadResponseDTO> responseList = List.of(responseDTO);
 
+    Long organizationId = 1L;
+    Organization organization = new Organization();
+    organization.setOrganizationId(organizationId);
+
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, null))
+      .thenReturn(apiKey);
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
-        .thenReturn(newNotificationApiMock);
+      .thenReturn(newNotificationApiMock);
     Mockito.when(newNotificationApiMock.presignedUploadRequest(requestList))
       .thenReturn(responseList);
 
     // When
-    List<PreLoadResponseDTO> result = sendClient.preloadFiles(requestList);
+    List<PreLoadResponseDTO> result = sendClient.preloadFiles(requestList, organizationId);
 
     // Then
     assertSame(responseList, result);
@@ -73,13 +83,19 @@ class SendClientTest {
     NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
 
+    Long organizationId = 1L;
+    Organization organization = new Organization();
+    organization.setOrganizationId(organizationId);
+
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, null))
+      .thenReturn(apiKey);
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
       .thenReturn(newNotificationApiMock);
     Mockito.when(newNotificationApiMock.sendNewNotificationV24(request))
       .thenReturn(response);
 
     // When
-    NewNotificationResponseDTO result = sendClient.deliveryNotification(request);
+    NewNotificationResponseDTO result = sendClient.deliveryNotification(request, organizationId);
 
     // Then
     assertSame(response, result);
@@ -91,17 +107,21 @@ class SendClientTest {
     String notificationRequestId = "REQUESTID";
     NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
 
+    Long organizationId = 1L;
+    Organization organization = new Organization();
+    organization.setOrganizationId(organizationId);
+
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, null))
+      .thenReturn(apiKey);
     Mockito.when(apisHolder.getSenderReadB2BApiByApiKey(apiKey))
       .thenReturn(senderReadB2BApiMock);
     Mockito.when(senderReadB2BApiMock.retrieveNotificationRequestStatusV24(notificationRequestId, null, null))
       .thenReturn(response);
 
     // When
-    NewNotificationRequestStatusResponseV24DTO result = sendClient.notificationStatus(notificationRequestId);
+    NewNotificationRequestStatusResponseV24DTO result = sendClient.notificationStatus(notificationRequestId, organizationId);
 
     // Then
     assertSame(response, result);
   }
-
 }
-

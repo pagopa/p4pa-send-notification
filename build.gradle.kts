@@ -1,3 +1,5 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 plugins {
 	java
 	id("org.springframework.boot") version "3.4.3"
@@ -6,6 +8,7 @@ plugins {
 	id("org.sonarqube") version "6.0.1.5171"
 	id("com.github.ben-manes.versions") version "0.51.0"
 	id("org.openapi.generator") version "7.10.0"
+  id("org.ajoberstar.grgit") version "5.3.0"
 }
 
 group = "it.gov.pagopa.payhub"
@@ -108,7 +111,8 @@ tasks.register("dependenciesBuild") {
 
   dependsOn(
     "openApiGenerateP4PASend",
-    "openApiGenerateSendClient"
+    "openApiGenerateSendClient",
+    "openApiGenerateORGANIZATION"
   )
 }
 
@@ -122,7 +126,7 @@ springBoot {
 	mainClass.value("it.gov.pagopa.pu.send.SendNotificationApplication")
 }
 
-tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateP4PASend") {
+tasks.register<GenerateTask>("openApiGenerateP4PASend") {
   group = "openapi"
   description = "description"
 
@@ -147,7 +151,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   ))
 }
 
-tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openApiGenerateSendClient") {
+tasks.register<GenerateTask>("openApiGenerateSendClient") {
   group = "openapi"
   description = "description"
 
@@ -166,5 +170,39 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
     "serializationLibrary" to "jackson",
     "generateSupportingFiles" to "true"
   ))
+  library.set("resttemplate")
+}
+
+var targetEnv = when (grgit.branch.current().name) {
+  "uat" -> "uat"
+  "main" -> "main"
+  else -> "develop"
+}
+
+tasks.register<GenerateTask>("openApiGenerateORGANIZATION") {
+  group = "AutomaticallyGeneratedCode"
+  description = "openapi"
+
+  generatorName.set("java")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-organization/refs/heads/$targetEnv/openapi/generated.openapi.json")
+  outputDir.set("$projectDir/build/generated")
+  invokerPackage.set("it.gov.pagopa.pu.organization.generated")
+  apiPackage.set("it.gov.pagopa.pu.organization.client.generated")
+  modelPackage.set("it.gov.pagopa.pu.organization.dto.generated")
+  configOptions.set(
+    mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "false",
+      "dateLibrary" to "java8",
+      "serializableModel" to "true",
+      "useSpringBoot3" to "true",
+      "useJakartaEe" to "true",
+      "serializationLibrary" to "jackson",
+      "generateSupportingFiles" to "true",
+      "generateConstructorWithAllArgs" to "true",
+      "generatedConstructorWithRequiredArgs" to "true",
+      "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)"
+    )
+  )
   library.set("resttemplate")
 }

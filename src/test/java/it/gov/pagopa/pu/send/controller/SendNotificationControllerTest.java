@@ -28,6 +28,7 @@ class SendNotificationControllerTest {
   @Test
   void givenValidNotificationRequestThenOk(){
     // Given
+    Long organizationId = 1L;
     CreateNotificationRequest request = CreateNotificationRequest.builder().build();
     CreateNotificationResponse expectedResponse = CreateNotificationResponse.builder()
       .sendNotificationId("SENDNOTIFICATIONID")
@@ -36,10 +37,10 @@ class SendNotificationControllerTest {
       .build();
 
     // When
-    Mockito.when(sendNotificationServiceMock.createSendNotification(request)).thenReturn(expectedResponse);
+    Mockito.when(sendNotificationServiceMock.createSendNotification(request, organizationId)).thenReturn(expectedResponse);
 
     // Then
-    ResponseEntity<CreateNotificationResponse> response = sendNotificationController.createSendNotification(request);
+    ResponseEntity<CreateNotificationResponse> response = sendNotificationController.createSendNotification(organizationId, request);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(expectedResponse, response.getBody());
   }
@@ -47,6 +48,7 @@ class SendNotificationControllerTest {
   @Test
   void givenStartNotificationRequestThenOk(){
     // Given
+    Long organizationId = 1L;
     String sendNotificationId = "SENDNOTIFICATIONID";
     LoadFileRequest loadFileRequest = LoadFileRequest.builder()
       .fileName("FILENAME")
@@ -56,11 +58,11 @@ class SendNotificationControllerTest {
     StartNotificationResponse expectedResponse = StartNotificationResponse.builder().workFlowId(sendNotificationId).build();
 
     // When
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, loadFileRequest))
+    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest))
       .thenReturn(expectedResponse);
 
     // Then
-    ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, loadFileRequest);
+    ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, organizationId, loadFileRequest);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedResponse, response.getBody());
@@ -69,6 +71,7 @@ class SendNotificationControllerTest {
   @Test
   void givenStartNotificationRequestThenAccepted(){
     // Given
+    Long organizationId = 1L;
     String sendNotificationId = "SENDNOTIFICATIONID";
     LoadFileRequest loadFileRequest = LoadFileRequest.builder()
       .fileName("FILENAME")
@@ -76,11 +79,11 @@ class SendNotificationControllerTest {
       .build();
 
     // When
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, loadFileRequest))
+    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest))
       .thenReturn(null);
 
     // Then
-    ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, loadFileRequest);
+    ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, organizationId, loadFileRequest);
     Assertions.assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
   }
 
@@ -88,10 +91,11 @@ class SendNotificationControllerTest {
   void givenValidSendNotificationIdWhenDeleteNotificationThenOk(){
     //Given
     String sendNotificationId = "SENDNOTIFICATIONID";
+    Long organizationId = 1L;
     // When
-    Mockito.doNothing().when(sendNotificationServiceMock).deleteSendNotification(sendNotificationId);
+    Mockito.doNothing().when(sendNotificationServiceMock).deleteSendNotification(sendNotificationId, organizationId);
     //Then
-    ResponseEntity<Void> response = sendNotificationController.deleteSendNotification(sendNotificationId);
+    ResponseEntity<Void> response = sendNotificationController.deleteSendNotification(sendNotificationId, organizationId);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
   }

@@ -23,25 +23,24 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
-  public ResponseEntity<CreateNotificationResponse> createSendNotification(
-    CreateNotificationRequest createNotificationRequest) {
-    log.info("new notification request");
-    return new ResponseEntity<>(sendNotificationService.createSendNotification(createNotificationRequest),HttpStatus.OK);
+  public ResponseEntity<CreateNotificationResponse> createSendNotification(Long organizationId, CreateNotificationRequest createNotificationRequest) {
+    log.info("new notification request for organizationId {}", organizationId);
+    return new ResponseEntity<>(sendNotificationService.createSendNotification(createNotificationRequest, organizationId), HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<Void> deleteSendNotification(String sendNotificationId) {
-    log.info("delete notification request for sendNotificationId {}", sendNotificationId);
-    sendNotificationService.deleteSendNotification(sendNotificationId);
+  public ResponseEntity<Void> deleteSendNotification(String sendNotificationId, Long organizationId) {
+    log.info("delete notification request for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
+    sendNotificationService.deleteSendNotification(sendNotificationId, organizationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<StartNotificationResponse> startNotification(
-    String sendNotificationId, LoadFileRequest loadFileRequest) {
-    log.info("start notification request for sendNotificationId {}", sendNotificationId);
-    StartNotificationResponse response = sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest);
-    if(response!=null)
+    String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest) {
+    log.info("start notification request for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
+    StartNotificationResponse response = sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest);
+    if (response != null)
       return new ResponseEntity<>(response, HttpStatus.OK);
     else
       return new ResponseEntity<>(HttpStatus.ACCEPTED);
