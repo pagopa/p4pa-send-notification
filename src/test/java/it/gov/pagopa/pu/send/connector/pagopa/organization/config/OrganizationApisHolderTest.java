@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pagopa.organization.config;
 
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +39,8 @@ class OrganizationApisHolderTest extends BaseApiHolderTest {
   @Test
   void whenGetOrganizationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      token -> apisHolder.getOrganizationApi(token)
-        .getOrganizationApiKey(1L, "SEND"),
+      token -> apisHolder.getOrganizationApi()
+        .getOrganizationApiKey(1L,  OrganizationApiKeyType.SEND),
       String.class,
       () -> {},
       AUTH_TYPE.API_KEY,

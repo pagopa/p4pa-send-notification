@@ -21,6 +21,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class SendNotification {
   @Id
   private String sendNotificationId;
+  private Long organizationId;
   private String paProtocolNumber;
   private String subjectType;
   private String fiscalCode;
@@ -29,5 +30,4 @@ public class SendNotification {
   private NotificationStatus status;
   private String notificationRequestId;
   private String iun;
-  private Long organizationId;
 }

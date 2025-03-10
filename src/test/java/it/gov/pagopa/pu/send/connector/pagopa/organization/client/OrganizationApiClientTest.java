@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.organization.client;
 
 import it.gov.pagopa.pu.organization.client.generated.OrganizationApi;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.send.connector.pagopa.organization.config.OrganizationApisHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,17 +34,15 @@ class OrganizationApiClientTest {
   void givenValidRequestWhenGetOrganizationApiKeyThenVerifyResponse() {
     // Given
     Long organizationId = 1L;
-    String accessToken = "accessToken";
-    String keyType = "SEND";
     String apiKey = "apiKey";
 
-    Mockito.when(apisHolder.getOrganizationApi(accessToken))
+    Mockito.when(apisHolder.getOrganizationApi())
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, keyType))
+    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND))
       .thenReturn(apiKey);
 
     // When
-    String result = organizationApiClient.getOrganizationApiKey(organizationId, keyType, accessToken);
+    String result = organizationApiClient.getOrganizationApiKey(organizationId);
 
     // Then
     assertSame(apiKey, result);
@@ -53,16 +52,14 @@ class OrganizationApiClientTest {
   void givenNotExistentOrganizationIdWhenGetOrganizationApiKeyThenReturnNull() {
     // Given
     Long organizationId = 1L;
-    String accessToken = "accessToken";
-    String keyType = "SEND";
 
-    Mockito.when(apisHolder.getOrganizationApi(accessToken))
+    Mockito.when(apisHolder.getOrganizationApi())
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, keyType))
+    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND))
       .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
 
     // When
-    String result = organizationApiClient.getOrganizationApiKey(organizationId, keyType, accessToken);
+    String result = organizationApiClient.getOrganizationApiKey(organizationId);
 
     // Then
     assertNull(result);

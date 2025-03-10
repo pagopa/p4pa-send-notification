@@ -36,7 +36,6 @@ class SendClientTest {
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
-  private final String keyType = "SEND";
 
   @BeforeEach
   void setUp() {
@@ -64,7 +63,7 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, null))
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
       .thenReturn(newNotificationApiMock);
@@ -88,7 +87,7 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, null))
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
       .thenReturn(newNotificationApiMock);
@@ -112,7 +111,7 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(organizationService.getOrganizationApiKey(organizationId, keyType, null))
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getSenderReadB2BApiByApiKey(apiKey))
       .thenReturn(senderReadB2BApiMock);

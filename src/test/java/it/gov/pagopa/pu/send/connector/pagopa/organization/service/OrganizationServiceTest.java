@@ -32,15 +32,13 @@ class OrganizationServiceTest {
   void whenGetOrganizationApiKeyThenInvokeClient(){
     // Given
     Long organizationId = 1L;
-    String keyType = "SEND";
-    String accessToken = "accessToken";
     String apiKey = "apiKey";
 
-    Mockito.when(organizationApiClientMock.getOrganizationApiKey(organizationId, keyType, accessToken))
+    Mockito.when(organizationApiClientMock.getOrganizationApiKey(organizationId))
       .thenReturn(apiKey);
 
     // When
-    String result = service.getOrganizationApiKey(organizationId, keyType, accessToken);
+    String result = service.getOrganizationApiKey(organizationId);
 
     // Then
     Assertions.assertSame(apiKey, result);

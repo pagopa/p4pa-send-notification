@@ -7,7 +7,6 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequest
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
-import it.gov.pagopa.pu.send.util.SecurityUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +16,6 @@ public class SendClient {
 
   private final PagopaSendApisHolder apisHolder;
   private final OrganizationService organizationService;
-  private static final String KEY_TYPE = "SEND";
 
   public SendClient(
     PagopaSendApisHolder apisHolder,
@@ -46,8 +44,7 @@ public class SendClient {
   }
 
   private String getApiKeyFromOrganization(Long organizationId) {
-    String accessToken = SecurityUtils.getAccessToken();
-    return organizationService.getOrganizationApiKey(organizationId, KEY_TYPE, accessToken);
+    return organizationService.getOrganizationApiKey(organizationId);
   }
 
 }
