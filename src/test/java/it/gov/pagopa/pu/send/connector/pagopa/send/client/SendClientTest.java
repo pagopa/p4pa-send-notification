@@ -63,7 +63,7 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(organizationService.getOrganizationApiKey(organizationId))
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, null))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
       .thenReturn(newNotificationApiMock);
@@ -87,7 +87,7 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(organizationService.getOrganizationApiKey(organizationId))
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, null))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
       .thenReturn(newNotificationApiMock);
@@ -111,7 +111,7 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(organizationService.getOrganizationApiKey(organizationId))
+    Mockito.when(organizationService.getOrganizationApiKey(organizationId, null))
       .thenReturn(apiKey);
     Mockito.when(apisHolder.getSenderReadB2BApiByApiKey(apiKey))
       .thenReturn(senderReadB2BApiMock);

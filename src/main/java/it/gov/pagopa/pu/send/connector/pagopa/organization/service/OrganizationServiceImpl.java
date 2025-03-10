@@ -13,7 +13,7 @@ public class OrganizationServiceImpl implements OrganizationService {
   }
 
   @Override
-  public String getOrganizationApiKey(Long organizationId) {
-    return organizationApiClient.getOrganizationApiKey(organizationId);
+  public String getOrganizationApiKey(Long organizationId, String accessToken) {
+    return organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
   }
 }

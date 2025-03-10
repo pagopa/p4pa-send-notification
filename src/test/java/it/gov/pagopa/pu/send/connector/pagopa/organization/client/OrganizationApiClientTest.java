@@ -34,15 +34,16 @@ class OrganizationApiClientTest {
   void givenValidRequestWhenGetOrganizationApiKeyThenVerifyResponse() {
     // Given
     Long organizationId = 1L;
+    String accessToken = "accessToken";
     String apiKey = "apiKey";
 
-    Mockito.when(apisHolder.getOrganizationApi())
+    Mockito.when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
     Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeys.KeyTypeEnum.SEND.getValue()))
       .thenReturn(apiKey);
 
     // When
-    String result = organizationApiClient.getOrganizationApiKey(organizationId);
+    String result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
 
     // Then
     assertSame(apiKey, result);
@@ -52,14 +53,15 @@ class OrganizationApiClientTest {
   void givenNotExistentOrganizationIdWhenGetOrganizationApiKeyThenReturnNull() {
     // Given
     Long organizationId = 1L;
+    String accessToken = "accessToken";
 
-    Mockito.when(apisHolder.getOrganizationApi())
+    Mockito.when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
     Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeys.KeyTypeEnum.SEND.getValue()))
       .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
 
     // When
-    String result = organizationApiClient.getOrganizationApiKey(organizationId);
+    String result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
 
     // Then
     assertNull(result);
