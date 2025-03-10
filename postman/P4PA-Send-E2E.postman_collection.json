@@ -145,13 +145,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{organizationId}}",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
-								"notification"
+								"notification",
+								"{{organizationId}}"
 							]
 						}
 					},
@@ -175,8 +176,11 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"packages": {},
-								"type": "text/javascript"
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -203,13 +207,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}/start",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{organizationId}}/{{sendNotificationId}}/start",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
 								"notification",
+								"{{organizationId}}",
 								"{{sendNotificationId}}",
 								"start"
 							]
@@ -271,13 +276,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}/start",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{organizationId}}/{{sendNotificationId}}/start",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
 								"notification",
+								"{{organizationId}}",
 								"{{sendNotificationId}}",
 								"start"
 							]
@@ -567,7 +573,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}?organizationId={{organizationId}}",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
@@ -575,6 +581,12 @@
 								"p4pasend",
 								"notification",
 								"{{sendNotificationId}}"
+							],
+							"query": [
+								{
+									"key": "organizationId",
+									"value": "{{organizationId}}"
+								}
 							]
 						}
 					},
@@ -595,6 +607,11 @@
 		{
 			"key": "noticeCode",
 			"value": ""
+		},
+		{
+			"key": "organizationId",
+			"value": "3",
+			"type": "default"
 		}
 	]
 }
