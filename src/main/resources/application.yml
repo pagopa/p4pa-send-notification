@@ -24,6 +24,10 @@ spring:
           maxConnecting: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTING:2}"
 
 management:
+  info:
+    build.enabled: true
+    java.enabled: true
+    git.enabled: true
   endpoints:
     jmx:
       exposure.include: "*"
