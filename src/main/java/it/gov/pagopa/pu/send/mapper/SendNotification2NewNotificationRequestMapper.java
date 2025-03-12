@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PhysicalCommunicationTypeEnum;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationAttachmentBodyRefDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationAttachmentDTO;
@@ -32,7 +33,7 @@ public class SendNotification2NewNotificationRequestMapper {
     NotificationRecipientV23DTO recipient = new NotificationRecipientV23DTO();
     recipient.setRecipientType(RecipientTypeEnum.valueOf(sendNotification.getSubjectType()));
     recipient.taxId(sendNotification.getFiscalCode());
-    recipient.denomination("Michelangelo Buonarroti");
+    recipient.denomination(sendNotification.getDenomination());
 
     //address domain
     NotificationPhysicalAddressDTO addressDTO = new NotificationPhysicalAddressDTO();
@@ -51,7 +52,8 @@ public class SendNotification2NewNotificationRequestMapper {
       pagoPa.setApplyCost(payment.getPagoPa().getApplyCost());
 
       Optional<NotificationAttachmentDTO> attachment = sendNotification.getDocuments().stream()
-          .filter(doc -> doc.getFileName().equals(payment.getPagoPa().getAttachment().getFileName()))
+          .filter(doc -> payment.getPagoPa().getAttachment()!=null
+            && doc.getFileName().equals(payment.getPagoPa().getAttachment().getFileName()))
           .findFirst()
           .map(doc -> {
             NotificationAttachmentDTO attachmentDTO = new NotificationAttachmentDTO();
@@ -69,6 +71,7 @@ public class SendNotification2NewNotificationRequestMapper {
     recipient.setPayments(payments);
 
     Set<String> attachmentFileNames = sendNotification.getPayments().stream()
+      .filter(payment -> payment.getPagoPa().getAttachment() != null)
       .map(payment -> payment.getPagoPa().getAttachment().getFileName())
       .collect(Collectors.toSet());
     //end payments
@@ -90,13 +93,21 @@ public class SendNotification2NewNotificationRequestMapper {
     //end documents
 
     //fee domain
-    newNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.valueOf("DELIVERY_MODE"));
-    newNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.valueOf("AR_REGISTERED_LETTER"));
-    newNotification.senderDenomination("Ente Intermediario 2");
-    newNotification.senderTaxId("00000000018");
-    newNotification.setTaxonomyCode("010101P");
-    newNotification.setPaFee(100);
-    newNotification.setVat(22);
+    newNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.valueOf(sendNotification.getNotificationFeePolicy()));
+    newNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.valueOf(sendNotification.getPhysicalCommunicationType()));
+    newNotification.senderDenomination(sendNotification.getSenderDenomination());
+    newNotification.senderTaxId(sendNotification.getSenderTaxId());
+    if(sendNotification.getAmount()!=0)
+      newNotification.setAmount(sendNotification.getAmount());
+    newNotification.setTaxonomyCode(sendNotification.getTaxonomyCode());
+    if(sendNotification.getPaFee()!=0)
+      newNotification.setPaFee(sendNotification.getPaFee());
+    if(sendNotification.getVat()!=0)
+      newNotification.setVat(sendNotification.getVat());
+    if(sendNotification.getPaymentExpirationDate()!=null)
+      newNotification.setPaymentExpirationDate(sendNotification.getPaymentExpirationDate());
+    if(sendNotification.getPagoPaIntMode()!=null)
+      newNotification.setPagoPaIntMode(PagoPaIntModeEnum.valueOf(sendNotification.getPagoPaIntMode()));
     //end fee domain
 
     newNotification.recipients(List.of(recipient));

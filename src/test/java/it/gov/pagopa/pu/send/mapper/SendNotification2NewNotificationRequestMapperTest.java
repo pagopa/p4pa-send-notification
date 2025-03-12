@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.Attachment;
+import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.model.SendNotification;
@@ -34,6 +35,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.setPaProtocolNumber("Prot_001");
     sendNotification.setSubjectType("PF");
     sendNotification.setFiscalCode("BNRMHL75C06G702B");
+    sendNotification.setDenomination("Michelangelo Buonarroti");
 
     //Payments
     Payment payment = new Payment();
@@ -71,6 +73,17 @@ class SendNotification2NewNotificationRequestMapperTest {
     documents.add(document);
     sendNotification.setDocuments(documents);
 
+    sendNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.DELIVERY_MODE.getValue());
+    sendNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue());
+    sendNotification.setSenderDenomination("Ente Intermediario 2");
+    sendNotification.setSenderTaxId("00000000018");
+    sendNotification.setAmount(100);
+    sendNotification.setTaxonomyCode("010101P");
+    sendNotification.setPaFee(100);
+    sendNotification.setVat(22);
+    sendNotification.setPaymentExpirationDate("2025-12-31");
+    sendNotification.setPagoPaIntMode(PagoPaIntModeEnum.NONE.getValue());
+
     // When
     NewNotificationRequestV24DTO result = mapper.apply(sendNotification);
 
@@ -104,7 +117,10 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals("Ente Intermediario 2", result.getSenderDenomination());
     assertEquals("00000000018", result.getSenderTaxId());
     assertEquals("010101P", result.getTaxonomyCode());
+    assertEquals(100, result.getAmount());
     assertEquals(100, result.getPaFee());
     assertEquals(22, result.getVat());
+    assertEquals("2025-12-31", result.getPaymentExpirationDate());
+    assertEquals(NewNotificationRequestV24DTO.PagoPaIntModeEnum.NONE, result.getPagoPaIntMode());
   }
 }
