@@ -17,6 +17,8 @@ public class CreateNotificationRequest2SendNotificationMapper {
     sendNotification.setPaProtocolNumber(request.getPaProtocolNumber());
     sendNotification.setSubjectType(request.getRecipient().getRecipientType().getValue());
     sendNotification.setFiscalCode(request.getRecipient().getTaxId());
+    sendNotification.setDenomination(request.getRecipient().getDenomination());
+
     if(request.getDocuments().isEmpty())
       sendNotification.setStatus(NotificationStatus.SENDING);
     else
@@ -47,6 +49,16 @@ public class CreateNotificationRequest2SendNotificationMapper {
 
     sendNotification.setDocuments(documents);
     sendNotification.setOrganizationId(organizationId);
+    sendNotification.setNotificationFeePolicy(request.getNotificationFeePolicy().getValue());
+    sendNotification.setPhysicalCommunicationType(request.getPhysicalCommunicationType().getValue());
+    sendNotification.setSenderDenomination(request.getSenderDenomination());
+    sendNotification.setSenderTaxId(request.getSenderTaxId());
+    sendNotification.setAmount(request.getAmount().intValue());
+    sendNotification.setTaxonomyCode(request.getTaxonomyCode());
+    sendNotification.setPaFee(request.getPaFee());
+    sendNotification.setVat(request.getVat());
+    sendNotification.setPaymentExpirationDate(request.getPaymentExpirationDate().toString());
+    sendNotification.setPagoPaIntMode(request.getPagoPaIntMode().getValue());
 
     return sendNotification;
   }
