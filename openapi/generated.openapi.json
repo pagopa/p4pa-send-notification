@@ -535,24 +535,10 @@
           "sendNotificationId" : {
             "type" : "string"
           },
-          "preloadRef" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/PreloadNotificationDTO"
-            }
+          "preloadUrl" : {
+            "type" : "string"
           },
           "status" : {
-            "type" : "string"
-          }
-        }
-      },
-      "PreloadNotificationDTO" : {
-        "type" : "object",
-        "properties" : {
-          "preloadId" : {
-            "type" : "string"
-          },
-          "preloadUrl" : {
             "type" : "string"
           }
         }

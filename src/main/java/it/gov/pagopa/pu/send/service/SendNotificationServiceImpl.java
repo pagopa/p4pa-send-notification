@@ -18,6 +18,7 @@ import it.gov.pagopa.pu.send.util.NotificationUtils;
 
 import java.io.File;
 
+import org.springframework.beans.factory.annotation.Value;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import org.springframework.stereotype.Service;
 
@@ -27,9 +28,11 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final SendNotificationRepository sendNotificationRepository;
   private final WorkflowService workflowService;
   private final CreateNotificationRequest2SendNotificationMapper mapper;
+  private final String fileShareBaseUrl;
 
-  public SendNotificationServiceImpl(SendNotificationRepository sendNotificationRepository,
-                                     CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService) {
+  public SendNotificationServiceImpl(@Value("${rest.pagopa.fileshare.base-url}") String fileShareBaseUrl,
+    SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService) {
+    this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationRepository = sendNotificationRepository;
     this.mapper = mapper;
     this.workflowService = workflowService;
@@ -43,7 +46,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .builder()
       .sendNotificationId(sendNotification.getSendNotificationId())
       .status(sendNotification.getStatus().name())
-      //.preloadRef() TODO P4ADEV-2080 comunicate fileName and url for upload file
+      .preloadUrl(fileShareBaseUrl+"/organization/"+organizationId+"/send-files/"+sendNotification.getSendNotificationId())
       .build();
   }
 
