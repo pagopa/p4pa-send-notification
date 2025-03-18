@@ -8,6 +8,6 @@ import it.gov.pagopa.pu.send.dto.generated.StartNotificationResponse;
 public interface SendNotificationService {
 
   CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, Long organizationId);
-  StartNotificationResponse startSendNotification(String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest);
+  StartNotificationResponse startSendNotification(String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest, String accessToken);
   void deleteSendNotification(String sendNotificationId, Long organizationId);
 }

@@ -58,7 +58,7 @@ class SendNotificationControllerTest {
     StartNotificationResponse expectedResponse = StartNotificationResponse.builder().workFlowId(sendNotificationId).build();
 
     // When
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest))
+    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest, null))
       .thenReturn(expectedResponse);
 
     // Then
@@ -79,7 +79,7 @@ class SendNotificationControllerTest {
       .build();
 
     // When
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest))
+    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest, null))
       .thenReturn(null);
 
     // Then
