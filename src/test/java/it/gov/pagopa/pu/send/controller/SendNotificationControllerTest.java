@@ -32,7 +32,7 @@ class SendNotificationControllerTest {
     CreateNotificationRequest request = CreateNotificationRequest.builder().build();
     CreateNotificationResponse expectedResponse = CreateNotificationResponse.builder()
       .sendNotificationId("SENDNOTIFICATIONID")
-      .preloadRef(null) //TODO P4ADEV-2080 comunicate fileName and url for upload file
+      .preloadUrl("PRELOADURL")
       .status(NotificationStatus.WAITING_FILE.name())
       .build();
 

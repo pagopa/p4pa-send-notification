@@ -110,3 +110,8 @@ rest:
       max-attempts: "\${ORGANIZATION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
       wait-time-millis: "\${ORGANIZATION_WAIT_TIME_MILLIS:500}"
       print-body-when-error: "\${ORGANIZATION_PRINT_BODY_WHEN_ERROR:true}"
+    fileshare:
+      base-url: "\${FILESHARE_BASE_URL:}"
+      max-attempts: "\${FILESHARE_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+      wait-time-millis: "\${FILESHARE_WAIT_TIME_MILLIS:500}"
+      print-body-when-error: "\${FILESHARE_PRINT_BODY_WHEN_ERROR:true}"

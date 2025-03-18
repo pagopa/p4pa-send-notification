@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "25b4e0d8-b3aa-4787-98fa-0e4e575f70a6",
+		"_postman_id": "c2e57e17-5b32-4858-87c4-ef0998b16020",
 		"name": "P4PA-Send-E2E",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "36568841"
@@ -98,7 +98,7 @@
 									"pm.test(\"Send Notification - create send notification - Verify response body\", function () {\r",
 									"    let jsonResponse = pm.response.json();\r",
 									"    pm.expect(jsonResponse).have.property(\"sendNotificationId\");\r",
-									"    //pm.expect(jsonResponse).have.property(\"preloadRef\"); will be implemented with P4ADEV-2080\r",
+									"    pm.expect(jsonResponse).have.property(\"preloadUrl\");\r",
 									"    pm.expect(jsonResponse).have.property(\"status\").to.eq(\"WAITING_FILE\");\r",
 									"\r",
 									"    pm.collectionVariables.set(\"sendNotificationId\", jsonResponse.sendNotificationId)\r",

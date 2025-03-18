@@ -17,16 +17,19 @@ import it.gov.pagopa.pu.send.util.NotificationUtils;
 
 import java.io.File;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SendNotificationServiceImpl implements SendNotificationService {
 
+  private final String fileShareBaseUrl;
   private final SendNotificationRepository sendNotificationRepository;
   private final CreateNotificationRequest2SendNotificationMapper mapper;
 
-  public SendNotificationServiceImpl(SendNotificationRepository sendNotificationRepository,
-                                     CreateNotificationRequest2SendNotificationMapper mapper) {
+  public SendNotificationServiceImpl(@Value("${rest.pagopa.fileshare.base-url}") String fileShareBaseUrl,
+    SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper) {
+    this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationRepository = sendNotificationRepository;
     this.mapper = mapper;
   }
@@ -39,7 +42,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .builder()
       .sendNotificationId(sendNotification.getSendNotificationId())
       .status(sendNotification.getStatus().name())
-      //.preloadRef() TODO P4ADEV-2080 comunicate fileName and url for upload file
+      .preloadUrl(fileShareBaseUrl+"/organization/"+organizationId+"/send-files/"+sendNotification.getSendNotificationId())
       .build();
   }
 
