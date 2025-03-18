@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.connector.pagopa.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
@@ -16,6 +17,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
+import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +35,9 @@ class SendNotificationServiceImplTest {
 
   @Mock
   private CreateNotificationRequest2SendNotificationMapper mapper;
+
+  @Mock
+  private WorkflowService workflowServiceMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -66,15 +72,19 @@ class SendNotificationServiceImplTest {
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
     SendNotification updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     Long organizationId = 1L;
+    WorkflowCreatedDTO workflow = WorkflowCreatedDTO.builder().workflowId("WORKFLOWID").build();
 
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId))
       .thenReturn(Optional.of(notification))
       .thenReturn(Optional.of(updatedNotification));
+    Mockito.when(workflowServiceMock.sendNotificationProcess(sendNotificationId, null))
+        .thenReturn(workflow);
 
-    sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest);
+    sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest, null);
 
     Mockito.verify(sendNotificationRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
     Mockito.verify(sendNotificationRepositoryMock).updateNotificationStatus(sendNotificationId, NotificationStatus.SENDING);
+    Mockito.verify(workflowServiceMock).sendNotificationProcess(sendNotificationId, null);
   }
 
   @Test
@@ -89,7 +99,7 @@ class SendNotificationServiceImplTest {
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
       Optional.of(notification));
 
-    Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest));
+    Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest, null));
 
     Assertions.assertEquals("File not found with id: NOTEXISTS", exception.getMessage());
   }
@@ -106,7 +116,7 @@ class SendNotificationServiceImplTest {
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
       Optional.of(notification));
 
-    Exception exception = Assertions.assertThrows(InvalidSignatureException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest));
+    Exception exception = Assertions.assertThrows(InvalidSignatureException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest, null));
 
     Assertions.assertEquals("File "+fileName+" has not a valid signature", exception.getMessage());
   }

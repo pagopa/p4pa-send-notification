@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
 import it.gov.pagopa.pu.send.dto.generated.LoadFileRequest;
 import it.gov.pagopa.pu.send.dto.generated.StartNotificationResponse;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
+import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +40,8 @@ public class SendNotificationController implements NotificationApi {
   public ResponseEntity<StartNotificationResponse> startNotification(
     String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest) {
     log.info("start notification request for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
-    StartNotificationResponse response = sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest);
+    String accessToken = SecurityUtils.getAccessToken();
+    StartNotificationResponse response = sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest, accessToken);
     if (response != null)
       return new ResponseEntity<>(response, HttpStatus.OK);
     else
