@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.connector.pagopa.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
@@ -18,20 +19,23 @@ import it.gov.pagopa.pu.send.util.NotificationUtils;
 import java.io.File;
 
 import org.springframework.beans.factory.annotation.Value;
+import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SendNotificationServiceImpl implements SendNotificationService {
 
-  private final String fileShareBaseUrl;
   private final SendNotificationRepository sendNotificationRepository;
+  private final WorkflowService workflowService;
   private final CreateNotificationRequest2SendNotificationMapper mapper;
+  private final String fileShareBaseUrl;
 
   public SendNotificationServiceImpl(@Value("${rest.pagopa.fileshare.base-url}") String fileShareBaseUrl,
-    SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper) {
+    SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationRepository = sendNotificationRepository;
     this.mapper = mapper;
+    this.workflowService = workflowService;
   }
 
   @Override
@@ -47,7 +51,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
-  public StartNotificationResponse startSendNotification(String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest) {
+  public StartNotificationResponse startSendNotification(String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest, String accessToken) {
     SendNotification notification = findSendNotification(sendNotificationId, organizationId);
     NotificationUtils.validateStatus(NotificationStatus.WAITING_FILE, notification.getStatus());
 
@@ -66,8 +70,10 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
     if (allFilesReady) {
       sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.SENDING);
-      // TODO P4ADEV-2232 invoke temporal to start workflow
-      return StartNotificationResponse.builder().workFlowId(sendNotificationId).build();
+      WorkflowCreatedDTO workflow = workflowService.sendNotificationProcess(sendNotificationId, accessToken);
+      return StartNotificationResponse.builder()
+        .workFlowId(workflow.getWorkflowId())
+        .build();
     }
     return null;
   }
