@@ -32,6 +32,7 @@ class SendUploadFacadeServiceImplTest {
     //GIVEN
     String sendNotificationId = "sendNotificationId";
     Optional<String> versionId = Optional.of("VERSIONID");
+    Long organizationId = 1L;
 
     String fileName = "src/test/resources/tmp/sendNotificationId_file.pdf";
     File file = new File(fileName);
@@ -49,7 +50,7 @@ class SendUploadFacadeServiceImplTest {
 
     Mockito.when(sendUploadClient.upload(documentDTO, fileBytes)).thenReturn(versionId);
 
-    Optional<String> result = uploadService.uploadFile(sendNotificationId, documentDTO);
+    Optional<String> result = uploadService.uploadFile(organizationId, sendNotificationId, documentDTO);
     // THEN
     assertTrue(result.isPresent());
     assertEquals(versionId, result);
@@ -59,16 +60,19 @@ class SendUploadFacadeServiceImplTest {
   @Test
   void givenInvalidFileWhenUploadFileThenThrowsFileNotFoundException() {
       String sendNotificationId = "SENDNOTIFICATIONID";
+      Long organizationId = 1L;
+
       DocumentDTO documentDTO = DocumentDTO.builder()
               .fileName("non_existent_file.pdf")
               .build();
 
-      assertThrows(UploadFileException.class, () -> uploadService.uploadFile(sendNotificationId, documentDTO));
+      assertThrows(UploadFileException.class, () -> uploadService.uploadFile(organizationId, sendNotificationId, documentDTO));
   }
 
   @Test
   void givenInvalidSignatureWhenUploadFileThenInvalidSignatureException() throws Exception {
     String sendNotificationId = "SENDNOTIFICATIONID";
+    Long organizationId = 1L;
     String filePath = "src/main/resources/tmp/" + sendNotificationId + "_file.pdf";
     File file = new File(filePath);
     file.deleteOnExit();
@@ -81,6 +85,6 @@ class SendUploadFacadeServiceImplTest {
     documentDTO.setFileName("file.pdf");
     documentDTO.setDigest("invalidDigest");
 
-    assertThrows(UploadFileException.class, () -> uploadService.uploadFile(sendNotificationId, documentDTO));
+    assertThrows(UploadFileException.class, () -> uploadService.uploadFile(organizationId, sendNotificationId, documentDTO));
   }
 }

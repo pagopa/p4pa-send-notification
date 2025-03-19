@@ -380,8 +380,6 @@ components:
           type: string
         fileName:
           type: string
-        path:
-          type: string
     CreateNotificationResponse:
       type: object
       properties:

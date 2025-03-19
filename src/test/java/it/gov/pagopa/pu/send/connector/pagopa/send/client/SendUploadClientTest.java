@@ -3,6 +3,8 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApiClientConfig;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,12 +18,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,15 +51,8 @@ class SendUploadClientTest {
   @Test
   void givenValidFileWhenUploadThenReturnsVersionId() throws IOException {
     //GIVEN
-    String sendNotificationId = "SENDNOTIFICATIONID";
     String versionId = "VERSIONID";
-    String filePath = "src/main/resources/tmp/" + sendNotificationId + "_file.pdf";
-    File file = new File(filePath);
-    file.deleteOnExit();
-
-    try (FileWriter writer = new FileWriter(file)) {
-      writer.write("TEST FILE HASH P4PA SEND");
-    }
+    InputStream file = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
     DocumentDTO documentDTO = DocumentDTO.builder()
       .fileName("file.pdf")
@@ -72,7 +63,7 @@ class SendUploadClientTest {
       .secret("SECRET")
       .build();
 
-    byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
+    byte[] fileBytes = file.readAllBytes();
 
     HttpHeaders headers = new HttpHeaders();
     headers.add("x-amz-version-id", versionId);

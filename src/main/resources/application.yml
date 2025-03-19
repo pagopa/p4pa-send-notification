@@ -89,6 +89,10 @@ jwt:
                   ewIDAQAB
                   -----END PUBLIC KEY-----}"
 
+folders:
+  shared: "\${SHARED_FOLDER_ROOT:/shared}"
+  send-file-folder: "data/send"
+
 rest:
   defaults:
     connection-pool:
@@ -120,3 +124,6 @@ rest:
       max-attempts: "\${FILESHARE_MAX_ATTEMPTS:3}" # It's counting also the first attempt
       wait-time-millis: "\${FILESHARE_WAIT_TIME_MILLIS:500}"
       print-body-when-error: "\${FILESHARE_PRINT_BODY_WHEN_ERROR:true}"
+
+app:
+  fileEncryptPassword: "\${FILE_ENCRYPT_PASSWORD:ENCR_PSW}"

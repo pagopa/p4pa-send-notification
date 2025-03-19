@@ -101,6 +101,7 @@ class SendFacadeServiceImplTest {
     String sendNotificationId = "SENDNOTIFICATIONID";
     String fileName = "FILENAME";
     String versionId = "VERSIONID";
+    Long organizationId = 1L;
 
     DocumentDTO documentDTO = DocumentDTO.builder()
       .fileName(fileName)
@@ -115,13 +116,14 @@ class SendFacadeServiceImplTest {
 
     SendNotification notification = SendNotification.builder()
       .sendNotificationId(sendNotificationId)
+      .organizationId(organizationId)
       .status(NotificationStatus.REGISTERED)
       .documents(List.of(documentDTO))
       .build();
 
     Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
-    Mockito.when(uploadService.uploadFile(sendNotificationId, documentDTO)).thenReturn(Optional.of(versionId));
+    Mockito.when(uploadService.uploadFile(organizationId, sendNotificationId, documentDTO)).thenReturn(Optional.of(versionId));
 
     sendService.uploadFiles(sendNotificationId);
     Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFileVersionId(sendNotificationId, fileName, versionId);
