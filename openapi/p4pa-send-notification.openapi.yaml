@@ -148,6 +148,34 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
+  /notification/{sendNotificationId}/retrieveNotificationDate:
+    get:
+      tags:
+        - Notification
+      summary: retrieve notification date
+      description: Retrieve notification date from send if exists
+      operationId: retrieveNotificationDate
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/SendNotificationDTO'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal server error
   /send/{sendNotificationId}/preload:
     post:
       tags:
@@ -401,8 +429,20 @@ components:
       properties:
         sendNotificationId:
           type: string
+        organizationId:
+          type: integer
+          format: int64
+        iun:
+          type: string
+        notificationDate:
+          type: string
+          format: date
         status:
           type: string
+        errors:
+          type: array
+          items:
+            type: string
     SendNotificationErrorDTO:
       type: object
       required:
