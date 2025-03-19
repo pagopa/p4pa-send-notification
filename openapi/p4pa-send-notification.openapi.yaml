@@ -63,8 +63,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/SendNotificationDTO'
+                $ref: '#/components/schemas/SendNotificationDTO'
         '400':
           description: Invalid request
         '403':
