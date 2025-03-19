@@ -63,7 +63,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: '#/components/schemas/SendNotificationDTO'
         '400':
@@ -148,7 +147,7 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
-  /notification/{sendNotificationId}/retrieveNotificationDate:
+  /notification/{organizationId}/{sendNotificationId}/retrieveNotificationDate:
     get:
       tags:
         - Notification
@@ -161,6 +160,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
           description: OK
