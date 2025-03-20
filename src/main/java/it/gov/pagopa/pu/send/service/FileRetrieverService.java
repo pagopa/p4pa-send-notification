@@ -4,7 +4,9 @@ import it.gov.pagopa.pu.send.util.AESUtils;
 import java.io.InputStream;
 import java.nio.file.Path;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+@Service
 public class FileRetrieverService {
   private final String fileEncryptPassword;
   private final String sendFilePath;

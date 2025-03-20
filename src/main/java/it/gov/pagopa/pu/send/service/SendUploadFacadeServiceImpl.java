@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.send.exception.UploadFileException;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,15 +28,11 @@ public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
   @Override
   public Optional<String> uploadFile(Long organizationId, String sendNotificationId, DocumentDTO documentDTO) {
     String fileName = sendNotificationId + "_" + documentDTO.getFileName();
-    try {
-      InputStream inputStream = fileRetrieverService.retrieveFile(organizationId, fileName);
+    try(InputStream inputStream = fileRetrieverService.retrieveFile(organizationId, fileName)) {
       if(inputStream==null)
         throw new FileNotFoundException("File not found: " + documentDTO.getFileName());
-
-      if(!FileUtils.calculateFileHash(inputStream).equals(documentDTO.getDigest()))
-        throw new InvalidSignatureException("File "+documentDTO.getFileName()+" has not a valid signature");
-
       byte[] fileBytes = inputStream.readAllBytes();
+      log.info("Digest after readAllBytes {}", Base64.getEncoder().encodeToString(fileBytes));
       return sendUploadClient.upload(documentDTO, fileBytes);
     } catch (Exception e) {
       throw new UploadFileException(e.getMessage());
