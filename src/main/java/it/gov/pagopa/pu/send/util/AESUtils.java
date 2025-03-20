@@ -32,11 +32,13 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Utility class for AES encryption and decryption using the GCM mode.
  * Supports secure handling of files and data streams.
  */
+@Slf4j
 public class AESUtils {
   private AESUtils() {
   }
@@ -207,6 +209,7 @@ public class AESUtils {
   /** It will create an InputStream to read the provided file decrypting it using AES GCM mode configured with the given password */
   public static InputStream decrypt(String password, Path filePath, String fileName) {
     Path cipherFilePath = resolveCipherFilePath(filePath, fileName);
+    log.info("decrypt cipherFilePath {}", cipherFilePath);
     try {
       return decrypt(password, new FileInputStream(cipherFilePath.toFile()));
     } catch (FileNotFoundException e) {

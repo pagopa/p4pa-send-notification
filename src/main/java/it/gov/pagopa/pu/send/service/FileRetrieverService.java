@@ -3,10 +3,12 @@ package it.gov.pagopa.pu.send.service;
 import it.gov.pagopa.pu.send.util.AESUtils;
 import java.io.InputStream;
 import java.nio.file.Path;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class FileRetrieverService {
   private final String fileEncryptPassword;
   private final String sendFilePath;
@@ -22,6 +24,7 @@ public class FileRetrieverService {
 
   public InputStream retrieveFile(Long organizationId, String fileName) {
     Path relativePath = Path.of(sharedFolder, String.valueOf(organizationId), sendFilePath);
+    log.info("FileRetrieverService retrieveFile relativePath {}", relativePath);
     return decryptFile(relativePath, fileName);
   }
 
