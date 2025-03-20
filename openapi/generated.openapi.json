@@ -712,9 +712,6 @@
           },
           "fileName" : {
             "type" : "string"
-          },
-          "path" : {
-            "type" : "string"
           }
         },
         "required" : [ "digest", "fileName" ]
