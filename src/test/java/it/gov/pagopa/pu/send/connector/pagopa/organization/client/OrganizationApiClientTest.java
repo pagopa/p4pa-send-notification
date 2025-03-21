@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.organization.client;
 
 import it.gov.pagopa.pu.organization.client.generated.OrganizationApi;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.send.connector.pagopa.organization.config.OrganizationApisHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class OrganizationApiClientTest {
 
     Mockito.when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeys.KeyTypeEnum.SEND.getValue()))
+    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND))
       .thenReturn(apiKey);
 
     // When
@@ -57,7 +57,7 @@ class OrganizationApiClientTest {
 
     Mockito.when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeys.KeyTypeEnum.SEND.getValue()))
+    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND))
       .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
 
     // When
