@@ -12,9 +12,8 @@ import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +37,9 @@ class SendNotificationServiceImplTest {
 
   @Mock
   private WorkflowService workflowServiceMock;
+
+  @Mock
+  private FileRetrieverService fileRetrieverServiceMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -65,10 +67,9 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
   }
 
-  /*
+
   @Test
-  void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyAllFilesReady()
-    throws IOException {
+  void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyAllFilesReady() {
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     LoadFileRequest loadFileRequest = new LoadFileRequest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=",fileName);
@@ -76,10 +77,12 @@ class SendNotificationServiceImplTest {
     SendNotification updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     Long organizationId = 1L;
     WorkflowCreatedDTO workflow = WorkflowCreatedDTO.builder().workflowId("WORKFLOWID").build();
+    InputStream inputStream = new ByteArrayInputStream(FILE_CONTENT.getBytes());
 
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId))
       .thenReturn(Optional.of(notification))
       .thenReturn(Optional.of(updatedNotification));
+    Mockito.when(fileRetrieverServiceMock.retrieveFile(organizationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
     Mockito.when(workflowServiceMock.sendNotificationProcess(sendNotificationId, null))
         .thenReturn(workflow);
 
@@ -89,7 +92,7 @@ class SendNotificationServiceImplTest {
     Mockito.verify(sendNotificationRepositoryMock).updateNotificationStatus(sendNotificationId, NotificationStatus.SENDING);
     Mockito.verify(workflowServiceMock).sendNotificationProcess(sendNotificationId, null);
   }
-*/
+
   @Test
   void givenStartNotificationRequestWhenStartSendNotificationThenExceptionFileNotFound() {
     String sendNotificationId = "sendNotificationId";
@@ -107,16 +110,17 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("File not found with id: NOTEXISTS", exception.getMessage());
   }
 
-  /*
+
   @Test
-  void givenStartNotificationRequestWhenStartSendNotificationThenExceptionInvalidSignature()
-    throws IOException {
+  void givenStartNotificationRequestWhenStartSendNotificationThenExceptionInvalidSignature() {
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     LoadFileRequest loadFileRequest = new LoadFileRequest("DIGEST", fileName);
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
     Long organizationId = 1L;
+    InputStream inputStream = new ByteArrayInputStream(FILE_CONTENT.getBytes());
 
+    Mockito.when(fileRetrieverServiceMock.retrieveFile(organizationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
       Optional.of(notification));
 
@@ -125,11 +129,9 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("File "+fileName+" has not a valid signature", exception.getMessage());
   }
 
-   */
 
   @Test
-  void givenDeleteNotificationRequestWhenDeleteSendNotificationThenVerify()
-    throws IOException {
+  void givenDeleteNotificationRequestWhenDeleteSendNotificationThenVerify() {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";

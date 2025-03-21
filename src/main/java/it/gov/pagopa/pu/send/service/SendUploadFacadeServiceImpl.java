@@ -2,18 +2,13 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendUploadClient;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
-import it.gov.pagopa.pu.send.util.FileUtils;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Base64;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
 
   private final SendUploadClient sendUploadClient;
@@ -32,7 +27,6 @@ public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
       if(inputStream==null)
         throw new FileNotFoundException("File not found: " + documentDTO.getFileName());
       byte[] fileBytes = inputStream.readAllBytes();
-      log.info("Digest after readAllBytes {}", Base64.getEncoder().encodeToString(fileBytes));
       return sendUploadClient.upload(documentDTO, fileBytes);
     } catch (Exception e) {
       throw new UploadFileException(e.getMessage());
