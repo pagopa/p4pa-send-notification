@@ -27,15 +27,13 @@ class SendUploadFacadeServiceImplTest {
   @InjectMocks
   private SendUploadFacadeServiceImpl uploadService;
 
-  private final String FILECONTENT = "TEST FILE HASH P4PA SEND";
-
   @Test
   void givenValidFileWhenUploadFileThenReturnsVersionId() {
     //GIVEN
     String sendNotificationId = "sendNotificationId";
     Optional<String> versionId = Optional.of("VERSIONID");
     Long organizationId = 1L;
-    InputStream inputStream = new ByteArrayInputStream(FILECONTENT.getBytes());
+    InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
     DocumentDTO documentDTO = DocumentDTO.builder()
       .fileName("file.pdf")
@@ -47,7 +45,7 @@ class SendUploadFacadeServiceImplTest {
       .build();
 
     Mockito.when(fileRetrieverServiceMock.retrieveFile(organizationId, sendNotificationId+"_file.pdf")).thenReturn(inputStream);
-    Mockito.when(sendUploadClient.upload(documentDTO, FILECONTENT.getBytes())).thenReturn(versionId);
+    Mockito.when(sendUploadClient.upload(documentDTO, "TEST FILE HASH P4PA SEND".getBytes())).thenReturn(versionId);
 
     Optional<String> result = uploadService.uploadFile(organizationId, sendNotificationId, documentDTO);
     // THEN
