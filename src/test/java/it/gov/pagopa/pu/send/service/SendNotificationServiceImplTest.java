@@ -44,7 +44,7 @@ class SendNotificationServiceImplTest {
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
 
-  private final String FILE_CONTENT = "TEST FILE HASH P4PA SEND";
+  private final String FILECONTENT = "TEST FILE HASH P4PA SEND";
 
   @Test
   void givenCreateNotificationRequestWhenCreateSendNotificationThenReturnCreateNotificationResponse(){
@@ -77,7 +77,7 @@ class SendNotificationServiceImplTest {
     SendNotification updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     Long organizationId = 1L;
     WorkflowCreatedDTO workflow = WorkflowCreatedDTO.builder().workflowId("WORKFLOWID").build();
-    InputStream inputStream = new ByteArrayInputStream(FILE_CONTENT.getBytes());
+    InputStream inputStream = new ByteArrayInputStream(FILECONTENT.getBytes());
 
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId))
       .thenReturn(Optional.of(notification))
@@ -118,7 +118,7 @@ class SendNotificationServiceImplTest {
     LoadFileRequest loadFileRequest = new LoadFileRequest("DIGEST", fileName);
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
     Long organizationId = 1L;
-    InputStream inputStream = new ByteArrayInputStream(FILE_CONTENT.getBytes());
+    InputStream inputStream = new ByteArrayInputStream(FILECONTENT.getBytes());
 
     Mockito.when(fileRetrieverServiceMock.retrieveFile(organizationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
