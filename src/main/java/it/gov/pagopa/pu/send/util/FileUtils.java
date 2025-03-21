@@ -1,9 +1,8 @@
 package it.gov.pagopa.pu.send.util;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
+import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,10 +13,10 @@ public class FileUtils {
   private FileUtils() {
   }
 
-  public static String calculateFileHash(File file)
+  public static String calculateFileHash(InputStream inputStream)
     throws NoSuchAlgorithmException, IOException {
     MessageDigest digest = MessageDigest.getInstance("SHA-256");
-    try(DigestInputStream digestInputStream = new DigestInputStream(new FileInputStream(file), digest)){
+    try(DigestInputStream digestInputStream = new DigestInputStream(inputStream, digest)){
       byte[] inputStreamBuffer = new byte[8192];
       while (digestInputStream.read(inputStreamBuffer) > -1);
     }

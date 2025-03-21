@@ -12,9 +12,8 @@ import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +37,9 @@ class SendNotificationServiceImplTest {
 
   @Mock
   private WorkflowService workflowServiceMock;
+
+  @Mock
+  private FileRetrieverService fileRetrieverServiceMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -63,9 +65,9 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
   }
 
+
   @Test
-  void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyAllFilesReady()
-    throws IOException {
+  void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyAllFilesReady() {
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     LoadFileRequest loadFileRequest = new LoadFileRequest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=",fileName);
@@ -73,10 +75,12 @@ class SendNotificationServiceImplTest {
     SendNotification updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     Long organizationId = 1L;
     WorkflowCreatedDTO workflow = WorkflowCreatedDTO.builder().workflowId("WORKFLOWID").build();
+    InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId))
       .thenReturn(Optional.of(notification))
       .thenReturn(Optional.of(updatedNotification));
+    Mockito.when(fileRetrieverServiceMock.retrieveFile(organizationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
     Mockito.when(workflowServiceMock.sendNotificationProcess(sendNotificationId, null))
         .thenReturn(workflow);
 
@@ -104,15 +108,17 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("File not found with id: NOTEXISTS", exception.getMessage());
   }
 
+
   @Test
-  void givenStartNotificationRequestWhenStartSendNotificationThenExceptionInvalidSignature()
-    throws IOException {
+  void givenStartNotificationRequestWhenStartSendNotificationThenExceptionInvalidSignature() {
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     LoadFileRequest loadFileRequest = new LoadFileRequest("DIGEST", fileName);
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
     Long organizationId = 1L;
+    InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
+    Mockito.when(fileRetrieverServiceMock.retrieveFile(organizationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
       Optional.of(notification));
 
@@ -121,9 +127,9 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("File "+fileName+" has not a valid signature", exception.getMessage());
   }
 
+
   @Test
-  void givenDeleteNotificationRequestWhenDeleteSendNotificationThenVerify()
-    throws IOException {
+  void givenDeleteNotificationRequestWhenDeleteSendNotificationThenVerify() {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
@@ -138,8 +144,7 @@ class SendNotificationServiceImplTest {
   }
 
   @Test
-  void givenDeleteNotificationRequestWithStatusCompleteWhenDeleteSendNotificationThenInvalidStatusException()
-    throws IOException {
+  void givenDeleteNotificationRequestWithStatusCompleteWhenDeleteSendNotificationThenInvalidStatusException() {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
@@ -154,19 +159,10 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("Cannot delete notification with status complete", exception.getMessage());
   }
 
-  private SendNotification createMockNotification(String sendNotificationId, String fileName, FileStatus fileStatus)
-    throws IOException {
-
+  private SendNotification createMockNotification(String sendNotificationId, String fileName, FileStatus fileStatus) {
     SendNotification notification = new SendNotification();
+    notification.setSendNotificationId(sendNotificationId);
     notification.setStatus(NotificationStatus.WAITING_FILE);
-
-    String filePath = "src/main/resources/tmp/" + sendNotificationId + "_"+ fileName;
-    File file = new File(filePath);
-    file.deleteOnExit();
-
-    try (FileWriter writer = new FileWriter(file)) {
-      writer.write("TEST FILE HASH P4PA SEND");
-    }
 
     DocumentDTO documentDTO = DocumentDTO.builder()
       .fileName(fileName)

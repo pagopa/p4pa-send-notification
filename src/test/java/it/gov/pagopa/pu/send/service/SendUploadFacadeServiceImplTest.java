@@ -5,10 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendUploadClient;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,18 +21,19 @@ class SendUploadFacadeServiceImplTest {
   @Mock
   private SendUploadClient sendUploadClient;
 
+  @Mock
+  private FileRetrieverService fileRetrieverServiceMock;
+
   @InjectMocks
   private SendUploadFacadeServiceImpl uploadService;
 
   @Test
-  void givenValidFileWhenUploadFileThenReturnsVersionId()
-    throws IOException {
+  void givenValidFileWhenUploadFileThenReturnsVersionId() {
     //GIVEN
     String sendNotificationId = "sendNotificationId";
     Optional<String> versionId = Optional.of("VERSIONID");
-
-    String fileName = "src/test/resources/tmp/sendNotificationId_file.pdf";
-    File file = new File(fileName);
+    Long organizationId = 1L;
+    InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
     DocumentDTO documentDTO = DocumentDTO.builder()
       .fileName("file.pdf")
@@ -45,42 +44,25 @@ class SendUploadFacadeServiceImplTest {
       .secret("SECRET")
       .build();
 
-    byte[] fileBytes = Files.readAllBytes(file.toPath());
+    Mockito.when(fileRetrieverServiceMock.retrieveFile(organizationId, sendNotificationId+"_file.pdf")).thenReturn(inputStream);
+    Mockito.when(sendUploadClient.upload(documentDTO, "TEST FILE HASH P4PA SEND".getBytes())).thenReturn(versionId);
 
-    Mockito.when(sendUploadClient.upload(documentDTO, fileBytes)).thenReturn(versionId);
-
-    Optional<String> result = uploadService.uploadFile(sendNotificationId, documentDTO);
+    Optional<String> result = uploadService.uploadFile(organizationId, sendNotificationId, documentDTO);
     // THEN
     assertTrue(result.isPresent());
     assertEquals(versionId, result);
   }
 
-
   @Test
   void givenInvalidFileWhenUploadFileThenThrowsFileNotFoundException() {
       String sendNotificationId = "SENDNOTIFICATIONID";
+      Long organizationId = 1L;
+
       DocumentDTO documentDTO = DocumentDTO.builder()
               .fileName("non_existent_file.pdf")
               .build();
 
-      assertThrows(UploadFileException.class, () -> uploadService.uploadFile(sendNotificationId, documentDTO));
+      assertThrows(UploadFileException.class, () -> uploadService.uploadFile(organizationId, sendNotificationId, documentDTO));
   }
 
-  @Test
-  void givenInvalidSignatureWhenUploadFileThenInvalidSignatureException() throws Exception {
-    String sendNotificationId = "SENDNOTIFICATIONID";
-    String filePath = "src/main/resources/tmp/" + sendNotificationId + "_file.pdf";
-    File file = new File(filePath);
-    file.deleteOnExit();
-
-    try (FileWriter writer = new FileWriter(file)) {
-      writer.write("TEST FILE HASH P4PA SEND");
-    }
-
-    DocumentDTO documentDTO = new DocumentDTO();
-    documentDTO.setFileName("file.pdf");
-    documentDTO.setDigest("invalidDigest");
-
-    assertThrows(UploadFileException.class, () -> uploadService.uploadFile(sendNotificationId, documentDTO));
-  }
 }

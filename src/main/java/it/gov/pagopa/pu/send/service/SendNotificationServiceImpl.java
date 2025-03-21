@@ -16,8 +16,7 @@ import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 
-import java.io.File;
-
+import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Value;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import org.springframework.stereotype.Service;
@@ -29,13 +28,16 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final WorkflowService workflowService;
   private final CreateNotificationRequest2SendNotificationMapper mapper;
   private final String fileShareBaseUrl;
+  private final FileRetrieverService fileRetrieverService;
 
   public SendNotificationServiceImpl(@Value("${rest.pagopa.fileshare.base-url}") String fileShareBaseUrl,
-    SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService) {
+    SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
+    FileRetrieverService fileRetrieverService) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationRepository = sendNotificationRepository;
     this.mapper = mapper;
     this.workflowService = workflowService;
+    this.fileRetrieverService = fileRetrieverService;
   }
 
   @Override
@@ -58,7 +60,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     notification.getDocuments().stream()
       .filter(doc -> doc.getFileName().equals(loadFileRequest.getFileName()))
       .findFirst().ifPresentOrElse(
-        doc -> updateFileStatus(sendNotificationId, doc, loadFileRequest),
+        doc -> updateFileStatus(sendNotificationId, doc, loadFileRequest, organizationId),
         () -> {
           throw new IllegalArgumentException("File not found with id: " + loadFileRequest.getFileName());
         }
@@ -93,17 +95,11 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId + " for organizationId: " + organizationId));
   }
 
-  private void updateFileStatus(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest) {
+  private void updateFileStatus(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest, Long organizationId) {
     NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());
-    //TODO edit file retrieve with P4ADEV-2148, change static sendNotificationId with doc.getSendNotificationId
-    String filePath;
-    if (loadFileRequest.getPath() != null)
-      filePath = loadFileRequest.getPath() + "sendNotificationId_" + doc.getFileName();
-    else
-      filePath = "src/main/resources/tmp/" + "sendNotificationId_" + doc.getFileName();
-
     try {
-      File file = new File(filePath);
+      String fileName = sendNotificationId +"_" + doc.getFileName();
+      InputStream file = fileRetrieverService.retrieveFile(organizationId, fileName);
       if (!FileUtils.calculateFileHash(file).equals(loadFileRequest.getDigest()))
         throw new InvalidSignatureException("File " + doc.getFileName() + " has not a valid signature");
     } catch (Exception e) {

@@ -67,7 +67,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     for(DocumentDTO doc : notification.getDocuments()){
       Optional<String> versionId = Optional.empty();
       if(!doc.getStatus().equals(FileStatus.UPLOADED))
-        versionId = uploadService.uploadFile(sendNotificationId, doc);
+        versionId = uploadService.uploadFile(notification.getOrganizationId(), sendNotificationId, doc);
       if (versionId.isPresent()) {
         sendNotificationRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.UPLOADED);
         sendNotificationRepository.updateFileVersionId(sendNotificationId, doc.getFileName(), versionId.get());
