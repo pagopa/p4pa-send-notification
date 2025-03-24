@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
@@ -42,6 +43,11 @@ public class SendClient {
     String apiKey = getApiKeyFromOrganization(organizationId);
     return apisHolder.getSenderReadB2BApiByApiKey(apiKey)
       .retrieveNotificationRequestStatusV24(notificationRequestId, null, null);
+  }
+
+  public NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, Long organizationId) {
+    String apiKey = getApiKeyFromOrganization(organizationId);
+    return apisHolder.getNotificationPriceApi(apiKey).retrieveNotificationPriceV23(paTaxId, noticeCode);
   }
 
   private String getApiKeyFromOrganization(Long organizationId) {
