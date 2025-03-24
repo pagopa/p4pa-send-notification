@@ -146,10 +146,10 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
-  /notification/{organizationId}/{sendNotificationId}/retrieveNotificationDate:
+  /send/{organizationId}/{sendNotificationId}/retrieveNotificationDate:
     get:
       tags:
-        - Notification
+        - Send
       summary: retrieve notification date
       description: Retrieve notification date from send if exists
       operationId: retrieveNotificationDate

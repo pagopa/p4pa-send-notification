@@ -387,6 +387,85 @@
         } ]
       }
     },
+    "/p4pasend/send/{organizationId}/{sendNotificationId}/retrieveNotificationDate" : {
+      "get" : {
+        "tags" : [ "Send" ],
+        "summary" : "retrieve notification date",
+        "description" : "Retrieve notification date from send if exists",
+        "operationId" : "retrieveNotificationDate",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Notification not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/notification/{organizationId}/{sendNotificationId}" : {
       "get" : {
         "tags" : [ "Notification" ],
@@ -504,85 +583,6 @@
           },
           "500" : {
             "description" : "Internal server error"
-          }
-        },
-        "security" : [ {
-          "BearerAuth" : [ ]
-        } ]
-      }
-    },
-    "/p4pasend/notification/{organizationId}/{sendNotificationId}/retrieveNotificationDate" : {
-      "get" : {
-        "tags" : [ "Notification" ],
-        "summary" : "retrieve notification date",
-        "description" : "Retrieve notification date from send if exists",
-        "operationId" : "retrieveNotificationDate",
-        "parameters" : [ {
-          "name" : "sendNotificationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "organizationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendNotificationDTO"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Invalid request",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendNotificationDTO"
-                }
-              }
-            }
-          },
-          "403" : {
-            "description" : "Forbidden",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendNotificationDTO"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Notification not found",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendNotificationDTO"
-                }
-              }
-            }
-          },
-          "500" : {
-            "description" : "Internal server error",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendNotificationDTO"
-                }
-              }
-            }
           }
         },
         "security" : [ {
