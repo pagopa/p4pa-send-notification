@@ -439,6 +439,10 @@ components:
         notificationDate:
           type: string
           format: date
+        navList:
+          type: array
+          items:
+            $ref: '#/components/schemas/PagoPa'
         status:
           type: string
         errors:
