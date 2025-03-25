@@ -499,6 +499,16 @@
               }
             }
           },
+          "204" : {
+            "description" : "NotificationData not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
           "400" : {
             "description" : "Invalid request",
             "content" : {
