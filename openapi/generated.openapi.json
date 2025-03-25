@@ -1097,7 +1097,13 @@
           },
           "notificationDate" : {
             "type" : "string",
-            "format" : "date"
+            "format" : "date-time"
+          },
+          "navList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           },
           "status" : {
             "type" : "string"
@@ -1108,7 +1114,8 @@
               "type" : "string"
             }
           }
-        }
+        },
+        "required" : [ "navList", "organizationId", "sendNotificationId", "status" ]
       }
     },
     "securitySchemes" : {

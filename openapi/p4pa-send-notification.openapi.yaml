@@ -428,6 +428,11 @@ components:
           type: string
     SendNotificationDTO:
       type: object
+      required:
+        - sendNotificationId
+        - organizationId
+        - status
+        - navList
       properties:
         sendNotificationId:
           type: string
@@ -438,7 +443,11 @@ components:
           type: string
         notificationDate:
           type: string
-          format: date
+          format: date-time
+        navList:
+          type: array
+          items:
+            type: string
         status:
           type: string
         errors:
