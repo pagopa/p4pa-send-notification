@@ -499,6 +499,16 @@
               }
             }
           },
+          "204" : {
+            "description" : "NotificationData not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
           "400" : {
             "description" : "Invalid request",
             "content" : {
@@ -1097,12 +1107,12 @@
           },
           "notificationDate" : {
             "type" : "string",
-            "format" : "date"
+            "format" : "date-time"
           },
           "navList" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/PagoPa"
+              "type" : "string"
             }
           },
           "status" : {
@@ -1114,7 +1124,8 @@
               "type" : "string"
             }
           }
-        }
+        },
+        "required" : [ "navList", "organizationId", "sendNotificationId", "status" ]
       }
     },
     "securitySchemes" : {

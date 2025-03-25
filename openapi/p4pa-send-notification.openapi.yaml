@@ -64,6 +64,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SendNotificationDTO'
+        '204':
+          description: NotificationData not found
         '400':
           description: Invalid request
         '403':
@@ -428,6 +430,11 @@ components:
           type: string
     SendNotificationDTO:
       type: object
+      required:
+        - sendNotificationId
+        - organizationId
+        - status
+        - navList
       properties:
         sendNotificationId:
           type: string
@@ -438,11 +445,11 @@ components:
           type: string
         notificationDate:
           type: string
-          format: date
+          format: date-time
         navList:
           type: array
           items:
-            $ref: '#/components/schemas/PagoPa'
+            type: string
         status:
           type: string
         errors:

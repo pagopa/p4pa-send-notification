@@ -7,15 +7,23 @@ import static org.mockito.ArgumentMatchers.eq;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.generated.PagoPa;
+import it.gov.pagopa.pu.send.dto.generated.Payment;
+import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
+import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -39,6 +47,9 @@ class SendFacadeServiceImplTest {
 
   @Mock
   private SendNotification2NewNotificationRequestMapper sendNotificationMapper;
+
+  @Mock
+  private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
 
   @InjectMocks
   private SendFacadeServiceImpl sendService;
@@ -185,4 +196,87 @@ class SendFacadeServiceImplTest {
     Mockito.verify(sendNotificationRepository, Mockito.times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
   }
+
+  @Test
+  void givenValidNotificationWhenRetrieveNotificationDataThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    Long orgId = 1L;
+    String paxId = "PAXID";
+    String noticeCode = "NOTICECODE";
+
+    NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
+    response.setNotificationViewDate(new Date());
+
+    SendNotification notification = SendNotification.builder()
+        .sendNotificationId(sendNotificationId)
+        .organizationId(orgId)
+        .payments(Collections.singletonList(new Payment(
+          new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId))))
+        .build();
+
+    SendNotificationDTO notificationDTO = new SendNotificationDTO();
+    notificationDTO.setNotificationDate(OffsetDateTime.now());
+
+    Mockito.when(sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, orgId))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendClient.retrieveNotificationPrice(paxId, noticeCode, orgId)).thenReturn(response);
+    Mockito.when(sendNotificationDTOMapper.apply(notification)).thenReturn(notificationDTO);
+
+    SendNotificationDTO result = sendService.retrieveNotificationData(sendNotificationId, orgId);
+
+    Assertions.assertNotNull(result);
+  }
+
+  @Test
+  void givenValidNotificationWhenRetrieveNotificationDataNoContentThenNull() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    Long orgId = 1L;
+    String paxId = "PAXID";
+    String noticeCode = "NOTICECODE";
+
+    NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
+
+    SendNotification notification = SendNotification.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .payments(Collections.singletonList(new Payment(
+        new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId))))
+      .build();
+
+    Mockito.when(sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, orgId))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendClient.retrieveNotificationPrice(paxId, noticeCode, orgId)).thenReturn(response);
+
+    SendNotificationDTO result = sendService.retrieveNotificationData(sendNotificationId, orgId);
+
+    Assertions.assertNull(result);
+  }
+
+  @Test
+  void givenValidNotificationWhenRetrieveNotificationDataAlreadyExistsThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    Long orgId = 1L;
+    String paxId = "PAXID";
+    String noticeCode = "NOTICECODE";
+
+    SendNotification notification = SendNotification.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .payments(Collections.singletonList(new Payment(
+        new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId))))
+      .notificationData(OffsetDateTime.now())
+      .build();
+
+    SendNotificationDTO notificationDTO = new SendNotificationDTO();
+    notificationDTO.setNotificationDate(OffsetDateTime.now());
+
+    Mockito.when(sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, orgId))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendNotificationDTOMapper.apply(notification)).thenReturn(notificationDTO);
+
+    SendNotificationDTO result = sendService.retrieveNotificationData(sendNotificationId, orgId);
+
+    Assertions.assertNotNull(result);
+  }
+
 }

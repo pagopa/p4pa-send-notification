@@ -61,7 +61,7 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     SendNotification result = mapper.map(request, organizationId, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun");
+    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun","notificationData");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("PF", result.getSubjectType());
