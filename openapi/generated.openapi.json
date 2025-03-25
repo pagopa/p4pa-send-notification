@@ -1097,7 +1097,7 @@
           },
           "notificationDate" : {
             "type" : "string",
-            "format" : "date"
+            "format" : "date-time"
           },
           "navList" : {
             "type" : "array",
