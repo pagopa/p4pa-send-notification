@@ -1,11 +1,7 @@
 package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
@@ -16,12 +12,13 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -108,7 +105,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if(notification.getNotificationData()!=null)
       return sendNotificationDTOMapper.apply(notification);
 
-    PagoPa payment = notification.getPayments().getFirst().getPagoPa();
+    PagoPa payment = notification.getPayments().getFirst().getPayment().getPagoPa();
     NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendClient.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), organizationId);
 
     if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {

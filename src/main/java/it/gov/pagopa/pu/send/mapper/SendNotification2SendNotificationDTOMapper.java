@@ -15,7 +15,7 @@ public class SendNotification2SendNotificationDTOMapper {
     notificationDTO.setNotificationDate(sendNotification.getNotificationData());
     notificationDTO.setStatus(sendNotification.getStatus().name());
     notificationDTO.setNavList(sendNotification.getPayments().stream().map(
-      pagoPa -> pagoPa.getPagoPa().getNoticeCode()
+      pagoPa -> pagoPa.getPayment().getPagoPa().getNoticeCode()
     ).toList());
     return notificationDTO;
   }

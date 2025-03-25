@@ -12,6 +12,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
@@ -21,11 +22,13 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMappe
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
+
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -208,11 +211,12 @@ class SendFacadeServiceImplTest {
     response.setNotificationViewDate(new Date());
 
     SendNotification notification = SendNotification.builder()
-        .sendNotificationId(sendNotificationId)
-        .organizationId(orgId)
-        .payments(Collections.singletonList(new Payment(
-          new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId))))
-        .build();
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .payments(Collections.singletonList(new PuPayment(1L, new Payment(
+        new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId))))
+      )
+      .build();
 
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
     notificationDTO.setNotificationDate(OffsetDateTime.now());
@@ -239,8 +243,9 @@ class SendFacadeServiceImplTest {
     SendNotification notification = SendNotification.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
-      .payments(Collections.singletonList(new Payment(
+      .payments(Collections.singletonList(new PuPayment(1L, new Payment(
         new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId))))
+      )
       .build();
 
     Mockito.when(sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, orgId))
@@ -262,8 +267,8 @@ class SendFacadeServiceImplTest {
     SendNotification notification = SendNotification.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
-      .payments(Collections.singletonList(new Payment(
-        new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId))))
+      .payments(Collections.singletonList(new PuPayment(1L, new Payment(
+        new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId)))))
       .notificationData(OffsetDateTime.now())
       .build();
 
