@@ -3,11 +3,14 @@ package it.gov.pagopa.pu.send.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import it.gov.pagopa.pu.send.dto.generated.PagoPa;
+import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.util.TestUtils;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,13 +23,18 @@ class SendNotification2SendNotificationDTOMapperTest {
 
   @Test
   void givenSendNotificationWhenMapThenReturnSendNotificationDTO() {
-    LocalDate now = LocalDate.now();
+    OffsetDateTime now = OffsetDateTime.now();
     SendNotification sendNotification = new SendNotification();
     sendNotification.setSendNotificationId("12345");
     sendNotification.setOrganizationId(1L);
     sendNotification.setIun("IUN");
     sendNotification.setNotificationData(now);
     sendNotification.setStatus(NotificationStatus.COMPLETE);
+
+    PagoPa pagoPa = new PagoPa();
+    pagoPa.setNoticeCode("NOTICECODE");
+    Payment payment = new Payment(pagoPa);
+    sendNotification.setPayments(Collections.singletonList(payment));
 
     SendNotificationDTO result = mapper.apply(sendNotification);
 
@@ -37,6 +45,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     assertEquals("IUN", result.getIun());
     assertEquals(now, result.getNotificationDate());
     assertEquals(NotificationStatus.COMPLETE.name(), result.getStatus());
+    assertEquals(Collections.singletonList("NOTICECODE"), result.getNavList());
   }
 
 }

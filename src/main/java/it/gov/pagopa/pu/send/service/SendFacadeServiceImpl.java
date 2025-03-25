@@ -107,7 +107,8 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendClient.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), organizationId);
 
     if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {
-      notification.setNotificationData(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+      notification.setNotificationData(notificationPriceResponseV23DTO.getNotificationViewDate()
+        .toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
       return sendNotificationDTOMapper.apply(notification);
     }
 
