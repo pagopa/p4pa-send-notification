@@ -1,24 +1,16 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PhysicalCommunicationTypeEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationAttachmentBodyRefDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationAttachmentDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationAttachmentDigestsDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationDocumentDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationFeePolicyDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPaymentItemDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPhysicalAddressDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO.RecipientTypeEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PagoPaPaymentDTO;
 import it.gov.pagopa.pu.send.model.SendNotification;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
 
 @Service
 public class SendNotification2NewNotificationRequestMapper {
@@ -47,13 +39,13 @@ public class SendNotification2NewNotificationRequestMapper {
     //payments domain to implements
     List<NotificationPaymentItemDTO> payments = sendNotification.getPayments().stream().map(payment -> {
       PagoPaPaymentDTO pagoPa = new PagoPaPaymentDTO();
-      pagoPa.setCreditorTaxId(payment.getPagoPa().getCreditorTaxId());
-      pagoPa.setNoticeCode(payment.getPagoPa().getNoticeCode());
-      pagoPa.setApplyCost(payment.getPagoPa().getApplyCost());
+      pagoPa.setCreditorTaxId(payment.getPayment().getPagoPa().getCreditorTaxId());
+      pagoPa.setNoticeCode(payment.getPayment().getPagoPa().getNoticeCode());
+      pagoPa.setApplyCost(payment.getPayment().getPagoPa().getApplyCost());
 
       Optional<NotificationAttachmentDTO> attachment = sendNotification.getDocuments().stream()
-          .filter(doc -> payment.getPagoPa().getAttachment()!=null
-            && doc.getFileName().equals(payment.getPagoPa().getAttachment().getFileName()))
+          .filter(doc -> payment.getPayment().getPagoPa().getAttachment()!=null
+            && doc.getFileName().equals(payment.getPayment().getPagoPa().getAttachment().getFileName()))
           .findFirst()
           .map(doc -> {
             NotificationAttachmentDTO attachmentDTO = new NotificationAttachmentDTO();
@@ -71,8 +63,8 @@ public class SendNotification2NewNotificationRequestMapper {
     recipient.setPayments(payments);
 
     Set<String> attachmentFileNames = sendNotification.getPayments().stream()
-      .filter(payment -> payment.getPagoPa().getAttachment() != null)
-      .map(payment -> payment.getPagoPa().getAttachment().getFileName())
+      .filter(payment -> payment.getPayment().getPagoPa().getAttachment() != null)
+      .map(payment -> payment.getPayment().getPagoPa().getAttachment().getFileName())
       .collect(Collectors.toSet());
     //end payments
 

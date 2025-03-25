@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.send.model;
 
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.generated.Payment;
+import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import java.math.BigDecimal;
+
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +27,7 @@ public class SendNotification {
   private String subjectType;
   private String fiscalCode;
   private String denomination;
-  private List<Payment> payments;
+  private List<PuPayment> payments;
   private List<DocumentDTO> documents;
   private NotificationStatus status;
   private String notificationRequestId;

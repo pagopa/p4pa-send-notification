@@ -50,6 +50,11 @@ public class SendNotificationExceptionHandler {
     return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, SendNotificationErrorDTO.CodeEnum.GENERIC_ERROR);
   }
 
+  @ExceptionHandler(UnknownDebtPositionException.class)
+  public ResponseEntity<SendNotificationErrorDTO> handleUnknownDebtPositionException(UnknownDebtPositionException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.NOT_FOUND, SendNotificationErrorDTO.CodeEnum.NOT_FOUND);
+  }
+
   @ExceptionHandler(InvalidStatusException.class)
   public ResponseEntity<SendNotificationErrorDTO> handleInvalidStatusException(InvalidStatusException ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.CONFLICT, SendNotificationErrorDTO.CodeEnum.BAD_REQUEST);

@@ -26,7 +26,8 @@ public class SendNotificationController implements NotificationApi {
   @Override
   public ResponseEntity<CreateNotificationResponse> createSendNotification(Long organizationId, CreateNotificationRequest createNotificationRequest) {
     log.info("new notification request for organizationId {}", organizationId);
-    return new ResponseEntity<>(sendNotificationService.createSendNotification(createNotificationRequest, organizationId), HttpStatus.OK);
+    String accessToken = SecurityUtils.getAccessToken();
+    return new ResponseEntity<>(sendNotificationService.createSendNotification(createNotificationRequest, organizationId, accessToken), HttpStatus.OK);
   }
 
   @Override

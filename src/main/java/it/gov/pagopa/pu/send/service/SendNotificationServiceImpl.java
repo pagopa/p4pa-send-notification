@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.send.connector.pagopa.workflow.service.WorkflowService;
+import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
@@ -15,11 +15,12 @@ import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
+import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
-import org.springframework.beans.factory.annotation.Value;
-import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
-import org.springframework.stereotype.Service;
 
 @Service
 public class SendNotificationServiceImpl implements SendNotificationService {
@@ -30,7 +31,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final String fileShareBaseUrl;
   private final FileRetrieverService fileRetrieverService;
 
-  public SendNotificationServiceImpl(@Value("${rest.pagopa.fileshare.base-url}") String fileShareBaseUrl,
+  public SendNotificationServiceImpl(@Value("${fileshare-public-base-url}") String fileShareBaseUrl,
     SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
     FileRetrieverService fileRetrieverService) {
     this.fileShareBaseUrl = fileShareBaseUrl;
@@ -40,9 +41,10 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.fileRetrieverService = fileRetrieverService;
   }
 
+  @Transactional
   @Override
-  public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, Long organizationId) {
-    SendNotification sendNotification = sendNotificationRepository.insert(mapper.map(createNotificationRequest, organizationId));
+  public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, Long organizationId, String accessToken) {
+    SendNotification sendNotification = sendNotificationRepository.insert(mapper.map(createNotificationRequest, organizationId, accessToken));
 
     return CreateNotificationResponse
       .builder()
@@ -52,6 +54,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .build();
   }
 
+  @Transactional
   @Override
   public StartNotificationResponse startSendNotification(String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest, String accessToken) {
     SendNotification notification = findSendNotification(sendNotificationId, organizationId);
@@ -80,6 +83,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     return null;
   }
 
+  @Transactional
   @Override
   public void deleteSendNotification(String sendNotificationId, Long organizationId) {
     SendNotification notification = findSendNotification(sendNotificationId, organizationId);

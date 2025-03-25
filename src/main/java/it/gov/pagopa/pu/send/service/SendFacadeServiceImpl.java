@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -34,6 +35,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     this.sendNotificationMapper = sendNotificationMapper;
   }
 
+  @Transactional
   @Override
   public void preloadFiles(String sendNotificationId) {
     SendNotification notification = findSendNotification(sendNotificationId);
@@ -58,6 +60,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.REGISTERED);
   }
 
+  @Transactional
   @Override
   public void uploadFiles(String sendNotificationId) {
     SendNotification notification = findSendNotification(sendNotificationId);
@@ -76,6 +79,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.UPLOADED);
   }
 
+  @Transactional
   @Override
   public void deliveryNotification(String sendNotificationId) {
     SendNotification notification = findSendNotification(sendNotificationId);
@@ -89,6 +93,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     }
   }
 
+  @Transactional
   @Override
   public NewNotificationRequestStatusResponseV24DTO notificationStatus(String sendNotificationId) {
     SendNotification notification = findSendNotification(sendNotificationId);
