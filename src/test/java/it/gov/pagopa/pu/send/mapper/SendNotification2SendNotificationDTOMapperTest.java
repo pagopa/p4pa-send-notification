@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
@@ -34,7 +35,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     PagoPa pagoPa = new PagoPa();
     pagoPa.setNoticeCode("NOTICECODE");
     Payment payment = new Payment(pagoPa);
-    sendNotification.setPayments(Collections.singletonList(payment));
+    sendNotification.setPayments(Collections.singletonList(new PuPayment(3L, payment)));
 
     SendNotificationDTO result = mapper.apply(sendNotification);
 

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.send.connector.pagopa.workflow.service.WorkflowService;
+import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
@@ -12,11 +12,6 @@ import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Optional;
-
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,6 +20,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationServiceImplTest {
@@ -52,12 +52,13 @@ class SendNotificationServiceImplTest {
     sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
     sendNotification.setStatus(NotificationStatus.WAITING_FILE);
     Long organizationId = 1L;
+    String accessToken = "accessToken";
 
-    // When
-    Mockito.when(mapper.map(request, organizationId)).thenReturn(sendNotification);
+    Mockito.when(mapper.map(request, organizationId, accessToken)).thenReturn(sendNotification);
     Mockito.when(sendNotificationRepositoryMock.insert(sendNotification)).thenReturn(sendNotification);
 
-    CreateNotificationResponse response = sendNotificationService.createSendNotification(request, organizationId);
+    // When
+    CreateNotificationResponse response = sendNotificationService.createSendNotification(request, organizationId, accessToken);
 
     // Then
     Mockito.verify(sendNotificationRepositoryMock).insert(sendNotification);
@@ -151,11 +152,14 @@ class SendNotificationServiceImplTest {
     Long organizationId = 1L;
     SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     notification.setStatus(NotificationStatus.COMPLETE);
-    //When
+
     Mockito.when(sendNotificationRepositoryMock.findByIdAndOrganizationId(sendNotificationId, organizationId)).thenReturn(
       Optional.of(notification));
-    //Then
+
+    //When
     Exception exception = Assertions.assertThrows(InvalidStatusException.class, () -> sendNotificationService.deleteSendNotification(sendNotificationId, organizationId));
+
+    //Then
     Assertions.assertEquals("Cannot delete notification with status complete", exception.getMessage());
   }
 

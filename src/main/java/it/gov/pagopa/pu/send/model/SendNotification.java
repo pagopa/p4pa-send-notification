@@ -1,10 +1,8 @@
 package it.gov.pagopa.pu.send.model;
 
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.generated.Payment;
+import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import java.time.OffsetDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
 @Document("send_notification")
@@ -27,7 +28,7 @@ public class SendNotification {
   private String subjectType;
   private String fiscalCode;
   private String denomination;
-  private List<Payment> payments;
+  private List<PuPayment> payments;
   private List<DocumentDTO> documents;
   private NotificationStatus status;
   private String notificationRequestId;

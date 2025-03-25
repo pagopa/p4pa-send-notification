@@ -232,4 +232,14 @@ class SendNotificationExceptionHandlerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_GENERIC_ERROR"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
   }
+
+  @Test
+  void handleUnknownDebtPositionException() throws Exception {
+    doThrow(new UnknownDebtPositionException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isNotFound())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_NOT_FOUND"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
+  }
 }

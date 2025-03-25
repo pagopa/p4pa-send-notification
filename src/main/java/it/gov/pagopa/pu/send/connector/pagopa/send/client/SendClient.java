@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
-import it.gov.pagopa.pu.send.connector.pagopa.organization.service.OrganizationService;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;

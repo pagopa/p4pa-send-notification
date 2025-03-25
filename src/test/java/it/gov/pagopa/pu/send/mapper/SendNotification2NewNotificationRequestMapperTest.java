@@ -1,27 +1,26 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PhysicalCommunicationTypeEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationDocumentDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationFeePolicyDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPhysicalAddressDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.Attachment;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.util.TestUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotification2NewNotificationRequestMapperTest {
@@ -57,7 +56,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     documentAttachment.setKey("docKey");
     documentAttachment.setVersionId("12345678");
 
-    sendNotification.setPayments(Collections.singletonList(payment));
+    sendNotification.setPayments(Collections.singletonList(new PuPayment(1L, payment)));
     // end payments
 
 
@@ -95,22 +94,8 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals("Prot_001", result.getPaProtocolNumber());
     assertEquals("TEST notifica PU numero 12345", result.getSubject());
 
-    NotificationRecipientV23DTO recipient = result.getRecipients().getFirst();
-    assertEquals(RecipientTypeEnum.PF, recipient.getRecipientType());
-    assertEquals("BNRMHL75C06G702B", recipient.getTaxId());
-    assertEquals("Michelangelo Buonarroti", recipient.getDenomination());
-
-    NotificationPhysicalAddressDTO address = recipient.getPhysicalAddress();
-    assertEquals("Via Larga 10", address.getAddress());
-    assertEquals("00186", address.getZip());
-    assertEquals("Roma", address.getMunicipality());
-    assertEquals("RM", address.getProvince());
-
-    NotificationDocumentDTO resultDocument = result.getDocuments().getFirst();
-    assertEquals("sha256", resultDocument.getDigests().getSha256());
-    assertEquals("application/pdf", resultDocument.getContentType());
-    assertEquals("docKey", resultDocument.getRef().getKey());
-    assertEquals("12345678", resultDocument.getRef().getVersionToken());
+    checkRecipient(result);
+    checkDocuments(result);
 
     assertEquals(NotificationFeePolicyDTO.DELIVERY_MODE, result.getNotificationFeePolicy());
     assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER, result.getPhysicalCommunicationType());
@@ -122,5 +107,26 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals(22, result.getVat());
     assertEquals("2025-12-31", result.getPaymentExpirationDate());
     assertEquals(NewNotificationRequestV24DTO.PagoPaIntModeEnum.NONE, result.getPagoPaIntMode());
+  }
+
+  private static void checkRecipient(NewNotificationRequestV24DTO result) {
+    NotificationRecipientV23DTO recipient = result.getRecipients().getFirst();
+    assertEquals(RecipientTypeEnum.PF, recipient.getRecipientType());
+    assertEquals("BNRMHL75C06G702B", recipient.getTaxId());
+    assertEquals("Michelangelo Buonarroti", recipient.getDenomination());
+
+    NotificationPhysicalAddressDTO address = recipient.getPhysicalAddress();
+    assertEquals("Via Larga 10", address.getAddress());
+    assertEquals("00186", address.getZip());
+    assertEquals("Roma", address.getMunicipality());
+    assertEquals("RM", address.getProvince());
+  }
+
+  private static void checkDocuments(NewNotificationRequestV24DTO result) {
+    NotificationDocumentDTO resultDocument = result.getDocuments().getFirst();
+    assertEquals("sha256", resultDocument.getDigests().getSha256());
+    assertEquals("application/pdf", resultDocument.getContentType());
+    assertEquals("docKey", resultDocument.getRef().getKey());
+    assertEquals("12345678", resultDocument.getRef().getVersionToken());
   }
 }

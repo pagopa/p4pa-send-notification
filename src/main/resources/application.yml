@@ -93,6 +93,8 @@ folders:
   shared: "\${SHARED_FOLDER_ROOT:/shared}"
   send-file-folder: "data/send"
 
+fileshare-public-base-url: "\${FILESHARE_PUBLIC_BASE_URL:}"
+
 rest:
   defaults:
     connection-pool:
@@ -102,6 +104,21 @@ rest:
     timeout:
       connect-millis: "\${DEFAULT_REST_TIMEOUT_CONNECT_MILLIS:120000}"
       read-millis: "\${DEFAULT_REST_TIMEOUT_READ_MILLIS:120000}"
+  organization:
+    base-url: "\${ORGANIZATION_BASE_URL:http://localhost:8081}"
+    max-attempts: "\${ORGANIZATION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${ORGANIZATION_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${ORGANIZATION_PRINT_BODY_WHEN_ERROR:true}"
+  workflow-hub:
+    base-url: "\${WORKFLOW_HUB_BASE_URL:http://localhost:8082}/workflowhub"
+    max-attempts: "\${WORKFLOW_HUB_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${WORKFLOW_HUB_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${WORKFLOW_HUB_PRINT_BODY_WHEN_ERROR:true}"
+  debt-positions:
+    base-url: "\${DEBT_POSITION_BASE_URL:}"
+    max-attempts: "\${DEBT_POSITION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${DEBT_POSITION_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${DEBT_POSITION_PRINT_BODY_WHEN_ERROR:true}"
   pagopa:
     send:
       api-key: "\${PU_SEND_API_KEY:}"
@@ -109,21 +126,6 @@ rest:
       max-attempts: "\${SEND_MAX_ATTEMPTS:3}" # It's counting also the first attempt
       wait-time-millis: "\${SEND_WAIT_TIME_MILLIS:500}"
       print-body-when-error: "\${SEND_PRINT_BODY_WHEN_ERROR:true}"
-    organization:
-      base-url: "\${ORGANIZATION_BASE_URL:http://localhost:8081}"
-      max-attempts: "\${ORGANIZATION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
-      wait-time-millis: "\${ORGANIZATION_WAIT_TIME_MILLIS:500}"
-      print-body-when-error: "\${ORGANIZATION_PRINT_BODY_WHEN_ERROR:true}"
-    workflow-hub:
-      base-url: "\${WORKFLOW_HUB_BASE_URL:http://localhost:8082}/workflowhub"
-      max-attempts: "\${WORKFLOW_HUB_MAX_ATTEMPTS:3}" # It's counting also the first attempt
-      wait-time-millis: "\${WORKFLOW_HUB_WAIT_TIME_MILLIS:500}"
-      print-body-when-error: "\${WORKFLOW_HUB_PRINT_BODY_WHEN_ERROR:true}"
-    fileshare:
-      base-url: "\${FILESHARE_BASE_URL:}"
-      max-attempts: "\${FILESHARE_MAX_ATTEMPTS:3}" # It's counting also the first attempt
-      wait-time-millis: "\${FILESHARE_WAIT_TIME_MILLIS:500}"
-      print-body-when-error: "\${FILESHARE_PRINT_BODY_WHEN_ERROR:true}"
 
 app:
   fileEncryptPassword: "\${FILE_ENCRYPT_PASSWORD:ENCR_PSW}"

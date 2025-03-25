@@ -6,7 +6,10 @@ import it.gov.pagopa.pu.send.dto.generated.LoadFileRequest;
 import it.gov.pagopa.pu.send.dto.generated.StartNotificationResponse;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
+import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +28,18 @@ class SendNotificationControllerTest {
   @InjectMocks
   private SendNotificationController sendNotificationController;
 
+  private final String accessToken = "ACCESSTOKEN";
+
+  @BeforeEach
+  void init(){
+    SecurityUtilsTest.configureSecurityContext(accessToken, "USERID");
+  }
+
+  @AfterEach
+  void clearContext(){
+    SecurityUtilsTest.clearSecurityContext();
+  }
+
   @Test
   void givenValidNotificationRequestThenOk(){
     // Given
@@ -37,7 +52,7 @@ class SendNotificationControllerTest {
       .build();
 
     // When
-    Mockito.when(sendNotificationServiceMock.createSendNotification(request, organizationId)).thenReturn(expectedResponse);
+    Mockito.when(sendNotificationServiceMock.createSendNotification(request, organizationId, accessToken)).thenReturn(expectedResponse);
 
     // Then
     ResponseEntity<CreateNotificationResponse> response = sendNotificationController.createSendNotification(organizationId, request);
@@ -57,12 +72,13 @@ class SendNotificationControllerTest {
 
     StartNotificationResponse expectedResponse = StartNotificationResponse.builder().workFlowId(sendNotificationId).build();
 
-    // When
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest, null))
+    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest, accessToken))
       .thenReturn(expectedResponse);
 
-    // Then
+    // When
     ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, organizationId, loadFileRequest);
+
+    // Then
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedResponse, response.getBody());
@@ -78,12 +94,13 @@ class SendNotificationControllerTest {
       .digest("DIGEST")
       .build();
 
-    // When
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest, null))
+    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest, accessToken))
       .thenReturn(null);
 
-    // Then
+    // When
     ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, organizationId, loadFileRequest);
+
+    // Then
     Assertions.assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
   }
 
