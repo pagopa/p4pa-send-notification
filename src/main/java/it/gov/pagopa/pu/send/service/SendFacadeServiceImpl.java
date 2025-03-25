@@ -12,7 +12,7 @@ import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
-import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTO;
+import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
@@ -29,12 +29,12 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendClient sendClient;
   private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
-  private final SendNotification2SendNotificationDTO sendNotificationDTOMapper;
+  private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
 
   public SendFacadeServiceImpl(SendNotificationRepository sendNotificationRepository,
                                SendClient sendClient, SendUploadFacadeServiceImpl uploadService,
                                SendNotification2NewNotificationRequestMapper sendNotificationMapper,
-    SendNotification2SendNotificationDTO sendNotificationDTOMapper) {
+    SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
     this.sendNotificationRepository = sendNotificationRepository;
     this.sendClient = sendClient;
     this.uploadService = uploadService;
@@ -101,14 +101,14 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   public SendNotificationDTO retrieveNotificationData(Long organizationId, String sendNotificationId) {
     SendNotification notification = findSendNotification(sendNotificationId, organizationId);
     if(notification.getNotificationData()!=null)
-      return sendNotificationDTOMapper.map(notification);
+      return sendNotificationDTOMapper.apply(notification);
 
     PagoPa payment = notification.getPayments().getFirst().getPagoPa();
     NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendClient.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), organizationId);
 
     if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {
       notification.setNotificationData(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-      return sendNotificationDTOMapper.map(notification);
+      return sendNotificationDTOMapper.apply(notification);
     }
 
     return null;
