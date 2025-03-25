@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.send.model;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,4 +42,5 @@ public class SendNotification {
   private int paFee;
   private int vat;
   private String pagoPaIntMode;
+  private OffsetDateTime notificationData;
 }

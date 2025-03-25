@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
+import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,17 @@ public class SendController implements SendApi {
     log.info("request preload files for sendNotificationId {}", sendNotificationId);
     sendFacadeService.preloadFiles(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<SendNotificationDTO> retrieveNotificationDate(
+    String sendNotificationId, Long organizationId) {
+    log.info("retrieve notificationData for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
+    SendNotificationDTO response = sendFacadeService.retrieveNotificationData(sendNotificationId, organizationId);
+    if(response!=null)
+      return new ResponseEntity<>(response, HttpStatus.OK);
+    else
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   @Override

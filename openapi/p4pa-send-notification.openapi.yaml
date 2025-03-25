@@ -64,6 +64,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SendNotificationDTO'
+        '204':
+          description: NotificationData not found
         '400':
           description: Invalid request
         '403':

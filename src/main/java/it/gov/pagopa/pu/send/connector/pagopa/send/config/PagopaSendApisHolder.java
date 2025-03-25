@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.config;
 import it.gov.pagopa.pu.send.config.RestTemplateConfig;
 import it.gov.pagopa.pu.send.connector.send.generated.ApiClient;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
+import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -21,6 +22,7 @@ public class PagopaSendApisHolder {
 
   private final Map<String, NewNotificationApi> newNotificationApiMap = new ConcurrentHashMap<>();
   private final Map<String, SenderReadB2BApi> senderReadB2BApiMap = new ConcurrentHashMap<>();
+  private final Map<String, NotificationPriceV23Api> notificationPriceApiMap = new ConcurrentHashMap<>();
 
   public PagopaSendApisHolder(
     PagopaSendApiClientConfig clientConfig,
@@ -41,6 +43,11 @@ public class PagopaSendApisHolder {
   public SenderReadB2BApi getSenderReadB2BApiByApiKey(String apiKey) {
     return senderReadB2BApiMap.computeIfAbsent(apiKey, key ->
       new SenderReadB2BApi(buildApiClient(key)));
+  }
+
+  public NotificationPriceV23Api getNotificationPriceApi(String apiKey) {
+    return notificationPriceApiMap.computeIfAbsent(apiKey, key ->
+      new NotificationPriceV23Api(buildApiClient(key)));
   }
 
   private ApiClient buildApiClient(String apiKey) {

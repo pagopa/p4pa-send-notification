@@ -59,4 +59,15 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
       AUTH_TYPE.API_KEY,
       "x-api-key");
   }
+
+  @Test
+  void whenGetNotificationPriceApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      apiKey -> apisHolder.getNotificationPriceApi(apiKey)
+        .retrieveNotificationPriceV23("PATAXID","NOTICECODE"),
+      new ParameterizedTypeReference<>() {},
+      () -> {},
+      AUTH_TYPE.API_KEY,
+      "x-api-key");
+  }
 }
