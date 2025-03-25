@@ -1102,7 +1102,7 @@
           "navList" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/PagoPa"
+              "type" : "string"
             }
           },
           "status" : {
@@ -1114,7 +1114,8 @@
               "type" : "string"
             }
           }
-        }
+        },
+        "required" : [ "navList", "organizationId", "sendNotificationId", "status" ]
       }
     },
     "securitySchemes" : {

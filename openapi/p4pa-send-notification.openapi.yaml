@@ -428,6 +428,11 @@ components:
           type: string
     SendNotificationDTO:
       type: object
+      required:
+        - sendNotificationId
+        - organizationId
+        - status
+        - navList
       properties:
         sendNotificationId:
           type: string
@@ -442,7 +447,7 @@ components:
         navList:
           type: array
           items:
-            $ref: '#/components/schemas/PagoPa'
+            type: string
         status:
           type: string
         errors:
