@@ -98,7 +98,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public SendNotificationDTO retrieveNotificationData(Long organizationId, String sendNotificationId) {
+  public SendNotificationDTO retrieveNotificationData(String sendNotificationId, Long organizationId) {
     SendNotification notification = findSendNotification(sendNotificationId, organizationId);
     if(notification.getNotificationData()!=null)
       return sendNotificationDTOMapper.apply(notification);

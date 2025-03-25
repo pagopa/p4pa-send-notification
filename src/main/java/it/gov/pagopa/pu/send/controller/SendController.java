@@ -30,7 +30,7 @@ public class SendController implements SendApi {
   public ResponseEntity<SendNotificationDTO> retrieveNotificationDate(
     String sendNotificationId, Long organizationId) {
     log.info("retrieve notificationData for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
-    SendNotificationDTO response = sendFacadeService.retrieveNotificationData(organizationId, sendNotificationId);
+    SendNotificationDTO response = sendFacadeService.retrieveNotificationData(sendNotificationId, organizationId);
     if(response!=null)
       return new ResponseEntity<>(response, HttpStatus.OK);
     else
