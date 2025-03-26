@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.util;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
+import it.gov.pagopa.pu.send.exception.StatusAlreadyProcessedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -19,13 +20,23 @@ class NotificationUtilsTest {
   }
 
   @Test
-  void givenUnexpectedNotificationStateWhenValidateStatusThenNoExceptions() {
+  void givenUnexpectedPreviousNotificationStateWhenValidateStatusThenNoExceptions() {
     Assertions.assertThrows(InvalidStatusException.class, () -> NotificationUtils.validateStatus(NotificationStatus.COMPLETE, NotificationStatus.REGISTERED));
   }
 
   @Test
-  void givenUnexpectedFileStateWhenValidateStatusThenNoExceptions() {
-    Assertions.assertThrows(InvalidStatusException.class, () -> NotificationUtils.validateStatus(FileStatus.READY, FileStatus.UPLOADED));
+  void givenUnexpectedNextNotificationStateWhenValidateStatusThenNoExceptions() {
+    Assertions.assertThrows(StatusAlreadyProcessedException.class, () -> NotificationUtils.validateStatus(NotificationStatus.COMPLETE, NotificationStatus.ACCEPTED));
+  }
+
+  @Test
+  void givenUnexpectedPreviousFileStateWhenValidateStatusThenNoExceptions() {
+    Assertions.assertThrows(InvalidStatusException.class, () -> NotificationUtils.validateStatus(FileStatus.READY, FileStatus.WAITING));
+  }
+
+  @Test
+  void givenUnexpectedNextFileStateWhenValidateStatusThenNoExceptions() {
+    Assertions.assertThrows(StatusAlreadyProcessedException.class, () -> NotificationUtils.validateStatus(FileStatus.READY, FileStatus.UPLOADED));
   }
 
   @Test

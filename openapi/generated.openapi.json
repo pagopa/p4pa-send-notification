@@ -38,6 +38,9 @@
           "200" : {
             "description" : "OK"
           },
+          "208" : {
+            "description" : "Already processed"
+          },
           "400" : {
             "description" : "Invalid request"
           },
@@ -77,6 +80,9 @@
           "200" : {
             "description" : "OK"
           },
+          "208" : {
+            "description" : "Already processed"
+          },
           "400" : {
             "description" : "Invalid request"
           },
@@ -115,6 +121,9 @@
         "responses" : {
           "200" : {
             "description" : "OK"
+          },
+          "208" : {
+            "description" : "Already processed"
           },
           "400" : {
             "description" : "Invalid request"
@@ -324,6 +333,16 @@
               }
             }
           },
+          "208" : {
+            "description" : "Already processed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
           "400" : {
             "description" : "Invalid request",
             "content" : {
@@ -346,6 +365,16 @@
           },
           "404" : {
             "description" : "Notification not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Wrong notification status",
             "content" : {
               "application/json" : {
                 "schema" : {
