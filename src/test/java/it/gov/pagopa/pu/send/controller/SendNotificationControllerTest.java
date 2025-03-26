@@ -1,9 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
-import it.gov.pagopa.pu.send.dto.generated.LoadFileRequest;
-import it.gov.pagopa.pu.send.dto.generated.StartNotificationResponse;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
@@ -43,7 +40,6 @@ class SendNotificationControllerTest {
   @Test
   void givenValidNotificationRequestThenOk(){
     // Given
-    Long organizationId = 1L;
     CreateNotificationRequest request = CreateNotificationRequest.builder().build();
     CreateNotificationResponse expectedResponse = CreateNotificationResponse.builder()
       .sendNotificationId("SENDNOTIFICATIONID")
@@ -52,10 +48,10 @@ class SendNotificationControllerTest {
       .build();
 
     // When
-    Mockito.when(sendNotificationServiceMock.createSendNotification(request, organizationId, accessToken)).thenReturn(expectedResponse);
+    Mockito.when(sendNotificationServiceMock.createSendNotification(request, accessToken)).thenReturn(expectedResponse);
 
     // Then
-    ResponseEntity<CreateNotificationResponse> response = sendNotificationController.createSendNotification(organizationId, request);
+    ResponseEntity<CreateNotificationResponse> response = sendNotificationController.createSendNotification(request);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(expectedResponse, response.getBody());
   }
@@ -63,7 +59,6 @@ class SendNotificationControllerTest {
   @Test
   void givenStartNotificationRequestThenOk(){
     // Given
-    Long organizationId = 1L;
     String sendNotificationId = "SENDNOTIFICATIONID";
     LoadFileRequest loadFileRequest = LoadFileRequest.builder()
       .fileName("FILENAME")
@@ -72,11 +67,11 @@ class SendNotificationControllerTest {
 
     StartNotificationResponse expectedResponse = StartNotificationResponse.builder().workFlowId(sendNotificationId).build();
 
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest, accessToken))
+    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, loadFileRequest, accessToken))
       .thenReturn(expectedResponse);
 
     // When
-    ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, organizationId, loadFileRequest);
+    ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, loadFileRequest);
 
     // Then
     Assertions.assertNotNull(response);
@@ -87,18 +82,17 @@ class SendNotificationControllerTest {
   @Test
   void givenStartNotificationRequestThenAccepted(){
     // Given
-    Long organizationId = 1L;
     String sendNotificationId = "SENDNOTIFICATIONID";
     LoadFileRequest loadFileRequest = LoadFileRequest.builder()
       .fileName("FILENAME")
       .digest("DIGEST")
       .build();
 
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, organizationId, loadFileRequest, accessToken))
+    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, loadFileRequest, accessToken))
       .thenReturn(null);
 
     // When
-    ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, organizationId, loadFileRequest);
+    ResponseEntity<StartNotificationResponse> response = sendNotificationController.startNotification(sendNotificationId, loadFileRequest);
 
     // Then
     Assertions.assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
@@ -108,13 +102,29 @@ class SendNotificationControllerTest {
   void givenValidSendNotificationIdWhenDeleteNotificationThenOk(){
     //Given
     String sendNotificationId = "SENDNOTIFICATIONID";
-    Long organizationId = 1L;
     // When
-    Mockito.doNothing().when(sendNotificationServiceMock).deleteSendNotification(sendNotificationId, organizationId);
+    Mockito.doNothing().when(sendNotificationServiceMock).deleteSendNotification(sendNotificationId);
     //Then
-    ResponseEntity<Void> response = sendNotificationController.deleteSendNotification(sendNotificationId, organizationId);
+    ResponseEntity<Void> response = sendNotificationController.deleteSendNotification(sendNotificationId);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  @Test
+  void whenGetSendNotificationThenInvokeService(){
+    //Given
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationServiceMock.findSendNotificationDTO(sendNotificationId))
+      .thenReturn(expectedResult);
+
+    // When
+    //Then
+    ResponseEntity<SendNotificationDTO> response = sendNotificationController.getSendNotification(sendNotificationId);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
   }
 
 }

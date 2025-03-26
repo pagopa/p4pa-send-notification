@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "134db90f-08d7-4ee4-9c30-7a4ab3f451b3",
+		"_postman_id": "06ee48a9-e34b-4458-badf-884bc057838c",
 		"name": "P4PA-Send-E2E",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "36568841"
+		"_exporter_id": "15747968",
+		"_collection_link": "https://warped-astronaut-141685.postman.co/workspace/P4PA~9a8b7dd5-97b6-4dd0-b3f5-95f25fd0b455/collection/15747968-06ee48a9-e34b-4458-badf-884bc057838c?action=share&source=collection_link&creator=15747968"
 	},
 	"item": [
 		{
@@ -134,7 +135,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        },\r\n        \"payments\": [ \r\n        {\r\n            \"pagoPa\": { \r\n                \"noticeCode\": \"301340000100000045\", \r\n                \"creditorTaxId\": \"99999999982\", \r\n                \"applyCost\": true, \r\n                \"attachment\": { \r\n                    \"fileName\":\"Pagamento.pdf\",\r\n                    \"contentType\": \"application/pdf\",\r\n                    \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n                }\r\n            }\r\n        }]\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    }],\r\n    \"notificationFeePolicy\": \"DELIVERY_MODE\", \r\n    \"physicalCommunicationType\": \"AR_REGISTERED_LETTER\", \r\n    \"senderDenomination\": \"Ente Intermediario 2\", \r\n    \"senderTaxId\": \"00000000018\", \r\n    \"amount\": 0, \r\n    \"paymentExpirationDate\": \"2025-12-27\", \r\n    \"taxonomyCode\": \"010101P\", \r\n    \"paFee\": 100, \r\n    \"vat\":22, \r\n    \"pagoPaIntMode\": \"NONE\" \r\n}",
+							"raw": "{\r\n    \"organizationId\": {{organizationId}},\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        },\r\n        \"payments\": [ \r\n        {\r\n            \"pagoPa\": { \r\n                \"noticeCode\": \"301340000100000045\", \r\n                \"creditorTaxId\": \"99999999982\", \r\n                \"applyCost\": true, \r\n                \"attachment\": { \r\n                    \"fileName\":\"Pagamento.pdf\",\r\n                    \"contentType\": \"application/pdf\",\r\n                    \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n                }\r\n            }\r\n        }]\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    }],\r\n    \"notificationFeePolicy\": \"DELIVERY_MODE\", \r\n    \"physicalCommunicationType\": \"AR_REGISTERED_LETTER\", \r\n    \"senderDenomination\": \"Ente Intermediario 2\", \r\n    \"senderTaxId\": \"00000000018\", \r\n    \"amount\": 0, \r\n    \"paymentExpirationDate\": \"2025-12-27\", \r\n    \"taxonomyCode\": \"010101P\", \r\n    \"paFee\": 100, \r\n    \"vat\":22, \r\n    \"pagoPaIntMode\": \"NONE\" \r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -142,14 +143,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{organizationId}}",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
-								"notification",
-								"{{organizationId}}"
+								"notification"
 							]
 						}
 					},
@@ -204,14 +204,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{organizationId}}/{{sendNotificationId}}/start",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}/start",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
 								"notification",
-								"{{organizationId}}",
 								"{{sendNotificationId}}",
 								"start"
 							]
@@ -273,14 +272,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{organizationId}}/{{sendNotificationId}}/start",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}/start",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
 								"notification",
-								"{{organizationId}}",
 								"{{sendNotificationId}}",
 								"start"
 							]
@@ -635,7 +633,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}?organizationId={{organizationId}}",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
@@ -643,12 +641,6 @@
 								"p4pasend",
 								"notification",
 								"{{sendNotificationId}}"
-							],
-							"query": [
-								{
-									"key": "organizationId",
-									"value": "{{organizationId}}"
-								}
 							]
 						}
 					},

@@ -2,15 +2,15 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
-import it.gov.pagopa.pu.send.dto.generated.LoadFileRequest;
-import it.gov.pagopa.pu.send.dto.generated.StartNotificationResponse;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
+import it.gov.pagopa.pu.send.exception.SendNotificationFileNotFoundException;
+import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
+import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.FileUtils;
@@ -30,47 +30,49 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final CreateNotificationRequest2SendNotificationMapper mapper;
   private final String fileShareBaseUrl;
   private final FileRetrieverService fileRetrieverService;
+  private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
 
   public SendNotificationServiceImpl(@Value("${fileshare-public-base-url}") String fileShareBaseUrl,
-    SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
-    FileRetrieverService fileRetrieverService) {
+                                     SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
+                                     FileRetrieverService fileRetrieverService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationRepository = sendNotificationRepository;
     this.mapper = mapper;
     this.workflowService = workflowService;
     this.fileRetrieverService = fileRetrieverService;
+    this.sendNotificationDTOMapper = sendNotificationDTOMapper;
   }
 
   @Transactional
   @Override
-  public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, Long organizationId, String accessToken) {
-    SendNotification sendNotification = sendNotificationRepository.insert(mapper.map(createNotificationRequest, organizationId, accessToken));
+  public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, String accessToken) {
+    SendNotification sendNotification = sendNotificationRepository.insert(mapper.map(createNotificationRequest, accessToken));
 
     return CreateNotificationResponse
       .builder()
       .sendNotificationId(sendNotification.getSendNotificationId())
       .status(sendNotification.getStatus().name())
-      .preloadUrl(fileShareBaseUrl+"/organization/"+organizationId+"/send-files/"+sendNotification.getSendNotificationId())
+      .preloadUrl(fileShareBaseUrl+"/organization/"+sendNotification.getOrganizationId()+"/send-files/"+sendNotification.getSendNotificationId())
       .build();
   }
 
   @Transactional
   @Override
-  public StartNotificationResponse startSendNotification(String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest, String accessToken) {
-    SendNotification notification = findSendNotification(sendNotificationId, organizationId);
+  public StartNotificationResponse startSendNotification(String sendNotificationId, LoadFileRequest loadFileRequest, String accessToken) {
+    SendNotification notification = findSendNotification(sendNotificationId);
     NotificationUtils.validateStatus(NotificationStatus.WAITING_FILE, notification.getStatus());
 
     notification.getDocuments().stream()
       .filter(doc -> doc.getFileName().equals(loadFileRequest.getFileName()))
       .findFirst().ifPresentOrElse(
-        doc -> updateFileStatus(sendNotificationId, doc, loadFileRequest, organizationId),
+        doc -> updateFileStatus(sendNotificationId, doc, loadFileRequest, notification.getOrganizationId()),
         () -> {
-          throw new IllegalArgumentException("File not found with id: " + loadFileRequest.getFileName());
+          throw new SendNotificationFileNotFoundException("File not found with id: " + loadFileRequest.getFileName());
         }
       );
 
-    notification = findSendNotification(sendNotificationId, organizationId);
-    boolean allFilesReady = notification.getDocuments().stream()
+    SendNotification updatedNotification = findSendNotification(sendNotificationId);
+    boolean allFilesReady = updatedNotification.getDocuments().stream()
       .allMatch(doc -> doc.getStatus().equals(FileStatus.READY));
 
     if (allFilesReady) {
@@ -85,18 +87,22 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
   @Transactional
   @Override
-  public void deleteSendNotification(String sendNotificationId, Long organizationId) {
-    SendNotification notification = findSendNotification(sendNotificationId, organizationId);
+  public void deleteSendNotification(String sendNotificationId) {
+    SendNotification notification = findSendNotification(sendNotificationId);
     if (!notification.getStatus().equals(NotificationStatus.COMPLETE))
       sendNotificationRepository.deleteById(sendNotificationId);
     else
       throw new InvalidStatusException("Cannot delete notification with status complete");
   }
 
+  @Override
+  public SendNotificationDTO findSendNotificationDTO(String sendNotificationId) {
+    return sendNotificationDTOMapper.apply(findSendNotification(sendNotificationId));
+  }
 
-  private SendNotification findSendNotification(String sendNotificationId, Long organizationId) {
-    return sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, organizationId)
-      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId + " for organizationId: " + organizationId));
+  private SendNotification findSendNotification(String sendNotificationId) {
+    return sendNotificationRepository.findById(sendNotificationId)
+      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }
 
   private void updateFileStatus(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest, Long organizationId) {

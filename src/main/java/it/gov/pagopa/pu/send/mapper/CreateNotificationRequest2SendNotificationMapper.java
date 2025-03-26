@@ -24,17 +24,21 @@ public class CreateNotificationRequest2SendNotificationMapper {
     this.debtPositionService = debtPositionService;
   }
 
-  public SendNotification map(CreateNotificationRequest request, Long organizationId, String accessToken) {
+  public SendNotification map(CreateNotificationRequest request, String accessToken) {
+    Long organizationId = request.getOrganizationId();
+
     SendNotification sendNotification = new SendNotification();
     sendNotification.setPaProtocolNumber(request.getPaProtocolNumber());
     sendNotification.setSubjectType(request.getRecipient().getRecipientType().getValue());
     sendNotification.setFiscalCode(request.getRecipient().getTaxId());
     sendNotification.setDenomination(request.getRecipient().getDenomination());
 
-    if (request.getDocuments().isEmpty())
+    if (request.getDocuments().isEmpty()) {
       sendNotification.setStatus(NotificationStatus.SENDING);
-    else
+    }
+    else {
       sendNotification.setStatus(NotificationStatus.WAITING_FILE);
+    }
 
     sendNotification.setPayments(request.getRecipient().getPayments().stream()
       .map(p -> {

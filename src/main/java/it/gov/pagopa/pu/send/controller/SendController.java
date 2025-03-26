@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.send.controller;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
@@ -51,7 +50,7 @@ public class SendController implements SendApi {
   }
 
   @Override
-  public ResponseEntity<NewNotificationRequestStatusResponseV24DTO> notificationStatus(String sendNotificationId) {
+  public ResponseEntity<SendNotificationDTO> notificationStatus(String sendNotificationId) {
     log.info("retrieve notification status for sendNotificationId {}", sendNotificationId);
     return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId), HttpStatus.OK);
   }

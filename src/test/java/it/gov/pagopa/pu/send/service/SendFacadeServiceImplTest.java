@@ -1,15 +1,7 @@
 package it.gov.pagopa.pu.send.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -18,17 +10,11 @@ import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
-
-import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +22,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class SendFacadeServiceImplTest {
@@ -105,7 +102,7 @@ class SendFacadeServiceImplTest {
     String sendNotificationId = "SENDNOTIFICATIONID";
     Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(Optional.empty());
 
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> sendService.preloadFiles(sendNotificationId));
+    Exception exception = assertThrows(SendNotificationNotFoundException.class, () -> sendService.preloadFiles(sendNotificationId));
 
     assertEquals("Notification not found with id: " + sendNotificationId, exception.getMessage());
   }
@@ -187,15 +184,20 @@ class SendFacadeServiceImplTest {
       .status(NotificationStatus.COMPLETE)
       .build();
 
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
     Mockito.when(sendNotificationRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
     Mockito.when(sendClient.notificationStatus(notificationRequestId, orgId)).thenReturn(response);
 
-    NewNotificationRequestStatusResponseV24DTO result = sendService.notificationStatus(sendNotificationId);
+    Mockito.when(sendNotificationDTOMapper.apply(Mockito.same(notification)))
+      .thenReturn(expectedResult);
+
+    SendNotificationDTO result = sendService.notificationStatus(sendNotificationId);
 
     Assertions.assertNotNull(result);
-    Assertions.assertEquals(response, result);
+    Assertions.assertSame(expectedResult, result);
     Mockito.verify(sendNotificationRepository, Mockito.times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
   }
