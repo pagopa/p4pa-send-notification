@@ -100,13 +100,13 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   @Transactional
   @Override
-  public SendNotificationDTO retrieveNotificationData(String sendNotificationId, Long organizationId) {
-    SendNotification notification = findSendNotification(sendNotificationId, organizationId);
+  public SendNotificationDTO retrieveNotificationData(String sendNotificationId) {
+    SendNotification notification = findSendNotification(sendNotificationId);
     if(notification.getNotificationData()!=null)
       return sendNotificationDTOMapper.apply(notification);
 
     PagoPa payment = notification.getPayments().getFirst().getPayment().getPagoPa();
-    NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendClient.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), organizationId);
+    NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendClient.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId());
 
     if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {
       notification.setNotificationData(notificationPriceResponseV23DTO.getNotificationViewDate()
@@ -133,11 +133,6 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   private SendNotification findSendNotification(String sendNotificationId) {
     return sendNotificationRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
-  }
-
-  private SendNotification findSendNotification(String sendNotificationId, Long organizationId) {
-    return sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, organizationId)
       .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
   }
 }
