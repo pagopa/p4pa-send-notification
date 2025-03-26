@@ -204,6 +204,16 @@ class SendNotificationExceptionHandlerTest {
   }
 
   @Test
+  void handleStatusAlreadyProcessedException() throws Exception {
+    doThrow(new StatusAlreadyProcessedException(NotificationStatus.WAITING_FILE, NotificationStatus.SENDING)).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isAlreadyReported())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_ALREADY_PROCESSED"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Expected status is WAITING_FILE, but it has already be processed: actual is SENDING"));
+  }
+
+  @Test
   void handleSendNotificationNotFoundException() throws Exception {
     doThrow(new SendNotificationNotFoundException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
 
