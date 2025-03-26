@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.model.SendNotification.Fields;
+import java.time.OffsetDateTime;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -86,6 +87,15 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
     return mongoTemplate.updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
       new Update().set(Fields.iun, iun),
+      SendNotification.class);
+  }
+
+  @Override
+  public UpdateResult updateNotificationDate(String sendNotificationId,
+    OffsetDateTime notificationDate) {
+    return mongoTemplate.updateFirst(
+      Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
+      new Update().set(Fields.notificationData, notificationDate.toString()),
       SendNotification.class);
   }
 
