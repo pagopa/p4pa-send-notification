@@ -55,6 +55,11 @@ public class SendNotificationExceptionHandler {
     return handleException(ex, request, HttpStatus.NOT_FOUND, SendNotificationErrorDTO.CodeEnum.NOT_FOUND);
   }
 
+  @ExceptionHandler(StatusAlreadyProcessedException.class)
+  public ResponseEntity<SendNotificationErrorDTO> handleStatusAlreadyProcessedException(StatusAlreadyProcessedException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.ALREADY_REPORTED, SendNotificationErrorDTO.CodeEnum.ALREADY_PROCESSED);
+  }
+
   @ExceptionHandler(InvalidStatusException.class)
   public ResponseEntity<SendNotificationErrorDTO> handleInvalidStatusException(InvalidStatusException ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.CONFLICT, SendNotificationErrorDTO.CodeEnum.BAD_REQUEST);

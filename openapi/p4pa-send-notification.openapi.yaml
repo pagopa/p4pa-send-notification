@@ -167,6 +167,8 @@ paths:
       responses:
         '200':
           description: OK
+        '208':
+          description: Already processed
         '400':
           description: Invalid request
         '403':
@@ -193,6 +195,8 @@ paths:
       responses:
         '200':
           description: OK
+        '208':
+          description: Already processed
         '400':
           description: Invalid request
         '403':
@@ -219,6 +223,8 @@ paths:
       responses:
         '200':
           description: OK
+        '208':
+          description: Already processed
         '400':
           description: Invalid request
         '403':
@@ -249,12 +255,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SendNotificationDTO'
+        '208':
+          description: Already processed
         '400':
           description: Invalid request
         '403':
           description: Forbidden
         '404':
           description: Notification not found
+        '409':
+          description: Wrong notification status
         '500':
           description: Internal server error
 security:
@@ -454,5 +464,6 @@ components:
             - SEND_NOTIFICATION_NOT_FOUND
             - SEND_NOTIFICATION_BAD_REQUEST
             - SEND_NOTIFICATION_GENERIC_ERROR
+            - SEND_NOTIFICATION_ALREADY_PROCESSED
         message:
           type: string
