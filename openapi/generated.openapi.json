@@ -765,6 +765,10 @@
         },
         "required" : [ "digest", "fileName" ]
       },
+      "NotificationStatus" : {
+        "type" : "string",
+        "enum" : [ "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED", "COMPLETE", "ACCEPTED" ]
+      },
       "SendNotificationDTO" : {
         "type" : "object",
         "properties" : {
@@ -789,7 +793,7 @@
             }
           },
           "status" : {
-            "type" : "string"
+            "$ref" : "#/components/schemas/NotificationStatus"
           },
           "errors" : {
             "type" : "array",

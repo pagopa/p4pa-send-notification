@@ -18,7 +18,7 @@ public class SendNotification2SendNotificationDTOMapper {
     notificationDTO.setOrganizationId(sendNotification.getOrganizationId());
     notificationDTO.setIun(sendNotification.getIun());
     notificationDTO.setNotificationDate(sendNotification.getNotificationData());
-    notificationDTO.setStatus(sendNotification.getStatus().name());
+    notificationDTO.setStatus(sendNotification.getStatus());
     notificationDTO.setPayments(buildPayments(sendNotification));
     return notificationDTO;
   }

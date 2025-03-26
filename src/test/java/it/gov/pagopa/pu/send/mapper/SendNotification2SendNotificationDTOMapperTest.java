@@ -54,7 +54,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     assertEquals(1L, result.getOrganizationId());
     assertEquals("IUN", result.getIun());
     assertEquals(now, result.getNotificationDate());
-    assertEquals(NotificationStatus.COMPLETE.name(), result.getStatus());
+    assertEquals(NotificationStatus.COMPLETE, result.getStatus());
     assertEquals(
       List.of(
         new SendNotificationPaymentsDTO(3L, List.of("NOTICECODE1", "NOTICECODE2")),

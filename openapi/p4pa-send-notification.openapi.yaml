@@ -424,7 +424,7 @@ components:
           items:
             $ref: '#/components/schemas/SendNotificationPaymentsDTO'
         status:
-          type: string
+          type: 'NotificationStatus'
         errors:
           type: array
           items:

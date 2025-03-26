@@ -141,6 +141,9 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
   outputDir.set("$projectDir/build/generated")
   apiPackage.set("it.gov.pagopa.pu.send.controller.generated")
   modelPackage.set("it.gov.pagopa.pu.send.dto.generated")
+  typeMappings.set(mapOf(
+    "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus"
+  ))
   configOptions.set(mapOf(
     "dateLibrary" to "java8",
     "requestMappingMode" to "api_interface",
