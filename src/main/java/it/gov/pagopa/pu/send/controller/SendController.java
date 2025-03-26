@@ -26,8 +26,7 @@ public class SendController implements SendApi {
   }
 
   @Override
-  public ResponseEntity<SendNotificationDTO> retrieveNotificationDate(
-    String sendNotificationId) {
+  public ResponseEntity<SendNotificationDTO> retrieveNotificationDate(String sendNotificationId) {
     log.info("retrieve notificationData for sendNotificationId {}", sendNotificationId);
     SendNotificationDTO response = sendFacadeService.retrieveNotificationData(sendNotificationId);
     if(response!=null)

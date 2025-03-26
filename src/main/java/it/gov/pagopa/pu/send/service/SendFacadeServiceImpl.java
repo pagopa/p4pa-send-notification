@@ -112,6 +112,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {
       notification.setNotificationData(notificationPriceResponseV23DTO.getNotificationViewDate()
         .toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
+      sendNotificationRepository.updateNotificationDate(sendNotificationId, notification.getNotificationData());
       return sendNotificationDTOMapper.apply(notification);
     }
 
