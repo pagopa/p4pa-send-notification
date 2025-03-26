@@ -1,9 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
-import it.gov.pagopa.pu.send.dto.generated.LoadFileRequest;
-import it.gov.pagopa.pu.send.dto.generated.StartNotificationResponse;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
@@ -111,6 +108,23 @@ class SendNotificationControllerTest {
     ResponseEntity<Void> response = sendNotificationController.deleteSendNotification(sendNotificationId);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  @Test
+  void whenGetSendNotificationThenInvokeService(){
+    //Given
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationServiceMock.findSendNotificationDTO(sendNotificationId))
+      .thenReturn(expectedResult);
+
+    // When
+    //Then
+    ResponseEntity<SendNotificationDTO> response = sendNotificationController.getSendNotification(sendNotificationId);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
   }
 
 }
