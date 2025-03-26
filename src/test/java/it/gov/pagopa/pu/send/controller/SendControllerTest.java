@@ -68,7 +68,6 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdAndOrganizationIdWhenRetrieveNotificationDateThenOk() {
     String sendNotificationId = "12345";
-    Long organizationId = 1L;
 
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
     Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId))
