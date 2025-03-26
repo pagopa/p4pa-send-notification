@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotification;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 public interface SendNotificationRepositoryExt {
@@ -15,5 +16,6 @@ public interface SendNotificationRepositoryExt {
   UpdateResult updateFileStatus(String sendNotificationId, String fileName, FileStatus newStatus);
   UpdateResult updateFileVersionId(String sendNotificationId, String fileName, String versionId);
   UpdateResult updateNotificationIun(String sendNotificationId, String iun);
+  UpdateResult updateNotificationDate(String sendNotificationId, OffsetDateTime notificationDate);
   Optional<SendNotification> findByIdAndOrganizationId(String notificationId, Long organizationId);
 }

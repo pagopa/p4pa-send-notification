@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.Htt
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotification;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -122,6 +123,20 @@ class SendNotificationRepositoryExtImplTest {
     Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateNotificationIun(sendNotificationId,iun);
+
+    assertEquals(1L, result.getModifiedCount());
+    Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class));
+  }
+
+  @Test
+  void givenUpdateNotificationDateThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    OffsetDateTime now = OffsetDateTime.now();
+
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class))).thenReturn(updateResult);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.updateNotificationDate(sendNotificationId,now);
 
     assertEquals(1L, result.getModifiedCount());
     Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(SendNotification.class));

@@ -68,13 +68,12 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdAndOrganizationIdWhenRetrieveNotificationDateThenOk() {
     String sendNotificationId = "12345";
-    Long organizationId = 1L;
 
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId, organizationId))
+    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId))
       .thenReturn(notificationDTO);
 
-    ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId, organizationId);
+    ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -82,11 +81,10 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdAndOrganizationIdWhenRetrieveNotificationDateThenNoContent() {
     String sendNotificationId = "12345";
-    Long organizationId = 1L;
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId, organizationId))
+    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId))
       .thenReturn(null);
 
-    ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId, organizationId);
+    ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId);
     Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
   }
 }

@@ -8,6 +8,6 @@ public interface SendFacadeService {
   void preloadFiles(String sendNotificationId);
   void uploadFiles(String sendNotificationId);
   void deliveryNotification(String sendNotificationId);
-  SendNotificationDTO retrieveNotificationData(String sendNotificationId, Long organizationId);
+  SendNotificationDTO retrieveNotificationData(String sendNotificationId);
   NewNotificationRequestStatusResponseV24DTO notificationStatus(String sendNotificationId);
 }

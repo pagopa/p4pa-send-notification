@@ -148,7 +148,7 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
-  /send/{organizationId}/{sendNotificationId}/retrieveNotificationDate:
+  /send/{sendNotificationId}/retrieveNotificationDate:
     get:
       tags:
         - Send
@@ -161,12 +161,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: organizationId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
       responses:
         '200':
           description: OK

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c2e57e17-5b32-4858-87c4-ef0998b16020",
+		"_postman_id": "134db90f-08d7-4ee4-9c30-7a4ab3f451b3",
 		"name": "P4PA-Send-E2E",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "36568841"
@@ -112,10 +112,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"const lodash = require('lodash');\r",
-									"const randomNumber = lodash.random(1000000000,9999999999)\r",
-									"const noticeCode = \"30000000\".concat(randomNumber)\r",
-									"pm.collectionVariables.set(\"noticeCode\", noticeCode)"
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -137,7 +134,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        },\r\n        \"payments\": [ \r\n        {\r\n            \"pagoPa\": { \r\n                \"noticeCode\": {{noticeCode}}, \r\n                \"creditorTaxId\": \"77777777777\", \r\n                \"applyCost\": true, \r\n                \"attachment\": { \r\n                    \"fileName\":\"Pagamento.pdf\",\r\n                    \"contentType\": \"application/pdf\",\r\n                    \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n                }\r\n            }\r\n        }]\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    }],\r\n    \"notificationFeePolicy\": \"DELIVERY_MODE\", \r\n    \"physicalCommunicationType\": \"AR_REGISTERED_LETTER\", \r\n    \"senderDenomination\": \"Ente Intermediario 2\", \r\n    \"senderTaxId\": \"00000000018\", \r\n    \"amount\": 0, \r\n    \"paymentExpirationDate\": \"2025-12-27\", \r\n    \"taxonomyCode\": \"010101P\", \r\n    \"paFee\": 100, \r\n    \"vat\":22, \r\n    \"pagoPaIntMode\": \"NONE\" \r\n}",
+							"raw": "{\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        },\r\n        \"payments\": [ \r\n        {\r\n            \"pagoPa\": { \r\n                \"noticeCode\": \"301340000100000045\", \r\n                \"creditorTaxId\": \"99999999982\", \r\n                \"applyCost\": true, \r\n                \"attachment\": { \r\n                    \"fileName\":\"Pagamento.pdf\",\r\n                    \"contentType\": \"application/pdf\",\r\n                    \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n                }\r\n            }\r\n        }]\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    }],\r\n    \"notificationFeePolicy\": \"DELIVERY_MODE\", \r\n    \"physicalCommunicationType\": \"AR_REGISTERED_LETTER\", \r\n    \"senderDenomination\": \"Ente Intermediario 2\", \r\n    \"senderTaxId\": \"00000000018\", \r\n    \"amount\": 0, \r\n    \"paymentExpirationDate\": \"2025-12-27\", \r\n    \"taxonomyCode\": \"010101P\", \r\n    \"paFee\": 100, \r\n    \"vat\":22, \r\n    \"pagoPaIntMode\": \"NONE\" \r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -526,6 +523,71 @@
 		{
 			"name": "99_utils",
 			"item": [
+				{
+					"name": "retrieveNotificationDate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send retrieve notificationDate - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"P4PA Send retrieve notificationDate - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"sendNotificationId\");\r",
+									"    pm.expect(jsonResponse).have.property(\"organizationId\");\r",
+									"    pm.expect(jsonResponse).have.property(\"iun\");\r",
+									"    pm.expect(jsonResponse).have.property(\"notificationDate\");\r",
+									"    pm.expect(jsonResponse).have.property(\"notificationRequestStatus\").eq(\"COMPLETE\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/retrieveNotificationDate",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"retrieveNotificationDate"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "deleteSendNotification",
 					"event": [

@@ -221,12 +221,12 @@ class SendFacadeServiceImplTest {
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
     notificationDTO.setNotificationDate(OffsetDateTime.now());
 
-    Mockito.when(sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, orgId))
+    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendClient.retrieveNotificationPrice(paxId, noticeCode, orgId)).thenReturn(response);
     Mockito.when(sendNotificationDTOMapper.apply(notification)).thenReturn(notificationDTO);
 
-    SendNotificationDTO result = sendService.retrieveNotificationData(sendNotificationId, orgId);
+    SendNotificationDTO result = sendService.retrieveNotificationData(sendNotificationId);
 
     Assertions.assertNotNull(result);
   }
@@ -248,11 +248,11 @@ class SendFacadeServiceImplTest {
       )
       .build();
 
-    Mockito.when(sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, orgId))
+    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendClient.retrieveNotificationPrice(paxId, noticeCode, orgId)).thenReturn(response);
 
-    SendNotificationDTO result = sendService.retrieveNotificationData(sendNotificationId, orgId);
+    SendNotificationDTO result = sendService.retrieveNotificationData(sendNotificationId);
 
     Assertions.assertNull(result);
   }
@@ -275,11 +275,11 @@ class SendFacadeServiceImplTest {
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
     notificationDTO.setNotificationDate(OffsetDateTime.now());
 
-    Mockito.when(sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, orgId))
+    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendNotificationDTOMapper.apply(notification)).thenReturn(notificationDTO);
 
-    SendNotificationDTO result = sendService.retrieveNotificationData(sendNotificationId, orgId);
+    SendNotificationDTO result = sendService.retrieveNotificationData(sendNotificationId);
 
     Assertions.assertNotNull(result);
   }
