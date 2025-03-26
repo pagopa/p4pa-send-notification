@@ -1,16 +1,16 @@
 package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.controller.generated.NotificationApi;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
-import it.gov.pagopa.pu.send.dto.generated.LoadFileRequest;
-import it.gov.pagopa.pu.send.dto.generated.StartNotificationResponse;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -24,28 +24,40 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
-  public ResponseEntity<CreateNotificationResponse> createSendNotification(Long organizationId, CreateNotificationRequest createNotificationRequest) {
-    log.info("new notification request for organizationId {}", organizationId);
+  public ResponseEntity<CreateNotificationResponse> createSendNotification(CreateNotificationRequest createNotificationRequest) {
+    log.info("new notification request for organizationId {} and nav {}",
+      createNotificationRequest.getOrganizationId(),
+      Optional.ofNullable(createNotificationRequest.getRecipient())
+        .map(r -> r.getPayments().stream()
+          .map(p->p.getPagoPa().getNoticeCode())
+          .collect(Collectors.joining(",")))
+        .orElse("null")
+    );
     String accessToken = SecurityUtils.getAccessToken();
-    return new ResponseEntity<>(sendNotificationService.createSendNotification(createNotificationRequest, organizationId, accessToken), HttpStatus.OK);
+    return new ResponseEntity<>(sendNotificationService.createSendNotification(createNotificationRequest, accessToken), HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<Void> deleteSendNotification(String sendNotificationId, Long organizationId) {
-    log.info("delete notification request for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
-    sendNotificationService.deleteSendNotification(sendNotificationId, organizationId);
+  public ResponseEntity<Void> deleteSendNotification(String sendNotificationId) {
+    log.info("delete notification request for sendNotificationId {}", sendNotificationId);
+    sendNotificationService.deleteSendNotification(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<StartNotificationResponse> startNotification(
-    String sendNotificationId, Long organizationId, LoadFileRequest loadFileRequest) {
-    log.info("start notification request for sendNotificationId {} and organizationId {}", sendNotificationId, organizationId);
+  public ResponseEntity<StartNotificationResponse> startNotification(String sendNotificationId, LoadFileRequest loadFileRequest) {
+    log.info("start notification request for sendNotificationId {}", sendNotificationId);
     String accessToken = SecurityUtils.getAccessToken();
-    StartNotificationResponse response = sendNotificationService.startSendNotification(sendNotificationId, organizationId, loadFileRequest, accessToken);
+    StartNotificationResponse response = sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, accessToken);
     if (response != null)
       return new ResponseEntity<>(response, HttpStatus.OK);
     else
       return new ResponseEntity<>(HttpStatus.ACCEPTED);
+  }
+
+  @Override
+  public ResponseEntity<SendNotificationDTO> getSendNotification(String sendNotificationId) {
+    log.info("Retrieving sendNotificationId {}", sendNotificationId);
+    return ResponseEntity.ok(sendNotificationService.findSendNotificationDTO(sendNotificationId));
   }
 }

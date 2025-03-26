@@ -85,7 +85,9 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
   public UpdateResult updateNotificationIun(String sendNotificationId, String iun) {
     return mongoTemplate.updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
-      new Update().set(Fields.iun, iun),
+      new Update()
+        .set(Fields.iun, iun)
+        .set(Fields.status, NotificationStatus.ACCEPTED),
       SendNotification.class);
   }
 

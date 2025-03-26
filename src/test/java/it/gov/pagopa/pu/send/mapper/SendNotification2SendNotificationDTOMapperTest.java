@@ -1,20 +1,22 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
+import it.gov.pagopa.pu.send.dto.generated.SendNotificationPaymentsDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotification;
 import it.gov.pagopa.pu.send.util.TestUtils;
-import java.time.OffsetDateTime;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -32,10 +34,17 @@ class SendNotification2SendNotificationDTOMapperTest {
     sendNotification.setNotificationData(now);
     sendNotification.setStatus(NotificationStatus.COMPLETE);
 
-    PagoPa pagoPa = new PagoPa();
-    pagoPa.setNoticeCode("NOTICECODE");
-    Payment payment = new Payment(pagoPa);
-    sendNotification.setPayments(Collections.singletonList(new PuPayment(3L, payment)));
+    sendNotification.setPayments(List.of(
+      new PuPayment(3L, new Payment(PagoPa.builder()
+        .noticeCode("NOTICECODE1")
+        .build())),
+      new PuPayment(3L, new Payment(PagoPa.builder()
+        .noticeCode("NOTICECODE2")
+        .build())),
+      new PuPayment(4L, new Payment(PagoPa.builder()
+        .noticeCode("NOTICECODE3")
+        .build()))
+    ));
 
     SendNotificationDTO result = mapper.apply(sendNotification);
 
@@ -46,7 +55,12 @@ class SendNotification2SendNotificationDTOMapperTest {
     assertEquals("IUN", result.getIun());
     assertEquals(now, result.getNotificationDate());
     assertEquals(NotificationStatus.COMPLETE.name(), result.getStatus());
-    assertEquals(Collections.singletonList("NOTICECODE"), result.getNavList());
+    assertEquals(
+      List.of(
+        new SendNotificationPaymentsDTO(3L, List.of("NOTICECODE1", "NOTICECODE2")),
+        new SendNotificationPaymentsDTO(4L, List.of("NOTICECODE3"))
+      ),
+      result.getPayments());
   }
 
 }

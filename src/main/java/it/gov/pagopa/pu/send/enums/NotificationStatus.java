@@ -5,5 +5,6 @@ public enum NotificationStatus {
   SENDING,
   REGISTERED,
   UPLOADED,
-  COMPLETE;
+  COMPLETE,
+  ACCEPTED
 }

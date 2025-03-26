@@ -137,21 +137,12 @@
         } ]
       }
     },
-    "/p4pasend/notification/{organizationId}" : {
+    "/p4pasend/notification" : {
       "post" : {
         "tags" : [ "Notification" ],
         "summary" : "Create notification",
         "description" : "Create initial notification",
         "operationId" : "createSendNotification",
-        "parameters" : [ {
-          "name" : "organizationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        } ],
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -208,7 +199,7 @@
         } ]
       }
     },
-    "/p4pasend/notification/{organizationId}/{sendNotificationId}/start" : {
+    "/p4pasend/notification/{sendNotificationId}/start" : {
       "post" : {
         "tags" : [ "Notification" ],
         "summary" : "start notification process",
@@ -220,14 +211,6 @@
           "required" : true,
           "schema" : {
             "type" : "string"
-          }
-        }, {
-          "name" : "organizationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
           }
         } ],
         "requestBody" : {
@@ -336,7 +319,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NewNotificationRequestStatusResponseV24DTO"
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
                 }
               }
             }
@@ -346,7 +329,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NewNotificationRequestStatusResponseV24DTO"
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
                 }
               }
             }
@@ -356,7 +339,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NewNotificationRequestStatusResponseV24DTO"
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
                 }
               }
             }
@@ -366,7 +349,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NewNotificationRequestStatusResponseV24DTO"
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
                 }
               }
             }
@@ -376,7 +359,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NewNotificationRequestStatusResponseV24DTO"
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
                 }
               }
             }
@@ -387,7 +370,7 @@
         } ]
       }
     },
-    "/p4pasend/send/{organizationId}/{sendNotificationId}/retrieveNotificationDate" : {
+    "/p4pasend/send/{sendNotificationId}/retrieveNotificationDate" : {
       "get" : {
         "tags" : [ "Send" ],
         "summary" : "retrieve notification date",
@@ -399,14 +382,6 @@
           "required" : true,
           "schema" : {
             "type" : "string"
-          }
-        }, {
-          "name" : "organizationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
           }
         } ],
         "responses" : {
@@ -466,7 +441,7 @@
         } ]
       }
     },
-    "/p4pasend/notification/{organizationId}/{sendNotificationId}" : {
+    "/p4pasend/notification/{sendNotificationId}" : {
       "get" : {
         "tags" : [ "Notification" ],
         "summary" : "get send notification",
@@ -478,14 +453,6 @@
           "required" : true,
           "schema" : {
             "type" : "string"
-          }
-        }, {
-          "name" : "organizationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
           }
         } ],
         "responses" : {
@@ -566,14 +533,6 @@
           "schema" : {
             "type" : "string"
           }
-        }, {
-          "name" : "organizationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
         } ],
         "responses" : {
           "200" : {
@@ -651,6 +610,10 @@
       "CreateNotificationRequest" : {
         "type" : "object",
         "properties" : {
+          "organizationId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
           "paProtocolNumber" : {
             "type" : "string"
           },
@@ -701,7 +664,7 @@
             "$ref" : "#/components/schemas/PagoPaIntModeEnum"
           }
         },
-        "required" : [ "paProtocolNumber" ]
+        "required" : [ "organizationId", "paProtocolNumber" ]
       },
       "Document" : {
         "type" : "object",
@@ -740,7 +703,7 @@
       },
       "PagoPaIntModeEnum" : {
         "type" : "string",
-        "enum" : [ "NONE", "SYNC", "ASYNC" ]
+        "enum" : [ "SYNC", "ASYNC", "NONE" ]
       },
       "Payment" : {
         "type" : "object",
@@ -802,296 +765,6 @@
         },
         "required" : [ "digest", "fileName" ]
       },
-      "F24PaymentDTO" : {
-        "type" : "object",
-        "properties" : {
-          "title" : {
-            "type" : "string"
-          },
-          "applyCost" : {
-            "type" : "boolean"
-          },
-          "metadataAttachment" : {
-            "$ref" : "#/components/schemas/NotificationMetadataAttachmentDTO"
-          }
-        }
-      },
-      "NewNotificationRequestStatusResponseV24DTO" : {
-        "type" : "object",
-        "properties" : {
-          "idempotenceToken" : {
-            "type" : "string"
-          },
-          "paProtocolNumber" : {
-            "type" : "string"
-          },
-          "subject" : {
-            "type" : "string"
-          },
-          "abstract" : {
-            "type" : "string"
-          },
-          "recipients" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/NotificationRecipientV23DTO"
-            }
-          },
-          "documents" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/NotificationDocumentDTO"
-            }
-          },
-          "notificationFeePolicy" : {
-            "$ref" : "#/components/schemas/NotificationFeePolicyDTO"
-          },
-          "cancelledIun" : {
-            "type" : "string"
-          },
-          "physicalCommunicationType" : {
-            "$ref" : "#/components/schemas/PhysicalCommunicationTypeEnum"
-          },
-          "senderDenomination" : {
-            "type" : "string"
-          },
-          "senderTaxId" : {
-            "type" : "string"
-          },
-          "group" : {
-            "type" : "string"
-          },
-          "amount" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "paymentExpirationDate" : {
-            "type" : "string"
-          },
-          "taxonomyCode" : {
-            "type" : "string"
-          },
-          "paFee" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "vat" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "pagoPaIntMode" : {
-            "$ref" : "#/components/schemas/PagoPaIntModeEnum"
-          },
-          "additionalLanguages" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "notificationRequestId" : {
-            "type" : "string"
-          },
-          "notificationRequestStatus" : {
-            "type" : "string"
-          },
-          "retryAfter" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "iun" : {
-            "type" : "string"
-          },
-          "errors" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/ProblemErrorDTO"
-            }
-          }
-        }
-      },
-      "NotificationAttachmentBodyRefDTO" : {
-        "type" : "object",
-        "properties" : {
-          "key" : {
-            "type" : "string"
-          },
-          "versionToken" : {
-            "type" : "string"
-          }
-        }
-      },
-      "NotificationAttachmentDTO" : {
-        "type" : "object",
-        "properties" : {
-          "digests" : {
-            "$ref" : "#/components/schemas/NotificationAttachmentDigestsDTO"
-          },
-          "contentType" : {
-            "type" : "string"
-          },
-          "ref" : {
-            "$ref" : "#/components/schemas/NotificationAttachmentBodyRefDTO"
-          }
-        }
-      },
-      "NotificationAttachmentDigestsDTO" : {
-        "type" : "object",
-        "properties" : {
-          "sha256" : {
-            "type" : "string"
-          }
-        }
-      },
-      "NotificationDigitalAddressDTO" : {
-        "type" : "object",
-        "properties" : {
-          "type" : {
-            "$ref" : "#/components/schemas/TypeEnum"
-          },
-          "address" : {
-            "type" : "string"
-          }
-        }
-      },
-      "NotificationDocumentDTO" : {
-        "type" : "object",
-        "properties" : {
-          "digests" : {
-            "$ref" : "#/components/schemas/NotificationAttachmentDigestsDTO"
-          },
-          "contentType" : {
-            "type" : "string"
-          },
-          "ref" : {
-            "$ref" : "#/components/schemas/NotificationAttachmentBodyRefDTO"
-          },
-          "title" : {
-            "type" : "string"
-          },
-          "docIdx" : {
-            "type" : "string"
-          }
-        }
-      },
-      "NotificationFeePolicyDTO" : {
-        "type" : "string",
-        "enum" : [ "FLAT_RATE", "DELIVERY_MODE" ]
-      },
-      "NotificationMetadataAttachmentDTO" : {
-        "type" : "object",
-        "properties" : {
-          "digests" : {
-            "$ref" : "#/components/schemas/NotificationAttachmentDigestsDTO"
-          },
-          "contentType" : {
-            "type" : "string"
-          },
-          "ref" : {
-            "$ref" : "#/components/schemas/NotificationAttachmentBodyRefDTO"
-          }
-        }
-      },
-      "NotificationPaymentItemDTO" : {
-        "type" : "object",
-        "properties" : {
-          "pagoPa" : {
-            "$ref" : "#/components/schemas/PagoPaPaymentDTO"
-          },
-          "f24" : {
-            "$ref" : "#/components/schemas/F24PaymentDTO"
-          }
-        }
-      },
-      "NotificationPhysicalAddressDTO" : {
-        "type" : "object",
-        "properties" : {
-          "at" : {
-            "type" : "string"
-          },
-          "address" : {
-            "type" : "string"
-          },
-          "addressDetails" : {
-            "type" : "string"
-          },
-          "zip" : {
-            "type" : "string"
-          },
-          "municipality" : {
-            "type" : "string"
-          },
-          "municipalityDetails" : {
-            "type" : "string"
-          },
-          "province" : {
-            "type" : "string"
-          },
-          "foreignState" : {
-            "type" : "string"
-          }
-        }
-      },
-      "NotificationRecipientV23DTO" : {
-        "type" : "object",
-        "properties" : {
-          "recipientType" : {
-            "$ref" : "#/components/schemas/RecipientTypeEnum"
-          },
-          "taxId" : {
-            "type" : "string"
-          },
-          "denomination" : {
-            "type" : "string"
-          },
-          "digitalDomicile" : {
-            "$ref" : "#/components/schemas/NotificationDigitalAddressDTO"
-          },
-          "physicalAddress" : {
-            "$ref" : "#/components/schemas/NotificationPhysicalAddressDTO"
-          },
-          "payments" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/NotificationPaymentItemDTO"
-            }
-          }
-        }
-      },
-      "PagoPaPaymentDTO" : {
-        "type" : "object",
-        "properties" : {
-          "noticeCode" : {
-            "type" : "string"
-          },
-          "creditorTaxId" : {
-            "type" : "string"
-          },
-          "applyCost" : {
-            "type" : "boolean"
-          },
-          "attachment" : {
-            "$ref" : "#/components/schemas/NotificationAttachmentDTO"
-          }
-        }
-      },
-      "ProblemErrorDTO" : {
-        "type" : "object",
-        "properties" : {
-          "code" : {
-            "type" : "string"
-          },
-          "element" : {
-            "type" : "string"
-          },
-          "detail" : {
-            "type" : "string"
-          }
-        }
-      },
-      "TypeEnum" : {
-        "type" : "string",
-        "enum" : [ "PEC" ]
-      },
       "SendNotificationDTO" : {
         "type" : "object",
         "properties" : {
@@ -1109,10 +782,10 @@
             "type" : "string",
             "format" : "date-time"
           },
-          "navList" : {
+          "payments" : {
             "type" : "array",
             "items" : {
-              "type" : "string"
+              "$ref" : "#/components/schemas/SendNotificationPaymentsDTO"
             }
           },
           "status" : {
@@ -1125,7 +798,23 @@
             }
           }
         },
-        "required" : [ "navList", "organizationId", "sendNotificationId", "status" ]
+        "required" : [ "organizationId", "payments", "sendNotificationId", "status" ]
+      },
+      "SendNotificationPaymentsDTO" : {
+        "type" : "object",
+        "properties" : {
+          "debtPositionId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "navList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "debtPositionId", "navList" ]
       }
     },
     "securitySchemes" : {

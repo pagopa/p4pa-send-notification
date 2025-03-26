@@ -49,16 +49,15 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     CreateNotificationRequest request = buildRequest();
     String nav = request.getRecipient().getPayments().getFirst().getPagoPa().getNoticeCode();
 
-    Long organizationId = 1L;
     String accessToken = "ACCESSTOKEN";
 
     DebtPosition debtPosition = new DebtPosition();
     debtPosition.setDebtPositionId(3L);
-    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(organizationId, nav, accessToken))
+    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
       .thenReturn(debtPosition);
 
     // When
-    SendNotification result = mapper.map(request, organizationId, accessToken);
+    SendNotification result = mapper.map(request, accessToken);
 
     // Then
     TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun","notificationData");
@@ -106,6 +105,7 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     document.setDigest("sha256");
 
     CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
     request.setPaProtocolNumber("Prot_001");
     request.setRecipient(recipient);
     request.setDocuments(Collections.singletonList(document));
@@ -142,15 +142,14 @@ class CreateNotificationRequest2SendNotificationMapperTest {
 
   @Test
   void givenNoDebtPositionWhenThenThrow(){
-    Long organizationId = 1L;
     String accessToken = "ACCESSTOKEN";
     CreateNotificationRequest request = buildRequest();
     String nav = request.getRecipient().getPayments().getFirst().getPagoPa().getNoticeCode();
 
-    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(organizationId, nav, accessToken))
+    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
       .thenReturn(null);
 
     // When, Then
-    Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.map(request, organizationId, accessToken));
+    Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.map(request, accessToken));
   }
 }

@@ -204,8 +204,18 @@ class SendNotificationExceptionHandlerTest {
   }
 
   @Test
-  void handleIllegalArgumentException() throws Exception {
-    doThrow(new IllegalArgumentException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+  void handleSendNotificationNotFoundException() throws Exception {
+    doThrow(new SendNotificationNotFoundException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isNotFound())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
+  }
+
+  @Test
+  void handleSendNotificationFileNotFoundException() throws Exception {
+    doThrow(new SendNotificationFileNotFoundException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isNotFound())

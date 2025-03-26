@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotification;
@@ -100,13 +101,13 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   @Transactional
   @Override
-  public SendNotificationDTO retrieveNotificationData(String sendNotificationId, Long organizationId) {
-    SendNotification notification = findSendNotification(sendNotificationId, organizationId);
+  public SendNotificationDTO retrieveNotificationData(String sendNotificationId) {
+    SendNotification notification = findSendNotification(sendNotificationId);
     if(notification.getNotificationData()!=null)
       return sendNotificationDTOMapper.apply(notification);
 
     PagoPa payment = notification.getPayments().getFirst().getPayment().getPagoPa();
-    NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendClient.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), organizationId);
+    NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendClient.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId());
 
     if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {
       notification.setNotificationData(notificationPriceResponseV23DTO.getNotificationViewDate()
@@ -118,25 +119,22 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String sendNotificationId) {
+  public SendNotificationDTO notificationStatus(String sendNotificationId) {
     SendNotification notification = findSendNotification(sendNotificationId);
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
     NewNotificationRequestStatusResponseV24DTO notificationStatus = sendClient.notificationStatus(notification.getNotificationRequestId(), notification.getOrganizationId());
-    if(notificationStatus!=null && notificationStatus.getIun() != null)
+    if(notificationStatus!=null && notificationStatus.getIun() != null){
       sendNotificationRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
+      notification.setStatus(NotificationStatus.ACCEPTED);
+    }
 
-    return notificationStatus;
+    return sendNotificationDTOMapper.apply(notification);
   }
 
   private SendNotification findSendNotification(String sendNotificationId) {
     return sendNotificationRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
-  }
-
-  private SendNotification findSendNotification(String sendNotificationId, Long organizationId) {
-    return sendNotificationRepository.findByIdAndOrganizationId(sendNotificationId, organizationId)
-      .orElseThrow(() -> new IllegalArgumentException("Notification not found with id: " + sendNotificationId));
+      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }
 }

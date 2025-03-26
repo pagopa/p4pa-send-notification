@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.send.controller;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import org.junit.jupiter.api.Assertions;
@@ -55,26 +54,25 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdWhenNotificationStatusRequestThenOk(){
     String sendNotificationId = "12345";
-    NewNotificationRequestStatusResponseV24DTO status = new NewNotificationRequestStatusResponseV24DTO();
+    SendNotificationDTO status = new SendNotificationDTO();
     Mockito.when(sendFacadeServiceMock.notificationStatus(sendNotificationId)).thenReturn(status);
 
-    ResponseEntity<NewNotificationRequestStatusResponseV24DTO> response = sendController.notificationStatus(sendNotificationId);
+    ResponseEntity<SendNotificationDTO> response = sendController.notificationStatus(sendNotificationId);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-    Assertions.assertEquals(status, response.getBody());
+    Assertions.assertSame(status, response.getBody());
   }
 
   @Test
   void givenSendNotificationIdAndOrganizationIdWhenRetrieveNotificationDateThenOk() {
     String sendNotificationId = "12345";
-    Long organizationId = 1L;
 
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId, organizationId))
+    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId))
       .thenReturn(notificationDTO);
 
-    ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId, organizationId);
+    ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -82,11 +80,10 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdAndOrganizationIdWhenRetrieveNotificationDateThenNoContent() {
     String sendNotificationId = "12345";
-    Long organizationId = 1L;
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId, organizationId))
+    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId))
       .thenReturn(null);
 
-    ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId, organizationId);
+    ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId);
     Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
   }
 }
