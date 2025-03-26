@@ -574,14 +574,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{organizationId}}/{{sendNotificationId}}/retrieveNotificationDate",
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/retrieveNotificationDate",
 							"host": [
 								"{{sendNotificationBaseUrl}}"
 							],
 							"path": [
 								"p4pasend",
 								"send",
-								"{{organizationId}}",
 								"{{sendNotificationId}}",
 								"retrieveNotificationDate"
 							]
