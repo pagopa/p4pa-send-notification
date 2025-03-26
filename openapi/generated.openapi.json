@@ -387,7 +387,7 @@
         } ]
       }
     },
-    "/p4pasend/send/{organizationId}/{sendNotificationId}/retrieveNotificationDate" : {
+    "/p4pasend/send/{sendNotificationId}/retrieveNotificationDate" : {
       "get" : {
         "tags" : [ "Send" ],
         "summary" : "retrieve notification date",
@@ -399,14 +399,6 @@
           "required" : true,
           "schema" : {
             "type" : "string"
-          }
-        }, {
-          "name" : "organizationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
           }
         } ],
         "responses" : {
