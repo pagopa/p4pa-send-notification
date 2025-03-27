@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.citizen.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.gov.pagopa.pu.send.citizen.util.AESUtils;
+import it.gov.pagopa.pu.send.util.AESUtils;
 import it.gov.pagopa.pu.send.citizen.util.HashAlgorithm;
 import java.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
