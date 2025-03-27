@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class DataCipherServiceTest {
 
   private final DataCipherService service = new DataCipherService("PSW","PEPPER", new ObjectMapper());
@@ -55,4 +59,24 @@ class DataCipherServiceTest {
     // Then
     Assertions.assertNull(hash);
   }
+
+  @Test
+  void testEncryptObjThrowsIllegalStateException() {
+    // When
+    Object mockItem = Mockito.mock(Object.class);
+
+    // Then
+    Assertions.assertThrows(IllegalStateException.class, () -> service.encryptObj(mockItem));
+  }
+
+  @Test
+  void testDecryptObjThrowsIllegalStateException() {
+    // When
+    Object mockItem = Mockito.mock(Object.class);
+    byte[] hash = service.hash(mockItem.toString());
+
+    // Then
+    Assertions.assertThrows(IllegalStateException.class, () -> service.decryptObj(hash, Object.class));
+  }
+
 }
