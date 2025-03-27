@@ -65,7 +65,7 @@ public class SendNotificationExceptionHandler {
     return handleException(ex, request, HttpStatus.CONFLICT, SendNotificationErrorDTO.CodeEnum.BAD_REQUEST);
   }
 
-  @ExceptionHandler({SendNotificationNotFoundException.class, SendNotificationFileNotFoundException.class})
+  @ExceptionHandler({NotFoundException.class, SendNotificationNotFoundException.class, SendNotificationFileNotFoundException.class})
   public ResponseEntity<SendNotificationErrorDTO> handleNotFoundExceptions(RuntimeException ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.NOT_FOUND, SendNotificationErrorDTO.CodeEnum.BAD_REQUEST);
   }
