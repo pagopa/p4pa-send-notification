@@ -9,6 +9,16 @@ spring:
   threads:
     virtual:
       enabled: "\${VIRTUAL_THREADS_ENABLED:true}"
+  jpa:
+    show-sql: "\${SHOW_SQL:false}"
+    hibernate:
+      ddl-auto: none
+  datasource:
+    citizen:
+      jdbc-url: "\${CITIZENDB_URL:jdbc:postgresql://\${CITIZENDB_HOST:localhost}:\${CITIZENDB_PORT:5432}/citizen}"
+      username: "\${CITIZENDB_USER}"
+      password: "\${CITIZENDB_PASSWORD}"
+      driverClassName: org.postgresql.Driver
   data:
     mongodb:
       uri: "\${MONGODB_URI:mongodb://localhost:27017}"
@@ -74,6 +84,10 @@ logging:
     PERFORMANCE_LOG.API_REQUEST: "\${LOG_LEVEL_PERFORMANCE_LOG_API_REQUEST:\${logging.level.PERFORMANCE_LOG}}"
     PERFORMANCE_LOG.REST_INVOKE: "\${LOG_LEVEL_PERFORMANCE_LOG_REST_INVOKE:\${logging.level.PERFORMANCE_LOG}}"
 
+data-cipher:
+  encrypt-psw: "\${DATA_CIPHER_ENCRYPT_PASSWORD:PWD}"
+  hash-pepper: "\${DATA_CIPHER_HASH_PEPPER:PEPPER}"
+
 springdoc:
   writer-with-default-pretty-printer: true
 
@@ -129,3 +143,8 @@ rest:
 
 app:
   fileEncryptPassword: "\${FILE_ENCRYPT_PASSWORD:ENCR_PSW}"
+
+cache:
+  pii:
+    size: "\${CACHE_PII_SIZE:1000}"
+    expire-in: "\${CACHE_PII_MINUTES:60}"

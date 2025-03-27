@@ -22,6 +22,11 @@ import org.springframework.test.web.servlet.MvcResult;
 @SpringBootTest
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, addFilters = false)
 @TestPropertySource(properties = {
+  "spring.datasource.citizen.driver-class-name=org.h2.Driver",
+  "spring.datasource.citizen.jdbc-url=jdbc:h2:mem:db;DB_CLOSE_DELAY=-1",
+  "spring.datasource.citizen.username=sa",
+  "spring.datasource.citizen.password=sa",
+
   "logging.level.org.springdoc.core.utils.SpringDocAnnotationsUtils=OFF"
 })
 class OpenApiGeneratorTest {
