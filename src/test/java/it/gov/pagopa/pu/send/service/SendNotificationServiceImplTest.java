@@ -1,7 +1,11 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.citizen.model.PersonalData;
+import it.gov.pagopa.pu.send.citizen.repository.PersonalDataRepository;
+import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationResponse;
 import it.gov.pagopa.pu.send.dto.generated.LoadFileRequest;
@@ -43,6 +47,10 @@ class SendNotificationServiceImplTest {
   private FileRetrieverService fileRetrieverServiceMock;
   @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
+  @Mock
+  private DataCipherService dataCipherServiceMock;
+  @Mock
+  private PersonalDataRepository personalDataRepositoryMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -55,8 +63,16 @@ class SendNotificationServiceImplTest {
     sendNotificationNoPII.setSendNotificationId("SENDNOTIFICATIONID");
     sendNotificationNoPII.setStatus(NotificationStatus.WAITING_FILE);
     String accessToken = "accessToken";
+    byte[] encryptedObj = "OBJ".getBytes();
+
+    SendNotificationPIIDTO sendNotificationPIIDTO = new SendNotificationPIIDTO();
+    PersonalData personalData = new PersonalData();
+    personalData.setId(1L);
 
     Mockito.when(mapperMock.mapToNoPII(request, accessToken)).thenReturn(sendNotificationNoPII);
+    Mockito.when(mapperMock.mapToPii(request)).thenReturn(sendNotificationPIIDTO);
+    Mockito.when(dataCipherServiceMock.encryptObj(Mockito.any(SendNotificationPIIDTO.class))).thenReturn(encryptedObj);
+    Mockito.when(personalDataRepositoryMock.save(Mockito.any(PersonalData.class))).thenReturn(personalData);
     Mockito.when(sendNotificationRepositoryMock.insert(sendNotificationNoPII)).thenReturn(
       sendNotificationNoPII);
 

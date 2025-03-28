@@ -59,12 +59,13 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     debtPosition.setDebtPositionId(3L);
     Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
       .thenReturn(debtPosition);
+    Mockito.when(dataCipherServiceMock.hash(request.getRecipient().getTaxId())).thenReturn(request.getRecipient().getTaxId().getBytes());
 
     // When
     SendNotificationNoPII result = mapper.mapToNoPII(request, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun","notificationData");
+    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun","notificationData", "personalDataId");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("PF", result.getSubjectType());

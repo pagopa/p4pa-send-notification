@@ -5,13 +5,15 @@ import it.gov.pagopa.pu.send.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import org.springframework.stereotype.Service;
 
-public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
+@Service
+public class SendNotificationMapper extends BasePIIMapper<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
 
   private final DataCipherService dataCipherService;
   private final PersonalDataService personalDataService;
 
-  public SendNotificationPIIMapper(DataCipherService dataCipherService,
+  public SendNotificationMapper(DataCipherService dataCipherService,
     PersonalDataService personalDataService) {
     this.dataCipherService = dataCipherService;
     this.personalDataService = personalDataService;
