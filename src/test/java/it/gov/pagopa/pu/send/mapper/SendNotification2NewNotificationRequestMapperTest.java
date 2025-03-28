@@ -9,7 +9,7 @@ import it.gov.pagopa.pu.send.dto.generated.Attachment;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,12 +29,12 @@ class SendNotification2NewNotificationRequestMapperTest {
   @Test
   void givenSendNotificationWhenMapThenOk() {
     // Given
-    SendNotification sendNotification = new SendNotification();
-    sendNotification.setSendNotificationId("12345");
-    sendNotification.setPaProtocolNumber("Prot_001");
-    sendNotification.setSubjectType("PF");
-    sendNotification.setFiscalCode("BNRMHL75C06G702B");
-    sendNotification.setDenomination("Michelangelo Buonarroti");
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+    sendNotificationNoPII.setSendNotificationId("12345");
+    sendNotificationNoPII.setPaProtocolNumber("Prot_001");
+    sendNotificationNoPII.setSubjectType("PF");
+    sendNotificationNoPII.setFiscalCodeHash("BNRMHL75C06G702B".getBytes());
+    sendNotificationNoPII.setDenomination("Michelangelo Buonarroti");
 
     //Payments
     Payment payment = new Payment();
@@ -56,7 +56,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     documentAttachment.setKey("docKey");
     documentAttachment.setVersionId("12345678");
 
-    sendNotification.setPayments(Collections.singletonList(new PuPayment(1L, payment)));
+    sendNotificationNoPII.setPayments(Collections.singletonList(new PuPayment(1L, payment)));
     // end payments
 
 
@@ -70,21 +70,21 @@ class SendNotification2NewNotificationRequestMapperTest {
     List<DocumentDTO> documents = new ArrayList<>();
     documents.add(documentAttachment);
     documents.add(document);
-    sendNotification.setDocuments(documents);
+    sendNotificationNoPII.setDocuments(documents);
 
-    sendNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.DELIVERY_MODE.getValue());
-    sendNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue());
-    sendNotification.setSenderDenomination("Ente Intermediario 2");
-    sendNotification.setSenderTaxId("00000000018");
-    sendNotification.setAmount(100);
-    sendNotification.setTaxonomyCode("010101P");
-    sendNotification.setPaFee(100);
-    sendNotification.setVat(22);
-    sendNotification.setPaymentExpirationDate("2025-12-31");
-    sendNotification.setPagoPaIntMode(PagoPaIntModeEnum.NONE.getValue());
+    sendNotificationNoPII.setNotificationFeePolicy(NotificationFeePolicyDTO.DELIVERY_MODE.getValue());
+    sendNotificationNoPII.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue());
+    sendNotificationNoPII.setSenderDenomination("Ente Intermediario 2");
+    sendNotificationNoPII.setSenderTaxId("00000000018");
+    sendNotificationNoPII.setAmount(100);
+    sendNotificationNoPII.setTaxonomyCode("010101P");
+    sendNotificationNoPII.setPaFee(100);
+    sendNotificationNoPII.setVat(22);
+    sendNotificationNoPII.setPaymentExpirationDate("2025-12-31");
+    sendNotificationNoPII.setPagoPaIntMode(PagoPaIntModeEnum.NONE.getValue());
 
     // When
-    NewNotificationRequestV24DTO result = mapper.apply(sendNotification);
+    NewNotificationRequestV24DTO result = mapper.apply(sendNotificationNoPII);
 
     // Then
     TestUtils.checkNotNullFields(result,"_abstract","cancelledIun","group","amount","paymentExpirationDate","pagoPaIntMode");

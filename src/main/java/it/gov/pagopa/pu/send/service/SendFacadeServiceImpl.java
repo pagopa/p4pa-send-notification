@@ -10,7 +10,7 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   @Transactional
   @Override
   public void preloadFiles(String sendNotificationId) {
-    SendNotification notification = findSendNotification(sendNotificationId);
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.SENDING, notification.getStatus());
@@ -69,7 +69,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   @Transactional
   @Override
   public void uploadFiles(String sendNotificationId) {
-    SendNotification notification = findSendNotification(sendNotificationId);
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.REGISTERED, notification.getStatus());
@@ -88,7 +88,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   @Transactional
   @Override
   public void deliveryNotification(String sendNotificationId) {
-    SendNotification notification = findSendNotification(sendNotificationId);
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.UPLOADED, notification.getStatus());
@@ -102,7 +102,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   @Transactional
   @Override
   public SendNotificationDTO retrieveNotificationData(String sendNotificationId) {
-    SendNotification notification = findSendNotification(sendNotificationId);
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
     if(notification.getNotificationData()!=null)
       return sendNotificationDTOMapper.apply(notification);
 
@@ -121,7 +121,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   @Override
   public SendNotificationDTO notificationStatus(String sendNotificationId) {
-    SendNotification notification = findSendNotification(sendNotificationId);
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
@@ -134,7 +134,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     return sendNotificationDTOMapper.apply(notification);
   }
 
-  private SendNotification findSendNotification(String sendNotificationId) {
+  private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }

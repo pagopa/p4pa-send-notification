@@ -14,7 +14,7 @@ import it.gov.pagopa.pu.send.exception.SendNotificationFileNotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import org.junit.jupiter.api.Assertions;
@@ -51,19 +51,20 @@ class SendNotificationServiceImplTest {
   void givenCreateNotificationRequestWhenCreateSendNotificationThenReturnCreateNotificationResponse(){
     // Given
     CreateNotificationRequest request = new CreateNotificationRequest();
-    SendNotification sendNotification = new SendNotification();
-    sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
-    sendNotification.setStatus(NotificationStatus.WAITING_FILE);
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+    sendNotificationNoPII.setSendNotificationId("SENDNOTIFICATIONID");
+    sendNotificationNoPII.setStatus(NotificationStatus.WAITING_FILE);
     String accessToken = "accessToken";
 
-    Mockito.when(mapperMock.map(request, accessToken)).thenReturn(sendNotification);
-    Mockito.when(sendNotificationRepositoryMock.insert(sendNotification)).thenReturn(sendNotification);
+    Mockito.when(mapperMock.mapToNoPII(request, accessToken)).thenReturn(sendNotificationNoPII);
+    Mockito.when(sendNotificationRepositoryMock.insert(sendNotificationNoPII)).thenReturn(
+      sendNotificationNoPII);
 
     // When
     CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
 
     // Then
-    Mockito.verify(sendNotificationRepositoryMock).insert(sendNotification);
+    Mockito.verify(sendNotificationRepositoryMock).insert(sendNotificationNoPII);
     Assertions.assertNotNull(response);
     Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
   }
@@ -74,8 +75,8 @@ class SendNotificationServiceImplTest {
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     LoadFileRequest loadFileRequest = new LoadFileRequest("9e9LsYp4qQ4bjyGI4Mp/jmBN2jKehKTTaonMr1AJEPU=",fileName);
-    SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
-    SendNotification updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
+    SendNotificationNoPII updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     WorkflowCreatedDTO workflow = WorkflowCreatedDTO.builder().workflowId("WORKFLOWID").build();
     InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
@@ -97,7 +98,7 @@ class SendNotificationServiceImplTest {
   void givenStartNotificationRequestWhenStartSendNotificationThenExceptionFileNotFound() {
     String sendNotificationId = "sendNotificationId";
     LoadFileRequest loadFileRequest = new LoadFileRequest("DIGEST", "NOTEXISTS");
-    SendNotification notification = new SendNotification();
+    SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setStatus(NotificationStatus.WAITING_FILE);
     notification.setDocuments(List.of());
 
@@ -115,7 +116,7 @@ class SendNotificationServiceImplTest {
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     LoadFileRequest loadFileRequest = new LoadFileRequest("DIGEST", fileName);
-    SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
+    SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
     InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
     Mockito.when(fileRetrieverServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId+"_"+fileName)).thenReturn(inputStream);
@@ -133,7 +134,7 @@ class SendNotificationServiceImplTest {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
-    SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     //When
     Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
@@ -147,7 +148,7 @@ class SendNotificationServiceImplTest {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
-    SendNotification notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     notification.setStatus(NotificationStatus.COMPLETE);
 
     Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
@@ -160,8 +161,8 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("Cannot delete notification with status complete", exception.getMessage());
   }
 
-  private SendNotification createMockNotification(String sendNotificationId, String fileName, FileStatus fileStatus) {
-    SendNotification notification = new SendNotification();
+  private SendNotificationNoPII createMockNotification(String sendNotificationId, String fileName, FileStatus fileStatus) {
+    SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setOrganizationId(1L);
     notification.setSendNotificationId(sendNotificationId);
     notification.setStatus(NotificationStatus.WAITING_FILE);
@@ -182,7 +183,7 @@ class SendNotificationServiceImplTest {
   void givenExistentNotificationWhenFindSendNotificationDTOThenReturnIt(){
     // Given
     String sendNotificationId = "NOTIFICATIONID";
-    SendNotification notification = new SendNotification();
+    SendNotificationNoPII notification = new SendNotificationNoPII();
     SendNotificationDTO expectedResult = new SendNotificationDTO();
 
     Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId))

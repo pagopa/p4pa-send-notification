@@ -1,14 +1,16 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
+import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
 import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,29 +20,32 @@ import org.springframework.stereotype.Service;
 @Service
 public class CreateNotificationRequest2SendNotificationMapper {
 
+  private final DataCipherService dataCipherService;
   private final DebtPositionService debtPositionService;
 
-  public CreateNotificationRequest2SendNotificationMapper(DebtPositionService debtPositionService) {
+  public CreateNotificationRequest2SendNotificationMapper(
+    DataCipherService dataCipherService, DebtPositionService debtPositionService) {
+    this.dataCipherService = dataCipherService;
     this.debtPositionService = debtPositionService;
   }
 
-  public SendNotification map(CreateNotificationRequest request, String accessToken) {
+  public SendNotificationNoPII mapToNoPII(CreateNotificationRequest request, String accessToken) {
     Long organizationId = request.getOrganizationId();
 
-    SendNotification sendNotification = new SendNotification();
-    sendNotification.setPaProtocolNumber(request.getPaProtocolNumber());
-    sendNotification.setSubjectType(request.getRecipient().getRecipientType().getValue());
-    sendNotification.setFiscalCode(request.getRecipient().getTaxId());
-    sendNotification.setDenomination(request.getRecipient().getDenomination());
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+    sendNotificationNoPII.setPaProtocolNumber(request.getPaProtocolNumber());
+    sendNotificationNoPII.setSubjectType(request.getRecipient().getRecipientType().getValue());
+    sendNotificationNoPII.setFiscalCodeHash(dataCipherService.hash(request.getRecipient().getTaxId()));
+    sendNotificationNoPII.setDenomination(request.getRecipient().getDenomination());
 
     if (request.getDocuments().isEmpty()) {
-      sendNotification.setStatus(NotificationStatus.SENDING);
+      sendNotificationNoPII.setStatus(NotificationStatus.SENDING);
     }
     else {
-      sendNotification.setStatus(NotificationStatus.WAITING_FILE);
+      sendNotificationNoPII.setStatus(NotificationStatus.WAITING_FILE);
     }
 
-    sendNotification.setPayments(request.getRecipient().getPayments().stream()
+    sendNotificationNoPII.setPayments(request.getRecipient().getPayments().stream()
       .map(p -> {
         String nav = p.getPagoPa().getNoticeCode();
         DebtPosition debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
@@ -74,19 +79,26 @@ public class CreateNotificationRequest2SendNotificationMapper {
           .status(FileStatus.WAITING)
           .build()).toList());
 
-    sendNotification.setDocuments(documents);
-    sendNotification.setOrganizationId(organizationId);
-    sendNotification.setNotificationFeePolicy(request.getNotificationFeePolicy().getValue());
-    sendNotification.setPhysicalCommunicationType(request.getPhysicalCommunicationType().getValue());
-    sendNotification.setSenderDenomination(request.getSenderDenomination());
-    sendNotification.setSenderTaxId(request.getSenderTaxId());
-    sendNotification.setAmount(request.getAmount().intValue());
-    sendNotification.setTaxonomyCode(request.getTaxonomyCode());
-    sendNotification.setPaFee(request.getPaFee());
-    sendNotification.setVat(request.getVat());
-    sendNotification.setPaymentExpirationDate(request.getPaymentExpirationDate().toString());
-    sendNotification.setPagoPaIntMode(request.getPagoPaIntMode().getValue());
+    sendNotificationNoPII.setDocuments(documents);
+    sendNotificationNoPII.setOrganizationId(organizationId);
+    sendNotificationNoPII.setNotificationFeePolicy(request.getNotificationFeePolicy().getValue());
+    sendNotificationNoPII.setPhysicalCommunicationType(request.getPhysicalCommunicationType().getValue());
+    sendNotificationNoPII.setSenderDenomination(request.getSenderDenomination());
+    sendNotificationNoPII.setSenderTaxId(request.getSenderTaxId());
+    sendNotificationNoPII.setAmount(request.getAmount().intValue());
+    sendNotificationNoPII.setTaxonomyCode(request.getTaxonomyCode());
+    sendNotificationNoPII.setPaFee(request.getPaFee());
+    sendNotificationNoPII.setVat(request.getVat());
+    sendNotificationNoPII.setPaymentExpirationDate(request.getPaymentExpirationDate().toString());
+    sendNotificationNoPII.setPagoPaIntMode(request.getPagoPaIntMode().getValue());
 
-    return sendNotification;
+    return sendNotificationNoPII;
+  }
+
+  public SendNotificationPIIDTO mapToPii(CreateNotificationRequest request) {
+    SendNotificationPIIDTO pii = new SendNotificationPIIDTO();
+    pii.setFiscalCode(request.getRecipient().getTaxId());
+    pii.setAddress(request.getRecipient().getPhysicalAddress());
+    return pii;
   }
 }

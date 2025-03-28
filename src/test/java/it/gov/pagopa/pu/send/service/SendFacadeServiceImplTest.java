@@ -13,7 +13,7 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -67,7 +67,7 @@ class SendFacadeServiceImplTest {
       .contentType("application/pdf")
       .status(FileStatus.READY)
       .build();
-    SendNotification notification = SendNotification.builder()
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .status(NotificationStatus.SENDING)
@@ -125,7 +125,7 @@ class SendFacadeServiceImplTest {
       .secret("SECRET")
       .build();
 
-    SendNotification notification = SendNotification.builder()
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(organizationId)
       .status(NotificationStatus.REGISTERED)
@@ -149,7 +149,7 @@ class SendFacadeServiceImplTest {
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
     response.setNotificationRequestId("NOTIFICATIONREQUESTID");
 
-    SendNotification notification = SendNotification.builder()
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .status(NotificationStatus.UPLOADED)
@@ -177,7 +177,7 @@ class SendFacadeServiceImplTest {
     NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
     response.setIun("IUN");
 
-    SendNotification notification = SendNotification.builder()
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .notificationRequestId(notificationRequestId)
@@ -212,7 +212,7 @@ class SendFacadeServiceImplTest {
     NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
     response.setNotificationViewDate(new Date());
 
-    SendNotification notification = SendNotification.builder()
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .payments(Collections.singletonList(new PuPayment(1L, new Payment(
@@ -242,7 +242,7 @@ class SendFacadeServiceImplTest {
 
     NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
 
-    SendNotification notification = SendNotification.builder()
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .payments(Collections.singletonList(new PuPayment(1L, new Payment(
@@ -266,7 +266,7 @@ class SendFacadeServiceImplTest {
     String paxId = "PAXID";
     String noticeCode = "NOTICECODE";
 
-    SendNotification notification = SendNotification.builder()
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .payments(Collections.singletonList(new PuPayment(1L, new Payment(

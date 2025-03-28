@@ -4,7 +4,7 @@ import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -17,5 +17,5 @@ public interface SendNotificationRepositoryExt {
   UpdateResult updateFileVersionId(String sendNotificationId, String fileName, String versionId);
   UpdateResult updateNotificationIun(String sendNotificationId, String iun);
   UpdateResult updateNotificationDate(String sendNotificationId, OffsetDateTime notificationDate);
-  Optional<SendNotification> findByIdAndOrganizationId(String notificationId, Long organizationId);
+  Optional<SendNotificationNoPII> findByIdAndOrganizationId(String notificationId, Long organizationId);
 }

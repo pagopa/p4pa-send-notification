@@ -1,7 +1,11 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.citizen.model.PersonalData;
+import it.gov.pagopa.pu.send.citizen.repository.PersonalDataRepository;
+import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
@@ -11,7 +15,7 @@ import it.gov.pagopa.pu.send.exception.SendNotificationFileNotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
@@ -31,35 +35,48 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final String fileShareBaseUrl;
   private final FileRetrieverService fileRetrieverService;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
+  private final PersonalDataRepository personalDataRepository;
+  private final DataCipherService dataCipherService;
 
   public SendNotificationServiceImpl(@Value("${fileshare-public-base-url}") String fileShareBaseUrl,
                                      SendNotificationRepository sendNotificationRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
-                                     FileRetrieverService fileRetrieverService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
+                                     FileRetrieverService fileRetrieverService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
+    PersonalDataRepository personalDataRepository,
+    DataCipherService dataCipherService) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationRepository = sendNotificationRepository;
     this.mapper = mapper;
     this.workflowService = workflowService;
     this.fileRetrieverService = fileRetrieverService;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
+    this.personalDataRepository = personalDataRepository;
+    this.dataCipherService = dataCipherService;
   }
 
   @Transactional
   @Override
   public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, String accessToken) {
-    SendNotification sendNotification = sendNotificationRepository.insert(mapper.map(createNotificationRequest, accessToken));
+    SendNotificationNoPII noPII = mapper.mapToNoPII(createNotificationRequest, accessToken);
+    SendNotificationPIIDTO pii = mapper.mapToPii(createNotificationRequest);
+
+    Long personalDataId = personalDataRepository.save(PersonalData.builder()
+      .type("SEND_NOTIFICATION")
+      .data(dataCipherService.encryptObj(pii)).build()).getId();
+    noPII.setPersonalDataId(personalDataId);
+    SendNotificationNoPII sendNotificationNoPII = sendNotificationRepository.insert(noPII);
 
     return CreateNotificationResponse
       .builder()
-      .sendNotificationId(sendNotification.getSendNotificationId())
-      .status(sendNotification.getStatus().name())
-      .preloadUrl(fileShareBaseUrl+"/organization/"+sendNotification.getOrganizationId()+"/send-files/"+sendNotification.getSendNotificationId())
+      .sendNotificationId(sendNotificationNoPII.getSendNotificationId())
+      .status(sendNotificationNoPII.getStatus().name())
+      .preloadUrl(fileShareBaseUrl+"/organization/"+ sendNotificationNoPII.getOrganizationId()+"/send-files/"+ sendNotificationNoPII.getSendNotificationId())
       .build();
   }
 
   @Transactional
   @Override
   public StartNotificationResponse startSendNotification(String sendNotificationId, LoadFileRequest loadFileRequest, String accessToken) {
-    SendNotification notification = findSendNotification(sendNotificationId);
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
     NotificationUtils.validateStatus(NotificationStatus.WAITING_FILE, notification.getStatus());
 
     notification.getDocuments().stream()
@@ -71,7 +88,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
         }
       );
 
-    SendNotification updatedNotification = findSendNotification(sendNotificationId);
+    SendNotificationNoPII updatedNotification = findSendNotification(sendNotificationId);
     boolean allFilesReady = updatedNotification.getDocuments().stream()
       .allMatch(doc -> doc.getStatus().equals(FileStatus.READY));
 
@@ -88,7 +105,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   @Transactional
   @Override
   public void deleteSendNotification(String sendNotificationId) {
-    SendNotification notification = findSendNotification(sendNotificationId);
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
     if (!notification.getStatus().equals(NotificationStatus.COMPLETE))
       sendNotificationRepository.deleteById(sendNotificationId);
     else
@@ -100,7 +117,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     return sendNotificationDTOMapper.apply(findSendNotification(sendNotificationId));
   }
 
-  private SendNotification findSendNotification(String sendNotificationId) {
+  private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }
