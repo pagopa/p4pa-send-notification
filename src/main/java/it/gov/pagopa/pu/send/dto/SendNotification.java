@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SendNotification implements FullPIIDTO<SendNotificationNoPII, SendNotificationPIIDTO> {
+public class SendNotification {
 
   private String sendNotificationId;
   private Long organizationId;
