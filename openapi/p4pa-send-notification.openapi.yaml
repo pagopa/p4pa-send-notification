@@ -1,0 +1,469 @@
+openapi: 3.0.3
+info:
+  title: P4PA-SEND-Service API
+  description: API and Models.
+  version: 0.0.1
+servers:
+  - url: "http://localhost:8080/p4pasend"
+paths:
+  /notification:
+    post:
+      tags:
+        - Notification
+      summary: Create notification
+      description: Create initial notification
+      operationId: createSendNotification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotificationRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateNotificationResponse'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+  /notification/{sendNotificationId}:
+    get:
+      tags:
+        - Notification
+      summary: get send notification
+      description: get send notification
+      operationId: getSendNotification
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendNotificationDTO'
+        '204':
+          description: NotificationData not found
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - Notification
+      summary: delete send notification
+      description: delete send notification
+      operationId: deleteSendNotification
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '409':
+          description: Wrong notification status
+        '500':
+          description: Internal server error
+  /notification/{sendNotificationId}/start:
+    post:
+      tags:
+        - Notification
+      summary: start notification process
+      description: Start request to authorize preload file to SEND
+      operationId: startNotification
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoadFileRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartNotificationResponse'
+        '202':
+          description: Accepted and waiting for all files
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification or File not found
+        '409':
+          description: Wrong notification status
+        '500':
+          description: Internal server error
+  /send/{sendNotificationId}/retrieveNotificationDate:
+    get:
+      tags:
+        - Send
+      summary: retrieve notification date
+      description: Retrieve notification date from send if exists
+      operationId: retrieveNotificationDate
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/SendNotificationDTO'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal server error
+  /send/{sendNotificationId}/preload:
+    post:
+      tags:
+        - Send
+      summary: preload file to SEND process
+      description: request to authorize preload file to SEND
+      operationId: preloadSendFile
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '208':
+          description: Already processed
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '409':
+          description: Wrong notification status
+        '500':
+          description: Internal server error
+  /send/{sendNotificationId}/load:
+    post:
+      tags:
+        - Send
+      summary: load file to SEND archive process
+      description: request to load file to SEND archive
+      operationId: uploadSendFile
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '208':
+          description: Already processed
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '409':
+          description: Wrong notification status
+        '500':
+          description: Internal server error
+  /send/{sendNotificationId}/delivery:
+    post:
+      tags:
+        - Send
+      summary: delivery notification
+      description: delivery notification
+      operationId: deliveryNotification
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '208':
+          description: Already processed
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '409':
+          description: Wrong notification status
+        '500':
+          description: Internal server error
+  /send/{sendNotificationId}/status:
+    get:
+      tags:
+        - Send
+      summary: notification status
+      description: notification status
+      operationId: notificationStatus
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendNotificationDTO'
+        '208':
+          description: Already processed
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '409':
+          description: Wrong notification status
+        '500':
+          description: Internal server error
+security:
+  - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    CreateNotificationRequest:
+      type: object
+      required:
+        - organizationId
+        - paProtocolNumber
+        - recipients
+      properties:
+        organizationId:
+          type: integer
+          format: int64
+        paProtocolNumber:
+          type: string
+        recipient:
+          $ref: '#/components/schemas/Recipient'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        notificationFeePolicy:
+          type: string
+          enum: [ FLAT_RATE, DELIVERY_MODE ]
+        physicalCommunicationType:
+          type: string
+          enum: [ AR_REGISTERED_LETTER, REGISTERED_LETTER_890 ]
+        senderDenomination:
+          type: string
+        senderTaxId:
+          type: string
+        amount:
+          type: number
+        paymentExpirationDate:
+          type: string
+          format: date
+        taxonomyCode:
+          type: string
+        paFee:
+          type: integer
+          minimum: 0
+          maximum: 100
+        vat:
+          type: integer
+          minimum: 0
+          maximum: 100
+        pagoPaIntMode:
+          type: string
+          enum: [ SYNC, ASYNC, NONE ]
+    Recipient:
+      type: object
+      required:
+        - recipientType
+        - taxId
+        - denomination
+        - physicalAddress
+      properties:
+        recipientType:
+          type: string
+          enum: [PF, PG]
+        taxId:
+          type: string
+        denomination:
+          type: string
+        physicalAddress:
+          $ref: '#/components/schemas/Address'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+    Address:
+      type: object
+      properties:
+        address:
+          type: string
+        zip:
+          type: string
+        municipality:
+          type: string
+        province:
+          type: string
+    Payment:
+      type: object
+      properties:
+        pagoPa:
+          $ref: '#/components/schemas/PagoPa'
+    PagoPa:
+      type: object
+      properties:
+        noticeCode:
+          type: string
+        creditorTaxId:
+          type: string
+        applyCost:
+          type: boolean
+        attachment:
+          $ref: '#/components/schemas/Attachment'
+    Attachment:
+      type: object
+      properties:
+        digest:
+          type: string
+        contentType:
+          type: string
+        fileName:
+          type: string
+    Document:
+      type: object
+      properties:
+        digest:
+          type: string
+        contentType:
+          type: string
+        fileName:
+          type: string
+    LoadFileRequest:
+      type: object
+      required:
+        - digest
+        - fileName
+      properties:
+        digest:
+          type: string
+        fileName:
+          type: string
+    CreateNotificationResponse:
+      type: object
+      properties:
+        sendNotificationId:
+          type: string
+        preloadUrl:
+          type: string
+        status:
+          type: string
+    StartNotificationResponse:
+      type: object
+      properties:
+        workFlowId:
+          type: string
+    SendNotificationDTO:
+      type: object
+      required:
+        - sendNotificationId
+        - organizationId
+        - status
+        - payments
+      properties:
+        sendNotificationId:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+        iun:
+          type: string
+        notificationDate:
+          type: string
+          format: date-time
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/SendNotificationPaymentsDTO'
+        status:
+          type: 'NotificationStatus'
+        errors:
+          type: array
+          items:
+            type: string
+    SendNotificationPaymentsDTO:
+      type: object
+      required:
+        - debtPositionId
+        - navList
+      properties:
+        debtPositionId:
+          type: integer
+          format: int64
+        navList:
+          type: array
+          items:
+            type: string
+    SendNotificationErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - SEND_NOTIFICATION_NOT_FOUND
+            - SEND_NOTIFICATION_BAD_REQUEST
+            - SEND_NOTIFICATION_GENERIC_ERROR
+            - SEND_NOTIFICATION_ALREADY_PROCESSED
+        message:
+          type: string

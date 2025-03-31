@@ -1,0 +1,671 @@
+{
+	"info": {
+		"_postman_id": "06ee48a9-e34b-4458-badf-884bc057838c",
+		"name": "P4PA-Send-E2E",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15747968",
+		"_collection_link": "https://warped-astronaut-141685.postman.co/workspace/P4PA~9a8b7dd5-97b6-4dd0-b3f5-95f25fd0b455/collection/15747968-06ee48a9-e34b-4458-badf-884bc057838c?action=share&source=collection_link&creator=15747968"
+	},
+	"item": [
+		{
+			"name": "00_login",
+			"item": [
+				{
+					"name": "postToken client-credentials",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"    pm.environment.get(\"clientId\")\r",
+									"    pm.environment.get(\"clientSecret\")"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Auth - postToken - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Auth - postToken - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"token_type\").to.eq(\"bearer\");\r",
+									"    pm.expect(jsonResponse).have.property(\"expires_in\").to.eq(14400);\r",
+									"    pm.expect(jsonResponse).have.property(\"access_token\");\r",
+									"\r",
+									"    pm.collectionVariables.set(\"accessToken\", jsonResponse.access_token)\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{p4paAuthBaseUrl}}/auth/token?client_id=IPA_TEST_2SOAKTEST_CLIENTNAME_0_1732879391104&grant_type=client_credentials&scope=openid&client_secret=c76e43fb-8ef8-486e-8fae-298e143df8bf",
+							"host": [
+								"{{p4paAuthBaseUrl}}"
+							],
+							"path": [
+								"auth",
+								"token"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "IPA_TEST_2SOAKTEST_CLIENTNAME_0_1732879391104"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials"
+								},
+								{
+									"key": "scope",
+									"value": "openid"
+								},
+								{
+									"key": "client_secret",
+									"value": "c76e43fb-8ef8-486e-8fae-298e143df8bf"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "01_SendNotification",
+			"item": [
+				{
+					"name": "createSendNotification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send Notification create notification - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Send Notification - create send notification - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"sendNotificationId\");\r",
+									"    pm.expect(jsonResponse).have.property(\"preloadUrl\");\r",
+									"    pm.expect(jsonResponse).have.property(\"status\").to.eq(\"WAITING_FILE\");\r",
+									"\r",
+									"    pm.collectionVariables.set(\"sendNotificationId\", jsonResponse.sendNotificationId)\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"organizationId\": {{organizationId}},\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        },\r\n        \"payments\": [ \r\n        {\r\n            \"pagoPa\": { \r\n                \"noticeCode\": \"301340000100000045\", \r\n                \"creditorTaxId\": \"99999999982\", \r\n                \"applyCost\": true, \r\n                \"attachment\": { \r\n                    \"fileName\":\"Pagamento.pdf\",\r\n                    \"contentType\": \"application/pdf\",\r\n                    \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n                }\r\n            }\r\n        }]\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    }],\r\n    \"notificationFeePolicy\": \"DELIVERY_MODE\", \r\n    \"physicalCommunicationType\": \"AR_REGISTERED_LETTER\", \r\n    \"senderDenomination\": \"Ente Intermediario 2\", \r\n    \"senderTaxId\": \"00000000018\", \r\n    \"amount\": 0, \r\n    \"paymentExpirationDate\": \"2025-12-27\", \r\n    \"taxonomyCode\": \"010101P\", \r\n    \"paFee\": 100, \r\n    \"vat\":22, \r\n    \"pagoPaIntMode\": \"NONE\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"notification"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "startSendNotificationNotificationFile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send Notification create notification - Responses with 202\", function () {\r",
+									"    pm.response.to.have.status(202);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n     \"digest\":\"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\",\r\n     \"fileName\": \"Notifica.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}/start",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"notification",
+								"{{sendNotificationId}}",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "startSendNotificationPagamentoFile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send Notification create notification - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Send Notification - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"workFlowId\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n     \"digest\":\"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\",\r\n     \"fileName\": \"Pagamento.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}/start",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"notification",
+								"{{sendNotificationId}}",
+								"start"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02_Send",
+			"item": [
+				{
+					"name": "sendPreloadFiles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send Notification preload files - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/preload",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"preload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendUploadFiles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send Notification load files - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/load",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"load"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendDeliveryNotification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send delivery notification - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/delivery",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"delivery"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendNotificationStatus",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send notification status - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"P4PA Send notification status - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"idempotenceToken\");\r",
+									"    pm.expect(jsonResponse).have.property(\"paProtocolNumber\");\r",
+									"    pm.expect(jsonResponse).have.property(\"subject\");\r",
+									"    pm.expect(jsonResponse).have.property(\"recipients\");\r",
+									"    pm.expect(jsonResponse).have.property(\"iun\");\r",
+									"    pm.expect(jsonResponse).have.property(\"notificationRequestStatus\").eq(\"ACCEPTED\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/status",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "99_utils",
+			"item": [
+				{
+					"name": "retrieveNotificationDate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send retrieve notificationDate - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"P4PA Send retrieve notificationDate - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"sendNotificationId\");\r",
+									"    pm.expect(jsonResponse).have.property(\"organizationId\");\r",
+									"    pm.expect(jsonResponse).have.property(\"iun\");\r",
+									"    pm.expect(jsonResponse).have.property(\"notificationDate\");\r",
+									"    pm.expect(jsonResponse).have.property(\"notificationRequestStatus\").eq(\"COMPLETE\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/retrieveNotificationDate",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"retrieveNotificationDate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteSendNotification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n     \"digest\":\"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\",\r\n     \"fileName\": \"Notifica.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"notification",
+								"{{sendNotificationId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "sendNotificationId",
+			"value": ""
+		},
+		{
+			"key": "noticeCode",
+			"value": ""
+		},
+		{
+			"key": "organizationId",
+			"value": "3",
+			"type": "default"
+		}
+	]
+}

@@ -1,0 +1,58 @@
+package it.gov.pagopa.pu.send.controller;
+
+import it.gov.pagopa.pu.send.controller.generated.SendApi;
+import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
+import it.gov.pagopa.pu.send.service.SendFacadeService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
+@Slf4j
+@RestController
+public class SendController implements SendApi {
+
+  private final SendFacadeService sendFacadeService;
+
+  public SendController(SendFacadeService sendFacadeService) {
+    this.sendFacadeService = sendFacadeService;
+  }
+
+  @Override
+  public ResponseEntity<Void> preloadSendFile(String sendNotificationId) {
+    log.info("request preload files for sendNotificationId {}", sendNotificationId);
+    sendFacadeService.preloadFiles(sendNotificationId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<SendNotificationDTO> retrieveNotificationDate(String sendNotificationId) {
+    log.info("retrieve notificationData for sendNotificationId {}", sendNotificationId);
+    SendNotificationDTO response = sendFacadeService.retrieveNotificationData(sendNotificationId);
+    if(response!=null)
+      return new ResponseEntity<>(response, HttpStatus.OK);
+    else
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<Void> uploadSendFile(String sendNotificationId) {
+    log.info("upload files to SEND safeStorage for sendNotificationId {}", sendNotificationId);
+    sendFacadeService.uploadFiles(sendNotificationId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> deliveryNotification(String sendNotificationId) {
+    log.info("delivery notification with sendNotificationId {} to SEND", sendNotificationId);
+    sendFacadeService.deliveryNotification(sendNotificationId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<SendNotificationDTO> notificationStatus(String sendNotificationId) {
+    log.info("retrieve notification status for sendNotificationId {}", sendNotificationId);
+    return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId), HttpStatus.OK);
+  }
+
+}
