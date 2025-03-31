@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.mapper;
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
 import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
+import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.NotificationFeePolicyEnum;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
@@ -103,6 +104,13 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     payment.setPagoPa(pagoPa);
     recipient.setPayments(Collections.singletonList(payment));
 
+    Address address = new Address();
+    address.setAddress("Via Larga 10");
+    address.setZip("00186");
+    address.setMunicipality("Roma");
+    address.setProvince("RM");
+    recipient.setPhysicalAddress(address);
+
     Document document = new Document();
     document.setFileName("document.pdf");
     document.setContentType("application/pdf");
@@ -155,5 +163,23 @@ class CreateNotificationRequest2SendNotificationMapperTest {
 
     // When, Then
     Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.mapToNoPII(request, accessToken));
+  }
+
+  @Test
+  void givenCreateNotificationRequestWhenMapToNoPiiThenOk(){
+    // Given
+    CreateNotificationRequest request = buildRequest();
+
+    // When
+    SendNotificationPIIDTO result = mapper.mapToPii(request);
+
+    // Then
+    TestUtils.checkNotNullFields(result);
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals("RSSMRA80L05F593A", result.getFiscalCode());
+    Assertions.assertEquals("Via Larga 10", request.getRecipient().getPhysicalAddress().getAddress());
+    Assertions.assertEquals("00186", request.getRecipient().getPhysicalAddress().getZip());
+    Assertions.assertEquals("Roma", request.getRecipient().getPhysicalAddress().getMunicipality());
+    Assertions.assertEquals("RM", request.getRecipient().getPhysicalAddress().getProvince());
   }
 }
