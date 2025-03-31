@@ -23,7 +23,7 @@ public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
   @Override
   public Optional<String> uploadFile(Long organizationId, String sendNotificationId, DocumentDTO documentDTO) {
     String fileName = sendNotificationId + "_" + documentDTO.getFileName();
-    try(InputStream inputStream = fileRetrieverService.retrieveFile(organizationId, fileName)) {
+    try(InputStream inputStream = fileRetrieverService.retrieveFile(organizationId, sendNotificationId, fileName)) {
       if(inputStream==null)
         throw new FileNotFoundException("File not found: " + documentDTO.getFileName());
       byte[] fileBytes = inputStream.readAllBytes();

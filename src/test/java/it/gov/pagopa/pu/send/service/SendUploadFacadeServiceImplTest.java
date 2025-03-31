@@ -44,7 +44,7 @@ class SendUploadFacadeServiceImplTest {
       .secret("SECRET")
       .build();
 
-    Mockito.when(fileRetrieverServiceMock.retrieveFile(organizationId, sendNotificationId+"_file.pdf")).thenReturn(inputStream);
+    Mockito.when(fileRetrieverServiceMock.retrieveFile(organizationId, sendNotificationId,sendNotificationId+"_file.pdf")).thenReturn(inputStream);
     Mockito.when(sendUploadClient.upload(documentDTO, "TEST FILE HASH P4PA SEND".getBytes())).thenReturn(versionId);
 
     Optional<String> result = uploadService.uploadFile(organizationId, sendNotificationId, documentDTO);

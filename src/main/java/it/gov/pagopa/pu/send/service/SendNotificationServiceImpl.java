@@ -109,7 +109,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());
     try {
       String fileName = sendNotificationId +"_" + doc.getFileName();
-      InputStream file = fileRetrieverService.retrieveFile(organizationId, fileName);
+      InputStream file = fileRetrieverService.retrieveFile(organizationId, sendNotificationId, fileName);
       if (!FileUtils.calculateFileHash(file).equals(loadFileRequest.getDigest()))
         throw new InvalidSignatureException("File " + doc.getFileName() + " has not a valid signature");
     } catch (Exception e) {

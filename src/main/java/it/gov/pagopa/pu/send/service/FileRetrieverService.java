@@ -20,8 +20,8 @@ public class FileRetrieverService {
     this.sharedFolder = sharedFolder;
   }
 
-  public InputStream retrieveFile(Long organizationId, String fileName) {
-    Path relativePath = Path.of(sharedFolder, String.valueOf(organizationId), sendFilePath);
+  public InputStream retrieveFile(Long organizationId, String sendNotificationId, String fileName) {
+    Path relativePath = Path.of(sharedFolder, String.valueOf(organizationId), sendFilePath, sendNotificationId);
     return decryptFile(relativePath, fileName);
   }
 
