@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -23,15 +24,16 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class SendNotificationMapperTest {
+class SendNotificationPIIMapperTest {
 
   private PersonalDataService personalDataService;
-  private SendNotificationMapper sendNotificationMapper;
+  private DataCipherService dataCipherService;
+  private SendNotificationPIIMapper sendNotificationPIIMapper;
 
   @BeforeEach
   void setUp() {
     personalDataService = Mockito.mock(PersonalDataService.class);
-    sendNotificationMapper = new SendNotificationMapper(personalDataService);
+    sendNotificationPIIMapper = new SendNotificationPIIMapper(personalDataService, dataCipherService);
   }
 
   @Test
@@ -52,7 +54,7 @@ class SendNotificationMapperTest {
     Mockito.when(personalDataService.get(personalDataId, SendNotificationPIIDTO.class)).thenReturn(piiDto);
 
     // When
-    SendNotification result = sendNotificationMapper.map(noPii);
+    SendNotification result = sendNotificationPIIMapper.map(noPii);
 
     // Then
     TestUtils.checkNotNullFields(result);

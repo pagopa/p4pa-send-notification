@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.Optional;
 
-public class SendNotificationRepositoryExtImpl implements SendNotificationRepositoryExt{
+public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationNoPIIRepositoryExt{
 
   private static final String FIELD_TEMPLATE = "%s.$.%s";
 
@@ -29,7 +29,7 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
 
   private final MongoTemplate mongoTemplate;
 
-  public SendNotificationRepositoryExtImpl(MongoTemplate mongoTemplate) {
+  public SendNotificationNoPIIRepositoryExtImpl(MongoTemplate mongoTemplate) {
     this.mongoTemplate = mongoTemplate;
   }
 

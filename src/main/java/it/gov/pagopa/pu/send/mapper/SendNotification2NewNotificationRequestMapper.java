@@ -16,16 +16,16 @@ import java.util.stream.Collectors;
 @Service
 public class SendNotification2NewNotificationRequestMapper {
 
-  public final SendNotificationMapper sendNotificationMapper;
+  public final SendNotificationPIIMapper sendNotificationPIIMapper;
 
   public SendNotification2NewNotificationRequestMapper(
-    SendNotificationMapper sendNotificationMapper) {
-    this.sendNotificationMapper = sendNotificationMapper;
+    SendNotificationPIIMapper sendNotificationPIIMapper) {
+    this.sendNotificationPIIMapper = sendNotificationPIIMapper;
   }
 
   public NewNotificationRequestV24DTO apply(SendNotificationNoPII sendNotificationNoPII) {
 
-    SendNotification sendNotification = sendNotificationMapper.map(sendNotificationNoPII);
+    SendNotification sendNotification = sendNotificationPIIMapper.map(sendNotificationNoPII);
 
     NewNotificationRequestV24DTO newNotification = new NewNotificationRequestV24DTO();
     newNotification.setIdempotenceToken(sendNotification.getSendNotificationId());

@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class SendNotification2NewNotificationRequestMapperTest {
 
   @Mock
-  private SendNotificationMapper sendNotificationMapperMock;
+  private SendNotificationPIIMapper sendNotificationPIIMapperMock;
 
   @InjectMocks
   private SendNotification2NewNotificationRequestMapper mapper;
@@ -103,7 +103,7 @@ class SendNotification2NewNotificationRequestMapperTest {
 
     SendNotificationNoPII noPII = new SendNotificationNoPII();
 
-    Mockito.when(sendNotificationMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
+    Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
 
     // When
     NewNotificationRequestV24DTO result = mapper.apply(noPII);

@@ -14,7 +14,7 @@ import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
-import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
+import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +37,7 @@ import static org.mockito.ArgumentMatchers.eq;
 @ExtendWith(MockitoExtension.class)
 class SendFacadeServiceImplTest {
   @Mock
-  private SendNotificationRepository sendNotificationRepository;
+  private SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
 
   @Mock
   private SendClient sendClient;
@@ -86,21 +86,21 @@ class SendFacadeServiceImplTest {
     preLoadResponse.setHttpMethod(HttpMethodEnum.POST);
     preLoadResponse.setUrl("http://example.com");
 
-    Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(
+    Mockito.when(sendNotificationNoPIIRepository.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
     Mockito.when(sendClient.preloadFiles(List.of(preLoadRequestDTO), notification.getOrganizationId())).thenReturn(List.of(preLoadResponse));
 
     sendService.preloadFiles(sendNotificationId);
 
-    Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFilePreloadInformation(eq(sendNotificationId), any(PreLoadResponseDTO.class));
-    Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateNotificationStatus(sendNotificationId, NotificationStatus.REGISTERED);
+    Mockito.verify(sendNotificationNoPIIRepository, Mockito.times(1)).updateFilePreloadInformation(eq(sendNotificationId), any(PreLoadResponseDTO.class));
+    Mockito.verify(sendNotificationNoPIIRepository, Mockito.times(1)).updateNotificationStatus(sendNotificationId, NotificationStatus.REGISTERED);
   }
 
   @Test
   void givenNotExistsNotificationWhenPreloadFilesThenException() {
     String sendNotificationId = "SENDNOTIFICATIONID";
-    Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(Optional.empty());
+    Mockito.when(sendNotificationNoPIIRepository.findById(sendNotificationId)).thenReturn(Optional.empty());
 
     Exception exception = assertThrows(SendNotificationNotFoundException.class, () -> sendService.preloadFiles(sendNotificationId));
 
@@ -132,13 +132,13 @@ class SendFacadeServiceImplTest {
       .documents(List.of(documentDTO))
       .build();
 
-    Mockito.when(sendNotificationRepository.findById(sendNotificationId)).thenReturn(
+    Mockito.when(sendNotificationNoPIIRepository.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
     Mockito.when(uploadService.uploadFile(organizationId, sendNotificationId, documentDTO)).thenReturn(Optional.of(versionId));
 
     sendService.uploadFiles(sendNotificationId);
-    Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFileVersionId(sendNotificationId, fileName, versionId);
-    Mockito.verify(sendNotificationRepository, Mockito.times(1)).updateFileStatus(sendNotificationId, fileName, FileStatus.UPLOADED);
+    Mockito.verify(sendNotificationNoPIIRepository, Mockito.times(1)).updateFileVersionId(sendNotificationId, fileName, versionId);
+    Mockito.verify(sendNotificationNoPIIRepository, Mockito.times(1)).updateFileStatus(sendNotificationId, fileName, FileStatus.UPLOADED);
   }
 
   @Test
@@ -155,16 +155,16 @@ class SendFacadeServiceImplTest {
       .status(NotificationStatus.UPLOADED)
       .build();
 
-    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
+    Mockito.when(sendNotificationNoPIIRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
     Mockito.when(sendClient.deliveryNotification(sendNotificationMapper.apply(notification), orgId)).thenReturn(response);
 
     sendService.deliveryNotification(sendNotificationId);
 
-    Mockito.verify(sendNotificationRepository, Mockito.times(1))
+    Mockito.verify(sendNotificationNoPIIRepository, Mockito.times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
-    Mockito.verify(sendNotificationRepository, Mockito.times(1))
+    Mockito.verify(sendNotificationNoPIIRepository, Mockito.times(1))
       .updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
   }
 
@@ -186,7 +186,7 @@ class SendFacadeServiceImplTest {
 
     SendNotificationDTO expectedResult = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
+    Mockito.when(sendNotificationNoPIIRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
     Mockito.when(sendClient.notificationStatus(notificationRequestId, orgId)).thenReturn(response);
@@ -198,7 +198,7 @@ class SendFacadeServiceImplTest {
 
     Assertions.assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
-    Mockito.verify(sendNotificationRepository, Mockito.times(1))
+    Mockito.verify(sendNotificationNoPIIRepository, Mockito.times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
   }
 
@@ -223,7 +223,7 @@ class SendFacadeServiceImplTest {
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
     notificationDTO.setNotificationDate(OffsetDateTime.now());
 
-    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
+    Mockito.when(sendNotificationNoPIIRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendClient.retrieveNotificationPrice(paxId, noticeCode, orgId)).thenReturn(response);
     Mockito.when(sendNotificationDTOMapper.apply(notification)).thenReturn(notificationDTO);
@@ -250,7 +250,7 @@ class SendFacadeServiceImplTest {
       )
       .build();
 
-    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
+    Mockito.when(sendNotificationNoPIIRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendClient.retrieveNotificationPrice(paxId, noticeCode, orgId)).thenReturn(response);
 
@@ -277,7 +277,7 @@ class SendFacadeServiceImplTest {
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
     notificationDTO.setNotificationDate(OffsetDateTime.now());
 
-    Mockito.when(sendNotificationRepository.findById(sendNotificationId))
+    Mockito.when(sendNotificationNoPIIRepository.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendNotificationDTOMapper.apply(notification)).thenReturn(notificationDTO);
 

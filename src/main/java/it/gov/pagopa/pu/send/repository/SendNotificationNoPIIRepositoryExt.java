@@ -9,7 +9,7 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-public interface SendNotificationRepositoryExt {
+public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult updateFilePreloadInformation(String sendNotificationId, PreLoadResponseDTO preLoad);
   UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus);
   UpdateResult updateNotificationRequestId(String sendNotificationId, String notificationRequestId);

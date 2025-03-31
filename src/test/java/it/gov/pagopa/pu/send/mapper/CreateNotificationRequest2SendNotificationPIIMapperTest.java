@@ -1,9 +1,8 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
-import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
-import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
+import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.NotificationFeePolicyEnum;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
@@ -12,7 +11,6 @@ import it.gov.pagopa.pu.send.dto.generated.Recipient.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
-import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -28,19 +26,16 @@ import java.time.LocalDate;
 import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
-class CreateNotificationRequest2SendNotificationMapperTest {
+class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
   @Mock
   private DebtPositionService debtPositionServiceMock;
-
-  @Mock
-  private DataCipherService dataCipherServiceMock;
 
   private CreateNotificationRequest2SendNotificationMapper mapper;
 
   @BeforeEach
   void init(){
-    mapper = new CreateNotificationRequest2SendNotificationMapper(dataCipherServiceMock, debtPositionServiceMock);
+    mapper = new CreateNotificationRequest2SendNotificationMapper(debtPositionServiceMock);
   }
 
   @AfterEach
@@ -49,7 +44,7 @@ class CreateNotificationRequest2SendNotificationMapperTest {
   }
 
   @Test
-  void givenCreateNotificationRequestWhenMapToNoPIIThenOk(){
+  void givenCreateNotificationRequestWhenMapToModelThenOk(){
     // Given
     CreateNotificationRequest request = buildRequest();
     String nav = request.getRecipient().getPayments().getFirst().getPagoPa().getNoticeCode();
@@ -60,13 +55,12 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     debtPosition.setDebtPositionId(3L);
     Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
       .thenReturn(debtPosition);
-    Mockito.when(dataCipherServiceMock.hash(request.getRecipient().getTaxId())).thenReturn(request.getRecipient().getTaxId().getBytes());
 
     // When
-    SendNotificationNoPII result = mapper.mapToNoPII(request, accessToken);
+    SendNotification result = mapper.mapToModel(request, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun","notificationData", "personalDataId");
+    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun","notificationData", "personalDataId", "noPII");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("PF", result.getSubjectType());
@@ -134,14 +128,14 @@ class CreateNotificationRequest2SendNotificationMapperTest {
     return request;
   }
 
-  private void checkPayments(DebtPosition debtPosition, SendNotificationNoPII result) {
+  private void checkPayments(DebtPosition debtPosition, SendNotification result) {
     Assertions.assertSame(debtPosition.getDebtPositionId(), result.getPayments().getFirst().getDebtPositionId());
     Assertions.assertEquals("CREDITORTAXID", result.getPayments().getFirst().getPayment().getPagoPa().getCreditorTaxId());
     Assertions.assertEquals("NOTICECODE", result.getPayments().getFirst().getPayment().getPagoPa().getNoticeCode());
     Assertions.assertEquals(true, result.getPayments().getFirst().getPayment().getPagoPa().getApplyCost());
   }
 
-  private void checkDocuments(SendNotificationNoPII result) {
+  private void checkDocuments(SendNotification result) {
     Assertions.assertEquals("attachment.pdf", result.getDocuments().getFirst().getFileName());
     Assertions.assertEquals("application/pdf", result.getDocuments().getFirst().getContentType());
     Assertions.assertEquals("sha256", result.getDocuments().getFirst().getDigest());
@@ -162,24 +156,6 @@ class CreateNotificationRequest2SendNotificationMapperTest {
       .thenReturn(null);
 
     // When, Then
-    Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.mapToNoPII(request, accessToken));
-  }
-
-  @Test
-  void givenCreateNotificationRequestWhenMapToNoPiiThenOk(){
-    // Given
-    CreateNotificationRequest request = buildRequest();
-
-    // When
-    SendNotificationPIIDTO result = mapper.mapToPii(request);
-
-    // Then
-    TestUtils.checkNotNullFields(result);
-    Assertions.assertNotNull(result);
-    Assertions.assertEquals("RSSMRA80L05F593A", result.getFiscalCode());
-    Assertions.assertEquals("Via Larga 10", request.getRecipient().getPhysicalAddress().getAddress());
-    Assertions.assertEquals("00186", request.getRecipient().getPhysicalAddress().getZip());
-    Assertions.assertEquals("Roma", request.getRecipient().getPhysicalAddress().getMunicipality());
-    Assertions.assertEquals("RM", request.getRecipient().getPhysicalAddress().getProvince());
+    Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.mapToModel(request, accessToken));
   }
 }

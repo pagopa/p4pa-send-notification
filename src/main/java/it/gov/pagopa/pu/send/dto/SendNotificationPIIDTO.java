@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SendNotificationPIIDTO {
+public class SendNotificationPIIDTO implements PIIDTO {
   private String fiscalCode;
   private Address address;
 }

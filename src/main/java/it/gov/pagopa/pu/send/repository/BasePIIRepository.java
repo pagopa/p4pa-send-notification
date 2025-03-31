@@ -1,0 +1,72 @@
+package it.gov.pagopa.pu.send.repository;
+
+import it.gov.pagopa.pu.send.citizen.service.PersonalDataService;
+import it.gov.pagopa.pu.send.dto.FullPIIDTO;
+import it.gov.pagopa.pu.send.dto.PIIDTO;
+import it.gov.pagopa.pu.send.mapper.BasePIIMapper;
+import it.gov.pagopa.pu.send.model.NoPIIEntity;
+import java.io.Serializable;
+import java.util.Optional;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.util.Pair;
+
+public abstract class BasePIIRepository<F extends FullPIIDTO<E, P>, E extends NoPIIEntity<P>, P extends PIIDTO, I extends Serializable> {
+
+  private final BasePIIMapper<F, E, P> piiMapper;
+  private final PersonalDataService personalDataService;
+  private final MongoRepository<E, I> noPIIRepository;
+
+  BasePIIRepository(BasePIIMapper<F, E, P> piiMapper, PersonalDataService personalDataService, MongoRepository<E, I> noPIIRepository) {
+    this.piiMapper = piiMapper;
+    this.personalDataService = personalDataService;
+    this.noPIIRepository = noPIIRepository;
+  }
+
+  abstract void setId(F fullDTO, I id);
+  abstract void setId(E noPii, I id);
+  abstract I getId(E noPii);
+  abstract Class<P> getPIITDTOClass();
+
+  public F save(F fullDTO) {
+    Pair<E, P> p = piiMapper.map(fullDTO);
+
+    Pair<Long, Optional<P>> piiId2OldPii = retrievePII(p.getFirst());
+    boolean pii2create = piiId2OldPii==null ||
+      piiId2OldPii.getSecond()
+        .map(o -> !o.equals(p.getSecond()))
+        .orElse(false);
+
+    if (piiId2OldPii != null && pii2create) {
+      personalDataService.delete(piiId2OldPii.getFirst());
+    }
+
+    long personalDataId;
+    if(pii2create) {
+      personalDataId = personalDataService.insert(p.getSecond(), "SEND_NOTIFICATION");
+    } else {
+      personalDataId = piiId2OldPii.getFirst();
+    }
+    p.getFirst().setPersonalDataId(personalDataId);
+
+    fullDTO.setNoPII(p.getFirst());
+    E savedNoPii = noPIIRepository.save(p.getFirst());
+    setId(fullDTO, getId(savedNoPii));
+    setId(fullDTO.getNoPII(), getId(savedNoPii));
+    return fullDTO;
+  }
+
+  protected Pair<Long, Optional<P>> retrievePII(E noPii) {
+    Long personalDataId = noPii.getPersonalDataId();
+    I id = getId(noPii);
+    if(personalDataId==null && id != null){
+      personalDataId = noPIIRepository.findById(id).map(NoPIIEntity::getPersonalDataId).orElse(null);
+    }
+
+    if (personalDataId != null) {
+      return Pair.of(personalDataId, Optional.ofNullable(personalDataService.get(personalDataId, getPIITDTOClass())));
+    } else {
+      return null;
+    }
+  }
+
+}

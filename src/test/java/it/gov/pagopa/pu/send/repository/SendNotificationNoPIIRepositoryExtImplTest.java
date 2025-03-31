@@ -22,7 +22,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
-class SendNotificationRepositoryExtImplTest {
+class SendNotificationNoPIIRepositoryExtImplTest {
 
   @Mock
   private MongoTemplate mongoTemplate;
@@ -31,7 +31,7 @@ class SendNotificationRepositoryExtImplTest {
   private UpdateResult updateResult;
 
   @InjectMocks
-  private SendNotificationRepositoryExtImpl repository;
+  private SendNotificationNoPIIRepositoryExtImpl repository;
 
 
   @Test

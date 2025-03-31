@@ -11,7 +11,7 @@ import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
-import it.gov.pagopa.pu.send.repository.SendNotificationRepository;
+import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,17 +24,18 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class SendFacadeServiceImpl implements SendFacadeService {
-  private final SendNotificationRepository sendNotificationRepository;
+  private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
   private final SendClient sendClient;
   private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
 
-  public SendFacadeServiceImpl(SendNotificationRepository sendNotificationRepository,
+  public SendFacadeServiceImpl(
+    SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
                                SendClient sendClient, SendUploadFacadeServiceImpl uploadService,
                                SendNotification2NewNotificationRequestMapper sendNotificationMapper,
     SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
-    this.sendNotificationRepository = sendNotificationRepository;
+    this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendClient = sendClient;
     this.uploadService = uploadService;
     this.sendNotificationMapper = sendNotificationMapper;
@@ -61,9 +62,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     //Call SEND preload API
     List<PreLoadResponseDTO> preLoadResponseDTO = sendClient.preloadFiles(preLoadRequest, notification.getOrganizationId());
     preLoadResponseDTO.forEach(response ->
-      sendNotificationRepository.updateFilePreloadInformation(sendNotificationId, response));
+      sendNotificationNoPIIRepository.updateFilePreloadInformation(sendNotificationId, response));
 
-    sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.REGISTERED);
+    sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.REGISTERED);
   }
 
   @Transactional
@@ -78,11 +79,11 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       if(!doc.getStatus().equals(FileStatus.UPLOADED))
         versionId = uploadService.uploadFile(notification.getOrganizationId(), sendNotificationId, doc);
       if (versionId.isPresent()) {
-        sendNotificationRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.UPLOADED);
-        sendNotificationRepository.updateFileVersionId(sendNotificationId, doc.getFileName(), versionId.get());
+        sendNotificationNoPIIRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.UPLOADED);
+        sendNotificationNoPIIRepository.updateFileVersionId(sendNotificationId, doc.getFileName(), versionId.get());
       }
     }
-    sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.UPLOADED);
+    sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.UPLOADED);
   }
 
   @Transactional
@@ -94,8 +95,8 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     NotificationUtils.validateStatus(NotificationStatus.UPLOADED, notification.getStatus());
     NewNotificationResponseDTO responseDTO = sendClient.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId());
     if (responseDTO!=null){
-      sendNotificationRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
-      sendNotificationRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
+      sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
+      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
     }
   }
 
@@ -112,7 +113,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {
       notification.setNotificationData(notificationPriceResponseV23DTO.getNotificationViewDate()
         .toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
-      sendNotificationRepository.updateNotificationDate(sendNotificationId, notification.getNotificationData());
+      sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, notification.getNotificationData());
       return sendNotificationDTOMapper.apply(notification);
     }
 
@@ -127,7 +128,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
     NewNotificationRequestStatusResponseV24DTO notificationStatus = sendClient.notificationStatus(notification.getNotificationRequestId(), notification.getOrganizationId());
     if(notificationStatus!=null && notificationStatus.getIun() != null){
-      sendNotificationRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
+      sendNotificationNoPIIRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
       notification.setStatus(NotificationStatus.ACCEPTED);
     }
 
@@ -135,7 +136,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
-    return sendNotificationRepository.findById(sendNotificationId)
+    return sendNotificationNoPIIRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }
 }
