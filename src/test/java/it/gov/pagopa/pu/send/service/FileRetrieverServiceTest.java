@@ -40,7 +40,7 @@ class FileRetrieverServiceTest {
     String sendNotificationId = "SENDID";
     String fileName = "test.pdf";
     InputStream expectedInputStream = new ByteArrayInputStream(FILECONTENT.getBytes());
-    Path expectedPath = Path.of(SHARED_FOLDER, String.valueOf(organizationId), SEND_FILE_PATH);
+    Path expectedPath = Path.of(SHARED_FOLDER, String.valueOf(organizationId), SEND_FILE_PATH, sendNotificationId);
 
     try (MockedStatic<AESUtils> aesUtils = Mockito.mockStatic(AESUtils.class)) {
       aesUtils.when(() -> AESUtils.decrypt(
