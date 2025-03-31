@@ -37,9 +37,10 @@ class FileRetrieverServiceTest {
   void givenCorrectPathWhenRetrieveFileThenReturnDecryptFile() {
     // Given
     Long organizationId = 1L;
+    String sendNotificationId = "SENDID";
     String fileName = "test.pdf";
     InputStream expectedInputStream = new ByteArrayInputStream(FILECONTENT.getBytes());
-    Path expectedPath = Path.of(SHARED_FOLDER, String.valueOf(organizationId), SEND_FILE_PATH);
+    Path expectedPath = Path.of(SHARED_FOLDER, String.valueOf(organizationId), SEND_FILE_PATH, sendNotificationId);
 
     try (MockedStatic<AESUtils> aesUtils = Mockito.mockStatic(AESUtils.class)) {
       aesUtils.when(() -> AESUtils.decrypt(
@@ -49,7 +50,7 @@ class FileRetrieverServiceTest {
       )).thenReturn(expectedInputStream);
 
       // When
-      InputStream result = fileRetrieverService.retrieveFile(organizationId, fileName);
+      InputStream result = fileRetrieverService.retrieveFile(organizationId, sendNotificationId, fileName);
 
       // Then
       assertNotNull(result);

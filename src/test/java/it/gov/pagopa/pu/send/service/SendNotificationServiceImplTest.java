@@ -99,7 +99,7 @@ class SendNotificationServiceImplTest {
     Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification))
       .thenReturn(Optional.of(updatedNotification));
-    Mockito.when(fileRetrieverServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId+"_"+fileName)).thenReturn(inputStream);
+    Mockito.when(fileRetrieverServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
     Mockito.when(workflowServiceMock.sendNotificationProcess(sendNotificationId, null))
         .thenReturn(workflow);
 
@@ -135,7 +135,7 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
     InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
-    Mockito.when(fileRetrieverServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId+"_"+fileName)).thenReturn(inputStream);
+    Mockito.when(fileRetrieverServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId,sendNotificationId+"_"+fileName)).thenReturn(inputStream);
     Mockito.when(sendNotificationRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
