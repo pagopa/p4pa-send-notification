@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationPaymentsDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,14 +27,14 @@ class SendNotification2SendNotificationDTOMapperTest {
   @Test
   void givenSendNotificationWhenMapThenReturnSendNotificationDTO() {
     OffsetDateTime now = OffsetDateTime.now();
-    SendNotification sendNotification = new SendNotification();
-    sendNotification.setSendNotificationId("12345");
-    sendNotification.setOrganizationId(1L);
-    sendNotification.setIun("IUN");
-    sendNotification.setNotificationData(now);
-    sendNotification.setStatus(NotificationStatus.COMPLETE);
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+    sendNotificationNoPII.setSendNotificationId("12345");
+    sendNotificationNoPII.setOrganizationId(1L);
+    sendNotificationNoPII.setIun("IUN");
+    sendNotificationNoPII.setNotificationData(now);
+    sendNotificationNoPII.setStatus(NotificationStatus.COMPLETE);
 
-    sendNotification.setPayments(List.of(
+    sendNotificationNoPII.setPayments(List.of(
       new PuPayment(3L, new Payment(PagoPa.builder()
         .noticeCode("NOTICECODE1")
         .build())),
@@ -46,7 +46,7 @@ class SendNotification2SendNotificationDTOMapperTest {
         .build()))
     ));
 
-    SendNotificationDTO result = mapper.apply(sendNotification);
+    SendNotificationDTO result = mapper.apply(sendNotificationNoPII);
 
     TestUtils.checkNotNullFields(result);
     assertNotNull(result);

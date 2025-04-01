@@ -5,8 +5,8 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.model.SendNotification;
-import it.gov.pagopa.pu.send.model.SendNotification.Fields;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
 import java.time.OffsetDateTime;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.Optional;
 
-public class SendNotificationRepositoryExtImpl implements SendNotificationRepositoryExt{
+public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationNoPIIRepositoryExt{
 
   private static final String FIELD_TEMPLATE = "%s.$.%s";
 
@@ -29,7 +29,7 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
 
   private final MongoTemplate mongoTemplate;
 
-  public SendNotificationRepositoryExtImpl(MongoTemplate mongoTemplate) {
+  public SendNotificationNoPIIRepositoryExtImpl(MongoTemplate mongoTemplate) {
     this.mongoTemplate = mongoTemplate;
   }
 
@@ -45,7 +45,7 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
         .set(FIELD_DOCUMENT_SECRET, preloadResponse.getSecret())
         .set(FIELD_DOCUMENT_HTTPMETHOD, preloadResponse.getHttpMethod())
         .set(FIELD_DOCUMENT_URL, preloadResponse.getUrl()),
-      SendNotification.class);
+      SendNotificationNoPII.class);
   }
 
   @Override
@@ -53,7 +53,7 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
     return mongoTemplate.updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
       new Update().set(Fields.status, newStatus),
-      SendNotification.class);
+      SendNotificationNoPII.class);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
     return mongoTemplate.updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
       new Update().set(Fields.notificationRequestId, notificationRequestId),
-      SendNotification.class);
+      SendNotificationNoPII.class);
   }
 
   @Override
@@ -70,7 +70,7 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
         .and(FIELD_DOCUMENT_ID).is(fileName)),
       new Update().set(FIELD_DOCUMENT_STATUS, newStatus),
-      SendNotification.class);
+      SendNotificationNoPII.class);
   }
 
   @Override
@@ -79,7 +79,7 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
         .and(FIELD_DOCUMENT_ID).is(fileName)),
       new Update().set(FIELD_DOCUMENT_VERSIONID, versionId),
-      SendNotification.class);
+      SendNotificationNoPII.class);
   }
 
   @Override
@@ -89,7 +89,7 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
       new Update()
         .set(Fields.iun, iun)
         .set(Fields.status, NotificationStatus.ACCEPTED),
-      SendNotification.class);
+      SendNotificationNoPII.class);
   }
 
   @Override
@@ -98,15 +98,15 @@ public class SendNotificationRepositoryExtImpl implements SendNotificationReposi
     return mongoTemplate.updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
       new Update().set(Fields.notificationData, notificationDate.toString()),
-      SendNotification.class);
+      SendNotificationNoPII.class);
   }
 
   @Override
-  public Optional<SendNotification> findByIdAndOrganizationId(String notificationId, Long organizationId) {
+  public Optional<SendNotificationNoPII> findByIdAndOrganizationId(String notificationId, Long organizationId) {
     Query query = new Query();
     query.addCriteria(Criteria.where(Fields.sendNotificationId).is(notificationId)
       .and(Fields.organizationId).is(organizationId));
 
-    return Optional.ofNullable(mongoTemplate.findOne(query, SendNotification.class));
+    return Optional.ofNullable(mongoTemplate.findOne(query, SendNotificationNoPII.class));
   }
 }

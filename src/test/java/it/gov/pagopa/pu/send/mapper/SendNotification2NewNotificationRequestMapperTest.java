@@ -5,14 +5,19 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequest
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.SendNotification;
+import it.gov.pagopa.pu.send.dto.generated.Address;
 import it.gov.pagopa.pu.send.dto.generated.Attachment;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -25,7 +30,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(MockitoExtension.class)
 class SendNotification2NewNotificationRequestMapperTest {
 
-  private final SendNotification2NewNotificationRequestMapper mapper = new SendNotification2NewNotificationRequestMapper();
+  @Mock
+  private SendNotificationPIIMapper sendNotificationPIIMapperMock;
+
+  @InjectMocks
+  private SendNotification2NewNotificationRequestMapper mapper;
+
+
   @Test
   void givenSendNotificationWhenMapThenOk() {
     // Given
@@ -35,6 +46,13 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.setSubjectType("PF");
     sendNotification.setFiscalCode("BNRMHL75C06G702B");
     sendNotification.setDenomination("Michelangelo Buonarroti");
+
+    Address address = new Address();
+    address.setAddress("Via Larga 10");
+    address.setZip("00186");
+    address.setMunicipality("Roma");
+    address.setProvince("RM");
+    sendNotification.setAddress(address);
 
     //Payments
     Payment payment = new Payment();
@@ -83,8 +101,12 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.setPaymentExpirationDate("2025-12-31");
     sendNotification.setPagoPaIntMode(PagoPaIntModeEnum.NONE.getValue());
 
+    SendNotificationNoPII noPII = new SendNotificationNoPII();
+
+    Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
+
     // When
-    NewNotificationRequestV24DTO result = mapper.apply(sendNotification);
+    NewNotificationRequestV24DTO result = mapper.apply(noPII);
 
     // Then
     TestUtils.checkNotNullFields(result,"_abstract","cancelledIun","group","amount","paymentExpirationDate","pagoPaIntMode");

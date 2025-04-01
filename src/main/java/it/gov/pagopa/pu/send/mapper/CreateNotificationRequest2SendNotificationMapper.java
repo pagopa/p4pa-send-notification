@@ -3,12 +3,12 @@ package it.gov.pagopa.pu.send.mapper;
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
 import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
-import it.gov.pagopa.pu.send.model.SendNotification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
     this.debtPositionService = debtPositionService;
   }
 
-  public SendNotification map(CreateNotificationRequest request, String accessToken) {
+  public SendNotification mapToModel(CreateNotificationRequest request, String accessToken) {
     Long organizationId = request.getOrganizationId();
 
     SendNotification sendNotification = new SendNotification();
@@ -32,6 +32,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
     sendNotification.setSubjectType(request.getRecipient().getRecipientType().getValue());
     sendNotification.setFiscalCode(request.getRecipient().getTaxId());
     sendNotification.setDenomination(request.getRecipient().getDenomination());
+    sendNotification.setAddress(request.getRecipient().getPhysicalAddress());
 
     if (request.getDocuments().isEmpty()) {
       sendNotification.setStatus(NotificationStatus.SENDING);
