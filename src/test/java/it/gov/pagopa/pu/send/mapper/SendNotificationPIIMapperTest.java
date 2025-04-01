@@ -17,22 +17,27 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationPIIMapperTest {
 
+  @Mock
   private PersonalDataService personalDataService;
+  @Mock
   private DataCipherService dataCipherService;
   private SendNotificationPIIMapper sendNotificationPIIMapper;
+  private static OffsetDateTime now;
 
   @BeforeEach
   void setUp() {
-    personalDataService = Mockito.mock(PersonalDataService.class);
+    now = OffsetDateTime.now();
     sendNotificationPIIMapper = new SendNotificationPIIMapper(personalDataService, dataCipherService);
   }
 
@@ -85,6 +90,32 @@ class SendNotificationPIIMapperTest {
     assertSame(noPii, result.getNoPII());
   }
 
+  @Test
+  void givenFullDTOWhenExtractNoPiiEntityThenVerify() {
+    SendNotification sendNotification = getFullDTO();
+    Mockito.when(dataCipherService.hash(Mockito.any(String.class)))
+      .thenReturn(sendNotification.getNoPII().getFiscalCodeHash());
+
+    SendNotificationNoPII result = sendNotificationPIIMapper.extractNoPiiEntity(sendNotification);
+
+    TestUtils.checkNotNullFields(result);
+    assertNotNull(result);
+    Assertions.assertEquals(sendNotification.getNoPII(), result);
+  }
+
+  @Test
+  void givenFullDTOWhenExtractPiiEntityThenVerify() {
+    SendNotification sendNotification = getFullDTO();
+
+    SendNotificationPIIDTO result = sendNotificationPIIMapper.extractPiiDto(sendNotification);
+
+    TestUtils.checkNotNullFields(result);
+    assertNotNull(result);
+    Assertions.assertEquals(sendNotification.getFiscalCode(), result.getFiscalCode());
+    Assertions.assertEquals(sendNotification.getAddress(), result.getAddress());
+  }
+
+
   private static SendNotificationNoPII getNoPII(Long personalDataId) {
     SendNotificationNoPII noPii = new SendNotificationNoPII();
     noPii.setSendNotificationId("SNID001");
@@ -93,6 +124,7 @@ class SendNotificationPIIMapperTest {
     noPii.setSubjectType("Individual");
     noPii.setPersonalDataId(personalDataId);
     noPii.setDenomination("Test Denomination");
+    noPii.setFiscalCodeHash("RSSMRA80L05F593A".getBytes());
 
     Payment payment = new Payment();
     PagoPa pagoPa = new PagoPa();
@@ -136,7 +168,71 @@ class SendNotificationPIIMapperTest {
     noPii.setPaFee(0);
     noPii.setVat(22);
     noPii.setPagoPaIntMode("PA");
-    noPii.setNotificationData(OffsetDateTime.now());
+    noPii.setNotificationData(now);
     return noPii;
   }
+
+  private static SendNotification getFullDTO() {
+    SendNotification sendNotification = new SendNotification();
+    sendNotification.setSendNotificationId("SNID001");
+    sendNotification.setOrganizationId(2L);
+    sendNotification.setPaProtocolNumber("PP001");
+    sendNotification.setSubjectType("Individual");
+    sendNotification.setDenomination("Test Denomination");
+
+    sendNotification.setFiscalCode("RSSMRA80L05F593A");
+    Address address = new Address();
+    address.setAddress("Via Larga 10");
+    address.setZip("00186");
+    address.setMunicipality("Roma");
+    address.setProvince("RM");
+    sendNotification.setAddress(address);
+
+    Payment payment = new Payment();
+    PagoPa pagoPa = new PagoPa();
+    pagoPa.setCreditorTaxId("CREDITORTAXID");
+    pagoPa.setNoticeCode("NOTICECODE");
+    pagoPa.setApplyCost(true);
+
+    Attachment attachment = new Attachment();
+    attachment.setContentType("application/pdf");
+    attachment.setDigest("sha256");
+    attachment.setFileName("attachment");
+    pagoPa.setAttachment(attachment);
+    payment.setPagoPa(pagoPa);
+
+    PuPayment puPayment = new PuPayment();
+    puPayment.setDebtPositionId(0L);
+    puPayment.setPayment(payment);
+
+
+    sendNotification.setPayments(Collections.singletonList(puPayment));
+
+    DocumentDTO documentAttachment = new DocumentDTO();
+    documentAttachment.setFileName(attachment.getFileName());
+    documentAttachment.setDigest(attachment.getDigest());
+    documentAttachment.setContentType(attachment.getContentType());
+    documentAttachment.setKey("docKey");
+    documentAttachment.setVersionId("12345678");
+    sendNotification.setDocuments(Collections.singletonList(documentAttachment));
+
+    sendNotification.setStatus(NotificationStatus.WAITING_FILE);
+
+    sendNotification.setNotificationRequestId("REQ001");
+    sendNotification.setIun("IUN123");
+    sendNotification.setNotificationFeePolicy("Policy001");
+    sendNotification.setPhysicalCommunicationType("Digital");
+    sendNotification.setSenderDenomination("Sender Org");
+    sendNotification.setSenderTaxId("TAX001");
+    sendNotification.setAmount(100);
+    sendNotification.setPaymentExpirationDate("2026-01-01");
+    sendNotification.setTaxonomyCode("CODE001");
+    sendNotification.setPaFee(0);
+    sendNotification.setVat(22);
+    sendNotification.setPagoPaIntMode("PA");
+    sendNotification.setNotificationData(now);
+    sendNotification.setNoPII(getNoPII(1L));
+    return sendNotification;
+  }
+
 }

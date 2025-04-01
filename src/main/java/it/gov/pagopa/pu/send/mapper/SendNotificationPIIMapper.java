@@ -45,6 +45,7 @@ public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, S
     noPII.setVat(fullDTO.getVat());
     noPII.setPagoPaIntMode(fullDTO.getPagoPaIntMode());
     noPII.setNotificationData(fullDTO.getNotificationData());
+    noPII.setPersonalDataId(fullDTO.getNoPII().getPersonalDataId());
 
     return noPII;
   }
