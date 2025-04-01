@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.citizen.service;
 
+import it.gov.pagopa.pu.send.citizen.enums.PersonalDataType;
 import it.gov.pagopa.pu.send.citizen.model.PersonalData;
 import it.gov.pagopa.pu.send.citizen.repository.PersonalDataRepository;
 import it.gov.pagopa.pu.send.config.CacheConfig;
@@ -67,7 +68,7 @@ class PersonalDataServiceTest {
     Mockito.when(cacheManagerMock.getCache(CacheConfig.Fields.pii)).thenReturn(cache);
 
     // When
-    long insert = service.insert(pii, "SEND_NOTIFICATION");
+    long insert = service.insert(pii, PersonalDataType.SEND_NOTIFICATION);
 
     // Then
     Assertions.assertEquals(piiId, insert);

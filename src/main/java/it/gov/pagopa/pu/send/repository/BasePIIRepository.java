@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.repository;
 
+import it.gov.pagopa.pu.send.citizen.enums.PersonalDataType;
 import it.gov.pagopa.pu.send.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.send.dto.FullPIIDTO;
 import it.gov.pagopa.pu.send.dto.PIIDTO;
@@ -26,6 +27,7 @@ public abstract class BasePIIRepository<F extends FullPIIDTO<E, P>, E extends No
   abstract void setId(E noPii, I id);
   abstract I getId(E noPii);
   abstract Class<P> getPIITDTOClass();
+  abstract PersonalDataType getPIIPersonalDataType();
 
   public F save(F fullDTO) {
     Pair<E, P> p = piiMapper.map(fullDTO);
@@ -42,7 +44,7 @@ public abstract class BasePIIRepository<F extends FullPIIDTO<E, P>, E extends No
 
     long personalDataId;
     if(pii2create) {
-      personalDataId = personalDataService.insert(p.getSecond(), "SEND_NOTIFICATION");
+      personalDataId = personalDataService.insert(p.getSecond(), getPIIPersonalDataType());
     } else {
       personalDataId = piiId2OldPii.getFirst();
     }

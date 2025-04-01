@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.citizen.service;
 
+import it.gov.pagopa.pu.send.citizen.enums.PersonalDataType;
 import it.gov.pagopa.pu.send.citizen.model.PersonalData;
 import it.gov.pagopa.pu.send.citizen.repository.PersonalDataRepository;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
@@ -26,9 +27,9 @@ public class PersonalDataService {
     this.cacheManager = cacheManager;
   }
 
-  public long insert(Object pii, String type) {
+  public long insert(Object pii, PersonalDataType type) {
     Long personalDataId = repository.save(PersonalData.builder()
-      .type(type)
+      .type(type.name())
       .data(dataCipherService.encryptObj(pii))
       .build()).getId();
     Objects.requireNonNull(cacheManager.getCache(it.gov.pagopa.pu.send.config.CacheConfig.Fields.pii))

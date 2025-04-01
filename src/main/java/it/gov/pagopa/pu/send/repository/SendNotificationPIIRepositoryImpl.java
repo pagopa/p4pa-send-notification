@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.repository;
 
+import it.gov.pagopa.pu.send.citizen.enums.PersonalDataType;
 import it.gov.pagopa.pu.send.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
@@ -31,5 +32,10 @@ public class SendNotificationPIIRepositoryImpl extends BasePIIRepository<SendNot
   @Override
   Class<SendNotificationPIIDTO> getPIITDTOClass() {
     return SendNotificationPIIDTO.class;
+  }
+
+  @Override
+  PersonalDataType getPIIPersonalDataType() {
+    return PersonalDataType.SEND_NOTIFICATION;
   }
 }
