@@ -484,7 +484,7 @@
             "type" : "string"
           }
         }, {
-          "name" : "noticeCode",
+          "name" : "iuv",
           "in" : "query",
           "required" : true,
           "schema" : {
