@@ -267,6 +267,41 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
+  /send/{sendNotificationId}/notificationprice:
+    get:
+      tags:
+        - Send
+      summary: retrieve notification price
+      description: notification price
+      operationId: retrieveNotificationPrice
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: noticeCode
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: 'NotificationPriceResponseV23DTO'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '409':
+          description: Wrong notification status
+        '500':
+          description: Internal server error
 security:
   - BearerAuth: []
 components:

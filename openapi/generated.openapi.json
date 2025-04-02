@@ -470,6 +470,94 @@
         } ]
       }
     },
+    "/p4pasend/send/{sendNotificationId}/notificationprice" : {
+      "get" : {
+        "tags" : [ "Send" ],
+        "summary" : "retrieve notification price",
+        "description" : "notification price",
+        "operationId" : "retrieveNotificationPrice",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "noticeCode",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationPriceResponseV23DTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationPriceResponseV23DTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationPriceResponseV23DTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Notification not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationPriceResponseV23DTO"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Wrong notification status",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationPriceResponseV23DTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationPriceResponseV23DTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/notification/{sendNotificationId}" : {
       "get" : {
         "tags" : [ "Notification" ],
@@ -848,6 +936,46 @@
           }
         },
         "required" : [ "debtPositionId", "navList" ]
+      },
+      "NotificationPriceResponseV23DTO" : {
+        "type" : "object",
+        "properties" : {
+          "iun" : {
+            "type" : "string"
+          },
+          "partialPrice" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalPrice" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "vat" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "paFee" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "refinementDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "notificationViewDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "sendFee" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "analogCost" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
       }
     },
     "securitySchemes" : {

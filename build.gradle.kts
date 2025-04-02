@@ -150,7 +150,8 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
   apiPackage.set("it.gov.pagopa.pu.send.controller.generated")
   modelPackage.set("it.gov.pagopa.pu.send.dto.generated")
   typeMappings.set(mapOf(
-    "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus"
+    "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus",
+    "NotificationPriceResponseV23DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO"
   ))
   configOptions.set(mapOf(
     "dateLibrary" to "java8",
