@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
@@ -33,6 +34,13 @@ public class SendController implements SendApi {
       return new ResponseEntity<>(response, HttpStatus.OK);
     else
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<NotificationPriceResponseV23DTO> retrieveNotificationPrice(String sendNotificationId, String iuv) {
+    log.info("retrieve notificationPrice for sendNotificationId {} and iuv {}", sendNotificationId, iuv);
+    NotificationPriceResponseV23DTO response = sendFacadeService.retrieveNotificationPrice(sendNotificationId, iuv);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @Override

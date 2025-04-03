@@ -3,10 +3,13 @@ package it.gov.pagopa.pu.send.service;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
+import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
@@ -133,6 +136,22 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     }
 
     return sendNotificationDTOMapper.apply(notification);
+  }
+
+  @Override
+  public NotificationPriceResponseV23DTO retrieveNotificationPrice(String sendNotificationId, String iuv) {
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
+
+    // Validate status
+    NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
+    Payment payment = notification.getPayments().stream()
+      .map(PuPayment::getPayment)
+      .filter(pagoPa -> iuv.equals("3"+pagoPa.getPagoPa().getNoticeCode()))
+      .findFirst()
+      .orElseThrow(() -> new NotFoundException("Noticecode not found with id: "+ iuv));
+
+    return sendClient.retrieveNotificationPrice(payment.getPagoPa().getCreditorTaxId(),
+      payment.getPagoPa().getNoticeCode(), notification.getOrganizationId());
   }
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
