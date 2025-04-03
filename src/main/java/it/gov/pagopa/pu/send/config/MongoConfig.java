@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.config;
 
 import it.gov.pagopa.pu.send.util.Constants;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -58,7 +59,10 @@ public class MongoConfig {
         return new MongoCustomConversions(Arrays.asList(
                 // LocalDateTime support
                 new LocalDateTimeWriteConverter(),
-                new LocalDateTimeReadConverter()
+                new LocalDateTimeReadConverter(),
+                new OffsetDateTimeWriteConverter(),
+                new OffsetDateTimeReadConverter(),
+                new StringToOffsetDateTimeConverter()
         ));
     }
 
@@ -76,6 +80,30 @@ public class MongoConfig {
         public LocalDateTime convert(Date date) {
             return date.toInstant().atZone(Constants.ZONEID).toLocalDateTime();
         }
+    }
+
+    @WritingConverter
+    public static class OffsetDateTimeWriteConverter implements Converter<OffsetDateTime, Date> {
+      @Override
+      public Date convert(OffsetDateTime offsetDateTime) {
+        return Date.from(offsetDateTime.toInstant());
+      }
+    }
+
+    @ReadingConverter
+    public static class OffsetDateTimeReadConverter implements Converter<Date, OffsetDateTime> {
+      @Override
+      public OffsetDateTime convert(Date date) {
+        return date.toInstant().atZone(Constants.ZONEID).toOffsetDateTime();
+      }
+    }
+
+    @ReadingConverter
+    public static class StringToOffsetDateTimeConverter implements Converter<String, OffsetDateTime> {
+      @Override
+      public OffsetDateTime convert(String source) {
+        return OffsetDateTime.parse(source);
+      }
     }
 }
 
