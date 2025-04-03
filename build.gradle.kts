@@ -1,4 +1,5 @@
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+import java.util.*
 
 plugins {
   java
@@ -186,7 +187,7 @@ tasks.register<GenerateTask>("openApiGenerateSendClient") {
   library.set("resttemplate")
 }
 
-var targetEnv = when (grgit.branch.current().name) {
+var targetEnv = when (Objects.requireNonNullElse(System.getProperty("targetBranch"), grgit.branch.current().name)) {
   "uat" -> "uat"
   "main" -> "main"
   else -> "develop"
@@ -233,7 +234,8 @@ tasks.register<GenerateTask>("openApiGenerateWORKFLOWHUB") {
   typeMappings.set(mapOf(
     "DebtPositionDTO" to "it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO",
     "IngestionFlowFileType" to "String",
-    "WfExecutionConfig" to "String"
+    "WfExecutionConfig" to "String",
+    "ExportFileType" to "String"
   ))
   configOptions.set(
     mapOf(

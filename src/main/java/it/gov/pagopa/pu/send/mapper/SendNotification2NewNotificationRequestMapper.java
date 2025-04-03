@@ -4,7 +4,8 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PhysicalCommunicationTypeEnum;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO.RecipientTypeEnum;
-import it.gov.pagopa.pu.send.model.SendNotification;
+import it.gov.pagopa.pu.send.dto.SendNotification;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,12 +16,21 @@ import java.util.stream.Collectors;
 @Service
 public class SendNotification2NewNotificationRequestMapper {
 
-  public NewNotificationRequestV24DTO apply(SendNotification sendNotification) {
-    //TODO some information (only required) are mocked, other information will be implemented with P4ADEV-2185
+  public final SendNotificationPIIMapper sendNotificationPIIMapper;
+
+  public SendNotification2NewNotificationRequestMapper(
+    SendNotificationPIIMapper sendNotificationPIIMapper) {
+    this.sendNotificationPIIMapper = sendNotificationPIIMapper;
+  }
+
+  public NewNotificationRequestV24DTO apply(SendNotificationNoPII sendNotificationNoPII) {
+
+    SendNotification sendNotification = sendNotificationPIIMapper.map(sendNotificationNoPII);
+
     NewNotificationRequestV24DTO newNotification = new NewNotificationRequestV24DTO();
     newNotification.setIdempotenceToken(sendNotification.getSendNotificationId());
     newNotification.setPaProtocolNumber(sendNotification.getPaProtocolNumber());
-    newNotification.setSubject("TEST notifica PU numero "+sendNotification.getSendNotificationId());
+    newNotification.setSubject("TEST notifica PU numero "+ sendNotification.getSendNotificationId());
 
     NotificationRecipientV23DTO recipient = new NotificationRecipientV23DTO();
     recipient.setRecipientType(RecipientTypeEnum.valueOf(sendNotification.getSubjectType()));
@@ -29,10 +39,10 @@ public class SendNotification2NewNotificationRequestMapper {
 
     //address domain
     NotificationPhysicalAddressDTO addressDTO = new NotificationPhysicalAddressDTO();
-    addressDTO.setAddress("Via Larga 10");
-    addressDTO.setZip("00186");
-    addressDTO.setMunicipality("Roma");
-    addressDTO.setProvince("RM");
+    addressDTO.setAddress(sendNotification.getAddress().getAddress());
+    addressDTO.setZip(sendNotification.getAddress().getZip());
+    addressDTO.setMunicipality(sendNotification.getAddress().getMunicipality());
+    addressDTO.setProvince(sendNotification.getAddress().getProvince());
     recipient.setPhysicalAddress(addressDTO);
     //end address domain
 
@@ -85,8 +95,10 @@ public class SendNotification2NewNotificationRequestMapper {
     //end documents
 
     //fee domain
-    newNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.valueOf(sendNotification.getNotificationFeePolicy()));
-    newNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.valueOf(sendNotification.getPhysicalCommunicationType()));
+    newNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.valueOf(
+      sendNotification.getNotificationFeePolicy()));
+    newNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.valueOf(
+      sendNotification.getPhysicalCommunicationType()));
     newNotification.senderDenomination(sendNotification.getSenderDenomination());
     newNotification.senderTaxId(sendNotification.getSenderTaxId());
     if(sendNotification.getAmount()!=0)
@@ -99,7 +111,8 @@ public class SendNotification2NewNotificationRequestMapper {
     if(sendNotification.getPaymentExpirationDate()!=null)
       newNotification.setPaymentExpirationDate(sendNotification.getPaymentExpirationDate());
     if(sendNotification.getPagoPaIntMode()!=null)
-      newNotification.setPagoPaIntMode(PagoPaIntModeEnum.valueOf(sendNotification.getPagoPaIntMode()));
+      newNotification.setPagoPaIntMode(PagoPaIntModeEnum.valueOf(
+        sendNotification.getPagoPaIntMode()));
     //end fee domain
 
     newNotification.recipients(List.of(recipient));
