@@ -234,7 +234,8 @@ tasks.register<GenerateTask>("openApiGenerateWORKFLOWHUB") {
   typeMappings.set(mapOf(
     "DebtPositionDTO" to "it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO",
     "IngestionFlowFileType" to "String",
-    "WfExecutionConfig" to "String"
+    "WfExecutionConfig" to "String",
+    "ExportFileType" to "String"
   ))
   configOptions.set(
     mapOf(
