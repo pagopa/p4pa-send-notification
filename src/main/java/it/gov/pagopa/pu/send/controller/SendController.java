@@ -37,9 +37,9 @@ public class SendController implements SendApi {
   }
 
   @Override
-  public ResponseEntity<NotificationPriceResponseV23DTO> retrieveNotificationPrice(String sendNotificationId, String iuv) {
-    log.info("retrieve notificationPrice for sendNotificationId {} and iuv {}", sendNotificationId, iuv);
-    NotificationPriceResponseV23DTO response = sendFacadeService.retrieveNotificationPrice(sendNotificationId, iuv);
+  public ResponseEntity<NotificationPriceResponseV23DTO> retrieveNotificationPrice(Long organizationId, String iuv) {
+    log.info("retrieve notificationPrice for organizationId {} and iuv {}", organizationId, iuv);
+    NotificationPriceResponseV23DTO response = sendFacadeService.retrieveNotificationPrice(organizationId, iuv);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 

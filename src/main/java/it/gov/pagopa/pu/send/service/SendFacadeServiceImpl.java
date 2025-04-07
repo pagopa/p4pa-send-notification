@@ -139,16 +139,16 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public NotificationPriceResponseV23DTO retrieveNotificationPrice(String sendNotificationId, String iuv) {
-    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
+  public NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String iuv) {
+    SendNotificationNoPII notification = findSendNotificationByOrgIdAndIUV(organizationId, iuv);
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
     Payment payment = notification.getPayments().stream()
       .map(PuPayment::getPayment)
-      .filter(pagoPa -> iuv.equals("3"+pagoPa.getPagoPa().getNoticeCode()))
+      .filter(pagoPa -> iuv.equals(pagoPa.getPagoPa().getNoticeCode().substring(1)))
       .findFirst()
-      .orElseThrow(() -> new NotFoundException("Noticecode not found with id: "+ iuv));
+      .orElseThrow(() -> new NotFoundException("Notification not found with iuv: "+ iuv));
 
     return sendClient.retrieveNotificationPrice(payment.getPagoPa().getCreditorTaxId(),
       payment.getPagoPa().getNoticeCode(), notification.getOrganizationId());
@@ -157,5 +157,10 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
+  }
+
+  private SendNotificationNoPII findSendNotificationByOrgIdAndIUV(Long organizationId, String iuv) {
+    return sendNotificationNoPIIRepository.findByOrganizationIdAndIUV(organizationId, iuv)
+      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with iuv: " + iuv));
   }
 }
