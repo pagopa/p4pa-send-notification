@@ -5,10 +5,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.generated.PagoPa;
+import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -192,5 +196,32 @@ class SendNotificationNoPIIRepositoryExtImplTest {
 
     Mockito.verify(mongoTemplate, Mockito.times(1)).findOne(Mockito.any(Query.class), Mockito.eq(
       SendNotificationNoPII.class));
+  }
+
+  @Test
+  void givenOrganizationIdAndIUVThenVerify() {
+    String iuv = "IUV";
+    Long organizationId = 1L;
+    Payment payment = new Payment();
+    PagoPa pagoPa = new PagoPa();
+    pagoPa.setNoticeCode("3"+iuv);
+    payment.setPagoPa(pagoPa);
+
+    SendNotificationNoPII mockNotification = new SendNotificationNoPII();
+    mockNotification.setPayments(Collections.singletonList(new PuPayment(1L, payment)));
+    mockNotification.setOrganizationId(organizationId);
+
+    Mockito.when(mongoTemplate.findOne(Mockito.any(Query.class), Mockito.eq(
+      SendNotificationNoPII.class))).thenReturn(mockNotification);
+
+    Optional<SendNotificationNoPII> result = repository.findByOrganizationIdAndIUV(organizationId, iuv);
+
+    assertTrue(result.isPresent());
+    assertEquals("3"+iuv, result.get().getPayments().getFirst().getPayment().getPagoPa().getNoticeCode());
+    assertEquals(organizationId, result.get().getOrganizationId());
+
+    Mockito.verify(mongoTemplate, Mockito.times(1)).findOne(Mockito.any(Query.class), Mockito.eq(
+      SendNotificationNoPII.class));
+
   }
 }
