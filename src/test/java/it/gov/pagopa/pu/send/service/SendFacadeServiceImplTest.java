@@ -286,4 +286,53 @@ class SendFacadeServiceImplTest {
     Assertions.assertNotNull(result);
   }
 
+  @Test
+  void givenValidOrganizationIdAndIUVWhenRetrieveNotificationPriceThenSuccess() {
+    // Given
+    Long organizationId = 1L;
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String iuv = "12345";
+    String noticeCode = "3" + iuv;
+    String creditorTaxId = "123456789";
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(organizationId)
+      .payments(Collections.singletonList(new PuPayment(1L, new Payment(
+        new PagoPa().noticeCode(noticeCode).creditorTaxId(creditorTaxId)))))
+      .status(NotificationStatus.ACCEPTED)
+      .build();
+
+    NotificationPriceResponseV23DTO expectedResponse = new NotificationPriceResponseV23DTO();
+
+    Mockito.when(sendNotificationNoPIIRepository.findByOrganizationIdAndIUV(organizationId, iuv))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendClient.retrieveNotificationPrice(creditorTaxId, noticeCode, organizationId))
+      .thenReturn(expectedResponse);
+
+    // When
+    NotificationPriceResponseV23DTO result = sendService.retrieveNotificationPrice(organizationId, iuv);
+
+    // Then
+    Assertions.assertNotNull(result);
+    assertEquals(expectedResponse, result);
+    Mockito.verify(sendNotificationNoPIIRepository).findByOrganizationIdAndIUV(organizationId, iuv);
+    Mockito.verify(sendClient).retrieveNotificationPrice(creditorTaxId, noticeCode, organizationId);
+  }
+
+  @Test
+  void givenNotExistsOrganizationIdAndIUVWhenRetrieveNotificationPriceThenNotFoundException() {
+    // Given
+    Long organizationId = 123L;
+    String iuv = "123456789";
+
+    Mockito.when(sendNotificationNoPIIRepository.findByOrganizationIdAndIUV(organizationId, iuv))
+      .thenReturn(Optional.empty());
+
+    // When Then
+    assertThrows(SendNotificationNotFoundException.class,
+      () -> sendService.retrieveNotificationPrice(organizationId, iuv));
+    Mockito.verify(sendNotificationNoPIIRepository).findByOrganizationIdAndIUV(organizationId, iuv);
+    Mockito.verifyNoInteractions(sendClient);
+  }
 }
