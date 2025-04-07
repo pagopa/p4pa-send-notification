@@ -470,18 +470,19 @@
         } ]
       }
     },
-    "/p4pasend/send/{sendNotificationId}/notificationprice" : {
+    "/p4pasend/send/notificationprice" : {
       "get" : {
         "tags" : [ "Send" ],
         "summary" : "retrieve notification price",
         "description" : "notification price",
         "operationId" : "retrieveNotificationPrice",
         "parameters" : [ {
-          "name" : "sendNotificationId",
-          "in" : "path",
+          "name" : "organizationId",
+          "in" : "query",
           "required" : true,
           "schema" : {
-            "type" : "string"
+            "type" : "integer",
+            "format" : "int64"
           }
         }, {
           "name" : "iuv",

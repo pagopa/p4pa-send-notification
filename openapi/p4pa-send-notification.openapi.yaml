@@ -267,7 +267,7 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
-  /send/{sendNotificationId}/notificationprice:
+  /send/notificationprice:
     get:
       tags:
         - Send
@@ -275,11 +275,12 @@ paths:
       description: notification price
       operationId: retrieveNotificationPrice
       parameters:
-        - name: sendNotificationId
-          in: path
+        - name: organizationId
+          in: query
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
         - name: iuv
           in: query
           required: true
