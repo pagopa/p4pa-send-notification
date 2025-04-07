@@ -3,10 +3,13 @@ package it.gov.pagopa.pu.send.service;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
+import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
@@ -135,8 +138,29 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     return sendNotificationDTOMapper.apply(notification);
   }
 
+  @Override
+  public NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String nav) {
+    SendNotificationNoPII notification = findSendNotificationByOrgIdAndNav(organizationId, nav);
+
+    // Validate status
+    NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
+    Payment payment = notification.getPayments().stream()
+      .map(PuPayment::getPayment)
+      .filter(pagoPa -> nav.equals(pagoPa.getPagoPa().getNoticeCode()))
+      .findFirst()
+      .orElseThrow(() -> new NotFoundException("Notification not found with nav: "+ nav));
+
+    return sendClient.retrieveNotificationPrice(payment.getPagoPa().getCreditorTaxId(),
+      payment.getPagoPa().getNoticeCode(), notification.getOrganizationId());
+  }
+
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
+  }
+
+  private SendNotificationNoPII findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
+    return sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
+      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with nav: " + nav));
   }
 }

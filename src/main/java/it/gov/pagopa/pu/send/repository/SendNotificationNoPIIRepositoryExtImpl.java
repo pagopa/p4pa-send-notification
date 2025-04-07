@@ -26,6 +26,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_DOCUMENT_HTTPMETHOD = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.httpMethod);
   public static final String FIELD_DOCUMENT_STATUS = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.status);
   public static final String FIELD_DOCUMENT_VERSIONID = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.versionId);
+  public static final String FIELD_PAYMENT_NOTICE_CODE = "payments.payment.pagoPa.noticeCode";
 
   private final MongoTemplate mongoTemplate;
 
@@ -106,6 +107,15 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     Query query = new Query();
     query.addCriteria(Criteria.where(Fields.sendNotificationId).is(notificationId)
       .and(Fields.organizationId).is(organizationId));
+
+    return Optional.ofNullable(mongoTemplate.findOne(query, SendNotificationNoPII.class));
+  }
+
+  @Override
+  public Optional<SendNotificationNoPII> findByOrganizationIdAndNav(Long organizationId, String nav) {
+    Query query = new Query();
+    query.addCriteria(Criteria.where(Fields.organizationId).is(organizationId)
+      .and(FIELD_PAYMENT_NOTICE_CODE).is(nav));
 
     return Optional.ofNullable(mongoTemplate.findOne(query, SendNotificationNoPII.class));
   }
