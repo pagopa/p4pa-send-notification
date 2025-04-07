@@ -89,14 +89,14 @@ class SendControllerTest {
   }
 
   @Test
-  void givenOrganizationIdAndIUVWhenRetrieveNotificationPriceRequestThenOk(){
+  void givenOrganizationIdAndNavWhenRetrieveNotificationPriceRequestThenOk(){
     Long organizationId = 1L;
-    String iuv = "12345";
+    String nav = "12345";
     NotificationPriceResponseV23DTO price = new NotificationPriceResponseV23DTO();
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationPrice(organizationId, iuv))
+    Mockito.when(sendFacadeServiceMock.retrieveNotificationPrice(organizationId, nav))
       .thenReturn(price);
 
-    ResponseEntity<NotificationPriceResponseV23DTO> response = sendController.retrieveNotificationPrice(organizationId, iuv);
+    ResponseEntity<NotificationPriceResponseV23DTO> response = sendController.retrieveNotificationPrice(organizationId, nav);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());

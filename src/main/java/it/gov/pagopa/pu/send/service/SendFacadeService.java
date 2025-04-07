@@ -10,5 +10,5 @@ public interface SendFacadeService {
   void deliveryNotification(String sendNotificationId);
   SendNotificationDTO retrieveNotificationData(String sendNotificationId);
   SendNotificationDTO notificationStatus(String sendNotificationId);
-  NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String noticeCode);
+  NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String nav);
 }

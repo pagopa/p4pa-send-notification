@@ -112,10 +112,10 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   @Override
-  public Optional<SendNotificationNoPII> findByOrganizationIdAndIUV(Long organizationId, String iuv) {
+  public Optional<SendNotificationNoPII> findByOrganizationIdAndNav(Long organizationId, String nav) {
     Query query = new Query();
     query.addCriteria(Criteria.where(Fields.organizationId).is(organizationId)
-      .and(FIELD_PAYMENT_NOTICE_CODE).is("3"+iuv));
+      .and(FIELD_PAYMENT_NOTICE_CODE).is(nav));
 
     return Optional.ofNullable(mongoTemplate.findOne(query, SendNotificationNoPII.class));
   }

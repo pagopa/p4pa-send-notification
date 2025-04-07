@@ -139,16 +139,16 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String iuv) {
-    SendNotificationNoPII notification = findSendNotificationByOrgIdAndIUV(organizationId, iuv);
+  public NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String nav) {
+    SendNotificationNoPII notification = findSendNotificationByOrgIdAndNav(organizationId, nav);
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
     Payment payment = notification.getPayments().stream()
       .map(PuPayment::getPayment)
-      .filter(pagoPa -> iuv.equals(pagoPa.getPagoPa().getNoticeCode().substring(1)))
+      .filter(pagoPa -> nav.equals(pagoPa.getPagoPa().getNoticeCode()))
       .findFirst()
-      .orElseThrow(() -> new NotFoundException("Notification not found with iuv: "+ iuv));
+      .orElseThrow(() -> new NotFoundException("Notification not found with nav: "+ nav));
 
     return sendClient.retrieveNotificationPrice(payment.getPagoPa().getCreditorTaxId(),
       payment.getPagoPa().getNoticeCode(), notification.getOrganizationId());
@@ -159,8 +159,8 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }
 
-  private SendNotificationNoPII findSendNotificationByOrgIdAndIUV(Long organizationId, String iuv) {
-    return sendNotificationNoPIIRepository.findByOrganizationIdAndIUV(organizationId, iuv)
-      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with iuv: " + iuv));
+  private SendNotificationNoPII findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
+    return sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
+      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with nav: " + nav));
   }
 }

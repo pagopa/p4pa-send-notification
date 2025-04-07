@@ -281,7 +281,7 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: iuv
+        - name: nav
           in: query
           required: true
           schema:

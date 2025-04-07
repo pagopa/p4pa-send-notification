@@ -199,12 +199,12 @@ class SendNotificationNoPIIRepositoryExtImplTest {
   }
 
   @Test
-  void givenOrganizationIdAndIUVThenVerify() {
-    String iuv = "IUV";
+  void givenOrganizationIdAndNavThenVerify() {
+    String nav = "NAV";
     Long organizationId = 1L;
     Payment payment = new Payment();
     PagoPa pagoPa = new PagoPa();
-    pagoPa.setNoticeCode("3"+iuv);
+    pagoPa.setNoticeCode(nav);
     payment.setPagoPa(pagoPa);
 
     SendNotificationNoPII mockNotification = new SendNotificationNoPII();
@@ -214,10 +214,10 @@ class SendNotificationNoPIIRepositoryExtImplTest {
     Mockito.when(mongoTemplate.findOne(Mockito.any(Query.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(mockNotification);
 
-    Optional<SendNotificationNoPII> result = repository.findByOrganizationIdAndIUV(organizationId, iuv);
+    Optional<SendNotificationNoPII> result = repository.findByOrganizationIdAndNav(organizationId, nav);
 
     assertTrue(result.isPresent());
-    assertEquals("3"+iuv, result.get().getPayments().getFirst().getPayment().getPagoPa().getNoticeCode());
+    assertEquals(nav, result.get().getPayments().getFirst().getPayment().getPagoPa().getNoticeCode());
     assertEquals(organizationId, result.get().getOrganizationId());
 
     Mockito.verify(mongoTemplate, Mockito.times(1)).findOne(Mockito.any(Query.class), Mockito.eq(
