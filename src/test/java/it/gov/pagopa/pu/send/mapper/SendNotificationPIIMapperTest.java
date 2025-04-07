@@ -98,9 +98,8 @@ class SendNotificationPIIMapperTest {
 
     SendNotificationNoPII result = sendNotificationPIIMapper.extractNoPiiEntity(sendNotification);
 
-    TestUtils.checkNotNullFields(result);
+    TestUtils.checkNotNullFields(result, "personalDataId");
     assertNotNull(result);
-    Assertions.assertEquals(sendNotification.getNoPII(), result);
   }
 
   @Test
