@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.send.config;
+package it.gov.pagopa.pu.send.config.rest;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

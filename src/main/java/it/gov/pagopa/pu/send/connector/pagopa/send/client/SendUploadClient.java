@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
-import it.gov.pagopa.pu.send.config.RestTemplateConfig;
+import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApiClientConfig;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
