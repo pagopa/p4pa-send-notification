@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.config;
 
-import it.gov.pagopa.pu.send.config.RestTemplateConfig;
+import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
 import it.gov.pagopa.pu.send.connector.send.generated.ApiClient;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.workflow.config;
 
-import it.gov.pagopa.pu.send.config.RestTemplateConfig;
+import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
 import it.gov.pagopa.pu.workflowhub.controller.generated.SendNotificationApi;
 import it.gov.pagopa.pu.workflowhub.generated.ApiClient;
 import it.gov.pagopa.pu.workflowhub.generated.BaseApi;

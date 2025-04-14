@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.config;
 
-import it.gov.pagopa.pu.send.config.ApiClientConfig;
+import it.gov.pagopa.pu.send.config.rest.ApiClientConfig;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;

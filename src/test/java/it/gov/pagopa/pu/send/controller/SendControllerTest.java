@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import org.junit.jupiter.api.Assertions;
@@ -86,4 +87,20 @@ class SendControllerTest {
     ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId);
     Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
   }
+
+  @Test
+  void givenOrganizationIdAndNavWhenRetrieveNotificationPriceRequestThenOk(){
+    Long organizationId = 1L;
+    String nav = "12345";
+    NotificationPriceResponseV23DTO price = new NotificationPriceResponseV23DTO();
+    Mockito.when(sendFacadeServiceMock.retrieveNotificationPrice(organizationId, nav))
+      .thenReturn(price);
+
+    ResponseEntity<NotificationPriceResponseV23DTO> response = sendController.retrieveNotificationPrice(organizationId, nav);
+
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(price, response.getBody());
+  }
+
 }

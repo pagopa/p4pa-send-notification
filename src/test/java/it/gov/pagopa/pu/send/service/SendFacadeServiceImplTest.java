@@ -286,4 +286,52 @@ class SendFacadeServiceImplTest {
     Assertions.assertNotNull(result);
   }
 
+  @Test
+  void givenValidOrganizationIdAndNavWhenRetrieveNotificationPriceThenSuccess() {
+    // Given
+    Long organizationId = 1L;
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String nav = "321";
+    String creditorTaxId = "123456789";
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(organizationId)
+      .payments(Collections.singletonList(new PuPayment(1L, new Payment(
+        new PagoPa().noticeCode(nav).creditorTaxId(creditorTaxId)))))
+      .status(NotificationStatus.ACCEPTED)
+      .build();
+
+    NotificationPriceResponseV23DTO expectedResponse = new NotificationPriceResponseV23DTO();
+
+    Mockito.when(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendClient.retrieveNotificationPrice(creditorTaxId, nav, organizationId))
+      .thenReturn(expectedResponse);
+
+    // When
+    NotificationPriceResponseV23DTO result = sendService.retrieveNotificationPrice(organizationId, nav);
+
+    // Then
+    Assertions.assertNotNull(result);
+    assertEquals(expectedResponse, result);
+    Mockito.verify(sendNotificationNoPIIRepository).findByOrganizationIdAndNav(organizationId, nav);
+    Mockito.verify(sendClient).retrieveNotificationPrice(creditorTaxId, nav, organizationId);
+  }
+
+  @Test
+  void givenNotExistsOrganizationIdAndNavWhenRetrieveNotificationPriceThenNotFoundException() {
+    // Given
+    Long organizationId = 123L;
+    String nav = "123456789";
+
+    Mockito.when(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav))
+      .thenReturn(Optional.empty());
+
+    // When Then
+    assertThrows(SendNotificationNotFoundException.class,
+      () -> sendService.retrieveNotificationPrice(organizationId, nav));
+    Mockito.verify(sendNotificationNoPIIRepository).findByOrganizationIdAndNav(organizationId, nav);
+    Mockito.verifyNoInteractions(sendClient);
+  }
 }

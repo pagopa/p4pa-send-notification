@@ -4,7 +4,7 @@ package it.gov.pagopa.pu.send.connector.debtpositions.config;
 import it.gov.pagopa.pu.debtposition.client.generated.DebtPositionSearchControllerApi;
 import it.gov.pagopa.pu.debtposition.generated.ApiClient;
 import it.gov.pagopa.pu.debtposition.generated.BaseApi;
-import it.gov.pagopa.pu.send.config.RestTemplateConfig;
+import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
