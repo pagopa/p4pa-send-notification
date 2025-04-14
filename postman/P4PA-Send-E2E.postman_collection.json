@@ -50,12 +50,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{p4paAuthBaseUrl}}/auth/token?client_id=IPA_TEST_2SOAKTEST_CLIENTNAME_0_1732879391104&grant_type=client_credentials&scope=openid&client_secret=c76e43fb-8ef8-486e-8fae-298e143df8bf",
+							"raw": "{{p4paAuthBaseUrl}}/oauth/token?client_id=IPA_TEST_2SOAKTEST_CLIENTNAME_0_1732879391104&grant_type=client_credentials&scope=openid&client_secret=c76e43fb-8ef8-486e-8fae-298e143df8bf",
 							"host": [
 								"{{p4paAuthBaseUrl}}"
 							],
 							"path": [
-								"auth",
+								"oauth",
 								"token"
 							],
 							"query": [
