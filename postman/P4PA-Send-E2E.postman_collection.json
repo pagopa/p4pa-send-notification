@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "06ee48a9-e34b-4458-badf-884bc057838c",
+		"_postman_id": "5207a0f6-77a3-4c84-aeeb-1b4b06a69ff8",
 		"name": "P4PA-Send-E2E",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "15747968",
-		"_collection_link": "https://warped-astronaut-141685.postman.co/workspace/P4PA~9a8b7dd5-97b6-4dd0-b3f5-95f25fd0b455/collection/15747968-06ee48a9-e34b-4458-badf-884bc057838c?action=share&source=collection_link&creator=15747968"
+		"_collection_link": "https://warped-astronaut-141685.postman.co/workspace/P4PA~9a8b7dd5-97b6-4dd0-b3f5-95f25fd0b455/collection/15747968-5207a0f6-77a3-4c84-aeeb-1b4b06a69ff8?action=share&source=collection_link&creator=15747968"
 	},
 	"item": [
 		{
@@ -135,7 +135,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"organizationId\": {{organizationId}},\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        },\r\n        \"payments\": [ \r\n        {\r\n            \"pagoPa\": { \r\n                \"noticeCode\": \"301340000100000045\", \r\n                \"creditorTaxId\": \"99999999982\", \r\n                \"applyCost\": true, \r\n                \"attachment\": { \r\n                    \"fileName\":\"Pagamento.pdf\",\r\n                    \"contentType\": \"application/pdf\",\r\n                    \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n                }\r\n            }\r\n        }]\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    }],\r\n    \"notificationFeePolicy\": \"DELIVERY_MODE\", \r\n    \"physicalCommunicationType\": \"AR_REGISTERED_LETTER\", \r\n    \"senderDenomination\": \"Ente Intermediario 2\", \r\n    \"senderTaxId\": \"00000000018\", \r\n    \"amount\": 0, \r\n    \"paymentExpirationDate\": \"2025-12-27\", \r\n    \"taxonomyCode\": \"010101P\", \r\n    \"paFee\": 100, \r\n    \"vat\":22, \r\n    \"pagoPaIntMode\": \"NONE\" \r\n}",
+							"raw": "{\r\n    \"organizationId\": {{organizationId}},\r\n    \"paProtocolNumber\":\"Prot_001\",\r\n    \"recipient\": {\r\n        \"recipientType\": \"PF\", \r\n        \"taxId\": \"BNRMHL75C06G702B\",\r\n        \"denomination\": \"Michelangelo Buonarroti\",\r\n        \"physicalAddress\": { \r\n        \"address\": \"Via Larga 10\", \r\n        \"zip\": \"00186\", \r\n        \"municipality\": \"Roma\", \r\n        \"province\": \"RM\" \r\n        },\r\n        \"payments\": [ \r\n        {\r\n            \"pagoPa\": { \r\n                \"noticeCode\": \"301000000020010209\", \r\n                \"creditorTaxId\": \"99999999982\", \r\n                \"applyCost\": true, \r\n                \"attachment\": { \r\n                    \"fileName\":\"Pagamento.pdf\",\r\n                    \"contentType\": \"application/pdf\",\r\n                    \"digest\": \"45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=\"\r\n                }\r\n            }\r\n        }]\r\n    },\r\n    \"documents\":[{\r\n        \"fileName\":\"Notifica.pdf\",\r\n        \"contentType\": \"application/pdf\",\r\n        \"digest\": \"YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=\"\r\n    }],\r\n    \"notificationFeePolicy\": \"DELIVERY_MODE\", \r\n    \"physicalCommunicationType\": \"AR_REGISTERED_LETTER\", \r\n    \"senderDenomination\": \"Ente Intermediario 2\", \r\n    \"senderTaxId\": \"00000000018\", \r\n    \"amount\": 0, \r\n    \"paymentExpirationDate\": \"2025-12-27\", \r\n    \"taxonomyCode\": \"010101P\", \r\n    \"paFee\": 100, \r\n    \"vat\":22, \r\n    \"pagoPaIntMode\": \"NONE\" \r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -150,6 +150,144 @@
 							"path": [
 								"p4pasend",
 								"notification"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "uploadNotificationFile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA-FILE-SHARE uploadNotificationFile - Responses with 202\", function () {\r",
+									"    pm.response.to.have.status(202);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "digest",
+									"value": "YSxsCpvZHvwL8IIosWJBUDjgUwa01sBHu6Cj4laQRLA=",
+									"type": "text"
+								},
+								{
+									"key": "sendFile",
+									"type": "file",
+									"src": "./postman/Notifica.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{fileShareBaseUrl}}/organization/{{organizationId}}/send-files/{{sendNotificationId}}",
+							"host": [
+								"{{fileShareBaseUrl}}"
+							],
+							"path": [
+								"organization",
+								"{{organizationId}}",
+								"send-files",
+								"{{sendNotificationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "uploadPagamentoFile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA-FILE-SHARE uploadNotificationFile - Responses with 202\", function () {\r",
+									"    pm.response.to.have.status(202);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "digest",
+									"value": "45Iba3tn9Dfm7TX+AbtWDR1csMuHgEbrHi/zZr6DjHU=",
+									"type": "text"
+								},
+								{
+									"key": "sendFile",
+									"type": "file",
+									"src": ".postman/Pagamento.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{fileShareBaseUrl}}/organization/{{organizationId}}/send-files/{{sendNotificationId}}",
+							"host": [
+								"{{fileShareBaseUrl}}"
+							],
+							"path": [
+								"organization",
+								"{{organizationId}}",
+								"send-files",
+								"{{sendNotificationId}}"
 							]
 						}
 					},
@@ -521,6 +659,68 @@
 		{
 			"name": "99_utils",
 			"item": [
+				{
+					"name": "getSendNotification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send getSendNotification - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"P4PA Send getSendNotification - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"sendNotificationId\");\r",
+									"    pm.expect(jsonResponse).have.property(\"organizationId\");\r",
+									"    pm.expect(jsonResponse).have.property(\"iun\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/notification/{{sendNotificationId}}",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"notification",
+								"{{sendNotificationId}}"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "retrieveNotificationDate",
 					"event": [
