@@ -65,7 +65,7 @@ class SendNotificationControllerTest {
       .digest("DIGEST")
       .build();
 
-    StartNotificationResponse expectedResponse = StartNotificationResponse.builder().workFlowId(sendNotificationId).build();
+    StartNotificationResponse expectedResponse = new StartNotificationResponse();
 
     Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, loadFileRequest, accessToken))
       .thenReturn(expectedResponse);
@@ -76,7 +76,7 @@ class SendNotificationControllerTest {
     // Then
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-    Assertions.assertEquals(expectedResponse, response.getBody());
+    Assertions.assertSame(expectedResponse, response.getBody());
   }
 
   @Test
