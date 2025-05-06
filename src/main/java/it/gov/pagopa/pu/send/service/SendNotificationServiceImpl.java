@@ -84,7 +84,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.SENDING);
       WorkflowCreatedDTO workflow = workflowService.sendNotificationProcess(sendNotificationId, accessToken);
       return StartNotificationResponse.builder()
-        .workFlowId(workflow.getWorkflowId())
+        .workflowId(workflow.getWorkflowId())
+        .runId(workflow.getRunId())
         .build();
     }
     return null;

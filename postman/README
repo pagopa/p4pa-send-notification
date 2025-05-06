@@ -1,0 +1,7 @@
+to run on postman, place the files on this folder (referenced by the postman collection) inside a folder named 'postman' under your Postman local Working Directory (see Postman settings -> General -> Working Directory -> Location).
+
+Eg:
+   Working directory: /Users/public/Postman/files
+   After the copy:
+      /Users/public/Postman/files/postman/Notifica.pdf
+      /Users/public/Postman/files/postman/Pagamento.pdf

@@ -38,7 +38,7 @@ class WorkflowServiceTest {
     // Given
     String accessToken = "ACCESSTOKEN";
     String sendNotificationId = "sendNotificationId";
-    WorkflowCreatedDTO expectedResult = new WorkflowCreatedDTO("1");
+    WorkflowCreatedDTO expectedResult = new WorkflowCreatedDTO();
 
     Mockito.when(workflowApiClientMock.sendNotificationProcess(Mockito.same(sendNotificationId), Mockito.same(accessToken)))
       .thenReturn(expectedResult);
