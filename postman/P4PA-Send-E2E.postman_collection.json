@@ -274,7 +274,7 @@
 								{
 									"key": "sendFile",
 									"type": "file",
-									"src": ".postman/Pagamento.pdf"
+									"src": "./postman/Pagamento.pdf"
 								}
 							]
 						},
