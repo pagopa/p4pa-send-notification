@@ -53,12 +53,12 @@ public class SendNotification2NewNotificationRequestMapper {
       pagoPa.setNoticeCode(payment.getPayment().getPagoPa().getNoticeCode());
       pagoPa.setApplyCost(payment.getPayment().getPagoPa().getApplyCost());
 
-      Optional<NotificationAttachmentDTO> attachment = sendNotification.getDocuments().stream()
+      Optional<NotificationPaymentAttachmentDTO> attachment = sendNotification.getDocuments().stream()
           .filter(doc -> payment.getPayment().getPagoPa().getAttachment()!=null
             && doc.getFileName().equals(payment.getPayment().getPagoPa().getAttachment().getFileName()))
           .findFirst()
           .map(doc -> {
-            NotificationAttachmentDTO attachmentDTO = new NotificationAttachmentDTO();
+            NotificationPaymentAttachmentDTO attachmentDTO = new NotificationPaymentAttachmentDTO();
             attachmentDTO.setContentType(doc.getContentType());
             attachmentDTO.setDigests(new NotificationAttachmentDigestsDTO().sha256(doc.getDigest()));
             attachmentDTO.setRef(new NotificationAttachmentBodyRefDTO()
