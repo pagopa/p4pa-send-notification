@@ -3,12 +3,12 @@ import java.util.*
 
 plugins {
   java
-  id("org.springframework.boot") version "3.4.3"
+  id("org.springframework.boot") version "3.4.5"
   id("io.spring.dependency-management") version "1.1.7"
   jacoco
-  id("org.sonarqube") version "6.0.1.5171"
-  id("com.github.ben-manes.versions") version "0.51.0"
-  id("org.openapi.generator") version "7.10.0"
+  id("org.sonarqube") version "6.1.0.5360"
+  id("com.github.ben-manes.versions") version "0.52.0"
+  id("org.openapi.generator") version "7.13.0"
   id("org.ajoberstar.grgit") version "5.3.0"
   id("com.gorylenko.gradle-git-properties") version "2.5.0"
 }
@@ -33,11 +33,11 @@ repositories {
   mavenCentral()
 }
 
-val springDocOpenApiVersion = "2.8.5"
+val springDocOpenApiVersion = "2.8.6"
 val openApiToolsVersion = "0.2.6"
-val micrometerVersion = "1.4.3"
+val micrometerVersion = "1.4.6"
 val bouncycastleVersion = "1.80"
-val httpClientVersion = "5.4.2"
+val httpClientVersion = "5.4.4"
 val postgresJdbcVersion = "42.7.5"
 val caffeineVersion = "3.2.0"
 
@@ -236,7 +236,8 @@ tasks.register<GenerateTask>("openApiGenerateWORKFLOWHUB") {
     "DebtPositionDTO" to "it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO",
     "IngestionFlowFileType" to "String",
     "WfExecutionConfig" to "String",
-    "ExportFileType" to "String"
+    "ExportFileType" to "String",
+    "WorkflowTypeOrg" to "String"
   ))
   configOptions.set(
     mapOf(
