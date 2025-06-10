@@ -237,7 +237,9 @@ tasks.register<GenerateTask>("openApiGenerateWORKFLOWHUB") {
     "IngestionFlowFileType" to "String",
     "WfExecutionConfig" to "String",
     "ExportFileType" to "String",
-    "WorkflowTypeOrg" to "String"
+    "WorkflowTypeOrg" to "String",
+    "WorkflowExecutionStatus" to "String",
+    "ScheduleEnum" to "String"
   ))
   configOptions.set(
     mapOf(
