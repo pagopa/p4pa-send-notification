@@ -31,7 +31,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     sendNotificationNoPII.setSendNotificationId("12345");
     sendNotificationNoPII.setOrganizationId(1L);
     sendNotificationNoPII.setIun("IUN");
-    sendNotificationNoPII.setNotificationData(now);
+    sendNotificationNoPII.setNotificationDate(now);
     sendNotificationNoPII.setStatus(NotificationStatus.COMPLETE);
 
     sendNotificationNoPII.setPayments(List.of(

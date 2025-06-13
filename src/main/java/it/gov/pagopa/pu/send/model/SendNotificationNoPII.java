@@ -47,7 +47,7 @@ public class SendNotificationNoPII implements Serializable, NoPIIEntity<SendNoti
   private int paFee;
   private int vat;
   private String pagoPaIntMode;
-  private OffsetDateTime notificationData;
+  private OffsetDateTime notificationDate;
   @NotNull
   private Long personalDataId;
 }

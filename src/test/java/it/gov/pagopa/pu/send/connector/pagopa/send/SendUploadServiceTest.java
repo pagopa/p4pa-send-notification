@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
-class SendSendUploadFacadeServiceTest {
+class SendUploadServiceTest {
 
   @Mock
   private SendUploadClient clientMock;
