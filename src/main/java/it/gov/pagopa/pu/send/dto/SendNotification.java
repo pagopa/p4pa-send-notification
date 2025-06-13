@@ -39,7 +39,7 @@ public class SendNotification implements FullPIIDTO<SendNotificationNoPII, SendN
   private int paFee;
   private int vat;
   private String pagoPaIntMode;
-  private OffsetDateTime notificationData;
+  private OffsetDateTime notificationDate;
 
   @JsonIgnore
   private SendNotificationNoPII noPII;

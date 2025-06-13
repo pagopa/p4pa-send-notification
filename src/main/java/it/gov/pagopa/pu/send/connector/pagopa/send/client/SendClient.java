@@ -1,14 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
-import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestStatusResponseV24DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationResponseDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadRequestDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
-import it.gov.pagopa.pu.send.util.SecurityUtils;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,42 +10,30 @@ import java.util.List;
 public class SendClient {
 
   private final PagopaSendApisHolder apisHolder;
-  private final OrganizationService organizationService;
 
   public SendClient(
-    PagopaSendApisHolder apisHolder,
-    OrganizationService organizationService
+    PagopaSendApisHolder apisHolder
   ) {
     this.apisHolder = apisHolder;
-    this.organizationService = organizationService;
   }
 
-  public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, Long organizationId) {
-    String apiKey = getApiKeyFromOrganization(organizationId);
+  public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, String apiKey) {
     return apisHolder.getNewNotificationApiByApiKey(apiKey)
       .presignedUploadRequest(preLoadRequestDTO);
   }
 
-  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, Long organizationId) {
-    String apiKey = getApiKeyFromOrganization(organizationId);
+  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, String apiKey) {
     return apisHolder.getNewNotificationApiByApiKey(apiKey)
       .sendNewNotificationV24(newNotificationRequestV24DTO);
   }
 
-  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, Long organizationId) {
-    String apiKey = getApiKeyFromOrganization(organizationId);
+  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, String apiKey) {
     return apisHolder.getSenderReadB2BApiByApiKey(apiKey)
       .retrieveNotificationRequestStatusV24(notificationRequestId, null, null);
   }
 
-  public NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, Long organizationId) {
-    String apiKey = getApiKeyFromOrganization(organizationId);
+  public NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, String apiKey) {
     return apisHolder.getNotificationPriceApi(apiKey).retrieveNotificationPriceV23(paTaxId, noticeCode);
-  }
-
-  private String getApiKeyFromOrganization(Long organizationId) {
-    String accessToken = SecurityUtils.getAccessToken();
-    return organizationService.getOrganizationApiKey(organizationId, accessToken);
   }
 
 }

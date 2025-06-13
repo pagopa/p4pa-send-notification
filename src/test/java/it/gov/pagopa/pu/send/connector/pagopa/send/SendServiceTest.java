@@ -1,0 +1,121 @@
+package it.gov.pagopa.pu.send.connector.pagopa.send;
+
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
+import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+@ExtendWith(MockitoExtension.class)
+class SendServiceTest {
+
+  @Mock
+  private SendClient clientMock;
+  @Mock
+  private OrganizationService organizationServiceMock;
+
+  private SendService service;
+
+  @BeforeEach
+  void init() {
+    service = new SendServiceImpl(clientMock, organizationServiceMock);
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(clientMock, organizationServiceMock);
+  }
+
+  @Test
+  void whenPreloadFilesThenInvokeClient() {
+    // Given
+    long organizationId = 123L;
+    String accessToken = "ACCESSTOKEN";
+    String orgSendApiKey = "ORG_SEND_API_KEY";
+    List<PreLoadRequestDTO> request = List.of();
+    List<PreLoadResponseDTO> expectedResult = List.of();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+        .thenReturn(orgSendApiKey);
+    Mockito.when(clientMock.preloadFiles(Mockito.same(request), Mockito.same(orgSendApiKey)))
+      .thenReturn(expectedResult);
+
+    // When
+    List<PreLoadResponseDTO> result = service.preloadFiles(request, organizationId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenDeliveryNotificationThenInvokeClient() {
+    // Given
+    long organizationId = 123L;
+    String accessToken = "ACCESSTOKEN";
+    String orgSendApiKey = "ORG_SEND_API_KEY";
+    NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
+    NewNotificationResponseDTO expectedResult = new NewNotificationResponseDTO();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+      .thenReturn(orgSendApiKey);
+    Mockito.when(clientMock.deliveryNotification(Mockito.same(request), Mockito.same(orgSendApiKey)))
+      .thenReturn(expectedResult);
+
+    // When
+    NewNotificationResponseDTO result = service.deliveryNotification(request, organizationId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenNotificationStatusThenInvokeClient() {
+    // Given
+    long organizationId = 123L;
+    String accessToken = "ACCESSTOKEN";
+    String orgSendApiKey = "ORG_SEND_API_KEY";
+    String notificationRequestId = "NOTIFICATION_ID";
+    NewNotificationRequestStatusResponseV24DTO expectedResult = new NewNotificationRequestStatusResponseV24DTO();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+      .thenReturn(orgSendApiKey);
+    Mockito.when(clientMock.notificationStatus(Mockito.same(notificationRequestId), Mockito.same(orgSendApiKey)))
+      .thenReturn(expectedResult);
+
+    // When
+    NewNotificationRequestStatusResponseV24DTO result = service.notificationStatus(notificationRequestId, organizationId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenRetrieveNotificationPriceThenInvokeClient() {
+    // Given
+    long organizationId = 123L;
+    String accessToken = "ACCESSTOKEN";
+    String orgSendApiKey = "ORG_SEND_API_KEY";
+    String paTaxId = "PA_TAX_ID";
+    String nav = "NAV";
+    NotificationPriceResponseV23DTO expectedResult = new NotificationPriceResponseV23DTO();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+      .thenReturn(orgSendApiKey);
+    Mockito.when(clientMock.retrieveNotificationPrice(Mockito.same(paTaxId), Mockito.same(nav), Mockito.same(orgSendApiKey)))
+      .thenReturn(expectedResult);
+
+    // When
+    NotificationPriceResponseV23DTO result = service.retrieveNotificationPrice(paTaxId, nav, organizationId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+}

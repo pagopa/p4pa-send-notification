@@ -44,7 +44,7 @@ public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, S
     noPII.setPaFee(fullDTO.getPaFee());
     noPII.setVat(fullDTO.getVat());
     noPII.setPagoPaIntMode(fullDTO.getPagoPaIntMode());
-    noPII.setNotificationData(fullDTO.getNotificationData());
+    noPII.setNotificationDate(fullDTO.getNotificationDate());
 
     return noPII;
   }
@@ -84,7 +84,7 @@ public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, S
     sendNotification.setPaFee(noPii.getPaFee());
     sendNotification.setVat(noPii.getVat());
     sendNotification.setPagoPaIntMode(noPii.getPagoPaIntMode());
-    sendNotification.setNotificationData(noPii.getNotificationData());
+    sendNotification.setNotificationDate(noPii.getNotificationDate());
     sendNotification.setNoPII(noPii);
 
     return sendNotification;

@@ -7,12 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldNameConstants
-public class DocumentDTO {
+public class DocumentDTO implements Serializable {
   private String fileName;
   private String digest;
   private String contentType;

@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceRespo
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
+import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +23,14 @@ public class SendController implements SendApi {
   @Override
   public ResponseEntity<Void> preloadSendFile(String sendNotificationId) {
     log.info("request preload files for sendNotificationId {}", sendNotificationId);
-    sendFacadeService.preloadFiles(sendNotificationId);
+    sendFacadeService.preloadFiles(sendNotificationId, SecurityUtils.getAccessToken());
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<SendNotificationDTO> retrieveNotificationDate(String sendNotificationId) {
     log.info("retrieve notificationData for sendNotificationId {}", sendNotificationId);
-    SendNotificationDTO response = sendFacadeService.retrieveNotificationData(sendNotificationId);
+    SendNotificationDTO response = sendFacadeService.retrieveNotificationDate(sendNotificationId, SecurityUtils.getAccessToken());
     if(response!=null)
       return new ResponseEntity<>(response, HttpStatus.OK);
     else
@@ -39,7 +40,7 @@ public class SendController implements SendApi {
   @Override
   public ResponseEntity<NotificationPriceResponseV23DTO> retrieveNotificationPrice(Long organizationId, String nav) {
     log.info("retrieve notificationPrice for organizationId {} and nav {}", organizationId, nav);
-    NotificationPriceResponseV23DTO response = sendFacadeService.retrieveNotificationPrice(organizationId, nav);
+    NotificationPriceResponseV23DTO response = sendFacadeService.retrieveNotificationPrice(organizationId, nav, SecurityUtils.getAccessToken());
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -53,14 +54,14 @@ public class SendController implements SendApi {
   @Override
   public ResponseEntity<Void> deliveryNotification(String sendNotificationId) {
     log.info("delivery notification with sendNotificationId {} to SEND", sendNotificationId);
-    sendFacadeService.deliveryNotification(sendNotificationId);
+    sendFacadeService.deliveryNotification(sendNotificationId, SecurityUtils.getAccessToken());
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<SendNotificationDTO> notificationStatus(String sendNotificationId) {
     log.info("retrieve notification status for sendNotificationId {}", sendNotificationId);
-    return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId), HttpStatus.OK);
+    return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId, SecurityUtils.getAccessToken()), HttpStatus.OK);
   }
 
 }

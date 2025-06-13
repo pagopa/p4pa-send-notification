@@ -3,7 +3,10 @@ package it.gov.pagopa.pu.send.controller;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
+import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,10 +25,21 @@ class SendControllerTest {
   @InjectMocks
   private SendController sendController;
 
+  private final String accessToken = "ACCESSTOKEN";
+
+  @BeforeEach
+  void init(){
+    SecurityUtilsTest.configureSecurityContext(accessToken, "MAPPEDEXTERNALUSERID");
+  }
+  @AfterEach
+  void clear(){
+    SecurityUtilsTest.clearSecurityContext();
+  }
+
   @Test
   void givenSendNotificationIdWhenPreloadFilesRequestThenOk() {
     String sendNotificationId = "12345";
-    Mockito.doNothing().when(sendFacadeServiceMock).preloadFiles(sendNotificationId);
+    Mockito.doNothing().when(sendFacadeServiceMock).preloadFiles(sendNotificationId, accessToken);
     ResponseEntity<Void> response = sendController.preloadSendFile(sendNotificationId);
 
     Assertions.assertNotNull(response);
@@ -45,7 +59,7 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdWhenDeliveryNotificationRequestThenOk(){
     String sendNotificationId = "12345";
-    Mockito.doNothing().when(sendFacadeServiceMock).deliveryNotification(sendNotificationId);
+    Mockito.doNothing().when(sendFacadeServiceMock).deliveryNotification(sendNotificationId, accessToken);
     ResponseEntity<Void> response = sendController.deliveryNotification(sendNotificationId);
 
     Assertions.assertNotNull(response);
@@ -56,7 +70,7 @@ class SendControllerTest {
   void givenSendNotificationIdWhenNotificationStatusRequestThenOk(){
     String sendNotificationId = "12345";
     SendNotificationDTO status = new SendNotificationDTO();
-    Mockito.when(sendFacadeServiceMock.notificationStatus(sendNotificationId)).thenReturn(status);
+    Mockito.when(sendFacadeServiceMock.notificationStatus(sendNotificationId, accessToken)).thenReturn(status);
 
     ResponseEntity<SendNotificationDTO> response = sendController.notificationStatus(sendNotificationId);
 
@@ -70,7 +84,7 @@ class SendControllerTest {
     String sendNotificationId = "12345";
 
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId))
+    Mockito.when(sendFacadeServiceMock.retrieveNotificationDate(sendNotificationId, accessToken))
       .thenReturn(notificationDTO);
 
     ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId);
@@ -81,7 +95,7 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdAndOrganizationIdWhenRetrieveNotificationDateThenNoContent() {
     String sendNotificationId = "12345";
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationData(sendNotificationId))
+    Mockito.when(sendFacadeServiceMock.retrieveNotificationDate(sendNotificationId, accessToken))
       .thenReturn(null);
 
     ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId);
@@ -93,7 +107,7 @@ class SendControllerTest {
     Long organizationId = 1L;
     String nav = "12345";
     NotificationPriceResponseV23DTO price = new NotificationPriceResponseV23DTO();
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationPrice(organizationId, nav))
+    Mockito.when(sendFacadeServiceMock.retrieveNotificationPrice(organizationId, nav, accessToken))
       .thenReturn(price);
 
     ResponseEntity<NotificationPriceResponseV23DTO> response = sendController.retrieveNotificationPrice(organizationId, nav);

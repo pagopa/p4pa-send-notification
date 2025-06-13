@@ -585,7 +585,7 @@
             }
           },
           "204" : {
-            "description" : "NotificationData not found",
+            "description" : "NotificationDate not found",
             "content" : {
               "application/json" : {
                 "schema" : {

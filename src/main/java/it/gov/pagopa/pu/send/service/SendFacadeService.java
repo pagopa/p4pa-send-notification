@@ -5,10 +5,10 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceRespo
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 
 public interface SendFacadeService {
-  void preloadFiles(String sendNotificationId);
+  void preloadFiles(String sendNotificationId, String accessToken);
   void uploadFiles(String sendNotificationId);
-  void deliveryNotification(String sendNotificationId);
-  SendNotificationDTO retrieveNotificationData(String sendNotificationId);
-  SendNotificationDTO notificationStatus(String sendNotificationId);
-  NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String nav);
+  void deliveryNotification(String sendNotificationId, String accessToken);
+  SendNotificationDTO retrieveNotificationDate(String sendNotificationId, String accessToken);
+  SendNotificationDTO notificationStatus(String sendNotificationId, String accessToken);
+  NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String nav, String accessToken);
 }

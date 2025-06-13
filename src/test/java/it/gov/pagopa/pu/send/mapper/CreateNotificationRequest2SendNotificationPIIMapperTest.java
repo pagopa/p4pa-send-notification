@@ -60,7 +60,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     SendNotification result = mapper.mapToModel(request, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun","notificationData", "personalDataId", "noPII");
+    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun","notificationDate", "personalDataId", "noPII");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals("PF", result.getSubjectType());

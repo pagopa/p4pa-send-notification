@@ -52,7 +52,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SendNotificationDTO'
         '204':
-          description: NotificationData not found
+          description: NotificationDate not found
         '400':
           description: Invalid request
         '403':

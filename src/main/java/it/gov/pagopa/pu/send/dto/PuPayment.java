@@ -4,13 +4,17 @@ import it.gov.pagopa.pu.send.dto.generated.Payment;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
+
+import java.io.Serializable;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 @Data
-public class PuPayment {
+@FieldNameConstants
+public class PuPayment implements Serializable {
   private Long debtPositionId;
   private Payment payment;
 }

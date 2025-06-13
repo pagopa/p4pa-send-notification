@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -26,7 +27,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_DOCUMENT_HTTPMETHOD = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.httpMethod);
   public static final String FIELD_DOCUMENT_STATUS = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.status);
   public static final String FIELD_DOCUMENT_VERSIONID = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.versionId);
-  public static final String FIELD_PAYMENT_NOTICE_CODE = "payments.payment.pagoPa.noticeCode";
+  public static final String FIELD_PAYMENT_NOTICE_CODE = "%s.%s.pagoPa.noticeCode".formatted(Fields.payments, PuPayment.Fields.payment);
 
   private final MongoTemplate mongoTemplate;
 
@@ -98,7 +99,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     OffsetDateTime notificationDate) {
     return mongoTemplate.updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
-      new Update().set(Fields.notificationData, notificationDate.toString()),
+      new Update().set(Fields.notificationDate, notificationDate.toString()),
       SendNotificationNoPII.class);
   }
 

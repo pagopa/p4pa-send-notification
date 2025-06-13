@@ -86,7 +86,7 @@ class SendNotificationPIIMapperTest {
     assertEquals(noPii.getPaFee(), result.getPaFee());
     assertEquals(noPii.getVat(), result.getVat());
     assertEquals(noPii.getPagoPaIntMode(), result.getPagoPaIntMode());
-    assertEquals(noPii.getNotificationData(), result.getNotificationData());
+    assertEquals(noPii.getNotificationDate(), result.getNotificationDate());
     assertSame(noPii, result.getNoPII());
   }
 
@@ -167,7 +167,7 @@ class SendNotificationPIIMapperTest {
     noPii.setPaFee(0);
     noPii.setVat(22);
     noPii.setPagoPaIntMode("PA");
-    noPii.setNotificationData(now);
+    noPii.setNotificationDate(now);
     return noPii;
   }
 
@@ -229,7 +229,7 @@ class SendNotificationPIIMapperTest {
     sendNotification.setPaFee(0);
     sendNotification.setVat(22);
     sendNotification.setPagoPaIntMode("PA");
-    sendNotification.setNotificationData(now);
+    sendNotification.setNotificationDate(now);
     sendNotification.setNoPII(getNoPII(1L));
     return sendNotification;
   }
