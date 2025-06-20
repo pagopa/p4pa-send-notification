@@ -143,6 +143,12 @@ rest:
       max-attempts: "\${SEND_MAX_ATTEMPTS:3}" # It's counting also the first attempt
       wait-time-millis: "\${SEND_WAIT_TIME_MILLIS:500}"
       print-body-when-error: "\${SEND_PRINT_BODY_WHEN_ERROR:true}"
+    pdnd:
+      base-url: "\${PDND_BASE_URL:https://hub.internal.dev.p4pa.pagopa.it/p4papdnd}"
+      max-attempts: "\${PDND_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+      wait-time-millis: "\${PDND_WAIT_TIME_MILLIS:500}"
+      print-body-when-error: "\${PDND_PRINT_BODY_WHEN_ERROR:true}"
+
 
 app:
   fileEncryptPassword: "\${FILE_ENCRYPT_PASSWORD:ENCR_PSW}"
