@@ -157,3 +157,6 @@ cache:
   pii:
     size: "\${CACHE_PII_SIZE:1000}"
     expire-in: "\${CACHE_PII_MINUTES:60}"
+  pdndAccessToken:
+    size: "\${CACHE_PDNDACCESSTOKEN_SIZE:1000}"
+    expire-in: "\${CACHE_PDNDACCESSTOKEN_MINUTES:60}"

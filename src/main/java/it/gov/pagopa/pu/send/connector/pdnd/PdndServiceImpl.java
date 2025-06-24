@@ -1,34 +1,24 @@
 package it.gov.pagopa.pu.send.connector.pdnd;
 
 import it.gov.pagopa.pu.pdnd.dto.generated.PdndAuthData;
-import it.gov.pagopa.pu.send.connector.pdnd.client.PdndApiClient;
 import java.time.OffsetDateTime;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PdndServiceImpl implements PdndService{
-  private final PdndApiClient pdndApiClient;
 
-  public PdndServiceImpl(PdndApiClient pdndApiClient) {
-    this.pdndApiClient = pdndApiClient;
+  private final PdndCacheService pdndCacheService;
+
+  public PdndServiceImpl(PdndCacheService pdndCacheService) {
+    this.pdndCacheService = pdndCacheService;
   }
-
-  @Cacheable(value="pdndVoucherTokens", key="#accessToken")
-  public PdndAuthData getPdndAccessToken(String accessToken) {
-    return pdndApiClient.getVoucherToken(accessToken);
-  }
-
-  @CacheEvict(value = "pdndVoucherTokens", key = "#accessToken")
-  public void evictPdndAccessToken(String accessToken) {}
 
   @Override
   public String resolvePdndAccessToken(String accessToken) {
-    PdndAuthData pdndAuthData = getPdndAccessToken(accessToken);
+    PdndAuthData pdndAuthData = pdndCacheService.getPdndAccessToken(accessToken);
     if (pdndAuthData.getExpiration().isBefore(OffsetDateTime.now())) {
-      evictPdndAccessToken(accessToken);
-      pdndAuthData = getPdndAccessToken(accessToken);
+      pdndCacheService.evictPdndAccessToken(accessToken);
+      pdndAuthData = pdndCacheService.getPdndAccessToken(accessToken);
     }
     return pdndAuthData.getAccessToken();
   }
