@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -35,25 +36,27 @@ public class PagopaSendApisHolder {
     }
   }
 
-  public NewNotificationApi getNewNotificationApiByApiKey(String apiKey) {
+  public NewNotificationApi getNewNotificationApiByApiKey(String apiKey, String voucherToken) {
     return newNotificationApiMap.computeIfAbsent(apiKey, key ->
-      new NewNotificationApi(buildApiClient(key)));
+      new NewNotificationApi(buildApiClient(key, voucherToken)));
   }
 
-  public SenderReadB2BApi getSenderReadB2BApiByApiKey(String apiKey) {
+  public SenderReadB2BApi getSenderReadB2BApiByApiKey(String apiKey, String voucherToken) {
     return senderReadB2BApiMap.computeIfAbsent(apiKey, key ->
-      new SenderReadB2BApi(buildApiClient(key)));
+      new SenderReadB2BApi(buildApiClient(key, voucherToken)));
   }
 
-  public NotificationPriceV23Api getNotificationPriceApi(String apiKey) {
+  public NotificationPriceV23Api getNotificationPriceApi(String apiKey, String voucherToken) {
     return notificationPriceApiMap.computeIfAbsent(apiKey, key ->
-      new NotificationPriceV23Api(buildApiClient(key)));
+      new NotificationPriceV23Api(buildApiClient(key, voucherToken)));
   }
 
-  private ApiClient buildApiClient(String apiKey) {
+  private ApiClient buildApiClient(String apiKey, String voucherToken) {
     ApiClient apiClient = new ApiClient(restTemplate);
     apiClient.setBasePath(clientConfig.getBaseUrl());
     apiClient.setApiKey(apiKey);
+    if(StringUtils.isNotEmpty(voucherToken))
+      apiClient.addDefaultHeader("Authorization", "Bearer " + voucherToken);
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
     return apiClient;
