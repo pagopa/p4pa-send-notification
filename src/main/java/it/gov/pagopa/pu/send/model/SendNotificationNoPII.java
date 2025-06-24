@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.model;
 
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import jakarta.validation.constraints.NotNull;
@@ -29,10 +30,6 @@ public class SendNotificationNoPII implements Serializable, NoPIIEntity<SendNoti
   private String sendNotificationId;
   private Long organizationId;
   private String paProtocolNumber;
-  private String subjectType;
-  private byte[] fiscalCodeHash;
-  private String denomination;
-  private List<PuPayment> payments;
   private List<DocumentDTO> documents;
   private NotificationStatus status;
   private String notificationRequestId;
@@ -50,4 +47,5 @@ public class SendNotificationNoPII implements Serializable, NoPIIEntity<SendNoti
   private OffsetDateTime notificationDate;
   @NotNull
   private Long personalDataId;
+  private List<PuRecipientNoPIIDTO> recipients;
 }

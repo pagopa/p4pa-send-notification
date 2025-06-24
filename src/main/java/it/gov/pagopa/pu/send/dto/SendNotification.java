@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.gov.pagopa.pu.send.dto.generated.Address;
+import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import java.time.OffsetDateTime;
@@ -20,11 +20,6 @@ public class SendNotification implements FullPIIDTO<SendNotificationNoPII, SendN
   private String sendNotificationId;
   private Long organizationId;
   private String paProtocolNumber;
-  private String subjectType;
-  private String fiscalCode;
-  private String denomination;
-  private Address address;
-  private List<PuPayment> payments;
   private List<DocumentDTO> documents;
   private NotificationStatus status;
   private String notificationRequestId;
@@ -40,6 +35,7 @@ public class SendNotification implements FullPIIDTO<SendNotificationNoPII, SendN
   private int vat;
   private String pagoPaIntMode;
   private OffsetDateTime notificationDate;
+  private List<PuRecipient> puRecipients;
 
   @JsonIgnore
   private SendNotificationNoPII noPII;

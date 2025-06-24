@@ -27,11 +27,11 @@ public class SendNotificationController implements NotificationApi {
   public ResponseEntity<CreateNotificationResponse> createSendNotification(CreateNotificationRequest createNotificationRequest) {
     log.info("new notification request for organizationId {} and nav {}",
       createNotificationRequest.getOrganizationId(),
-      Optional.ofNullable(createNotificationRequest.getRecipient())
-        .map(r -> r.getPayments().stream()
-          .map(p->p.getPagoPa().getNoticeCode())
-          .collect(Collectors.joining(",")))
-        .orElse("null")
+      Optional.ofNullable(createNotificationRequest.getRecipients())
+        .map(recipients -> recipients.stream()
+          .map(r -> r.getPayments().stream()
+            .map(p->p.getPagoPa().getNoticeCode())).toList())
+        .orElse(null)
     );
     String accessToken = SecurityUtils.getAccessToken();
     return new ResponseEntity<>(sendNotificationService.createSendNotification(createNotificationRequest, accessToken), HttpStatus.OK);

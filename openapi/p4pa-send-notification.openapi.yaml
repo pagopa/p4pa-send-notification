@@ -317,14 +317,18 @@ components:
         - organizationId
         - paProtocolNumber
         - recipients
+        - notificationFeePolicy
+        - physicalCommunicationType
       properties:
         organizationId:
           type: integer
           format: int64
         paProtocolNumber:
           type: string
-        recipient:
-          $ref: '#/components/schemas/Recipient'
+        recipients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recipient'
         documents:
           type: array
           items:
@@ -380,6 +384,9 @@ components:
             $ref: '#/components/schemas/Payment'
     Address:
       type: object
+      required:
+        - address
+        - municipality
       properties:
         address:
           type: string
@@ -396,6 +403,10 @@ components:
           $ref: '#/components/schemas/PagoPa'
     PagoPa:
       type: object
+      required:
+        - noticeCode
+        - creditorTaxId
+        - applyCost
       properties:
         noticeCode:
           type: string

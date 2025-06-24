@@ -3,8 +3,10 @@ package it.gov.pagopa.pu.send.mapper;
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
 import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.PuRecipient;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
@@ -28,42 +30,78 @@ public class CreateNotificationRequest2SendNotificationMapper {
     Long organizationId = request.getOrganizationId();
 
     SendNotification sendNotification = new SendNotification();
-    sendNotification.setPaProtocolNumber(request.getPaProtocolNumber());
-    sendNotification.setSubjectType(request.getRecipient().getRecipientType().getValue());
-    sendNotification.setFiscalCode(request.getRecipient().getTaxId());
-    sendNotification.setDenomination(request.getRecipient().getDenomination());
-    sendNotification.setAddress(request.getRecipient().getPhysicalAddress());
 
-    if (request.getDocuments().isEmpty()) {
+    sendNotification.setPaProtocolNumber(request.getPaProtocolNumber());
+
+    if (request.getDocuments().isEmpty()) { //TODO può essere che non esiste
       sendNotification.setStatus(NotificationStatus.SENDING);
-    }
-    else {
+    } else {
       sendNotification.setStatus(NotificationStatus.WAITING_FILE);
     }
 
-    sendNotification.setPayments(request.getRecipient().getPayments().stream()
-      .map(p -> {
-        String nav = p.getPagoPa().getNoticeCode();
-        DebtPosition debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
-        if (debtPosition == null) {
-          throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
-        } else {
-          return new PuPayment(debtPosition.getDebtPositionId(), p);
-        }
-      })
-      .toList()
-    );
+    sendNotification.setPuRecipients(setPuRecipients(request, accessToken, organizationId));
+    sendNotification.setDocuments(setDocuments(request));
 
-    List<DocumentDTO> documents = new ArrayList<>();
-    // add attachment to documents
-    documents.addAll(request.getRecipient().getPayments().stream()
-      .map(payment ->
-        DocumentDTO.builder()
-          .fileName(payment.getPagoPa().getAttachment().getFileName())
-          .contentType(payment.getPagoPa().getAttachment().getContentType())
-          .digest(payment.getPagoPa().getAttachment().getDigest())
-          .status(FileStatus.WAITING)
-          .build()).toList());
+    sendNotification.setOrganizationId(organizationId);
+    sendNotification.setNotificationFeePolicy(request.getNotificationFeePolicy().getValue());
+    sendNotification.setPhysicalCommunicationType(request.getPhysicalCommunicationType().getValue());
+    sendNotification.setSenderDenomination(request.getSenderDenomination());
+    sendNotification.setSenderTaxId(request.getSenderTaxId());
+    sendNotification.setTaxonomyCode(request.getTaxonomyCode());
+    if (request.getAmount() != null) {
+      sendNotification.setAmount(request.getAmount().intValue());
+    }
+    if (request.getPaFee() != null) {
+      sendNotification.setPaFee(request.getPaFee());
+    }
+    if (request.getVat() != null) {
+      sendNotification.setVat(request.getVat());
+    }
+    if (request.getPaymentExpirationDate() != null) {
+      sendNotification.setPaymentExpirationDate(request.getPaymentExpirationDate().toString());
+    }
+    if (request.getPagoPaIntMode() != null) {
+      sendNotification.setPagoPaIntMode(request.getPagoPaIntMode().getValue());
+    }
+
+    return sendNotification;
+  }
+
+  private List<PuRecipient> setPuRecipients(CreateNotificationRequest request, String accessToken, Long organizationId) {
+    return request.getRecipients().stream()
+      .map(r -> {
+        List<PuPayment> puPayments = r.getPayments().stream()
+          .map(p -> {
+            String nav = p.getPagoPa().getNoticeCode();
+            DebtPosition debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
+            if (debtPosition == null) {
+              throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
+            } else {
+              return new PuPayment(debtPosition.getDebtPositionId(), p);
+            }
+          }).toList();
+        Recipient recipient = Recipient.builder()
+          .recipientType(r.getRecipientType())
+          .taxId(r.getTaxId())
+          .denomination(r.getDenomination())
+          .physicalAddress(r.getPhysicalAddress())
+          .build();
+        return new PuRecipient(recipient, puPayments);
+      }).toList();
+  }
+
+  private List<DocumentDTO> setDocuments(CreateNotificationRequest request) {
+    List<DocumentDTO> documents = new ArrayList<>(request.getRecipients().stream()
+      .flatMap(r -> r.getPayments().stream())
+      .filter(p -> p.getPagoPa() != null && p.getPagoPa().getAttachment() != null)
+      .map(p -> p.getPagoPa().getAttachment())
+      .map(attachment -> DocumentDTO.builder()
+        .fileName(attachment.getFileName())
+        .contentType(attachment.getContentType())
+        .digest(attachment.getDigest())
+        .status(FileStatus.WAITING)
+        .build())
+      .toList());
 
     // set documents
     documents.addAll(request.getDocuments().stream()
@@ -75,19 +113,6 @@ public class CreateNotificationRequest2SendNotificationMapper {
           .status(FileStatus.WAITING)
           .build()).toList());
 
-    sendNotification.setDocuments(documents);
-    sendNotification.setOrganizationId(organizationId);
-    sendNotification.setNotificationFeePolicy(request.getNotificationFeePolicy().getValue());
-    sendNotification.setPhysicalCommunicationType(request.getPhysicalCommunicationType().getValue());
-    sendNotification.setSenderDenomination(request.getSenderDenomination());
-    sendNotification.setSenderTaxId(request.getSenderTaxId());
-    sendNotification.setAmount(request.getAmount().intValue());
-    sendNotification.setTaxonomyCode(request.getTaxonomyCode());
-    sendNotification.setPaFee(request.getPaFee());
-    sendNotification.setVat(request.getVat());
-    sendNotification.setPaymentExpirationDate(request.getPaymentExpirationDate().toString());
-    sendNotification.setPagoPaIntMode(request.getPagoPaIntMode().getValue());
-
-    return sendNotification;
+    return documents;
   }
 }
