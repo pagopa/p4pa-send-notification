@@ -30,13 +30,13 @@ class PdndServiceImplTest {
   private PdndAuthData pdndAuthData;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     pdndAuthData = new PdndAuthData();
     pdndAuthData.setAccessToken(ACCESS_TOKEN);
   }
 
   @Test
-  public void givenAccessTokenWhenResolvePdndAccessTokenThenIsValid() {
+  void givenAccessTokenWhenResolvePdndAccessTokenThenIsValid() {
     // Given
     pdndAuthData.setExpiration(OffsetDateTime.now().plusHours(1));
     when(pdndApiClient.getVoucherToken(ACCESS_TOKEN)).thenReturn(pdndAuthData);
@@ -51,7 +51,7 @@ class PdndServiceImplTest {
   }
 
   @Test
-  public void givenAccessTokenWhenResolvePdndAccessTokenThenIsExpired() {
+  void givenAccessTokenWhenResolvePdndAccessTokenThenIsExpired() {
     // Given
     pdndAuthData.setExpiration(OffsetDateTime.now().minusHours(1));
     when(pdndApiClient.getVoucherToken(ACCESS_TOKEN)).thenReturn(pdndAuthData);

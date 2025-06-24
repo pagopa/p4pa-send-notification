@@ -16,13 +16,12 @@ public class PdndServiceImpl implements PdndService{
   }
 
   @Cacheable(value="pdndVoucherTokens", key="#accessToken")
-  private PdndAuthData getPdndAccessToken(String accessToken) {
+  public PdndAuthData getPdndAccessToken(String accessToken) {
     return pdndApiClient.getVoucherToken(accessToken);
   }
 
   @CacheEvict(value = "pdndVoucherTokens", key = "#accessToken")
-  private void evictPdndAccessToken(String accessToken) {
-  }
+  public void evictPdndAccessToken(String accessToken) {}
 
   @Override
   public String resolvePdndAccessToken(String accessToken) {
