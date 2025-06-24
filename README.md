@@ -103,10 +103,12 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | SHARED_FOLDER_ROOT                            | Absolute path towards shared folder on file system                                    | /shared                                                       |
 
 ##### 📋 [Caching](https://pagopa.atlassian.net/wiki/spaces/SPAC/pages/1542128077/Caching)
-| ENV               | DESCRIPTION                   | DEFAULT |
-|-------------------|-------------------------------|---------|
-| CACHE_PII_SIZE    | PII cache size                | 1000    |
-| CACHE_PII_MINUTES | PII cache retention (minutes) | 60      |
+| ENV                           | DESCRIPTION                                | DEFAULT |
+|-------------------------------|--------------------------------------------|---------|
+| CACHE_PII_SIZE                | PII cache size                             | 1000    |
+| CACHE_PII_MINUTES             | PII cache retention (minutes)              | 60      |
+| CACHE_PDNDACCESSTOKEN_SIZE    | PDND accessToken cache size                | 100     |
+| CACHE_PDNDACCESSTOKEN_MINUTES | PDND accessToken cache retention (minutes) | 10      |
 
 ##### 🔗 REST
 | ENV                                               | DESCRIPTION                               | DEFAULT |
