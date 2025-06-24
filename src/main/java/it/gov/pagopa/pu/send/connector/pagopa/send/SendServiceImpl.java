@@ -24,28 +24,29 @@ public class SendServiceImpl implements SendService {
     this.pdndApiClient = pdndApiClient;
     this.organizationService = organizationService;
   }
-  private String getVoucherToken(String accessToken) {
-    return pdndTokenHolder.computeIfAbsent(accessToken, voucher -> pdndApiClient.getVoucherToken(accessToken));
+
+  private String getPdndAccessToken(String accessToken) {
+    return pdndTokenHolder.computeIfAbsent(accessToken, voucher -> pdndApiClient.getVoucherToken(accessToken).getAccessToken());
   }
 
   @Override
   public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, Long organizationId, String accessToken) {
-    return client.preloadFiles(preLoadRequestDTO, getApiKeyFromOrganization(organizationId, accessToken), getVoucherToken(accessToken));
+    return client.preloadFiles(preLoadRequestDTO, getApiKeyFromOrganization(organizationId, accessToken), getPdndAccessToken(accessToken));
   }
 
   @Override
   public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, Long organizationId, String accessToken) {
-    return client.deliveryNotification(newNotificationRequestV24DTO, getApiKeyFromOrganization(organizationId, accessToken), getVoucherToken(accessToken));
+    return client.deliveryNotification(newNotificationRequestV24DTO, getApiKeyFromOrganization(organizationId, accessToken), getPdndAccessToken(accessToken));
   }
 
   @Override
   public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, Long organizationId, String accessToken) {
-    return client.notificationStatus(notificationRequestId, getApiKeyFromOrganization(organizationId, accessToken), getVoucherToken(accessToken));
+    return client.notificationStatus(notificationRequestId, getApiKeyFromOrganization(organizationId, accessToken), getPdndAccessToken(accessToken));
   }
 
   @Override
   public NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, Long organizationId, String accessToken) {
-    return client.retrieveNotificationPrice(paTaxId, noticeCode, getApiKeyFromOrganization(organizationId, accessToken), getVoucherToken(accessToken));
+    return client.retrieveNotificationPrice(paTaxId, noticeCode, getApiKeyFromOrganization(organizationId, accessToken), getPdndAccessToken(accessToken));
   }
 
   private String getApiKeyFromOrganization(Long organizationId, String accessToken) {

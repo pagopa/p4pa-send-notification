@@ -36,27 +36,27 @@ public class PagopaSendApisHolder {
     }
   }
 
-  public NewNotificationApi getNewNotificationApiByApiKey(String apiKey, String voucherToken) {
+  public NewNotificationApi getNewNotificationApiByApiKey(String apiKey, String pdndAccessToken) {
     return newNotificationApiMap.computeIfAbsent(apiKey, key ->
-      new NewNotificationApi(buildApiClient(key, voucherToken)));
+      new NewNotificationApi(buildApiClient(key, pdndAccessToken)));
   }
 
-  public SenderReadB2BApi getSenderReadB2BApiByApiKey(String apiKey, String voucherToken) {
+  public SenderReadB2BApi getSenderReadB2BApiByApiKey(String apiKey, String pdndAccessToken) {
     return senderReadB2BApiMap.computeIfAbsent(apiKey, key ->
-      new SenderReadB2BApi(buildApiClient(key, voucherToken)));
+      new SenderReadB2BApi(buildApiClient(key, pdndAccessToken)));
   }
 
-  public NotificationPriceV23Api getNotificationPriceApi(String apiKey, String voucherToken) {
+  public NotificationPriceV23Api getNotificationPriceApi(String apiKey, String pdndAccessToken) {
     return notificationPriceApiMap.computeIfAbsent(apiKey, key ->
-      new NotificationPriceV23Api(buildApiClient(key, voucherToken)));
+      new NotificationPriceV23Api(buildApiClient(key, pdndAccessToken)));
   }
 
-  private ApiClient buildApiClient(String apiKey, String voucherToken) {
+  private ApiClient buildApiClient(String apiKey, String pdndAccessToken) {
     ApiClient apiClient = new ApiClient(restTemplate);
     apiClient.setBasePath(clientConfig.getBaseUrl());
     apiClient.setApiKey(apiKey);
-    if(StringUtils.isNotEmpty(voucherToken))
-      apiClient.addDefaultHeader("Authorization", "Bearer " + voucherToken);
+    if(StringUtils.isNotEmpty(pdndAccessToken))
+      apiClient.addDefaultHeader("Authorization", "Bearer " + pdndAccessToken);
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
     return apiClient;
