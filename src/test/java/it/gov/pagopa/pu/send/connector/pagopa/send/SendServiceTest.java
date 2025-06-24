@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.connector.pagopa.send;
 
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
-import it.gov.pagopa.pu.send.connector.pdnd.client.PdndApiClient;
+import it.gov.pagopa.pu.send.connector.pdnd.PdndService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -21,7 +21,7 @@ class SendServiceTest {
   @Mock
   private SendClient clientMock;
   @Mock
-  private PdndApiClient pdndApiClient;
+  private PdndService pdndServiceMock;
   @Mock
   private OrganizationService organizationServiceMock;
 
@@ -32,12 +32,12 @@ class SendServiceTest {
 
   @BeforeEach
   void init() {
-    service = new SendServiceImpl(clientMock, pdndApiClient, organizationServiceMock);
+    service = new SendServiceImpl(clientMock, organizationServiceMock, pdndServiceMock);
   }
 
   @AfterEach
   void verifyNoMoreInteractions() {
-    Mockito.verifyNoMoreInteractions(clientMock, pdndApiClient, organizationServiceMock);
+    Mockito.verifyNoMoreInteractions(clientMock, organizationServiceMock, pdndServiceMock);
   }
 
   @Test
@@ -50,7 +50,7 @@ class SendServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
         .thenReturn(orgSendApiKey);
-    Mockito.when(pdndApiClient.getVoucherToken(accessToken)).thenReturn(voucherToken);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(accessToken)).thenReturn(voucherToken);
     Mockito.when(clientMock.preloadFiles(Mockito.same(request), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
@@ -71,7 +71,7 @@ class SendServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndApiClient.getVoucherToken(accessToken)).thenReturn(voucherToken);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(accessToken)).thenReturn(voucherToken);
     Mockito.when(clientMock.deliveryNotification(Mockito.same(request), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
@@ -92,7 +92,7 @@ class SendServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndApiClient.getVoucherToken(accessToken)).thenReturn(voucherToken);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(accessToken)).thenReturn(voucherToken);
     Mockito.when(clientMock.notificationStatus(Mockito.same(notificationRequestId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
@@ -114,7 +114,7 @@ class SendServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndApiClient.getVoucherToken(accessToken)).thenReturn(voucherToken);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(accessToken)).thenReturn(voucherToken);
     Mockito.when(clientMock.retrieveNotificationPrice(Mockito.same(paTaxId), Mockito.same(nav), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
