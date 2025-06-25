@@ -17,23 +17,23 @@ public class SendClient {
     this.apisHolder = apisHolder;
   }
 
-  public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, String apiKey) {
-    return apisHolder.getNewNotificationApiByApiKey(apiKey)
+  public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, String apiKey, String pdndAccessToken) {
+    return apisHolder.getNewNotificationApiByApiKey(apiKey, pdndAccessToken)
       .presignedUploadRequest(preLoadRequestDTO);
   }
 
-  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, String apiKey) {
-    return apisHolder.getNewNotificationApiByApiKey(apiKey)
+  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, String apiKey, String pdndAccessToken) {
+    return apisHolder.getNewNotificationApiByApiKey(apiKey, pdndAccessToken)
       .sendNewNotificationV24(newNotificationRequestV24DTO);
   }
 
-  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, String apiKey) {
-    return apisHolder.getSenderReadB2BApiByApiKey(apiKey)
+  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, String apiKey, String pdndAccessToken) {
+    return apisHolder.getSenderReadB2BApiByApiKey(apiKey, pdndAccessToken)
       .retrieveNotificationRequestStatusV24(notificationRequestId, null, null);
   }
 
-  public NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, String apiKey) {
-    return apisHolder.getNotificationPriceApi(apiKey).retrieveNotificationPriceV23(paTaxId, noticeCode);
+  public NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, String apiKey, String pdndAccessToken) {
+    return apisHolder.getNotificationPriceApi(apiKey, pdndAccessToken).retrieveNotificationPriceV23(paTaxId, noticeCode);
   }
 
 }
