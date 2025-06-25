@@ -709,7 +709,8 @@
           "province" : {
             "type" : "string"
           }
-        }
+        },
+        "required" : [ "address", "municipality" ]
       },
       "Attachment" : {
         "type" : "object",
@@ -735,8 +736,11 @@
           "paProtocolNumber" : {
             "type" : "string"
           },
-          "recipient" : {
-            "$ref" : "#/components/schemas/Recipient"
+          "recipients" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Recipient"
+            }
           },
           "documents" : {
             "type" : "array",
@@ -782,7 +786,7 @@
             "$ref" : "#/components/schemas/PagoPaIntModeEnum"
           }
         },
-        "required" : [ "organizationId", "paProtocolNumber" ]
+        "required" : [ "notificationFeePolicy", "organizationId", "paProtocolNumber", "physicalCommunicationType", "recipients" ]
       },
       "Document" : {
         "type" : "object",
@@ -817,7 +821,8 @@
           "attachment" : {
             "$ref" : "#/components/schemas/Attachment"
           }
-        }
+        },
+        "required" : [ "applyCost", "creditorTaxId", "noticeCode" ]
       },
       "PagoPaIntModeEnum" : {
         "type" : "string",

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
@@ -13,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-public class PuRecipientNoPIIDTO implements PIIDTO {
+public class PuRecipientNoPIIDTO implements Serializable, PIIDTO {
   private byte[] fiscalCodeHash;
   private List<PuPayment> puPayments;
 }
