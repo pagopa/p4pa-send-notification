@@ -83,6 +83,13 @@ public class SendNotification2NewNotificationRequestMapper {
         notificationRecipient.setPhysicalAddress(addressDTO);
         //end address domain
 
+        //digital address domain
+        NotificationDigitalAddressDTO digitalAddressDTO = new NotificationDigitalAddressDTO();
+        digitalAddressDTO.setAddress(puRecipient.getRecipient().getDigitalDomicile().getAddress());
+        digitalAddressDTO.setType(NotificationDigitalAddressDTO.TypeEnum.valueOf(puRecipient.getRecipient().getDigitalDomicile().getType().getValue()));
+        notificationRecipient.digitalDomicile(digitalAddressDTO);
+        //end digital address domain
+
         //payments domain to implements
         List<NotificationPaymentItemDTO> payments = puRecipient.getRecipient().getPayments().stream().map(payment -> {
           PagoPaPaymentDTO pagoPa = new PagoPaPaymentDTO();

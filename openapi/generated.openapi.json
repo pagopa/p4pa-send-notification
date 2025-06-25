@@ -784,9 +784,6 @@
           },
           "pagoPaIntMode" : {
             "$ref" : "#/components/schemas/PagoPaIntModeEnum"
-          },
-          "digitalDomicile" : {
-            "$ref" : "#/components/schemas/NotificationDigitalAddress"
           }
         },
         "required" : [ "notificationFeePolicy", "organizationId", "paProtocolNumber", "physicalCommunicationType", "recipients" ]

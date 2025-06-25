@@ -361,8 +361,6 @@ components:
         pagoPaIntMode:
           type: string
           enum: [ SYNC, ASYNC, NONE ]
-        digitalDomicile:
-          $ref: '#/components/schemas/NotificationDigitalAddress'
     Recipient:
       type: object
       required:
