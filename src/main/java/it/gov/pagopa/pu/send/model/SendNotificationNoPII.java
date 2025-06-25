@@ -30,6 +30,7 @@ public class SendNotificationNoPII implements Serializable, NoPIIEntity<SendNoti
   private String sendNotificationId;
   private Long organizationId;
   private String paProtocolNumber;
+  private List<PuRecipientNoPIIDTO> recipients;
   private List<DocumentDTO> documents;
   private NotificationStatus status;
   private String notificationRequestId;
@@ -47,5 +48,4 @@ public class SendNotificationNoPII implements Serializable, NoPIIEntity<SendNoti
   private OffsetDateTime notificationDate;
   @NotNull
   private Long personalDataId;
-  private List<PuRecipientNoPIIDTO> recipients;
 }
