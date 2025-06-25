@@ -125,7 +125,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
   }
 
   private void checkDocuments(SendNotification result) {
-    Assertions.assertEquals("attachment.pdf", result.getDocuments().getFirst().getFileName());
+    Assertions.assertEquals("attachment", result.getDocuments().getFirst().getFileName());
     Assertions.assertEquals("application/pdf", result.getDocuments().getFirst().getContentType());
     Assertions.assertEquals("sha256", result.getDocuments().getFirst().getDigest());
     Assertions.assertEquals("document.pdf", result.getDocuments().getLast().getFileName());

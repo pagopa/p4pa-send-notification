@@ -14,7 +14,7 @@ public class RecipientFaker {
     return Recipient.builder()
       .recipientType(Recipient.RecipientTypeEnum.fromValue("PF"))
       .taxId("BNRMHL75C06G702B")
-      .denomination("Michelangelo Buonarroti")
+      .denomination("ROSSI MARIO")
       .physicalAddress(buildPhysicalAddress())
       .digitalDomicile(buildDigitalAddress())
       .payments(List.of(buildPayment()))

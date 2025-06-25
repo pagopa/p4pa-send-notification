@@ -61,7 +61,7 @@ class SendNotification2NewNotificationRequestMapperTest {
   private static void checkRecipient(NewNotificationRequestV24DTO result) {
     NotificationRecipientV23DTO recipient = result.getRecipients().getFirst();
     assertEquals("BNRMHL75C06G702B", recipient.getTaxId());
-    assertEquals("Michelangelo Buonarroti", recipient.getDenomination());
+    assertEquals("ROSSI MARIO", recipient.getDenomination());
 
     NotificationPhysicalAddressDTO address = recipient.getPhysicalAddress();
     assertEquals("Via Larga 10", address.getAddress());
