@@ -4,13 +4,11 @@ import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.pdnd.PdndService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@Slf4j
 public class SendServiceImpl implements SendService {
 
   private final SendClient client;
@@ -45,8 +43,6 @@ public class SendServiceImpl implements SendService {
   }
 
   private String getApiKeyFromOrganization(Long organizationId, String accessToken) {
-    String apiKey = organizationService.getOrganizationApiKey(organizationId, accessToken);
-      log.info("ORGID {}, APIKEY {}", organizationId, apiKey);
-    return apiKey;
+    return organizationService.getOrganizationApiKey(organizationId, accessToken);
   }
 }
