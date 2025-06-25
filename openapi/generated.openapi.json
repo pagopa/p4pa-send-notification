@@ -784,6 +784,9 @@
           },
           "pagoPaIntMode" : {
             "$ref" : "#/components/schemas/PagoPaIntModeEnum"
+          },
+          "digitalDomicile" : {
+            "$ref" : "#/components/schemas/NotificationDigitalAddress"
           }
         },
         "required" : [ "notificationFeePolicy", "organizationId", "paProtocolNumber", "physicalCommunicationType", "recipients" ]
@@ -801,6 +804,21 @@
             "type" : "string"
           }
         }
+      },
+      "NotificationDigitalAddress" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "$ref" : "#/components/schemas/TypeEnum"
+          },
+          "address" : {
+            "type" : "string",
+            "maxLength" : 320,
+            "minLength" : 0,
+            "pattern" : "^(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\\[(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])$"
+          }
+        },
+        "required" : [ "address", "type" ]
       },
       "NotificationFeePolicyEnum" : {
         "type" : "string",
@@ -855,6 +873,9 @@
           "physicalAddress" : {
             "$ref" : "#/components/schemas/Address"
           },
+          "digitalDomicile" : {
+            "$ref" : "#/components/schemas/NotificationDigitalAddress"
+          },
           "payments" : {
             "type" : "array",
             "items" : {
@@ -867,6 +888,10 @@
       "RecipientTypeEnum" : {
         "type" : "string",
         "enum" : [ "PF", "PG" ]
+      },
+      "TypeEnum" : {
+        "type" : "string",
+        "enum" : [ "PEC" ]
       },
       "StartNotificationResponse" : {
         "type" : "object",

@@ -33,7 +33,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
 
     sendNotification.setPaProtocolNumber(request.getPaProtocolNumber());
 
-    if (request.getDocuments().isEmpty()) { //TODO può essere che non esiste
+    if (request.getDocuments().isEmpty()) {
       sendNotification.setStatus(NotificationStatus.SENDING);
     } else {
       sendNotification.setStatus(NotificationStatus.WAITING_FILE);
@@ -85,6 +85,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
           .taxId(r.getTaxId())
           .denomination(r.getDenomination())
           .physicalAddress(r.getPhysicalAddress())
+          .digitalDomicile(r.getDigitalDomicile())
           .build();
         return new PuRecipient(recipient, puPayments);
       }).toList();
