@@ -25,6 +25,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 
+import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocument;
+import static it.gov.pagopa.pu.send.util.faker.RecipientFaker.buildRecipient;
+
 @ExtendWith(MockitoExtension.class)
 class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
@@ -93,35 +96,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
   }
 
   private static CreateNotificationRequest buildRequest() {
-    Recipient recipient = new Recipient();
-    recipient.setRecipientType(RecipientTypeEnum.PF);
-    recipient.setTaxId("RSSMRA80L05F593A");
-    recipient.setDenomination("ROSSI MARIO");
-
-    Payment payment = new Payment();
-    PagoPa pagoPa = new PagoPa();
-    pagoPa.setCreditorTaxId("CREDITORTAXID");
-    pagoPa.setNoticeCode("NOTICECODE");
-    pagoPa.setApplyCost(true);
-    Attachment attachment = new Attachment();
-    attachment.setFileName("attachment.pdf");
-    attachment.setDigest("sha256");
-    attachment.setContentType("application/pdf");
-    pagoPa.setAttachment(attachment);
-    payment.setPagoPa(pagoPa);
-    recipient.setPayments(Collections.singletonList(payment));
-
-    Address address = new Address();
-    address.setAddress("Via Larga 10");
-    address.setZip("00186");
-    address.setMunicipality("Roma");
-    address.setProvince("RM");
-    recipient.setPhysicalAddress(address);
-
-    Document document = new Document();
-    document.setFileName("document.pdf");
-    document.setContentType("application/pdf");
-    document.setDigest("sha256");
+    Recipient recipient = buildRecipient();
+    Document document = buildDocument();
 
     CreateNotificationRequest request = new CreateNotificationRequest();
     request.setOrganizationId(1L);
