@@ -43,10 +43,10 @@ class PdndApiClientTest {
       .thenReturn(authData);
 
     // When
-    String result = pdndApiClient.getVoucherToken(accessToken);
+    PdndAuthData result = pdndApiClient.getVoucherToken(accessToken);
 
     // Then
-    assertSame(accessToken, result);
+    assertSame(accessToken, result.getAccessToken());
   }
 
   @Test
@@ -61,7 +61,7 @@ class PdndApiClientTest {
         HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
 
     // When
-    String result = pdndApiClient.getVoucherToken(accessToken);
+    PdndAuthData result = pdndApiClient.getVoucherToken(accessToken);
 
     // Then
     assertNull(result);
