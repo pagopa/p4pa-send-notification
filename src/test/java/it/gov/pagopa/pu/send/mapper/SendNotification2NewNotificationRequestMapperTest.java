@@ -44,7 +44,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertNotNull(result);
     assertEquals("12345", result.getIdempotenceToken());
     assertEquals("Prot_001", result.getPaProtocolNumber());
-    assertEquals("TEST notifica PU numero 12345", result.getSubject());
+    assertEquals("Notifica Piattaforma Unitaria", result.getSubject());
 
     checkRecipient(result);
     checkDocuments(result);
@@ -85,7 +85,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertNotNull(result);
     assertEquals("12345", result.getIdempotenceToken());
     assertEquals("Prot_001", result.getPaProtocolNumber());
-    assertEquals("TEST notifica PU numero 12345", result.getSubject());
+    assertEquals("Notifica Piattaforma Unitaria", result.getSubject());
 
     checkRecipient(result);
     checkDocuments(result);
@@ -121,7 +121,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertNotNull(result);
     assertEquals("12345", result.getIdempotenceToken());
     assertEquals("Prot_001", result.getPaProtocolNumber());
-    assertEquals("TEST notifica PU numero 12345", result.getSubject());
+    assertEquals("Notifica Piattaforma Unitaria", result.getSubject());
 
     checkRecipient(result);
     checkDocuments(result);
