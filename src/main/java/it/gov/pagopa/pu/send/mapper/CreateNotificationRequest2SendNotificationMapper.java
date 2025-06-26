@@ -94,7 +94,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
   private List<DocumentDTO> setDocuments(CreateNotificationRequest request) {
     List<DocumentDTO> documents = new ArrayList<>(request.getRecipients().stream()
       .flatMap(r -> r.getPayments().stream())
-      .filter(p -> p.getPagoPa() != null && p.getPagoPa().getAttachment() != null)
+      .filter(p -> p.getPagoPa().getAttachment() != null)
       .map(p -> p.getPagoPa().getAttachment())
       .map(attachment -> DocumentDTO.builder()
         .fileName(attachment.getFileName())

@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 
 import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocument;
@@ -37,17 +38,17 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
   private CreateNotificationRequest2SendNotificationMapper mapper;
 
   @BeforeEach
-  void init(){
+  void init() {
     mapper = new CreateNotificationRequest2SendNotificationMapper(debtPositionServiceMock);
   }
 
   @AfterEach
-  void verifyNoMoreInteractions(){
+  void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(debtPositionServiceMock);
   }
 
   @Test
-  void givenCreateNotificationRequestWhenMapToModelThenOk(){
+  void givenCreateNotificationRequestWhenMapToModelThenOk() {
     // Given
     CreateNotificationRequest request = buildRequest();
     String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
@@ -64,7 +65,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     SendNotification result = mapper.mapToModel(request, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId","organizationId","notificationRequestId","iun","notificationDate", "personalDataId", "noPII");
+    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -84,7 +85,46 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
   }
 
   @Test
-  void givenNoDebtPositionWhenThenThrow(){
+  void givenCreateNotificationRequestWithSomeNullValuesWhenMapToModelThenOk() {
+    // Given
+    CreateNotificationRequest request = buildRequest();
+    request.setDocuments(new ArrayList<>());
+    request.setAmount(null);
+    request.setPaFee(null);
+    request.setPaymentExpirationDate(null);
+    request.setVat(null);
+    request.setPagoPaIntMode(null);
+    request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().setAttachment(null);
+    String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
+
+    String accessToken = "ACCESSTOKEN";
+
+    DebtPosition debtPosition = new DebtPosition();
+    debtPosition.setDebtPositionId(3L);
+
+    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
+      .thenReturn(debtPosition);
+
+    // When
+    SendNotification result = mapper.mapToModel(request, accessToken);
+
+    // Then
+    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun",
+      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate", "pagoPaIntMode");
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
+    Assertions.assertEquals("ROSSI MARIO", result.getPuRecipients().getFirst().getRecipient().getDenomination());
+    checkPayments(debtPosition, result);
+    Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
+    Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
+    Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
+    Assertions.assertEquals("TAXID", result.getSenderTaxId());
+    Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
+  }
+
+  @Test
+  void givenNoDebtPositionWhenThenThrow() {
     String accessToken = "ACCESSTOKEN";
     CreateNotificationRequest request = buildRequest();
     String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();

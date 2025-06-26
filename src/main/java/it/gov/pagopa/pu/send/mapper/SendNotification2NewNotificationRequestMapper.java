@@ -84,10 +84,12 @@ public class SendNotification2NewNotificationRequestMapper {
         //end address domain
 
         //digital address domain
-        NotificationDigitalAddressDTO digitalAddressDTO = new NotificationDigitalAddressDTO();
-        digitalAddressDTO.setAddress(puRecipient.getRecipient().getDigitalDomicile().getAddress());
-        digitalAddressDTO.setType(NotificationDigitalAddressDTO.TypeEnum.valueOf(puRecipient.getRecipient().getDigitalDomicile().getType().getValue()));
-        notificationRecipient.digitalDomicile(digitalAddressDTO);
+        if (puRecipient.getRecipient().getDigitalDomicile() != null) {
+          NotificationDigitalAddressDTO digitalAddressDTO = new NotificationDigitalAddressDTO();
+          digitalAddressDTO.setAddress(puRecipient.getRecipient().getDigitalDomicile().getAddress());
+          digitalAddressDTO.setType(NotificationDigitalAddressDTO.TypeEnum.valueOf(puRecipient.getRecipient().getDigitalDomicile().getType().getValue()));
+          notificationRecipient.digitalDomicile(digitalAddressDTO);
+        }
         //end digital address domain
 
         //payments domain to implements

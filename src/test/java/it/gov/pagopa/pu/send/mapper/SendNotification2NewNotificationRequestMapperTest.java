@@ -36,7 +36,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     NewNotificationRequestV24DTO result = mapper.apply(noPII);
 
     //then
-    TestUtils.checkNotNullFields(result,"_abstract","cancelledIun","group","amount","paymentExpirationDate","pagoPaIntMode");
+    TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate", "pagoPaIntMode");
 
     assertNotNull(result);
     assertEquals("12345", result.getIdempotenceToken());
@@ -56,6 +56,41 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals(22, result.getVat());
     assertEquals("2025-12-31", result.getPaymentExpirationDate());
     assertEquals(NewNotificationRequestV24DTO.PagoPaIntModeEnum.NONE, result.getPagoPaIntMode());
+  }
+
+  @Test
+  void givenSendNotificationWithSomeNullValueWhenMapThenOk() {
+    //given
+    SendNotification sendNotification = buildSendNotification();
+    sendNotification.setVat(0);
+    sendNotification.setPaFee(0);
+    sendNotification.setAmount(0);
+    sendNotification.setPaymentExpirationDate(null);
+    sendNotification.setPagoPaIntMode(null);
+    sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().setAttachment(null);
+    SendNotificationNoPII noPII = new SendNotificationNoPII();
+
+    Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
+
+    //when
+    NewNotificationRequestV24DTO result = mapper.apply(noPII);
+
+    //then
+    TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate", "pagoPaIntMode", "paFee", "vat");
+
+    assertNotNull(result);
+    assertEquals("12345", result.getIdempotenceToken());
+    assertEquals("Prot_001", result.getPaProtocolNumber());
+    assertEquals("TEST notifica PU numero 12345", result.getSubject());
+
+    checkRecipient(result);
+    checkDocuments(result);
+
+    assertEquals(NotificationFeePolicyDTO.DELIVERY_MODE, result.getNotificationFeePolicy());
+    assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER, result.getPhysicalCommunicationType());
+    assertEquals("Ente Intermediario 2", result.getSenderDenomination());
+    assertEquals("00000000018", result.getSenderTaxId());
+    assertEquals("010101P", result.getTaxonomyCode());
   }
 
   private static void checkRecipient(NewNotificationRequestV24DTO result) {
