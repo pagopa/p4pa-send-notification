@@ -127,7 +127,6 @@ public class SendNotification2NewNotificationRequestMapper {
     Set<String> attachmentFileNames =
       sendNotification.getPuRecipients().stream()
         .flatMap(r -> r.getPuPayments().stream())
-        .filter(puPayment -> puPayment.getPayment().getPagoPa() != null)
         .map(payment -> payment.getPayment().getPagoPa().getAttachment())
         .filter(Objects::nonNull)
         .map(Attachment::getFileName)
