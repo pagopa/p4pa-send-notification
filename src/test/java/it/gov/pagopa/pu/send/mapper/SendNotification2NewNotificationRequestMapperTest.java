@@ -2,15 +2,7 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PhysicalCommunicationTypeEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO.RecipientTypeEnum;
-import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.SendNotification;
-import it.gov.pagopa.pu.send.dto.generated.Address;
-import it.gov.pagopa.pu.send.dto.generated.Attachment;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
-import it.gov.pagopa.pu.send.dto.generated.PagoPa;
-import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.Test;
@@ -20,12 +12,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocumentAttachment;
+import static it.gov.pagopa.pu.send.util.faker.SendNotificationFaker.buildSendNotification;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotification2NewNotificationRequestMapperTest {
@@ -36,85 +27,24 @@ class SendNotification2NewNotificationRequestMapperTest {
   @InjectMocks
   private SendNotification2NewNotificationRequestMapper mapper;
 
-
   @Test
   void givenSendNotificationWhenMapThenOk() {
-    // Given
-    SendNotification sendNotification = new SendNotification();
-    sendNotification.setSendNotificationId("12345");
-    sendNotification.setPaProtocolNumber("Prot_001");
-    sendNotification.setSubjectType("PF");
-    sendNotification.setFiscalCode("BNRMHL75C06G702B");
-    sendNotification.setDenomination("Michelangelo Buonarroti");
-
-    Address address = new Address();
-    address.setAddress("Via Larga 10");
-    address.setZip("00186");
-    address.setMunicipality("Roma");
-    address.setProvince("RM");
-    sendNotification.setAddress(address);
-
-    //Payments
-    Payment payment = new Payment();
-    PagoPa pagoPa = new PagoPa();
-    pagoPa.setCreditorTaxId("CREDITORTAXID");
-    pagoPa.setNoticeCode("NOTICECODE");
-    pagoPa.setApplyCost(true);
-    Attachment attachment = new Attachment();
-    attachment.setContentType("application/pdf");
-    attachment.setDigest("sha256");
-    attachment.setFileName("attachment");
-    pagoPa.setAttachment(attachment);
-    payment.setPagoPa(pagoPa);
-
-    DocumentDTO documentAttachment = new DocumentDTO();
-    documentAttachment.setFileName(attachment.getFileName());
-    documentAttachment.setDigest(attachment.getDigest());
-    documentAttachment.setContentType(attachment.getContentType());
-    documentAttachment.setKey("docKey");
-    documentAttachment.setVersionId("12345678");
-
-    sendNotification.setPayments(Collections.singletonList(new PuPayment(1L, payment)));
-    // end payments
-
-
-    DocumentDTO document = new DocumentDTO();
-    document.setFileName("document");
-    document.setDigest("sha256");
-    document.setContentType("application/pdf");
-    document.setKey("docKey");
-    document.setVersionId("12345678");
-
-    List<DocumentDTO> documents = new ArrayList<>();
-    documents.add(documentAttachment);
-    documents.add(document);
-    sendNotification.setDocuments(documents);
-
-    sendNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.DELIVERY_MODE.getValue());
-    sendNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue());
-    sendNotification.setSenderDenomination("Ente Intermediario 2");
-    sendNotification.setSenderTaxId("00000000018");
-    sendNotification.setAmount(100);
-    sendNotification.setTaxonomyCode("010101P");
-    sendNotification.setPaFee(100);
-    sendNotification.setVat(22);
-    sendNotification.setPaymentExpirationDate("2025-12-31");
-    sendNotification.setPagoPaIntMode(PagoPaIntModeEnum.NONE.getValue());
-
+    //given
+    SendNotification sendNotification = buildSendNotification();
     SendNotificationNoPII noPII = new SendNotificationNoPII();
 
     Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
 
-    // When
+    //when
     NewNotificationRequestV24DTO result = mapper.apply(noPII);
 
-    // Then
-    TestUtils.checkNotNullFields(result,"_abstract","cancelledIun","group","amount","paymentExpirationDate","pagoPaIntMode");
+    //then
+    TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate", "pagoPaIntMode");
 
     assertNotNull(result);
     assertEquals("12345", result.getIdempotenceToken());
     assertEquals("Prot_001", result.getPaProtocolNumber());
-    assertEquals("TEST notifica PU numero 12345", result.getSubject());
+    assertEquals("Notifica Piattaforma Unitaria", result.getSubject());
 
     checkRecipient(result);
     checkDocuments(result);
@@ -131,17 +61,107 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals(NewNotificationRequestV24DTO.PagoPaIntModeEnum.NONE, result.getPagoPaIntMode());
   }
 
+  @Test
+  void givenSendNotificationWithSomeNullValueWhenMapThenOk() {
+    //given
+    SendNotification sendNotification = buildSendNotification();
+    sendNotification.setVat(0);
+    sendNotification.setPaFee(0);
+    sendNotification.setAmount(0);
+    sendNotification.setPaymentExpirationDate(null);
+    sendNotification.setPagoPaIntMode(null);
+    sendNotification.getPuRecipients().getFirst().getRecipient().setDigitalDomicile(null);
+    sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().setAttachment(null);
+    SendNotificationNoPII noPII = new SendNotificationNoPII();
+
+    Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
+
+    //when
+    NewNotificationRequestV24DTO result = mapper.apply(noPII);
+
+    //then
+    TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate", "pagoPaIntMode", "paFee", "vat");
+
+    assertNotNull(result);
+    assertEquals("12345", result.getIdempotenceToken());
+    assertEquals("Prot_001", result.getPaProtocolNumber());
+    assertEquals("Notifica Piattaforma Unitaria", result.getSubject());
+
+    checkRecipient(result);
+    checkDocuments(result);
+
+    assertEquals(NotificationFeePolicyDTO.DELIVERY_MODE, result.getNotificationFeePolicy());
+    assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER, result.getPhysicalCommunicationType());
+    assertEquals("Ente Intermediario 2", result.getSenderDenomination());
+    assertEquals("00000000018", result.getSenderTaxId());
+    assertEquals("010101P", result.getTaxonomyCode());
+  }
+
+  @Test
+  void givenSendNotificationWithDocDiffersValueWhenMapThenOk() {
+    //given
+    SendNotification sendNotification = buildSendNotification();
+    sendNotification.setVat(0);
+    sendNotification.setPaFee(0);
+    sendNotification.setAmount(0);
+    sendNotification.setPaymentExpirationDate(null);
+    sendNotification.setPagoPaIntMode(null);
+    sendNotification.getPuRecipients().getFirst().getRecipient().setDigitalDomicile(null);
+    sendNotification.setDocuments(List.of(buildDocumentAttachment()));
+    SendNotificationNoPII noPII = new SendNotificationNoPII();
+
+    Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
+
+    //when
+    NewNotificationRequestV24DTO result = mapper.apply(noPII);
+
+    //then
+    TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate", "pagoPaIntMode", "paFee", "vat");
+
+    assertNotNull(result);
+    assertEquals("12345", result.getIdempotenceToken());
+    assertEquals("Prot_001", result.getPaProtocolNumber());
+    assertEquals("Notifica Piattaforma Unitaria", result.getSubject());
+
+    checkRecipient(result);
+    checkDocuments(result);
+
+    assertEquals(NotificationFeePolicyDTO.DELIVERY_MODE, result.getNotificationFeePolicy());
+    assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER, result.getPhysicalCommunicationType());
+    assertEquals("Ente Intermediario 2", result.getSenderDenomination());
+    assertEquals("00000000018", result.getSenderTaxId());
+    assertEquals("010101P", result.getTaxonomyCode());
+  }
+
   private static void checkRecipient(NewNotificationRequestV24DTO result) {
     NotificationRecipientV23DTO recipient = result.getRecipients().getFirst();
-    assertEquals(RecipientTypeEnum.PF, recipient.getRecipientType());
     assertEquals("BNRMHL75C06G702B", recipient.getTaxId());
-    assertEquals("Michelangelo Buonarroti", recipient.getDenomination());
+    assertEquals("ROSSI MARIO", recipient.getDenomination());
 
     NotificationPhysicalAddressDTO address = recipient.getPhysicalAddress();
     assertEquals("Via Larga 10", address.getAddress());
     assertEquals("00186", address.getZip());
     assertEquals("Roma", address.getMunicipality());
     assertEquals("RM", address.getProvince());
+
+    NotificationDigitalAddressDTO digital = recipient.getDigitalDomicile();
+    if (digital != null) {
+      assertEquals("account@domain.it", digital.getAddress());
+      assertEquals(NotificationDigitalAddressDTO.TypeEnum.PEC, digital.getType());
+    }
+
+    NotificationPaymentItemDTO payment = recipient.getPayments().getFirst();
+    assertEquals("CREDITORTAXID", payment.getPagoPa().getCreditorTaxId());
+    assertEquals("NOTICECODE", payment.getPagoPa().getNoticeCode());
+    assertTrue(payment.getPagoPa().getApplyCost());
+
+    if (payment.getPagoPa().getAttachment() != null) {
+      assertNotNull(payment.getPagoPa().getAttachment());
+      assertEquals("sha256", payment.getPagoPa().getAttachment().getDigests().getSha256());
+      assertEquals("application/pdf", payment.getPagoPa().getAttachment().getContentType());
+      assertEquals("docKey", payment.getPagoPa().getAttachment().getRef().getKey());
+      assertEquals("12345678", payment.getPagoPa().getAttachment().getRef().getVersionToken());
+    }
   }
 
   private static void checkDocuments(NewNotificationRequestV24DTO result) {

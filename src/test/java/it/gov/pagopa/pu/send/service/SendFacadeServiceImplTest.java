@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
@@ -25,13 +26,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -212,7 +211,7 @@ class SendFacadeServiceImplTest {
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
 
-    Assertions.assertNotNull(result);
+    assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
@@ -223,81 +222,57 @@ class SendFacadeServiceImplTest {
     String accessToken = "ACCESSTOKEN";
     String sendNotificationId = "SENDNOTIFICATIONID";
     Long orgId = 1L;
-    String paxId = "PAXID";
+    String creditorTaxId = "PAXID";
     String noticeCode = "NOTICECODE";
 
     NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
-    response.setNotificationViewDate(new Date());
+    OffsetDateTime viewDate = OffsetDateTime.now().minusDays(1);
+    response.setNotificationViewDate(Date.from(viewDate.toInstant()));
+
+    Payment payment = new Payment(new PagoPa().creditorTaxId(creditorTaxId).noticeCode(noticeCode));
+    PuPayment puPayment = new PuPayment(1L, payment);
+    PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
-      .payments(Collections.singletonList(new PuPayment(1L, new Payment(
-        new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId))))
-      )
+      .notificationDate(null)
+      .recipients(List.of(recipient))
       .build();
 
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
-    notificationDTO.setNotificationDate(OffsetDateTime.now());
+    notificationDTO.setNotificationDate(viewDate);
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendServiceMock.retrieveNotificationPrice(paxId, noticeCode, orgId, accessToken)).thenReturn(response);
-    Mockito.when(sendNotificationDTOMapperMock.apply(notification)).thenReturn(notificationDTO);
+    Mockito.when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, noticeCode, orgId, accessToken))
+      .thenReturn(response);
+    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.argThat(n ->
+      n.getNotificationDate() != null))).thenReturn(notificationDTO);
 
     SendNotificationDTO result = sendService.retrieveNotificationDate(sendNotificationId, accessToken);
 
-    Assertions.assertNotNull(result);
-
-    Mockito.verify(sendNotificationNoPIIRepositoryMock)
-      .updateNotificationDate(sendNotificationId, notification.getNotificationDate());
+    assertNotNull(result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationDate(sendNotificationId, notification.getNotificationDate());
+    Mockito.verify(sendNotificationDTOMapperMock).apply(Mockito.any());
   }
 
   @Test
-  void givenValidNotificationWhenRetrieveNotificationDateNoContentThenNull() {
+  void givenValidNotificationWhenRetrieveNotificationDateAlreadyExistsThenVerifyNoCall() {
     String accessToken = "ACCESSTOKEN";
     String sendNotificationId = "SENDNOTIFICATIONID";
     Long orgId = 1L;
-    String paxId = "PAXID";
-    String noticeCode = "NOTICECODE";
 
-    NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
-
+    OffsetDateTime existingDate = OffsetDateTime.now().minusDays(2);
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
-      .payments(Collections.singletonList(new PuPayment(1L, new Payment(
-        new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId))))
-      )
-      .build();
-
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
-      .thenReturn(Optional.of(notification));
-    Mockito.when(sendServiceMock.retrieveNotificationPrice(paxId, noticeCode, orgId, accessToken)).thenReturn(response);
-
-    SendNotificationDTO result = sendService.retrieveNotificationDate(sendNotificationId, accessToken);
-
-    Assertions.assertNull(result);
-  }
-
-  @Test
-  void givenValidNotificationWhenRetrieveNotificationDateAlreadyExistsThenVerify() {
-    String accessToken = "ACCESSTOKEN";
-    String sendNotificationId = "SENDNOTIFICATIONID";
-    Long orgId = 1L;
-    String paxId = "PAXID";
-    String noticeCode = "NOTICECODE";
-
-    SendNotificationNoPII notification = SendNotificationNoPII.builder()
-      .sendNotificationId(sendNotificationId)
-      .organizationId(orgId)
-      .payments(Collections.singletonList(new PuPayment(1L, new Payment(
-        new PagoPa().noticeCode(noticeCode).creditorTaxId(paxId)))))
-      .notificationDate(OffsetDateTime.now())
+      .notificationDate(existingDate)
+      .recipients(List.of())
       .build();
 
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
-    notificationDTO.setNotificationDate(OffsetDateTime.now());
+    notificationDTO.setNotificationDate(existingDate);
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
@@ -305,24 +280,27 @@ class SendFacadeServiceImplTest {
 
     SendNotificationDTO result = sendService.retrieveNotificationDate(sendNotificationId, accessToken);
 
-    Assertions.assertNotNull(result);
+    assertNotNull(result);
+    assertEquals(existingDate, result.getNotificationDate());
   }
 
   @Test
   void givenValidOrganizationIdAndNavWhenRetrieveNotificationPriceThenSuccess() {
     String accessToken = "ACCESSTOKEN";
-    // Given
     Long organizationId = 1L;
     String sendNotificationId = "SENDNOTIFICATIONID";
     String nav = "321";
     String creditorTaxId = "123456789";
 
+    Payment payment = new Payment(new PagoPa().noticeCode(nav).creditorTaxId(creditorTaxId));
+    PuPayment puPayment = new PuPayment(1L, payment);
+    PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
+
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(organizationId)
-      .payments(Collections.singletonList(new PuPayment(1L, new Payment(
-        new PagoPa().noticeCode(nav).creditorTaxId(creditorTaxId)))))
       .status(NotificationStatus.ACCEPTED)
+      .recipients(List.of(recipient))
       .build();
 
     NotificationPriceResponseV23DTO expectedResponse = new NotificationPriceResponseV23DTO();
@@ -332,11 +310,8 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, nav, organizationId, accessToken))
       .thenReturn(expectedResponse);
 
-    // When
     NotificationPriceResponseV23DTO result = sendService.retrieveNotificationPrice(organizationId, nav, accessToken);
 
-    // Then
-    Assertions.assertNotNull(result);
     assertEquals(expectedResponse, result);
     Mockito.verify(sendNotificationNoPIIRepositoryMock).findByOrganizationIdAndNav(organizationId, nav);
     Mockito.verify(sendServiceMock).retrieveNotificationPrice(creditorTaxId, nav, organizationId, accessToken);

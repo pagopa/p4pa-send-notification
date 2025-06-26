@@ -163,7 +163,8 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
     "generateConstructorWithAllArgs" to "true",
     "generatedConstructorWithRequiredArgs" to "true",
     "additionalModelTypeAnnotations" to "@lombok.experimental.SuperBuilder(toBuilder = true)",
-    "serializationLibrary" to "jackson"
+    "serializationLibrary" to "jackson",
+    "serializableModel" to "true"
   ))
 }
 

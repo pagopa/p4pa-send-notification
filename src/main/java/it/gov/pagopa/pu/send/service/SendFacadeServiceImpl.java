@@ -111,7 +111,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if(notification.getNotificationDate()!=null)
       return sendNotificationDTOMapper.apply(notification);
 
-    PagoPa payment = notification.getPayments().getFirst().getPayment().getPagoPa();
+    PagoPa payment = notification.getRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa();
     NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
 
     if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {
@@ -153,7 +153,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
-    Payment payment = notification.getPayments().stream()
+    Payment payment = notification.getRecipients().getFirst().getPuPayments().stream()
       .map(PuPayment::getPayment)
       .filter(pagoPa -> nav.equals(pagoPa.getPagoPa().getNoticeCode()))
       .findFirst()

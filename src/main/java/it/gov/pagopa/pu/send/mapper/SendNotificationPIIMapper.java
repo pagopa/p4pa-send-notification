@@ -2,9 +2,11 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.citizen.service.PersonalDataService;
+import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,10 +28,6 @@ public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, S
     noPII.setSendNotificationId(fullDTO.getSendNotificationId());
     noPII.setOrganizationId(fullDTO.getOrganizationId());
     noPII.setPaProtocolNumber(fullDTO.getPaProtocolNumber());
-    noPII.setSubjectType(fullDTO.getSubjectType());
-    noPII.setFiscalCodeHash(dataCipherService.hash(fullDTO.getFiscalCode()));
-    noPII.setDenomination(fullDTO.getDenomination());
-    noPII.setPayments(fullDTO.getPayments());
     noPII.setDocuments(fullDTO.getDocuments());
     noPII.setStatus(fullDTO.getStatus());
     noPII.setNotificationRequestId(fullDTO.getNotificationRequestId());
@@ -45,6 +43,9 @@ public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, S
     noPII.setVat(fullDTO.getVat());
     noPII.setPagoPaIntMode(fullDTO.getPagoPaIntMode());
     noPII.setNotificationDate(fullDTO.getNotificationDate());
+    List<PuRecipientNoPIIDTO> recipients = fullDTO.getPuRecipients().stream().map(
+      puRecipient -> new PuRecipientNoPIIDTO(dataCipherService.hash(puRecipient.getRecipient().getTaxId()), puRecipient.getPuPayments())).toList();
+    noPII.setRecipients(recipients);
 
     return noPII;
   }
@@ -52,8 +53,7 @@ public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, S
   @Override
   protected SendNotificationPIIDTO extractPiiDto(SendNotification fullDTO) {
     SendNotificationPIIDTO piidto = new SendNotificationPIIDTO();
-    piidto.setAddress(fullDTO.getAddress());
-    piidto.setFiscalCode(fullDTO.getFiscalCode());
+    piidto.setPuRecipients(fullDTO.getPuRecipients());
     return piidto;
   }
 
@@ -65,11 +65,7 @@ public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, S
     sendNotification.setSendNotificationId(noPii.getSendNotificationId());
     sendNotification.setOrganizationId(noPii.getOrganizationId());
     sendNotification.setPaProtocolNumber(noPii.getPaProtocolNumber());
-    sendNotification.setSubjectType(noPii.getSubjectType());
-    sendNotification.setFiscalCode(pii.getFiscalCode());
-    sendNotification.setAddress(pii.getAddress());
-    sendNotification.setDenomination(noPii.getDenomination());
-    sendNotification.setPayments(noPii.getPayments());
+    sendNotification.setPuRecipients(pii.getPuRecipients());
     sendNotification.setDocuments(noPii.getDocuments());
     sendNotification.setStatus(noPii.getStatus());
     sendNotification.setNotificationRequestId(noPii.getNotificationRequestId());

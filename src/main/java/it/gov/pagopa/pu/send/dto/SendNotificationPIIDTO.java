@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.dto;
 
-import it.gov.pagopa.pu.send.dto.generated.Address;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SendNotificationPIIDTO implements PIIDTO {
-  private String fiscalCode;
-  private Address address;
+  private List<PuRecipient> puRecipients;
 }
