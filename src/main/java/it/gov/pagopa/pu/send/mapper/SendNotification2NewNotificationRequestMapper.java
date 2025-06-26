@@ -93,15 +93,15 @@ public class SendNotification2NewNotificationRequestMapper {
         //end digital address domain
 
         //payments domain to implements
-        List<NotificationPaymentItemDTO> payments = puRecipient.getRecipient().getPayments().stream().map(payment -> {
+        List<NotificationPaymentItemDTO> payments = puRecipient.getPuPayments().stream().map(puPayment -> {
           PagoPaPaymentDTO pagoPa = new PagoPaPaymentDTO();
-          pagoPa.setCreditorTaxId(payment.getPagoPa().getCreditorTaxId());
-          pagoPa.setNoticeCode(payment.getPagoPa().getNoticeCode());
-          pagoPa.setApplyCost(payment.getPagoPa().getApplyCost());
+          pagoPa.setCreditorTaxId(puPayment.getPayment().getPagoPa().getCreditorTaxId());
+          pagoPa.setNoticeCode(puPayment.getPayment().getPagoPa().getNoticeCode());
+          pagoPa.setApplyCost(puPayment.getPayment().getPagoPa().getApplyCost());
 
           Optional<NotificationPaymentAttachmentDTO> attachment = sendNotification.getDocuments().stream()
-            .filter(doc -> payment.getPagoPa().getAttachment() != null
-              && doc.getFileName().equals(payment.getPagoPa().getAttachment().getFileName()))
+            .filter(doc -> puPayment.getPayment().getPagoPa().getAttachment() != null
+              && doc.getFileName().equals(puPayment.getPayment().getPagoPa().getAttachment().getFileName()))
             .findFirst()
             .map(doc -> {
               NotificationPaymentAttachmentDTO attachmentDTO = new NotificationPaymentAttachmentDTO();
