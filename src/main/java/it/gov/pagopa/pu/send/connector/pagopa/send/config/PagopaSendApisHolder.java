@@ -55,9 +55,9 @@ public class PagopaSendApisHolder {
     ApiClient apiClient = new ApiClient(restTemplate);
     apiClient.setBasePath(clientConfig.getBaseUrl());
     apiClient.setApiKey(apiKey);
-    if (StringUtils.isNotEmpty(pdndAccessToken)) {
-      apiClient.setBearerToken(pdndAccessToken);
-    }
+//    if (StringUtils.isNotEmpty(pdndAccessToken)) {
+//      apiClient.setBearerToken(pdndAccessToken);
+//    }
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
     return apiClient;
