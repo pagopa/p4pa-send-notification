@@ -20,6 +20,8 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
 
   private PagopaSendApisHolder apisHolder;
 
+  private final String voucherToken = "VOUCHERTOKEN";
+
   @BeforeEach
   void setUp() {
     Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
@@ -40,7 +42,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
   @Test
   void whenGetNewNotificationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      apiKey -> apisHolder.getNewNotificationApiByApiKey(apiKey)
+      apiKey -> apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken)
         .sendNewNotificationV24(new NewNotificationRequestV24DTO()),
       new ParameterizedTypeReference<>() {},
       () -> {
@@ -52,7 +54,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
   @Test
   void whenGetSenderReadB2BApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      apiKey -> apisHolder.getSenderReadB2BApiByApiKey(apiKey)
+      apiKey -> apisHolder.getSenderReadB2BApiByApiKey(apiKey, voucherToken)
         .retrieveNotificationRequestStatusV24("REQUESTID",null, null),
       new ParameterizedTypeReference<>() {},
       () -> {},
@@ -63,7 +65,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
   @Test
   void whenGetNotificationPriceApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      apiKey -> apisHolder.getNotificationPriceApi(apiKey)
+      apiKey -> apisHolder.getNotificationPriceApi(apiKey, voucherToken)
         .retrieveNotificationPriceV23("PATAXID","NOTICECODE"),
       new ParameterizedTypeReference<>() {},
       () -> {},

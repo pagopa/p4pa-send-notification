@@ -23,16 +23,17 @@ public class SendNotification2SendNotificationDTOMapper {
     return notificationDTO;
   }
 
-  private static List<SendNotificationPaymentsDTO> buildPayments(
-    SendNotificationNoPII sendNotificationNoPII) {
-    return sendNotificationNoPII.getPayments().stream()
+  private static List<SendNotificationPaymentsDTO> buildPayments(SendNotificationNoPII sendNotificationNoPII) {
+    return sendNotificationNoPII.getRecipients().stream()
+      .flatMap(recipient -> recipient.getPuPayments().stream())
       .collect(Collectors.groupingBy(PuPayment::getDebtPositionId))
       .entrySet().stream()
-      .map(e -> new SendNotificationPaymentsDTO(
-          e.getKey(),
-          e.getValue().stream().map(p -> p.getPayment().getPagoPa().getNoticeCode()).toList()
-        )
-      ).toList();
+      .map(entry -> new SendNotificationPaymentsDTO(
+        entry.getKey(),
+        entry.getValue().stream()
+          .map(p -> p.getPayment().getPagoPa().getNoticeCode())
+          .toList()
+      ))
+      .toList();
   }
-
 }

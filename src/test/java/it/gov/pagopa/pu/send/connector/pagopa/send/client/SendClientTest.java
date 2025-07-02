@@ -32,6 +32,7 @@ class SendClientTest {
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
+  private final String voucherToken = "voucherToken";
 
   @BeforeEach
   void setUp() {
@@ -59,13 +60,13 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
+    Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken))
       .thenReturn(newNotificationApiMock);
     Mockito.when(newNotificationApiMock.presignedUploadRequest(requestList))
       .thenReturn(responseList);
 
     // When
-    List<PreLoadResponseDTO> result = sendClient.preloadFiles(requestList, apiKey);
+    List<PreLoadResponseDTO> result = sendClient.preloadFiles(requestList, apiKey, voucherToken);
 
     // Then
     assertSame(responseList, result);
@@ -77,13 +78,13 @@ class SendClientTest {
     NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
 
-    Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey))
+    Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken))
       .thenReturn(newNotificationApiMock);
     Mockito.when(newNotificationApiMock.sendNewNotificationV24(request))
       .thenReturn(response);
 
     // When
-    NewNotificationResponseDTO result = sendClient.deliveryNotification(request, apiKey);
+    NewNotificationResponseDTO result = sendClient.deliveryNotification(request, apiKey, voucherToken);
 
     // Then
     assertSame(response, result);
@@ -95,13 +96,13 @@ class SendClientTest {
     String notificationRequestId = "REQUESTID";
     NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
 
-    Mockito.when(apisHolder.getSenderReadB2BApiByApiKey(apiKey))
+    Mockito.when(apisHolder.getSenderReadB2BApiByApiKey(apiKey, voucherToken))
       .thenReturn(senderReadB2BApiMock);
     Mockito.when(senderReadB2BApiMock.retrieveNotificationRequestStatusV24(notificationRequestId, null, null))
       .thenReturn(response);
 
     // When
-    NewNotificationRequestStatusResponseV24DTO result = sendClient.notificationStatus(notificationRequestId, apiKey);
+    NewNotificationRequestStatusResponseV24DTO result = sendClient.notificationStatus(notificationRequestId, apiKey, voucherToken);
 
     // Then
     assertSame(response, result);
@@ -114,12 +115,12 @@ class SendClientTest {
 
     NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
 
-    Mockito.when(apisHolder.getNotificationPriceApi(apiKey))
+    Mockito.when(apisHolder.getNotificationPriceApi(apiKey, voucherToken))
       .thenReturn(notificationPriceApiMock);
     Mockito.when(notificationPriceApiMock.retrieveNotificationPriceV23(paTaxId, noticeCode))
       .thenReturn(response);
 
-    NotificationPriceResponseV23DTO result = sendClient.retrieveNotificationPrice(paTaxId, noticeCode, apiKey);
+    NotificationPriceResponseV23DTO result = sendClient.retrieveNotificationPrice(paTaxId, noticeCode, apiKey, voucherToken);
 
     assertSame(response, result);
   }

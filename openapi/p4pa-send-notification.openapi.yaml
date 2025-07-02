@@ -317,14 +317,18 @@ components:
         - organizationId
         - paProtocolNumber
         - recipients
+        - notificationFeePolicy
+        - physicalCommunicationType
       properties:
         organizationId:
           type: integer
           format: int64
         paProtocolNumber:
           type: string
-        recipient:
-          $ref: '#/components/schemas/Recipient'
+        recipients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recipient'
         documents:
           type: array
           items:
@@ -374,12 +378,17 @@ components:
           type: string
         physicalAddress:
           $ref: '#/components/schemas/Address'
+        digitalDomicile:
+          $ref: '#/components/schemas/NotificationDigitalAddress'
         payments:
           type: array
           items:
             $ref: '#/components/schemas/Payment'
     Address:
       type: object
+      required:
+        - address
+        - municipality
       properties:
         address:
           type: string
@@ -391,11 +400,17 @@ components:
           type: string
     Payment:
       type: object
+      required:
+        - pagoPa
       properties:
         pagoPa:
           $ref: '#/components/schemas/PagoPa'
     PagoPa:
       type: object
+      required:
+        - noticeCode
+        - creditorTaxId
+        - applyCost
       properties:
         noticeCode:
           type: string
@@ -505,3 +520,18 @@ components:
             - SEND_NOTIFICATION_ALREADY_PROCESSED
         message:
           type: string
+    NotificationDigitalAddress:
+      required:
+        - address
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - PEC
+        address:
+          type: string
+          pattern: >-
+            ^(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$
+          maxLength: 320

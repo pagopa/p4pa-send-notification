@@ -16,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class SendNotificationControllerTest {
 
@@ -125,6 +127,40 @@ class SendNotificationControllerTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertSame(expectedResult, response.getBody());
+  }
+
+  @Test
+  void givenNotificationRequestWithRecipientsAndPaymentsThenLogNoticeCodes() {
+    // Given
+    PagoPa pagoPa = new PagoPa();
+    pagoPa.setNoticeCode("NOTICE123");
+
+    Payment payment = new Payment();
+    payment.setPagoPa(pagoPa);
+
+    Recipient recipient = new Recipient();
+    recipient.setPayments(List.of(payment));
+
+    CreateNotificationRequest request = CreateNotificationRequest.builder()
+      .organizationId(123L)
+      .recipients(List.of(recipient))
+      .build();
+
+    CreateNotificationResponse expectedResponse = CreateNotificationResponse.builder()
+      .sendNotificationId("SENDID")
+      .preloadUrl("url")
+      .status(NotificationStatus.WAITING_FILE.name())
+      .build();
+
+    Mockito.when(sendNotificationServiceMock.createSendNotification(request, accessToken)).thenReturn(expectedResponse);
+
+    // When
+    ResponseEntity<CreateNotificationResponse> response = sendNotificationController.createSendNotification(request);
+
+    // Then
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResponse, response.getBody());
   }
 
 }
