@@ -78,9 +78,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.REGISTERED, notification.getStatus());
-    for(DocumentDTO doc : notification.getDocuments()){
+    for (DocumentDTO doc : notification.getDocuments()) {
       Optional<String> versionId = Optional.empty();
-      if(!doc.getStatus().equals(FileStatus.UPLOADED))
+      if (!doc.getStatus().equals(FileStatus.UPLOADED))
         versionId = uploadService.uploadFile(notification.getOrganizationId(), sendNotificationId, doc);
       if (versionId.isPresent()) {
         sendNotificationNoPIIRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.UPLOADED);
@@ -98,7 +98,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.UPLOADED, notification.getStatus());
     NewNotificationResponseDTO responseDTO = sendService.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId(), accessToken);
-    if (responseDTO!=null){
+    if (responseDTO != null) {
       sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
       sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
     }
@@ -108,20 +108,20 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   @Override
   public SendNotificationDTO retrieveNotificationDate(String sendNotificationId, String accessToken) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
-    if(notification.getNotificationDate()!=null)
-      return sendNotificationDTOMapper.apply(notification);
 
-    PagoPa payment = notification.getRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa();
-    NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
+    notification.getRecipients().forEach(puRecipientNoPIIDTO ->
+      puRecipientNoPIIDTO.getPuPayments().forEach(puPaymentNoPIIDTO ->
+        puRecipientNoPIIDTO.getPuPayments().forEach(puPayment -> {
+          PagoPa payment = puPayment.getPayment().getPagoPa();
+          NotificationPriceResponseV23DTO notificationPriceResponseV23DTO = sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
 
-    if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {
-      notification.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate()
-        .toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
-      sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, notification.getNotificationDate());
-      return sendNotificationDTOMapper.apply(notification);
-    }
+          if (notificationPriceResponseV23DTO.getNotificationViewDate() != null) {
+            puPayment.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
+            sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+          }
+        })));
 
-    return null;
+    return sendNotificationDTOMapper.apply(notification);
   }
 
   @Override
@@ -129,20 +129,20 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
-    if(!notification.getStatus().equals(NotificationStatus.COMPLETE) && !notification.getStatus().equals(NotificationStatus.ACCEPTED))
+    if (!notification.getStatus().equals(NotificationStatus.COMPLETE) && !notification.getStatus().equals(NotificationStatus.ACCEPTED))
       NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
 
     NewNotificationRequestStatusResponseV24DTO notificationStatus = sendService.notificationStatus(notification.getNotificationRequestId(), notification.getOrganizationId(), accessToken);
-    if(notification.getIun()==null && notificationStatus!=null && notificationStatus.getIun() != null){
+    if (notification.getIun() == null && notificationStatus != null && notificationStatus.getIun() != null) {
       sendNotificationNoPIIRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
       notification.setIun(notificationStatus.getIun());
       notification.setStatus(NotificationStatus.ACCEPTED);
     }
     SendNotificationDTO sendNotificationDTO = sendNotificationDTOMapper.apply(notification);
 
-    if(notificationStatus!=null && notificationStatus.getErrors()!=null)
-     sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
-       .map(ProblemErrorDTO::getDetail).toList());
+    if (notificationStatus != null && notificationStatus.getErrors() != null)
+      sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
+        .map(ProblemErrorDTO::getDetail).toList());
 
     return sendNotificationDTO;
   }
@@ -157,7 +157,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       .map(PuPayment::getPayment)
       .filter(pagoPa -> nav.equals(pagoPa.getPagoPa().getNoticeCode()))
       .findFirst()
-      .orElseThrow(() -> new NotFoundException("Notification not found with nav: "+ nav));
+      .orElseThrow(() -> new NotFoundException("Notification not found with nav: " + nav));
 
     return sendService.retrieveNotificationPrice(payment.getPagoPa().getCreditorTaxId(),
       payment.getPagoPa().getNoticeCode(), notification.getOrganizationId(), accessToken);

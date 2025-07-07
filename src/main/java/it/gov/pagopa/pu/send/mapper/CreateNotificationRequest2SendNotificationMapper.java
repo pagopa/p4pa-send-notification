@@ -77,7 +77,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
             if (debtPosition == null) {
               throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
             } else {
-              return new PuPayment(debtPosition.getDebtPositionId(), p);
+              return new PuPayment(debtPosition.getDebtPositionId(), p, null);
             }
           }).toList();
         Recipient recipient = Recipient.builder()

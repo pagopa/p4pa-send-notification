@@ -35,7 +35,7 @@ public class SendNotificationFaker {
       .paymentExpirationDate("2025-12-31")
       .pagoPaIntMode(CreateNotificationRequest.PagoPaIntModeEnum.NONE.getValue())
       .puRecipients(List.of(buildPuRecipient()))
-      .notificationDate(OffsetDateTime.now())
+//      .notificationDate(OffsetDateTime.now())
       .build();
   }
 }

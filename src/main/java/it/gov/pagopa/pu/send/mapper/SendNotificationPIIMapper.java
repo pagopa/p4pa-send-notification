@@ -42,7 +42,6 @@ public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, S
     noPII.setPaFee(fullDTO.getPaFee());
     noPII.setVat(fullDTO.getVat());
     noPII.setPagoPaIntMode(fullDTO.getPagoPaIntMode());
-    noPII.setNotificationDate(fullDTO.getNotificationDate());
     List<PuRecipientNoPIIDTO> recipients = fullDTO.getPuRecipients().stream().map(
       puRecipient -> new PuRecipientNoPIIDTO(dataCipherService.hash(puRecipient.getRecipient().getTaxId()), puRecipient.getPuPayments())).toList();
     noPII.setRecipients(recipients);
@@ -80,7 +79,6 @@ public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, S
     sendNotification.setPaFee(noPii.getPaFee());
     sendNotification.setVat(noPii.getVat());
     sendNotification.setPagoPaIntMode(noPii.getPagoPaIntMode());
-    sendNotification.setNotificationDate(noPii.getNotificationDate());
     sendNotification.setNoPII(noPii);
 
     return sendNotification;

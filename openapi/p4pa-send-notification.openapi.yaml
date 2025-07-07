@@ -479,9 +479,6 @@ components:
           format: int64
         iun:
           type: string
-        notificationDate:
-          type: string
-          format: date-time
         payments:
           type: array
           items:
@@ -505,6 +502,9 @@ components:
           type: array
           items:
             type: string
+        notificationDate:
+          type: string
+          format: date-time
     SendNotificationErrorDTO:
       type: object
       required:
