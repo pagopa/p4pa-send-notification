@@ -6,7 +6,6 @@ import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocumentAttachment;
@@ -35,7 +34,6 @@ public class SendNotificationFaker {
       .paymentExpirationDate("2025-12-31")
       .pagoPaIntMode(CreateNotificationRequest.PagoPaIntModeEnum.NONE.getValue())
       .puRecipients(List.of(buildPuRecipient()))
-//      .notificationDate(OffsetDateTime.now())
       .build();
   }
 }
