@@ -50,7 +50,7 @@ class SendServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
         .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(accessToken)).thenReturn(voucherToken);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
     Mockito.when(clientMock.preloadFiles(Mockito.same(request), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
@@ -71,7 +71,7 @@ class SendServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(accessToken)).thenReturn(voucherToken);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
     Mockito.when(clientMock.deliveryNotification(Mockito.same(request), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
@@ -92,7 +92,7 @@ class SendServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(accessToken)).thenReturn(voucherToken);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
     Mockito.when(clientMock.notificationStatus(Mockito.same(notificationRequestId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
@@ -114,7 +114,7 @@ class SendServiceTest {
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(accessToken)).thenReturn(voucherToken);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
     Mockito.when(clientMock.retrieveNotificationPrice(Mockito.same(paTaxId), Mockito.same(nav), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
