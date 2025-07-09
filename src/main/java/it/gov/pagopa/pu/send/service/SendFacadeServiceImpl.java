@@ -110,16 +110,16 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     notification.getRecipients().forEach(puRecipientNoPIIDTO ->
-      puRecipientNoPIIDTO.getPuPayments().forEach(puPaymentNoPIIDTO ->
-        puRecipientNoPIIDTO.getPuPayments().forEach(puPayment -> {
-          PagoPa payment = puPayment.getPayment().getPagoPa();
-          NotificationPriceResponseV23DTO notificationPriceResponseV23DTO = sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
+      puRecipientNoPIIDTO.getPuPayments().forEach(puPayment -> {
+        PagoPa payment = puPayment.getPayment().getPagoPa();
+        NotificationPriceResponseV23DTO notificationPriceResponseV23DTO = sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
 
-          if (notificationPriceResponseV23DTO.getNotificationViewDate() != null) {
-            puPayment.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
-            sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
-          }
-        })));
+        if (notificationPriceResponseV23DTO.getNotificationViewDate() != null) {
+          puPayment.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
+          sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+        }
+      })
+    );
 
     return sendNotificationDTOMapper.apply(notification);
   }
