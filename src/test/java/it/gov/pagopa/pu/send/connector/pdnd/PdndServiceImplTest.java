@@ -7,7 +7,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pdnd.dto.generated.PdndAuthData;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,8 @@ class PdndServiceImplTest {
 
   @Mock
   private PdndCacheService pdndCacheServiceMock;
+  @Mock
+  private OrganizationService organizationServiceMock;
 
   private PdndServiceImpl pdndService;
 
@@ -31,17 +35,21 @@ class PdndServiceImplTest {
     pdndAuthData = new PdndAuthData();
     pdndAuthData.setAccessToken(ACCESS_TOKEN);
 
-    pdndService = new PdndServiceImpl(pdndCacheServiceMock);
+    pdndService = new PdndServiceImpl(pdndCacheServiceMock, organizationServiceMock);
   }
 
   @Test
   void givenAccessTokenWhenResolvePdndAccessTokenThenIsValid() {
     // Given
+    Long organizationId = 1L;
+    Organization organization = new Organization();
+    organization.setPdndEnabled(true);
     pdndAuthData.setExpiration(OffsetDateTime.now().plusHours(1));
     when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN)).thenReturn(pdndAuthData);
+    when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
 
     // When
-    String result = pdndService.resolvePdndAccessToken(ACCESS_TOKEN);
+    String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
 
     // Then
     assertEquals(ACCESS_TOKEN, result);
@@ -52,14 +60,34 @@ class PdndServiceImplTest {
   @Test
   void givenAccessTokenWhenResolvePdndAccessTokenThenIsExpired() {
     // Given
+    Long organizationId = 1L;
+    Organization organization = new Organization();
+    organization.setPdndEnabled(true);
     pdndAuthData.setExpiration(OffsetDateTime.now().minusHours(1));
     when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN)).thenReturn(pdndAuthData);
+    when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
 
     // When
-    String result = pdndService.resolvePdndAccessToken(ACCESS_TOKEN);
+    String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
 
     // Then
     assertEquals(ACCESS_TOKEN, result);
     verify(pdndCacheServiceMock, times(2)).getPdndAccessToken(ACCESS_TOKEN);
+  }
+
+  @Test
+  void givenPdndEnabledFalseWhenResolvePdndAccessTokenThenNull() {
+    // Given
+    Long organizationId = 1L;
+    Organization organization = new Organization();
+    organization.setPdndEnabled(false);
+    when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
+
+    // When
+    String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
+
+    // Then
+    assertNull(result);
+    verify(pdndCacheServiceMock, never()).getPdndAccessToken(ACCESS_TOKEN);
   }
 }
