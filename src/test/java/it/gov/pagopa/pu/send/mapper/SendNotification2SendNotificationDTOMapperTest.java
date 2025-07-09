@@ -27,8 +27,6 @@ class SendNotification2SendNotificationDTOMapperTest {
 
   @Test
   void givenSendNotificationWhenMapThenReturnSendNotificationDTO() {
-    OffsetDateTime now = OffsetDateTime.now();
-
     PuPayment payment1 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE1").build()), OffsetDateTime.now());
     PuPayment payment2 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE2").build()), OffsetDateTime.now());
     PuPayment payment3 = new PuPayment(4L, new Payment(PagoPa.builder().noticeCode("NOTICECODE3").build()), OffsetDateTime.now());
@@ -40,7 +38,6 @@ class SendNotification2SendNotificationDTOMapperTest {
     sendNotificationNoPII.setSendNotificationId("12345");
     sendNotificationNoPII.setOrganizationId(1L);
     sendNotificationNoPII.setIun("IUN");
-//    sendNotificationNoPII.setNotificationDate(now);
     sendNotificationNoPII.setStatus(NotificationStatus.COMPLETE);
     sendNotificationNoPII.setRecipients(List.of(recipient));
 
@@ -53,7 +50,6 @@ class SendNotification2SendNotificationDTOMapperTest {
     assertEquals("12345", result.getSendNotificationId());
     assertEquals(1L, result.getOrganizationId());
     assertEquals("IUN", result.getIun());
-//    assertEquals(now, result.getNotificationDate());
     assertEquals(NotificationStatus.COMPLETE, result.getStatus());
 
     List<SendNotificationPaymentsDTO> expectedPayments = List.of(
