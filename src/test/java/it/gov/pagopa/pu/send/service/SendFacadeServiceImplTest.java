@@ -219,69 +219,46 @@ class SendFacadeServiceImplTest {
 
   @Test
   void givenValidNotificationWhenRetrieveNotificationDateThenVerify() {
+    // Given
     String accessToken = "ACCESSTOKEN";
     String sendNotificationId = "SENDNOTIFICATIONID";
     Long orgId = 1L;
     String creditorTaxId = "PAXID";
     String noticeCode = "NOTICECODE";
 
-    NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
     OffsetDateTime viewDate = OffsetDateTime.now().minusDays(1);
+
+    NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
     response.setNotificationViewDate(Date.from(viewDate.toInstant()));
 
     Payment payment = new Payment(new PagoPa().creditorTaxId(creditorTaxId).noticeCode(noticeCode));
-    PuPayment puPayment = new PuPayment(1L, payment, OffsetDateTime.now());
+    PuPayment puPayment = new PuPayment(1L, payment, null);
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
-//      .notificationDate(null)
       .recipients(List.of(recipient))
       .build();
 
-    SendNotificationDTO notificationDTO = new SendNotificationDTO();
-//    notificationDTO.setNotificationDate(viewDate);
+    SendNotificationDTO expectedDTO = new SendNotificationDTO();
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, noticeCode, orgId, accessToken))
       .thenReturn(response);
-//    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.argThat(n ->
-//      n.getNotificationDate() != null))).thenReturn(notificationDTO);
+    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.any()))
+      .thenReturn(expectedDTO);
 
+    // When
     SendNotificationDTO result = sendService.retrieveNotificationDate(sendNotificationId, accessToken);
 
+    // Then
     assertNotNull(result);
-//    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationDate(sendNotificationId, notification.getNotificationDate());
+    assertEquals(expectedDTO, result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock)
+      .updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
     Mockito.verify(sendNotificationDTOMapperMock).apply(Mockito.any());
-  }
-
-  @Test
-  void givenValidNotificationWhenRetrieveNotificationDateAlreadyExistsThenVerifyNoCall() {
-    String accessToken = "ACCESSTOKEN";
-    String sendNotificationId = "SENDNOTIFICATIONID";
-    Long orgId = 1L;
-
-    OffsetDateTime existingDate = OffsetDateTime.now().minusDays(2);
-    SendNotificationNoPII notification = SendNotificationNoPII.builder()
-      .sendNotificationId(sendNotificationId)
-      .organizationId(orgId)
-//      .notificationDate(existingDate)
-      .recipients(List.of())
-      .build();
-
-    SendNotificationDTO notificationDTO = new SendNotificationDTO();
-//    notificationDTO.setNotificationDate(existingDate);
-
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
-      .thenReturn(Optional.of(notification));
-    Mockito.when(sendNotificationDTOMapperMock.apply(notification)).thenReturn(notificationDTO);
-
-    SendNotificationDTO result = sendService.retrieveNotificationDate(sendNotificationId, accessToken);
-
-    assertNotNull(result);
-//    assertEquals(existingDate, result.getNotificationDate());
   }
 
   @Test
