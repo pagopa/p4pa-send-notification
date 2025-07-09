@@ -101,8 +101,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     OffsetDateTime notificationDate, String nav) {
     return mongoTemplate.updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
-        .and(FIELD_PAYMENT_NOTICE_CODE).is(nav)
-        .and(Fields.status).is(NotificationStatus.ACCEPTED)),
+        .and(FIELD_PAYMENT_NOTICE_CODE).is(nav)),
       new Update().set(FIELD_PAYMENT_NOTIFICATION_DATE, notificationDate.toString()),
       SendNotificationNoPII.class);
   }
