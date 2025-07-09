@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.ApiClient;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -37,18 +38,21 @@ public class PagopaSendApisHolder {
   }
 
   public NewNotificationApi getNewNotificationApiByApiKey(String apiKey, String pdndAccessToken) {
-    return newNotificationApiMap.computeIfAbsent(apiKey, key ->
-      new NewNotificationApi(buildApiClient(key, pdndAccessToken)));
+    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
+    return newNotificationApiMap.computeIfAbsent(cacheKey, key ->
+      new NewNotificationApi(buildApiClient(apiKey, pdndAccessToken)));
   }
 
   public SenderReadB2BApi getSenderReadB2BApiByApiKey(String apiKey, String pdndAccessToken) {
-    return senderReadB2BApiMap.computeIfAbsent(apiKey, key ->
-      new SenderReadB2BApi(buildApiClient(key, pdndAccessToken)));
+    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
+    return senderReadB2BApiMap.computeIfAbsent(cacheKey, key ->
+      new SenderReadB2BApi(buildApiClient(apiKey, pdndAccessToken)));
   }
 
   public NotificationPriceV23Api getNotificationPriceApi(String apiKey, String pdndAccessToken) {
-    return notificationPriceApiMap.computeIfAbsent(apiKey, key ->
-      new NotificationPriceV23Api(buildApiClient(key, pdndAccessToken)));
+    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
+    return notificationPriceApiMap.computeIfAbsent(cacheKey, key ->
+      new NotificationPriceV23Api(buildApiClient(apiKey, pdndAccessToken)));
   }
 
   private ApiClient buildApiClient(String apiKey, String pdndAccessToken) {
