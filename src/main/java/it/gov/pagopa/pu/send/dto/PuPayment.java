@@ -8,6 +8,7 @@ import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,4 +18,5 @@ import java.io.Serializable;
 public class PuPayment implements Serializable {
   private Long debtPositionId;
   private Payment payment;
+  private OffsetDateTime notificationDate;
 }

@@ -931,10 +931,6 @@
           "iun" : {
             "type" : "string"
           },
-          "notificationDate" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
           "payments" : {
             "type" : "array",
             "items" : {
@@ -965,6 +961,10 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "notificationDate" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         },
         "required" : [ "debtPositionId", "navList" ]
