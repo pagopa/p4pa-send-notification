@@ -26,7 +26,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -229,7 +228,7 @@ class SendFacadeServiceImplTest {
     OffsetDateTime viewDate = OffsetDateTime.now().minusDays(1);
 
     NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
-    response.setNotificationViewDate(Date.from(viewDate.toInstant()));
+    response.setNotificationViewDate(viewDate);
 
     Payment payment = new Payment(new PagoPa().creditorTaxId(creditorTaxId).noticeCode(noticeCode));
     PuPayment puPayment = new PuPayment(1L, payment, null);

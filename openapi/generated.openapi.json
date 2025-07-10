@@ -973,7 +973,10 @@
         "type" : "object",
         "properties" : {
           "iun" : {
-            "type" : "string"
+            "type" : "string",
+            "maxLength" : 25,
+            "minLength" : 25,
+            "pattern" : "^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$"
           },
           "partialPrice" : {
             "type" : "integer",
@@ -985,11 +988,15 @@
           },
           "vat" : {
             "type" : "integer",
-            "format" : "int32"
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0
           },
           "paFee" : {
             "type" : "integer",
-            "format" : "int32"
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0
           },
           "refinementDate" : {
             "type" : "string",
