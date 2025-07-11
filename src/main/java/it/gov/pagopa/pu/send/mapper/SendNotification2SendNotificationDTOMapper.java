@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +32,12 @@ public class SendNotification2SendNotificationDTOMapper {
         entry.getKey(),
         entry.getValue().stream()
           .map(p -> p.getPayment().getPagoPa().getNoticeCode())
-          .toList()
+          .toList(),
+        entry.getValue().stream()
+          .map(PuPayment::getNotificationDate)
+          .filter(Objects::nonNull)
+          .findFirst()
+          .orElse(null)
       ))
       .toList();
   }
