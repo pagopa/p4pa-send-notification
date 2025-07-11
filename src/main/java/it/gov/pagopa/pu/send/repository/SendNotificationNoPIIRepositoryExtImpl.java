@@ -31,7 +31,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_DOCUMENT_STATUS = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.status);
   public static final String FIELD_DOCUMENT_VERSIONID = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.versionId);
   public static final String FIELD_PAYMENT_NOTICE_CODE = "%s.%s.%s.pagoPa.noticeCode".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.puPayments, PuPayment.Fields.payment);
-  private static final String FIELD_FILTERED_NOTIFICATION_DATE = "recipients.$[r].puPayments.$[p].notificationDate";
+  private static final String FIELD_FILTERED_NOTIFICATION_DATE = "recipients.$[].puPayments.$[elem].notificationDate";
 
   private final MongoTemplate mongoTemplate;
 
@@ -107,12 +107,9 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
       Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
         .and(FIELD_PAYMENT_NOTICE_CODE).is(nav)
     );
-
     Update update = new Update();
     update.set(FIELD_FILTERED_NOTIFICATION_DATE, notificationDate.toString());
-
-    update.filterArray("r.puPayments.payment.pagoPa.noticeCode", nav);
-    update.filterArray("p.payment.pagoPa.noticeCode", nav);
+    update.filterArray("elem.payment.pagoPa.noticeCode", nav);
 
     return mongoTemplate.updateFirst(query, update, SendNotificationNoPII.class);
   }
