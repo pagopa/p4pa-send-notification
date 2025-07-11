@@ -1,8 +1,10 @@
 package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
+import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
@@ -46,6 +48,8 @@ class SendFacadeServiceImplTest {
   private SendNotification2NewNotificationRequestMapper sendNotificationMapperMock;
   @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
+  @Mock
+  private SendStreamService sendStreamServiceMock;
 
   @InjectMocks
   private SendFacadeServiceImpl sendService;
@@ -57,7 +61,8 @@ class SendFacadeServiceImplTest {
       sendServiceMock,
       uploadServiceMock,
       sendNotificationMapperMock,
-      sendNotificationDTOMapperMock
+      sendNotificationDTOMapperMock,
+      sendStreamServiceMock
     );
   }
 
@@ -159,6 +164,14 @@ class SendFacadeServiceImplTest {
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
     response.setNotificationRequestId("NOTIFICATIONREQUESTID");
 
+    StreamCreationRequestV25DTO streamCreationRequestV25DTO = new StreamCreationRequestV25DTO();
+    streamCreationRequestV25DTO.setTitle("SEND-STREAM_".concat(orgId.toString()));
+    streamCreationRequestV25DTO.setEventType(StreamCreationRequestV25DTO.EventTypeEnum.STATUS);
+
+    StreamMetadataResponseV25DTO streamMetadataResponseV25DTO = new StreamMetadataResponseV25DTO();
+    streamMetadataResponseV25DTO.setTitle("SEND-STREAM_".concat(orgId.toString()));
+    streamMetadataResponseV25DTO.setEventType(EventTypeEnum.STATUS);
+
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
@@ -170,6 +183,8 @@ class SendFacadeServiceImplTest {
       .thenReturn(Optional.of(notification));
     Mockito.when(sendNotificationMapperMock.apply(notification))
         .thenReturn(request);
+    Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV25DTO, orgId, accessToken))
+      .thenReturn(streamMetadataResponseV25DTO);
 
     Mockito.when(sendServiceMock.deliveryNotification(request, orgId, accessToken)).thenReturn(response);
 

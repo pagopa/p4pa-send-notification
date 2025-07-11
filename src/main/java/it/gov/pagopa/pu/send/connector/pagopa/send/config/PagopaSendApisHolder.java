@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.ApiClient;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
+import it.gov.pagopa.pu.send.connector.send.generated.api.StreamsApi;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,7 @@ public class PagopaSendApisHolder {
   private final Map<String, NewNotificationApi> newNotificationApiMap = new ConcurrentHashMap<>();
   private final Map<String, SenderReadB2BApi> senderReadB2BApiMap = new ConcurrentHashMap<>();
   private final Map<String, NotificationPriceV23Api> notificationPriceApiMap = new ConcurrentHashMap<>();
+  private final Map<String, StreamsApi> streamsApiMap = new ConcurrentHashMap<>();
 
   public PagopaSendApisHolder(
     PagopaSendApiClientConfig clientConfig,
@@ -53,6 +55,12 @@ public class PagopaSendApisHolder {
     String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
     return notificationPriceApiMap.computeIfAbsent(cacheKey, key ->
       new NotificationPriceV23Api(buildApiClient(apiKey, pdndAccessToken)));
+  }
+
+  public StreamsApi getStreamsApi(String apiKey, String pdndAccessToken) {
+    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
+    return streamsApiMap.computeIfAbsent(cacheKey, key ->
+      new StreamsApi(buildApiClient(apiKey, pdndAccessToken)));
   }
 
   private ApiClient buildApiClient(String apiKey, String pdndAccessToken) {
