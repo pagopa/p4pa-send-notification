@@ -1,7 +1,9 @@
 package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
+import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
@@ -16,6 +18,7 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
+import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,18 +35,21 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
+  private final SendStreamService sendStreamService;
 
   public SendFacadeServiceImpl(
     SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
     SendService sendService,
     SendUploadFacadeServiceImpl uploadService,
     SendNotification2NewNotificationRequestMapper sendNotificationMapper,
-    SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
+    SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
+    SendStreamService sendStreamService) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendService = sendService;
     this.uploadService = uploadService;
     this.sendNotificationMapper = sendNotificationMapper;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
+    this.sendStreamService = sendStreamService;
   }
 
   @Transactional
@@ -97,6 +103,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.UPLOADED, notification.getStatus());
+    //create stream if not already exists in cache
+    createStream(notification.getOrganizationId(), accessToken);
+
     NewNotificationResponseDTO responseDTO = sendService.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId(), accessToken);
     if (responseDTO != null) {
       sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
@@ -171,5 +180,15 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private SendNotificationNoPII findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
     return sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with nav: " + nav));
+  }
+
+  private void createStream(Long organizationId, String accessToken){
+    StreamCreationRequestV25DTO request  = new StreamCreationRequestV25DTO();
+    request.setTitle("SEND-STREAM_".concat(organizationId.toString()));
+    request.setEventType(EventTypeEnum.STATUS);
+    request.setGroups(new ArrayList<>());
+
+    StreamMetadataResponseV25DTO response = sendStreamService.createStream(request, organizationId, accessToken);
+    log.info("STREAM-SEND: {}", response);
   }
 }

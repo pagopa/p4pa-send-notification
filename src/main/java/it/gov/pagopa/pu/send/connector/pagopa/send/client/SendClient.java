@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +12,10 @@ public class SendClient {
 
   private final PagopaSendApisHolder apisHolder;
 
-  public SendClient(
-    PagopaSendApisHolder apisHolder
-  ) {
+  private final ConcurrentHashMap<String, StreamMetadataResponseV25DTO> streamCache = new ConcurrentHashMap<>();
+
+
+  public SendClient(PagopaSendApisHolder apisHolder) {
     this.apisHolder = apisHolder;
   }
 
@@ -35,5 +37,15 @@ public class SendClient {
   public NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, String apiKey, String pdndAccessToken) {
     return apisHolder.getNotificationPriceApi(apiKey, pdndAccessToken).retrieveNotificationPriceV23(paTaxId, noticeCode);
   }
+
+  public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, String apikey, String pdndAccessToken){
+    return streamCache.computeIfAbsent(apikey, key ->
+      apisHolder.getStreamsApi(apikey, pdndAccessToken).createEventStreamV25(createStreamRequest));
+  }
+
+  public List<StreamListElementDTO> getStreams(String apikey, String pdndAccessToken){
+    return apisHolder.getStreamsApi(apikey, pdndAccessToken).listEventStreamsV25();
+  }
+
 
 }
