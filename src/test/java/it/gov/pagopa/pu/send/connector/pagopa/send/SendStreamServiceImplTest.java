@@ -1,0 +1,85 @@
+package it.gov.pagopa.pu.send.connector.pagopa.send;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
+import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
+import it.gov.pagopa.pu.send.connector.pdnd.PdndService;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamListElementDTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO;
+import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class SendStreamServiceImplTest {
+
+  @Mock
+  private SendClient clientMock;
+  @Mock
+  private PdndService pdndServiceMock;
+  @Mock
+  private OrganizationService organizationServiceMock;
+
+  private SendStreamService service;
+
+  private final String accessToken = "ACCESSTOKEN";
+  private final String voucherToken = "VOUCHERTOKEN";
+
+  @BeforeEach
+  void init() {
+    service = new SendStreamServiceImpl(clientMock, organizationServiceMock, pdndServiceMock);
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(clientMock, organizationServiceMock, pdndServiceMock);
+  }
+
+  @Test
+  void whenCreateStreamThenInvokeClient() {
+    // Given
+    long organizationId = 123L;
+    String orgSendApiKey = "ORG_SEND_API_KEY";
+
+    StreamCreationRequestV25DTO request = new StreamCreationRequestV25DTO();
+    StreamMetadataResponseV25DTO expectedResult = new StreamMetadataResponseV25DTO();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+      .thenReturn(orgSendApiKey);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    Mockito.when(clientMock.createStream(request, orgSendApiKey, voucherToken)).thenReturn(expectedResult);
+
+    //When
+    StreamMetadataResponseV25DTO result = service.createStream(request, organizationId, accessToken);
+
+    //Then
+    assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenGetStreamsThenInvokeClient() {
+    // Given
+    long organizationId = 123L;
+    String orgSendApiKey = "ORG_SEND_API_KEY";
+
+    List<StreamListElementDTO> expectedResult = List.of();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+      .thenReturn(orgSendApiKey);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    Mockito.when(clientMock.getStreams(orgSendApiKey, voucherToken)).thenReturn(expectedResult);
+
+    //When
+    List<StreamListElementDTO> result = service.getStreams(organizationId, accessToken);
+
+    //Then
+    assertSame(expectedResult, result);
+  }
+}

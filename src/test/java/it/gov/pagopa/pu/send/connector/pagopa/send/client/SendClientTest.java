@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
+import it.gov.pagopa.pu.send.connector.send.generated.api.StreamsApi;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,8 @@ class SendClientTest {
   private SenderReadB2BApi senderReadB2BApiMock;
   @Mock
   private NotificationPriceV23Api notificationPriceApiMock;
+  @Mock
+  private StreamsApi streamsApiMock;
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
@@ -121,6 +124,36 @@ class SendClientTest {
       .thenReturn(response);
 
     NotificationPriceResponseV23DTO result = sendClient.retrieveNotificationPrice(paTaxId, noticeCode, apiKey, voucherToken);
+
+    assertSame(response, result);
+  }
+
+  @Test
+  void givenValidRequestWhenCreateStreamThenVerifyResponse() {
+
+    StreamCreationRequestV25DTO request = new StreamCreationRequestV25DTO();
+    StreamMetadataResponseV25DTO response = new StreamMetadataResponseV25DTO();
+
+    Mockito.when(apisHolder.getStreamsApi(apiKey, voucherToken))
+      .thenReturn(streamsApiMock);
+    Mockito.when(streamsApiMock.createEventStreamV25(request))
+      .thenReturn(response);
+
+    StreamMetadataResponseV25DTO result = sendClient.createStream(request, apiKey, voucherToken);
+
+    assertSame(response, result);
+  }
+
+  @Test
+  void givenValidRequestWhenGetStreamsThenVerifyResponse() {
+    List<StreamListElementDTO> response = List.of();
+
+    Mockito.when(apisHolder.getStreamsApi(apiKey, voucherToken))
+      .thenReturn(streamsApiMock);
+    Mockito.when(streamsApiMock.listEventStreamsV25())
+      .thenReturn(response);
+
+    List<StreamListElementDTO> result = sendClient.getStreams(apiKey, voucherToken);
 
     assertSame(response, result);
   }
