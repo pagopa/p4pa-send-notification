@@ -8,7 +8,6 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponse
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
