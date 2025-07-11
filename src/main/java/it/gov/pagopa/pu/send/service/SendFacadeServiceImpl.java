@@ -188,7 +188,6 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     request.setEventType(EventTypeEnum.STATUS);
     request.setGroups(new ArrayList<>());
 
-    StreamMetadataResponseV25DTO response = sendStreamService.createStream(request, organizationId, accessToken);
-    log.info("STREAM-SEND: {}", response);
+    sendStreamService.createStream(request, organizationId, accessToken);
   }
 }
