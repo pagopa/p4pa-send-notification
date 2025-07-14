@@ -9,7 +9,9 @@ import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
+
 import java.time.OffsetDateTime;
+
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -17,7 +19,7 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.Optional;
 
-public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationNoPIIRepositoryExt{
+public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationNoPIIRepositoryExt {
 
   private static final String FIELD_TEMPLATE = "%s.$.%s";
 
@@ -29,7 +31,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_DOCUMENT_STATUS = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.status);
   public static final String FIELD_DOCUMENT_VERSIONID = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.versionId);
   public static final String FIELD_PAYMENT_NOTICE_CODE = "%s.%s.%s.pagoPa.noticeCode".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.puPayments, PuPayment.Fields.payment);
-  public static final String FIELD_PAYMENT_NOTIFICATION_DATE = "%s.%s.%s.pagoPa.notificationDate".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.puPayments, PuPayment.Fields.payment);
+  private static final String FIELD_FILTERED_NOTIFICATION_DATE = "recipients.$[].puPayments.$[elem].notificationDate";
 
   private final MongoTemplate mongoTemplate;
 
@@ -42,7 +44,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     return mongoTemplate.updateFirst(
       Query.query(Criteria
         .where(Fields.sendNotificationId).is(sendNotificationId)
-          .and(FIELD_DOCUMENT_ID).is(preloadResponse.getPreloadIdx())
+        .and(FIELD_DOCUMENT_ID).is(preloadResponse.getPreloadIdx())
       ),
       new Update()
         .set(FIELD_DOCUMENT_KEY, preloadResponse.getKey())
@@ -98,12 +100,18 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
   @Override
   public UpdateResult updateNotificationDate(String sendNotificationId,
-    OffsetDateTime notificationDate, String nav) {
-    return mongoTemplate.updateFirst(
-      Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
-        .and(FIELD_PAYMENT_NOTICE_CODE).is(nav)),
-      new Update().set(FIELD_PAYMENT_NOTIFICATION_DATE, notificationDate.toString()),
-      SendNotificationNoPII.class);
+                                             OffsetDateTime notificationDate,
+                                             String nav) {
+    Query query = new Query();
+    query.addCriteria(
+      Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
+        .and(FIELD_PAYMENT_NOTICE_CODE).is(nav)
+    );
+    Update update = new Update();
+    update.set(FIELD_FILTERED_NOTIFICATION_DATE, notificationDate.toString());
+    update.filterArray("elem.payment.pagoPa.noticeCode", nav);
+
+    return mongoTemplate.updateFirst(query, update, SendNotificationNoPII.class);
   }
 
   @Override
