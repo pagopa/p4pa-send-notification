@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,11 @@ public class SendClient {
 
   public List<StreamListElementDTO> getStreams(String apikey, String pdndAccessToken){
     return apisHolder.getStreamsApi(apikey, pdndAccessToken).listEventStreamsV25();
+  }
+
+  public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId, String apiKey, String pdndAccessToken){
+    return apisHolder.getEventsApi(apiKey, pdndAccessToken)
+      .consumeEventStreamV25(UUID.fromString(streamId), lastEventId);
   }
 
 

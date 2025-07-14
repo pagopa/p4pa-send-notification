@@ -18,6 +18,9 @@
   }, {
     "name" : "Send",
     "description" : "the Send API"
+  }, {
+    "name" : "Streams",
+    "description" : "the Streams API"
   } ],
   "paths" : {
     "/p4pasend/send/{sendNotificationId}/preload" : {
@@ -298,6 +301,107 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/StartNotificationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/p4pasend/streams/events" : {
+      "get" : {
+        "tags" : [ "Streams" ],
+        "summary" : "retrieve events by stream",
+        "description" : "get events from last stream, if streamid is specified return events from that stream",
+        "operationId" : "getStreamEvents",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "streamId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "lastEventId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Streams not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
                 }
               }
             }
@@ -913,6 +1017,93 @@
           }
         },
         "required" : [ "digest", "fileName" ]
+      },
+      "LegalFactsIdV20DTO" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string",
+            "maxLength" : 512,
+            "minLength" : 0,
+            "pattern" : "^(safestorage://)?[A-Za-z0-9._-]+$"
+          },
+          "category" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "category", "key" ]
+      },
+      "NotificationStatusDTO" : {
+        "type" : "string",
+        "enum" : [ "IN_VALIDATION", "ACCEPTED", "REFUSED", "DELIVERING", "DELIVERED", "VIEWED", "EFFECTIVE_DATE", "PAID", "UNREACHABLE", "CANCELLED" ]
+      },
+      "ProgressResponseElementV25DTO" : {
+        "type" : "object",
+        "properties" : {
+          "eventId" : {
+            "type" : "string"
+          },
+          "notificationRequestId" : {
+            "type" : "string"
+          },
+          "iun" : {
+            "type" : "string",
+            "maxLength" : 25,
+            "minLength" : 0,
+            "pattern" : "^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$"
+          },
+          "newStatus" : {
+            "$ref" : "#/components/schemas/NotificationStatusDTO"
+          },
+          "element" : {
+            "$ref" : "#/components/schemas/TimelineElementV25DTO"
+          }
+        },
+        "required" : [ "element", "eventId" ]
+      },
+      "TimelineElementCategoryV23DTO" : {
+        "type" : "string",
+        "enum" : [ "SENDER_ACK_CREATION_REQUEST", "VALIDATE_NORMALIZE_ADDRESSES_REQUEST", "NORMALIZED_ADDRESS", "REQUEST_ACCEPTED", "SEND_COURTESY_MESSAGE", "GET_ADDRESS", "PUBLIC_REGISTRY_CALL", "PUBLIC_REGISTRY_RESPONSE", "SCHEDULE_ANALOG_WORKFLOW", "SCHEDULE_DIGITAL_WORKFLOW", "PREPARE_DIGITAL_DOMICILE", "SEND_DIGITAL_DOMICILE", "SEND_DIGITAL_PROGRESS", "SEND_DIGITAL_FEEDBACK", "REFINEMENT", "SCHEDULE_REFINEMENT", "DIGITAL_DELIVERY_CREATION_REQUEST", "DIGITAL_SUCCESS_WORKFLOW", "DIGITAL_FAILURE_WORKFLOW", "ANALOG_SUCCESS_WORKFLOW", "ANALOG_FAILURE_WORKFLOW", "PREPARE_SIMPLE_REGISTERED_LETTER", "SEND_SIMPLE_REGISTERED_LETTER", "SEND_SIMPLE_REGISTERED_LETTER_PROGRESS", "NOTIFICATION_VIEWED_CREATION_REQUEST", "NOTIFICATION_VIEWED", "PREPARE_ANALOG_DOMICILE", "SEND_ANALOG_DOMICILE", "SEND_ANALOG_PROGRESS", "SEND_ANALOG_FEEDBACK", "PAYMENT", "COMPLETELY_UNREACHABLE", "COMPLETELY_UNREACHABLE_CREATION_REQUEST", "REQUEST_REFUSED", "AAR_CREATION_REQUEST", "AAR_GENERATION", "NOT_HANDLED", "PROBABLE_SCHEDULING_ANALOG_DATE", "NOTIFICATION_CANCELLATION_REQUEST", "NOTIFICATION_CANCELLED", "PREPARE_ANALOG_DOMICILE_FAILURE", "NOTIFICATION_RADD_RETRIEVED" ]
+      },
+      "TimelineElementDetailsV25DTO" : { },
+      "TimelineElementV25DTO" : {
+        "type" : "object",
+        "properties" : {
+          "elementId" : {
+            "type" : "string",
+            "maxLength" : 512,
+            "minLength" : 0
+          },
+          "timestamp" : {
+            "type" : "string",
+            "format" : "date-time",
+            "deprecated" : true
+          },
+          "ingestionTimestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "eventTimestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "notificationSentAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "legalFactsIds" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/LegalFactsIdV20DTO"
+            }
+          },
+          "category" : {
+            "$ref" : "#/components/schemas/TimelineElementCategoryV23DTO"
+          },
+          "details" : {
+            "$ref" : "#/components/schemas/TimelineElementDetailsV25DTO"
+          }
+        }
       },
       "NotificationStatus" : {
         "type" : "string",

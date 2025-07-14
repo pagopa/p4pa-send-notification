@@ -172,6 +172,12 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       payment.getPagoPa().getNoticeCode(), notification.getOrganizationId(), accessToken);
   }
 
+  @Override
+  public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId,
+    Long organizationId, String accessToken) {
+    return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+  }
+
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
