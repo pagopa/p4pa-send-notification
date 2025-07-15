@@ -4,7 +4,6 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElemen
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamListElementDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
 import java.util.List;
 
 public interface SendStreamService {

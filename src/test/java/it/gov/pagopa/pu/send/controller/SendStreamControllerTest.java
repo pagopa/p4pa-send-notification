@@ -1,7 +1,5 @@
 package it.gov.pagopa.pu.send.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;

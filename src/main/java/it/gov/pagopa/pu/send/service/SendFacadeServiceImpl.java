@@ -18,8 +18,6 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
