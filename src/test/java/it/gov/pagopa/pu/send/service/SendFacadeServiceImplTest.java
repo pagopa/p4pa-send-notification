@@ -165,11 +165,11 @@ class SendFacadeServiceImplTest {
     response.setNotificationRequestId("NOTIFICATIONREQUESTID");
 
     StreamCreationRequestV25DTO streamCreationRequestV25DTO = new StreamCreationRequestV25DTO();
-    streamCreationRequestV25DTO.setTitle("SEND-STREAM_".concat(orgId.toString()));
+    streamCreationRequestV25DTO.setTitle("SEND-STREAM_"+orgId);
     streamCreationRequestV25DTO.setEventType(StreamCreationRequestV25DTO.EventTypeEnum.STATUS);
 
     StreamMetadataResponseV25DTO streamMetadataResponseV25DTO = new StreamMetadataResponseV25DTO();
-    streamMetadataResponseV25DTO.setTitle("SEND-STREAM_".concat(orgId.toString()));
+    streamMetadataResponseV25DTO.setTitle("SEND-STREAM_"+orgId);
     streamMetadataResponseV25DTO.setEventType(EventTypeEnum.STATUS);
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()

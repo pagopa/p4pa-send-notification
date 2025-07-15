@@ -200,7 +200,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   private void createStream(Long organizationId, String accessToken){
     StreamCreationRequestV25DTO request  = new StreamCreationRequestV25DTO();
-    request.setTitle("SEND-STREAM_"+organizationId+"_"+ LocalDateTime.now());
+    request.setTitle("SEND-STREAM_"+organizationId);
     request.setEventType(EventTypeEnum.STATUS);
 
     sendStreamService.createStream(request, organizationId, accessToken);
