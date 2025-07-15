@@ -2,12 +2,14 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
+import it.gov.pagopa.pu.send.connector.send.generated.api.EventsApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.StreamsApi;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +34,8 @@ class SendClientTest {
   private NotificationPriceV23Api notificationPriceApiMock;
   @Mock
   private StreamsApi streamsApiMock;
+  @Mock
+  private EventsApi eventsApiMock;
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
@@ -154,6 +158,22 @@ class SendClientTest {
       .thenReturn(response);
 
     List<StreamListElementDTO> result = sendClient.getStreams(apiKey, voucherToken);
+
+    assertSame(response, result);
+  }
+
+  @Test
+  void givenValidRequestWhenGetStreamEventsThenVerifyResponse() {
+    UUID streamId = UUID.randomUUID();
+    List<ProgressResponseElementV25DTO> response = List.of();
+
+    Mockito.when(apisHolder.getEventsApi(apiKey, voucherToken))
+      .thenReturn(eventsApiMock);
+    Mockito.when(eventsApiMock.consumeEventStreamV25(streamId, null))
+      .thenReturn(response);
+
+    List<ProgressResponseElementV25DTO> result = sendClient.getStreamEvents(
+      String.valueOf(streamId), null, apiKey, voucherToken);
 
     assertSame(response, result);
   }

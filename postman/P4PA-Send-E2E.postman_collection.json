@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "d42d9f1b-03f6-466d-ac4a-7f2d93e44bfa",
+		"_postman_id": "acae94b1-348c-4c28-a79e-8358d9d857ef",
 		"name": "P4PA-Send-E2E",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "29646859"
+		"_exporter_id": "36568841"
 	},
 	"item": [
 		{
@@ -856,6 +856,68 @@
 								{
 									"key": "nav",
 									"value": "{{nav}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getStreamEvents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send get stream events - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/streams/events?organizationId={{organizationId}}",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"streams",
+								"events"
+							],
+							"query": [
+								{
+									"key": "organizationId",
+									"value": "{{organizationId}}"
 								}
 							]
 						}

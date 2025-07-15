@@ -13,11 +13,13 @@ import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -165,11 +167,11 @@ class SendFacadeServiceImplTest {
     response.setNotificationRequestId("NOTIFICATIONREQUESTID");
 
     StreamCreationRequestV25DTO streamCreationRequestV25DTO = new StreamCreationRequestV25DTO();
-    streamCreationRequestV25DTO.setTitle("SEND-STREAM_".concat(orgId.toString()));
+    streamCreationRequestV25DTO.setTitle("SEND-STREAM_"+orgId);
     streamCreationRequestV25DTO.setEventType(StreamCreationRequestV25DTO.EventTypeEnum.STATUS);
 
     StreamMetadataResponseV25DTO streamMetadataResponseV25DTO = new StreamMetadataResponseV25DTO();
-    streamMetadataResponseV25DTO.setTitle("SEND-STREAM_".concat(orgId.toString()));
+    streamMetadataResponseV25DTO.setTitle("SEND-STREAM_"+orgId);
     streamMetadataResponseV25DTO.setEventType(EventTypeEnum.STATUS);
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
@@ -324,4 +326,64 @@ class SendFacadeServiceImplTest {
     Mockito.verify(sendNotificationNoPIIRepositoryMock).findByOrganizationIdAndNav(organizationId, nav);
     Mockito.verifyNoInteractions(sendServiceMock);
   }
+
+  @Test
+  void givenValidParamsWhenGetStreamEventsThenReturnEvents() {
+    String accessToken = "ACCESSTOKEN";
+    String streamId = "STREAMID";
+    String lastEventId = "LASTEVENTID";
+    Long organizationId = 1L;
+
+    List<ProgressResponseElementV25DTO> expectedEvents = List.of(new ProgressResponseElementV25DTO());
+
+    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId, lastEventId, organizationId, accessToken))
+      .thenReturn(expectedEvents);
+
+    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+
+    assertNotNull(result);
+    assertEquals(expectedEvents, result);
+  }
+
+  @Test
+  void givenEmptyStreamIdWhenGetStreamEventsThenFetchLastStreamAndReturnEvents() {
+    String accessToken = "ACCESSTOKEN";
+    String lastEventId = "LASTEVENTID";
+    UUID streamId = UUID.randomUUID();
+    Long organizationId = 1L;
+
+    StreamListElementDTO lastStream = new StreamListElementDTO();
+    lastStream.setStreamId(streamId);
+
+    List<StreamListElementDTO> streams = List.of(new StreamListElementDTO(), lastStream);
+    List<ProgressResponseElementV25DTO> expectedEvents = List.of(new ProgressResponseElementV25DTO());
+
+    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(streams);
+    Mockito.when(sendStreamServiceMock.getStreamEvents(String.valueOf(streamId), lastEventId, organizationId, accessToken))
+      .thenReturn(expectedEvents);
+
+    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(null, lastEventId, organizationId, accessToken);
+
+    assertNotNull(result);
+    assertEquals(expectedEvents, result);
+  }
+
+  @Test
+  void givenEmptyStreamIdAndNoStreamsWhenGetStreamEventsThenThrowNotFoundException() {
+    String accessToken = "ACCESSTOKEN";
+    String lastEventId = "LASTEVENTID";
+    Long organizationId = 1L;
+
+    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(List.of());
+
+    NotFoundException exception = assertThrows(NotFoundException.class, () ->
+      sendService.getStreamEvents(null, lastEventId, organizationId, accessToken)
+    );
+
+    assertEquals("Streams not found for this organization: " + organizationId, exception.getMessage());
+  }
+
+
+
+
 }

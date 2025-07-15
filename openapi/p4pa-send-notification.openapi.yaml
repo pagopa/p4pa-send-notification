@@ -303,6 +303,43 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
+  /send/streams/events:
+    get:
+      tags:
+        - Streams
+      summary: retrieve events by stream
+      description: get events from last stream, if streamid is specified return events from that stream
+      operationId: getStreamEvents
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: streamId
+          in: query
+          schema:
+            type: string
+        - name: lastEventId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreamEventsResponse'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Streams not found
+        '500':
+          description: Internal server error
 security:
   - BearerAuth: []
 components:
@@ -535,3 +572,7 @@ components:
           pattern: >-
             ^(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$
           maxLength: 320
+    StreamEventsResponse:
+      type: array
+      items:
+        type: "ProgressResponseElementV25DTO"

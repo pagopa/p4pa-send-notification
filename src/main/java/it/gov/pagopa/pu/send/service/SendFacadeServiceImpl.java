@@ -18,8 +18,8 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
-import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -172,6 +172,20 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       payment.getPagoPa().getNoticeCode(), notification.getOrganizationId(), accessToken);
   }
 
+  @Override
+  public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId,
+    Long organizationId, String accessToken) {
+    if(StringUtils.isBlank(streamId)) {
+      List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
+      if(streams.isEmpty())
+        throw new NotFoundException("Streams not found for this organization: "+organizationId);
+
+      streamId = String.valueOf(streams.getLast().getStreamId());
+    }
+
+    return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+  }
+
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
@@ -184,9 +198,8 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   private void createStream(Long organizationId, String accessToken){
     StreamCreationRequestV25DTO request  = new StreamCreationRequestV25DTO();
-    request.setTitle("SEND-STREAM_".concat(organizationId.toString()));
+    request.setTitle("SEND-STREAM_"+organizationId);
     request.setEventType(EventTypeEnum.STATUS);
-    request.setGroups(new ArrayList<>());
 
     sendStreamService.createStream(request, organizationId, accessToken);
   }
