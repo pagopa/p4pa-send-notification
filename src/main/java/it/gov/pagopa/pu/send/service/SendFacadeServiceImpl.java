@@ -19,7 +19,7 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -175,7 +175,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   @Override
   public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId,
     Long organizationId, String accessToken) {
-    if(ObjectUtils.isEmpty(streamId)) {
+    if(StringUtils.isBlank(streamId)) {
       List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
       if(streams.isEmpty())
         throw new NotFoundException("Streams not found for this organization: "+organizationId);
