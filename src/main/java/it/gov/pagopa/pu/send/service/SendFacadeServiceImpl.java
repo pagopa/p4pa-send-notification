@@ -18,8 +18,10 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -175,6 +177,14 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   @Override
   public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId,
     Long organizationId, String accessToken) {
+    if(ObjectUtils.isEmpty(streamId)) {
+      List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
+      if(streams.isEmpty())
+        throw new NotFoundException("Streams not found for this organization: "+organizationId);
+
+      streamId = String.valueOf(streams.getLast().getStreamId());
+    }
+
     return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
   }
 
@@ -190,9 +200,8 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   private void createStream(Long organizationId, String accessToken){
     StreamCreationRequestV25DTO request  = new StreamCreationRequestV25DTO();
-    request.setTitle("SEND-STREAM_".concat(organizationId.toString()));
+    request.setTitle("SEND-STREAM_"+organizationId+"_"+ LocalDateTime.now());
     request.setEventType(EventTypeEnum.STATUS);
-    request.setGroups(new ArrayList<>());
 
     sendStreamService.createStream(request, organizationId, accessToken);
   }

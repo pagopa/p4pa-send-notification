@@ -153,7 +153,7 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
   typeMappings.set(mapOf(
     "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus",
     "NotificationPriceResponseV23DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO",
-    "ProgressResponseElementV25DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO"
+    "ProgressResponseElementV25DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO",
   ))
   configOptions.set(mapOf(
     "dateLibrary" to "java8",
@@ -192,10 +192,11 @@ tasks.register<GenerateTask>("openApiGenerateSendClient") {
     "dateLibrary" to "java8",
     "useSpringBoot3" to "true",
     "useJakartaEe" to "true",
-    "useOneOfInterfaces" to "true",
+    "useOneOfInterfaces" to "false",
     "useBeanValidation" to "true",
     "serializationLibrary" to "jackson",
-    "generateSupportingFiles" to "true"
+    "generateSupportingFiles" to "true",
+    "serializableModel" to "true"
   ))
   library.set("resttemplate")
 }

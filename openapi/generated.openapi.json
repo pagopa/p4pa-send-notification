@@ -1018,6 +1018,95 @@
         },
         "required" : [ "digest", "fileName" ]
       },
+      "AttachmentDetailsDTO" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "documentType" : {
+            "type" : "string",
+            "maxLength" : 20,
+            "minLength" : 0
+          },
+          "url" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "date" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "ContactPhaseDTO" : {
+        "type" : "string",
+        "enum" : [ "CHOOSE_DELIVERY", "SEND_ATTEMPT" ]
+      },
+      "DelegateInfoDTO" : {
+        "type" : "object",
+        "properties" : {
+          "internalId" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "taxId" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "operatorUuid" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "mandateId" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "denomination" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "delegateType" : {
+            "$ref" : "#/components/schemas/RecipientTypeDTO"
+          }
+        }
+      },
+      "DeliveryModeDTO" : {
+        "type" : "string",
+        "enum" : [ "DIGITAL", "ANALOG" ]
+      },
+      "DigitalAddressDTO" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "address" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "address", "type" ]
+      },
+      "DigitalAddressSourceDTO" : {
+        "type" : "string",
+        "enum" : [ "PLATFORM", "SPECIAL", "GENERAL" ]
+      },
+      "EndWorkflowStatusDTO" : {
+        "type" : "string",
+        "enum" : [ "SUCCESS", "FAILURE" ]
+      },
+      "IoSendMessageResultDTO" : {
+        "type" : "string",
+        "enum" : [ "NOT_SENT_OPTIN_ALREADY_SENT", "SENT_COURTESY", "SENT_OPTIN" ]
+      },
       "LegalFactsIdV20DTO" : {
         "type" : "object",
         "properties" : {
@@ -1033,9 +1122,54 @@
         },
         "required" : [ "category", "key" ]
       },
+      "NotificationRefusedErrorV25DTO" : {
+        "type" : "object",
+        "properties" : {
+          "errorCode" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "detail" : {
+            "type" : "string",
+            "maxLength" : 2048,
+            "minLength" : 0
+          }
+        }
+      },
       "NotificationStatusDTO" : {
         "type" : "string",
         "enum" : [ "IN_VALIDATION", "ACCEPTED", "REFUSED", "DELIVERING", "DELIVERED", "VIEWED", "EFFECTIVE_DATE", "PAID", "UNREACHABLE", "CANCELLED" ]
+      },
+      "PhysicalAddressDTO" : {
+        "type" : "object",
+        "properties" : {
+          "at" : {
+            "type" : "string"
+          },
+          "address" : {
+            "type" : "string"
+          },
+          "addressDetails" : {
+            "type" : "string"
+          },
+          "zip" : {
+            "type" : "string"
+          },
+          "municipality" : {
+            "type" : "string"
+          },
+          "municipalityDetails" : {
+            "type" : "string"
+          },
+          "province" : {
+            "type" : "string"
+          },
+          "foreignState" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "address", "municipality" ]
       },
       "ProgressResponseElementV25DTO" : {
         "type" : "object",
@@ -1061,11 +1195,307 @@
         },
         "required" : [ "element", "eventId" ]
       },
+      "RecipientTypeDTO" : {
+        "type" : "string",
+        "enum" : [ "PF", "PG" ]
+      },
+      "ResponseStatusDTO" : {
+        "type" : "string",
+        "enum" : [ "OK", "KO" ]
+      },
+      "SendingReceiptDTO" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "maxLength" : 1024,
+            "minLength" : 0
+          },
+          "system" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          }
+        }
+      },
+      "ServiceLevelDTO" : {
+        "type" : "string",
+        "enum" : [ "AR_REGISTERED_LETTER", "REGISTERED_LETTER_890" ]
+      },
       "TimelineElementCategoryV23DTO" : {
         "type" : "string",
         "enum" : [ "SENDER_ACK_CREATION_REQUEST", "VALIDATE_NORMALIZE_ADDRESSES_REQUEST", "NORMALIZED_ADDRESS", "REQUEST_ACCEPTED", "SEND_COURTESY_MESSAGE", "GET_ADDRESS", "PUBLIC_REGISTRY_CALL", "PUBLIC_REGISTRY_RESPONSE", "SCHEDULE_ANALOG_WORKFLOW", "SCHEDULE_DIGITAL_WORKFLOW", "PREPARE_DIGITAL_DOMICILE", "SEND_DIGITAL_DOMICILE", "SEND_DIGITAL_PROGRESS", "SEND_DIGITAL_FEEDBACK", "REFINEMENT", "SCHEDULE_REFINEMENT", "DIGITAL_DELIVERY_CREATION_REQUEST", "DIGITAL_SUCCESS_WORKFLOW", "DIGITAL_FAILURE_WORKFLOW", "ANALOG_SUCCESS_WORKFLOW", "ANALOG_FAILURE_WORKFLOW", "PREPARE_SIMPLE_REGISTERED_LETTER", "SEND_SIMPLE_REGISTERED_LETTER", "SEND_SIMPLE_REGISTERED_LETTER_PROGRESS", "NOTIFICATION_VIEWED_CREATION_REQUEST", "NOTIFICATION_VIEWED", "PREPARE_ANALOG_DOMICILE", "SEND_ANALOG_DOMICILE", "SEND_ANALOG_PROGRESS", "SEND_ANALOG_FEEDBACK", "PAYMENT", "COMPLETELY_UNREACHABLE", "COMPLETELY_UNREACHABLE_CREATION_REQUEST", "REQUEST_REFUSED", "AAR_CREATION_REQUEST", "AAR_GENERATION", "NOT_HANDLED", "PROBABLE_SCHEDULING_ANALOG_DATE", "NOTIFICATION_CANCELLATION_REQUEST", "NOTIFICATION_CANCELLED", "PREPARE_ANALOG_DOMICILE_FAILURE", "NOTIFICATION_RADD_RETRIEVED" ]
       },
-      "TimelineElementDetailsV25DTO" : { },
+      "TimelineElementDetailsV25DTO" : {
+        "type" : "object",
+        "properties" : {
+          "legalFactId" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "recIndex" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "oldAddress" : {
+            "$ref" : "#/components/schemas/PhysicalAddressDTO"
+          },
+          "normalizedAddress" : {
+            "$ref" : "#/components/schemas/PhysicalAddressDTO"
+          },
+          "generatedAarUrl" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "physicalAddress" : {
+            "$ref" : "#/components/schemas/PhysicalAddressDTO"
+          },
+          "legalfactId" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "endWorkflowStatus" : {
+            "$ref" : "#/components/schemas/EndWorkflowStatusDTO"
+          },
+          "completionWorkflowDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "legalFactGenerationDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "digitalAddress" : {
+            "$ref" : "#/components/schemas/DigitalAddressDTO"
+          },
+          "digitalAddressSource" : {
+            "$ref" : "#/components/schemas/DigitalAddressSourceDTO"
+          },
+          "isAvailable" : {
+            "type" : "boolean"
+          },
+          "attemptDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "eventTimestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "raddType" : {
+            "type" : "string"
+          },
+          "raddTransactionId" : {
+            "type" : "string",
+            "maxLength" : 512,
+            "minLength" : 0
+          },
+          "delegateInfo" : {
+            "$ref" : "#/components/schemas/DelegateInfoDTO"
+          },
+          "notificationCost" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "deliveryMode" : {
+            "$ref" : "#/components/schemas/DeliveryModeDTO"
+          },
+          "contactPhase" : {
+            "$ref" : "#/components/schemas/ContactPhaseDTO"
+          },
+          "sentAttemptMade" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "sendDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "refusalReasons" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NotificationRefusedErrorV25DTO"
+            }
+          },
+          "schedulingDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "lastAttemptDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "ioSendMessageResult" : {
+            "$ref" : "#/components/schemas/IoSendMessageResultDTO"
+          },
+          "retryNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "nextDigitalAddressSource" : {
+            "$ref" : "#/components/schemas/DigitalAddressSourceDTO"
+          },
+          "nextSourceAttemptsMade" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "nextLastAttemptMadeForSource" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "responseStatus" : {
+            "$ref" : "#/components/schemas/ResponseStatusDTO"
+          },
+          "notificationDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "deliveryFailureCause" : {
+            "type" : "string",
+            "maxLength" : 10,
+            "minLength" : 0
+          },
+          "deliveryDetailCode" : {
+            "type" : "string",
+            "maxLength" : 20,
+            "minLength" : 0
+          },
+          "sendingReceipts" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SendingReceiptDTO"
+            }
+          },
+          "shouldRetry" : {
+            "type" : "boolean"
+          },
+          "serviceLevel" : {
+            "$ref" : "#/components/schemas/ServiceLevelDTO"
+          },
+          "relatedRequestId" : {
+            "type" : "string",
+            "maxLength" : 512,
+            "minLength" : 0
+          },
+          "productType" : {
+            "type" : "string",
+            "maxLength" : 10,
+            "minLength" : 0
+          },
+          "analogCost" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "numberOfPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "envelopeWeight" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "prepareRequestId" : {
+            "type" : "string",
+            "maxLength" : 512,
+            "minLength" : 0
+          },
+          "newAddress" : {
+            "$ref" : "#/components/schemas/PhysicalAddressDTO"
+          },
+          "attachments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AttachmentDetailsDTO"
+            }
+          },
+          "sendRequestId" : {
+            "type" : "string",
+            "maxLength" : 512,
+            "minLength" : 0
+          },
+          "registeredLetterCode" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "aarKey" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
+          },
+          "reasonCode" : {
+            "type" : "string",
+            "maxLength" : 10,
+            "minLength" : 0
+          },
+          "reason" : {
+            "type" : "string",
+            "maxLength" : 2048,
+            "minLength" : 0
+          },
+          "recipientType" : {
+            "$ref" : "#/components/schemas/RecipientTypeDTO"
+          },
+          "amount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "creditorTaxId" : {
+            "type" : "string",
+            "maxLength" : 11,
+            "minLength" : 11,
+            "pattern" : "^\\d+$"
+          },
+          "noticeCode" : {
+            "type" : "string",
+            "maxLength" : 18,
+            "minLength" : 18,
+            "pattern" : "^\\d+$"
+          },
+          "idF24" : {
+            "type" : "string",
+            "maxLength" : 512,
+            "minLength" : 0
+          },
+          "paymentSourceChannel" : {
+            "type" : "string",
+            "maxLength" : 512,
+            "minLength" : 0
+          },
+          "uncertainPaymentDate" : {
+            "type" : "boolean",
+            "deprecated" : true
+          },
+          "schedulingAnalogDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "cancellationRequestId" : {
+            "type" : "string",
+            "maxLength" : 512,
+            "minLength" : 0
+          },
+          "notRefinedRecipientIndexes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "foundAddress" : {
+            "$ref" : "#/components/schemas/PhysicalAddressDTO"
+          },
+          "failureCause" : {
+            "type" : "string",
+            "maxLength" : 10,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "aarKey", "attemptDate", "cancellationRequestId", "contactPhase", "deliveryMode", "digitalAddress", "digitalAddressSource", "eventTimestamp", "generatedAarUrl", "isAvailable", "lastAttemptDate", "normalizedAddress", "notRefinedRecipientIndexes", "notificationCost", "notificationDate", "numberOfPages", "oldAddress", "paymentSourceChannel", "physicalAddress", "raddTransactionId", "raddType", "reason", "reasonCode", "recIndex", "recipientType", "responseStatus", "retryNumber", "schedulingAnalogDate", "sendDate", "sentAttemptMade", "serviceLevel" ]
+      },
       "TimelineElementV25DTO" : {
         "type" : "object",
         "properties" : {
