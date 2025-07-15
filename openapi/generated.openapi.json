@@ -311,107 +311,6 @@
         } ]
       }
     },
-    "/p4pasend/streams/events" : {
-      "get" : {
-        "tags" : [ "Streams" ],
-        "summary" : "retrieve events by stream",
-        "description" : "get events from last stream, if streamid is specified return events from that stream",
-        "operationId" : "getStreamEvents",
-        "parameters" : [ {
-          "name" : "organizationId",
-          "in" : "query",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "name" : "streamId",
-          "in" : "query",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "lastEventId",
-          "in" : "query",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Invalid request",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
-                  }
-                }
-              }
-            }
-          },
-          "403" : {
-            "description" : "Forbidden",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
-                  }
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Streams not found",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
-                  }
-                }
-              }
-            }
-          },
-          "500" : {
-            "description" : "Internal server error",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "BearerAuth" : [ ]
-        } ]
-      }
-    },
     "/p4pasend/send/{sendNotificationId}/status" : {
       "get" : {
         "tags" : [ "Send" ],
@@ -564,6 +463,107 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/p4pasend/send/streams/events" : {
+      "get" : {
+        "tags" : [ "Streams" ],
+        "summary" : "retrieve events by stream",
+        "description" : "get events from last stream, if streamid is specified return events from that stream",
+        "operationId" : "getStreamEvents",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "streamId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "lastEventId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Streams not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                  }
                 }
               }
             }
@@ -1017,6 +1017,61 @@
           }
         },
         "required" : [ "digest", "fileName" ]
+      },
+      "NotificationStatus" : {
+        "type" : "string",
+        "enum" : [ "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED", "COMPLETE", "ACCEPTED" ]
+      },
+      "SendNotificationDTO" : {
+        "type" : "object",
+        "properties" : {
+          "sendNotificationId" : {
+            "type" : "string"
+          },
+          "organizationId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "iun" : {
+            "type" : "string"
+          },
+          "payments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SendNotificationPaymentsDTO"
+            }
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/NotificationStatus"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "organizationId", "payments", "sendNotificationId", "status" ]
+      },
+      "SendNotificationPaymentsDTO" : {
+        "type" : "object",
+        "properties" : {
+          "debtPositionId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "navList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "notificationDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        },
+        "required" : [ "debtPositionId", "navList" ]
       },
       "AttachmentDetailsDTO" : {
         "type" : "object",
@@ -1534,61 +1589,6 @@
             "$ref" : "#/components/schemas/TimelineElementDetailsV25DTO"
           }
         }
-      },
-      "NotificationStatus" : {
-        "type" : "string",
-        "enum" : [ "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED", "COMPLETE", "ACCEPTED" ]
-      },
-      "SendNotificationDTO" : {
-        "type" : "object",
-        "properties" : {
-          "sendNotificationId" : {
-            "type" : "string"
-          },
-          "organizationId" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "iun" : {
-            "type" : "string"
-          },
-          "payments" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/SendNotificationPaymentsDTO"
-            }
-          },
-          "status" : {
-            "$ref" : "#/components/schemas/NotificationStatus"
-          },
-          "errors" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          }
-        },
-        "required" : [ "organizationId", "payments", "sendNotificationId", "status" ]
-      },
-      "SendNotificationPaymentsDTO" : {
-        "type" : "object",
-        "properties" : {
-          "debtPositionId" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "navList" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "notificationDate" : {
-            "type" : "string",
-            "format" : "date-time"
-          }
-        },
-        "required" : [ "debtPositionId", "navList" ]
       },
       "NotificationPriceResponseV23DTO" : {
         "type" : "object",

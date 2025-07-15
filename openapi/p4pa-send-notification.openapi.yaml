@@ -303,7 +303,7 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
-  /streams/events:
+  /send/streams/events:
     get:
       tags:
         - Streams
