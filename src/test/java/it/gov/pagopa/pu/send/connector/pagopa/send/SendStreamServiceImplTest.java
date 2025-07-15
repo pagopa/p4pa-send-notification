@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.pdnd.PdndService;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamListElementDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO;
@@ -78,6 +79,28 @@ class SendStreamServiceImplTest {
 
     //When
     List<StreamListElementDTO> result = service.getStreams(organizationId, accessToken);
+
+    //Then
+    assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenGetStreamEventsThenInvokeClient() {
+    // Given
+    long organizationId = 123L;
+    String orgSendApiKey = "ORG_SEND_API_KEY";
+    String streamId = "streamId";
+
+    List<ProgressResponseElementV25DTO> expectedResult = List.of();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+      .thenReturn(orgSendApiKey);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    Mockito.when(clientMock.getStreamEvents(streamId, null, orgSendApiKey, voucherToken))
+      .thenReturn(expectedResult);
+
+    //When
+    List<ProgressResponseElementV25DTO> result = service.getStreamEvents(streamId, null,organizationId, accessToken);
 
     //Then
     assertSame(expectedResult, result);
