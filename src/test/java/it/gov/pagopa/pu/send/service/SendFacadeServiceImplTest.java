@@ -1,8 +1,10 @@
 package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
+import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
@@ -11,11 +13,13 @@ import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,7 +30,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +50,8 @@ class SendFacadeServiceImplTest {
   private SendNotification2NewNotificationRequestMapper sendNotificationMapperMock;
   @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
+  @Mock
+  private SendStreamService sendStreamServiceMock;
 
   @InjectMocks
   private SendFacadeServiceImpl sendService;
@@ -58,7 +63,8 @@ class SendFacadeServiceImplTest {
       sendServiceMock,
       uploadServiceMock,
       sendNotificationMapperMock,
-      sendNotificationDTOMapperMock
+      sendNotificationDTOMapperMock,
+      sendStreamServiceMock
     );
   }
 
@@ -160,6 +166,14 @@ class SendFacadeServiceImplTest {
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
     response.setNotificationRequestId("NOTIFICATIONREQUESTID");
 
+    StreamCreationRequestV25DTO streamCreationRequestV25DTO = new StreamCreationRequestV25DTO();
+    streamCreationRequestV25DTO.setTitle("SEND-STREAM_"+orgId);
+    streamCreationRequestV25DTO.setEventType(StreamCreationRequestV25DTO.EventTypeEnum.STATUS);
+
+    StreamMetadataResponseV25DTO streamMetadataResponseV25DTO = new StreamMetadataResponseV25DTO();
+    streamMetadataResponseV25DTO.setTitle("SEND-STREAM_"+orgId);
+    streamMetadataResponseV25DTO.setEventType(EventTypeEnum.STATUS);
+
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
@@ -171,6 +185,8 @@ class SendFacadeServiceImplTest {
       .thenReturn(Optional.of(notification));
     Mockito.when(sendNotificationMapperMock.apply(notification))
         .thenReturn(request);
+    Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV25DTO, orgId, accessToken))
+      .thenReturn(streamMetadataResponseV25DTO);
 
     Mockito.when(sendServiceMock.deliveryNotification(request, orgId, accessToken)).thenReturn(response);
 
@@ -219,69 +235,46 @@ class SendFacadeServiceImplTest {
 
   @Test
   void givenValidNotificationWhenRetrieveNotificationDateThenVerify() {
+    // Given
     String accessToken = "ACCESSTOKEN";
     String sendNotificationId = "SENDNOTIFICATIONID";
     Long orgId = 1L;
     String creditorTaxId = "PAXID";
     String noticeCode = "NOTICECODE";
 
-    NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
     OffsetDateTime viewDate = OffsetDateTime.now().minusDays(1);
-    response.setNotificationViewDate(Date.from(viewDate.toInstant()));
+
+    NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
+    response.setNotificationViewDate(viewDate);
 
     Payment payment = new Payment(new PagoPa().creditorTaxId(creditorTaxId).noticeCode(noticeCode));
-    PuPayment puPayment = new PuPayment(1L, payment);
+    PuPayment puPayment = new PuPayment(1L, payment, null);
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
-      .notificationDate(null)
       .recipients(List.of(recipient))
       .build();
 
-    SendNotificationDTO notificationDTO = new SendNotificationDTO();
-    notificationDTO.setNotificationDate(viewDate);
+    SendNotificationDTO expectedDTO = new SendNotificationDTO();
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, noticeCode, orgId, accessToken))
       .thenReturn(response);
-    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.argThat(n ->
-      n.getNotificationDate() != null))).thenReturn(notificationDTO);
+    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.any()))
+      .thenReturn(expectedDTO);
 
+    // When
     SendNotificationDTO result = sendService.retrieveNotificationDate(sendNotificationId, accessToken);
 
+    // Then
     assertNotNull(result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationDate(sendNotificationId, notification.getNotificationDate());
+    assertEquals(expectedDTO, result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock)
+      .updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
     Mockito.verify(sendNotificationDTOMapperMock).apply(Mockito.any());
-  }
-
-  @Test
-  void givenValidNotificationWhenRetrieveNotificationDateAlreadyExistsThenVerifyNoCall() {
-    String accessToken = "ACCESSTOKEN";
-    String sendNotificationId = "SENDNOTIFICATIONID";
-    Long orgId = 1L;
-
-    OffsetDateTime existingDate = OffsetDateTime.now().minusDays(2);
-    SendNotificationNoPII notification = SendNotificationNoPII.builder()
-      .sendNotificationId(sendNotificationId)
-      .organizationId(orgId)
-      .notificationDate(existingDate)
-      .recipients(List.of())
-      .build();
-
-    SendNotificationDTO notificationDTO = new SendNotificationDTO();
-    notificationDTO.setNotificationDate(existingDate);
-
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
-      .thenReturn(Optional.of(notification));
-    Mockito.when(sendNotificationDTOMapperMock.apply(notification)).thenReturn(notificationDTO);
-
-    SendNotificationDTO result = sendService.retrieveNotificationDate(sendNotificationId, accessToken);
-
-    assertNotNull(result);
-    assertEquals(existingDate, result.getNotificationDate());
   }
 
   @Test
@@ -293,7 +286,7 @@ class SendFacadeServiceImplTest {
     String creditorTaxId = "123456789";
 
     Payment payment = new Payment(new PagoPa().noticeCode(nav).creditorTaxId(creditorTaxId));
-    PuPayment puPayment = new PuPayment(1L, payment);
+    PuPayment puPayment = new PuPayment(1L, payment, OffsetDateTime.now());
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
@@ -333,4 +326,64 @@ class SendFacadeServiceImplTest {
     Mockito.verify(sendNotificationNoPIIRepositoryMock).findByOrganizationIdAndNav(organizationId, nav);
     Mockito.verifyNoInteractions(sendServiceMock);
   }
+
+  @Test
+  void givenValidParamsWhenGetStreamEventsThenReturnEvents() {
+    String accessToken = "ACCESSTOKEN";
+    String streamId = "STREAMID";
+    String lastEventId = "LASTEVENTID";
+    Long organizationId = 1L;
+
+    List<ProgressResponseElementV25DTO> expectedEvents = List.of(new ProgressResponseElementV25DTO());
+
+    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId, lastEventId, organizationId, accessToken))
+      .thenReturn(expectedEvents);
+
+    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+
+    assertNotNull(result);
+    assertEquals(expectedEvents, result);
+  }
+
+  @Test
+  void givenEmptyStreamIdWhenGetStreamEventsThenFetchLastStreamAndReturnEvents() {
+    String accessToken = "ACCESSTOKEN";
+    String lastEventId = "LASTEVENTID";
+    UUID streamId = UUID.randomUUID();
+    Long organizationId = 1L;
+
+    StreamListElementDTO lastStream = new StreamListElementDTO();
+    lastStream.setStreamId(streamId);
+
+    List<StreamListElementDTO> streams = List.of(new StreamListElementDTO(), lastStream);
+    List<ProgressResponseElementV25DTO> expectedEvents = List.of(new ProgressResponseElementV25DTO());
+
+    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(streams);
+    Mockito.when(sendStreamServiceMock.getStreamEvents(String.valueOf(streamId), lastEventId, organizationId, accessToken))
+      .thenReturn(expectedEvents);
+
+    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(null, lastEventId, organizationId, accessToken);
+
+    assertNotNull(result);
+    assertEquals(expectedEvents, result);
+  }
+
+  @Test
+  void givenEmptyStreamIdAndNoStreamsWhenGetStreamEventsThenThrowNotFoundException() {
+    String accessToken = "ACCESSTOKEN";
+    String lastEventId = "LASTEVENTID";
+    Long organizationId = 1L;
+
+    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(List.of());
+
+    NotFoundException exception = assertThrows(NotFoundException.class, () ->
+      sendService.getStreamEvents(null, lastEventId, organizationId, accessToken)
+    );
+
+    assertEquals("Streams not found for this organization: " + organizationId, exception.getMessage());
+  }
+
+
+
+
 }

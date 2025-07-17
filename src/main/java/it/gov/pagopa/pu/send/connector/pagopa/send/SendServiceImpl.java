@@ -24,22 +24,22 @@ public class SendServiceImpl implements SendService {
 
   @Override
   public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, Long organizationId, String accessToken) {
-    return client.preloadFiles(preLoadRequestDTO, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(accessToken));
+    return client.preloadFiles(preLoadRequestDTO, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
 
   @Override
   public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, Long organizationId, String accessToken) {
-    return client.deliveryNotification(newNotificationRequestV24DTO, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(accessToken));
+    return client.deliveryNotification(newNotificationRequestV24DTO, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
 
   @Override
   public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, Long organizationId, String accessToken) {
-    return client.notificationStatus(notificationRequestId, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(accessToken));
+    return client.notificationStatus(notificationRequestId, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
 
   @Override
   public NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, Long organizationId, String accessToken) {
-    return client.retrieveNotificationPrice(paTaxId, noticeCode, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(accessToken));
+    return client.retrieveNotificationPrice(paTaxId, noticeCode, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
 
   private String getApiKeyFromOrganization(Long organizationId, String accessToken) {

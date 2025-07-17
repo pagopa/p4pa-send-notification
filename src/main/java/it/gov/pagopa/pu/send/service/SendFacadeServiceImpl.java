@@ -1,7 +1,9 @@
 package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
+import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
@@ -17,6 +19,7 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,18 +35,21 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
+  private final SendStreamService sendStreamService;
 
   public SendFacadeServiceImpl(
     SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
     SendService sendService,
     SendUploadFacadeServiceImpl uploadService,
     SendNotification2NewNotificationRequestMapper sendNotificationMapper,
-    SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
+    SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
+    SendStreamService sendStreamService) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendService = sendService;
     this.uploadService = uploadService;
     this.sendNotificationMapper = sendNotificationMapper;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
+    this.sendStreamService = sendStreamService;
   }
 
   @Transactional
@@ -78,9 +84,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.REGISTERED, notification.getStatus());
-    for(DocumentDTO doc : notification.getDocuments()){
+    for (DocumentDTO doc : notification.getDocuments()) {
       Optional<String> versionId = Optional.empty();
-      if(!doc.getStatus().equals(FileStatus.UPLOADED))
+      if (!doc.getStatus().equals(FileStatus.UPLOADED))
         versionId = uploadService.uploadFile(notification.getOrganizationId(), sendNotificationId, doc);
       if (versionId.isPresent()) {
         sendNotificationNoPIIRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.UPLOADED);
@@ -97,8 +103,11 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.UPLOADED, notification.getStatus());
+    //create stream if not already exists in cache
+    createStream(notification.getOrganizationId(), accessToken);
+
     NewNotificationResponseDTO responseDTO = sendService.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId(), accessToken);
-    if (responseDTO!=null){
+    if (responseDTO != null) {
       sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
       sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
     }
@@ -108,20 +117,20 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   @Override
   public SendNotificationDTO retrieveNotificationDate(String sendNotificationId, String accessToken) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
-    if(notification.getNotificationDate()!=null)
-      return sendNotificationDTOMapper.apply(notification);
 
-    PagoPa payment = notification.getRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa();
-    NotificationPriceResponseV23DTO notificationPriceResponseV23DTO =  sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
+    notification.getRecipients().forEach(puRecipientNoPIIDTO ->
+      puRecipientNoPIIDTO.getPuPayments().forEach(puPayment -> {
+        PagoPa payment = puPayment.getPayment().getPagoPa();
+        NotificationPriceResponseV23DTO notificationPriceResponseV23DTO = sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
 
-    if(notificationPriceResponseV23DTO.getNotificationViewDate()!=null) {
-      notification.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate()
-        .toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
-      sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, notification.getNotificationDate());
-      return sendNotificationDTOMapper.apply(notification);
-    }
+        if (notificationPriceResponseV23DTO.getNotificationViewDate() != null) {
+          puPayment.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
+          sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+        }
+      })
+    );
 
-    return null;
+    return sendNotificationDTOMapper.apply(notification);
   }
 
   @Override
@@ -129,20 +138,20 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
-    if(!notification.getStatus().equals(NotificationStatus.COMPLETE) && !notification.getStatus().equals(NotificationStatus.ACCEPTED))
+    if (!notification.getStatus().equals(NotificationStatus.COMPLETE) && !notification.getStatus().equals(NotificationStatus.ACCEPTED))
       NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
 
     NewNotificationRequestStatusResponseV24DTO notificationStatus = sendService.notificationStatus(notification.getNotificationRequestId(), notification.getOrganizationId(), accessToken);
-    if(notification.getIun()==null && notificationStatus!=null && notificationStatus.getIun() != null){
+    if (notification.getIun() == null && notificationStatus != null && notificationStatus.getIun() != null) {
       sendNotificationNoPIIRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
       notification.setIun(notificationStatus.getIun());
       notification.setStatus(NotificationStatus.ACCEPTED);
     }
     SendNotificationDTO sendNotificationDTO = sendNotificationDTOMapper.apply(notification);
 
-    if(notificationStatus!=null && notificationStatus.getErrors()!=null)
-     sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
-       .map(ProblemErrorDTO::getDetail).toList());
+    if (notificationStatus != null && notificationStatus.getErrors() != null)
+      sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
+        .map(ProblemErrorDTO::getDetail).toList());
 
     return sendNotificationDTO;
   }
@@ -157,10 +166,24 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       .map(PuPayment::getPayment)
       .filter(pagoPa -> nav.equals(pagoPa.getPagoPa().getNoticeCode()))
       .findFirst()
-      .orElseThrow(() -> new NotFoundException("Notification not found with nav: "+ nav));
+      .orElseThrow(() -> new NotFoundException("Notification not found with nav: " + nav));
 
     return sendService.retrieveNotificationPrice(payment.getPagoPa().getCreditorTaxId(),
       payment.getPagoPa().getNoticeCode(), notification.getOrganizationId(), accessToken);
+  }
+
+  @Override
+  public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId,
+    Long organizationId, String accessToken) {
+    if(StringUtils.isBlank(streamId)) {
+      List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
+      if(streams.isEmpty())
+        throw new NotFoundException("Streams not found for this organization: "+organizationId);
+
+      streamId = String.valueOf(streams.getLast().getStreamId());
+    }
+
+    return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
   }
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
@@ -171,5 +194,13 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private SendNotificationNoPII findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
     return sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with nav: " + nav));
+  }
+
+  private void createStream(Long organizationId, String accessToken){
+    StreamCreationRequestV25DTO request  = new StreamCreationRequestV25DTO();
+    request.setTitle("SEND-STREAM_"+organizationId);
+    request.setEventType(EventTypeEnum.STATUS);
+
+    sendStreamService.createStream(request, organizationId, accessToken);
   }
 }

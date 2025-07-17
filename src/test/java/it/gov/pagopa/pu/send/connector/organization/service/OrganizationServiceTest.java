@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.connector.organization.service;
 
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.client.OrganizationApiClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -43,5 +44,22 @@ class OrganizationServiceTest {
 
     // Then
     Assertions.assertSame(apiKey, result);
+  }
+
+  @Test
+  void whenGetOrganizationThenInvokeClient(){
+    // Given
+    Long organizationId = 1L;
+    String accessToken = "accessToken";
+    Organization organization = new Organization();
+
+    Mockito.when(organizationApiClientMock.findByOrganizationId(organizationId, accessToken))
+      .thenReturn(organization);
+
+    // When
+    Organization result = service.getOrganization(organizationId, accessToken);
+
+    // Then
+    Assertions.assertSame(organization, result);
   }
 }

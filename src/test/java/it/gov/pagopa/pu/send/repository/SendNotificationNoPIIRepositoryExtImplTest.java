@@ -150,7 +150,7 @@ class SendNotificationNoPIIRepositoryExtImplTest {
       SendNotificationNoPII.class))).thenReturn(updateResult);
     Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
 
-    UpdateResult result = repository.updateNotificationDate(sendNotificationId,now);
+    UpdateResult result = repository.updateNotificationDate(sendNotificationId,now,"nav");
 
     assertEquals(1L, result.getModifiedCount());
     Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(

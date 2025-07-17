@@ -12,7 +12,7 @@ import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
-import java.time.OffsetDateTime;
+
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
@@ -31,11 +31,9 @@ class SendNotificationPIIMapperTest {
   @Mock
   private DataCipherService dataCipherService;
   private SendNotificationPIIMapper sendNotificationPIIMapper;
-  private static OffsetDateTime now;
 
   @BeforeEach
   void setUp() {
-    now = OffsetDateTime.now();
     sendNotificationPIIMapper = new SendNotificationPIIMapper(personalDataService, dataCipherService);
   }
 
@@ -75,7 +73,6 @@ class SendNotificationPIIMapperTest {
     assertEquals(noPii.getPaFee(), result.getPaFee());
     assertEquals(noPii.getVat(), result.getVat());
     assertEquals(noPii.getPagoPaIntMode(), result.getPagoPaIntMode());
-    assertEquals(noPii.getNotificationDate(), result.getNotificationDate());
     assertSame(noPii, result.getNoPII());
   }
 
@@ -131,7 +128,6 @@ class SendNotificationPIIMapperTest {
     noPii.setPaFee(0);
     noPii.setVat(22);
     noPii.setPagoPaIntMode("PA");
-    noPii.setNotificationDate(now);
     return noPii;
   }
 

@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.config;
 
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,28 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> apisHolder.getNotificationPriceApi(apiKey, voucherToken)
         .retrieveNotificationPriceV23("PATAXID","NOTICECODE"),
+      new ParameterizedTypeReference<>() {},
+      () -> {},
+      AUTH_TYPE.API_KEY,
+      "x-api-key");
+  }
+
+  @Test
+  void whenGetStreamsApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      apiKey -> apisHolder.getStreamsApi(apiKey, voucherToken)
+        .listEventStreamsV25(),
+      new ParameterizedTypeReference<>() {},
+      () -> {},
+      AUTH_TYPE.API_KEY,
+      "x-api-key");
+  }
+
+  @Test
+  void whenGetEventsApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      apiKey -> apisHolder.getEventsApi(apiKey, voucherToken)
+        .consumeEventStreamV25(UUID.randomUUID(),null),
       new ParameterizedTypeReference<>() {},
       () -> {},
       AUTH_TYPE.API_KEY,

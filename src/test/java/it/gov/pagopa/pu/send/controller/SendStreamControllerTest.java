@@ -1,0 +1,55 @@
+package it.gov.pagopa.pu.send.controller;
+
+import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO;
+import it.gov.pagopa.pu.send.service.SendFacadeService;
+import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
+import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+@ExtendWith(MockitoExtension.class)
+class SendStreamControllerTest {
+
+  @Mock
+  private SendFacadeService sendFacadeServiceMock;
+
+  @InjectMocks
+  private SendStreamController sendStreamController;
+
+  private final String accessToken = "ACCESSTOKEN";
+
+  @BeforeEach
+  void init(){
+    SecurityUtilsTest.configureSecurityContext(accessToken, "USERID");
+  }
+  @AfterEach
+  void clear(){
+    SecurityUtilsTest.clearSecurityContext();
+  }
+
+  @Test
+  void givenOrganizationIdAndStreamIdWhenGetStreamEventsThenOk(){
+    Long organizationId = 1L;
+    String streamId = "STREAMID";
+    List<ProgressResponseElementV25DTO> expectedResult = List.of();
+
+    Mockito.when(sendFacadeServiceMock.getStreamEvents(streamId, null, organizationId, accessToken))
+      .thenReturn(expectedResult);
+
+    ResponseEntity<List<ProgressResponseElementV25DTO>> response = sendStreamController
+      .getStreamEvents(organizationId, streamId, null);
+
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
+  }
+}

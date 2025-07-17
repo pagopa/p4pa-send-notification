@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.connector.organization.client;
 
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.send.connector.organization.config.OrganizationApisHolder;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,16 @@ public class OrganizationApiClient {
     try{
       return organizationApisHolder.getOrganizationApi(accessToken)
         .getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND);
+    } catch (HttpClientErrorException.NotFound e){
+      log.info("Cannot find organization api key having organizationId {}", organizationId);
+      return null;
+    }
+  }
+
+  public Organization findByOrganizationId(Long organizationId, String accessToken) {
+    try{
+      return organizationApisHolder.getOrganizationEntityControllerApi(accessToken)
+        .crudGetOrganization(String.valueOf(organizationId));
     } catch (HttpClientErrorException.NotFound e){
       log.info("Cannot find organization having organizationId {}", organizationId);
       return null;
