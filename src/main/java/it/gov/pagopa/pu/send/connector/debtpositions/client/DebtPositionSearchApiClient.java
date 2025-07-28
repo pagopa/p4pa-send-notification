@@ -2,9 +2,13 @@ package it.gov.pagopa.pu.send.connector.debtpositions.client;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
 import it.gov.pagopa.pu.send.connector.debtpositions.config.DebtPositionApisHolder;
+import it.gov.pagopa.pu.send.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -17,13 +21,15 @@ public class DebtPositionSearchApiClient {
   }
 
   public DebtPosition findDebtPositionByInstallment(Long organizationId, String nav, String accessToken) {
-    try{
-      return debtPositionApisHolder.getDebtPositionSearchApi(accessToken)
-        .crudDebtPositionsFindByOrganizationIdAndInstallmentNav(organizationId, nav);
-    } catch (HttpClientErrorException.NotFound e){
-      log.info("Cannot find DebtPosition related to organizationId {} and NAV {}", organizationId, nav);
-      return null;
-    }
+      List<DebtPosition> debtPositions = Objects.requireNonNull(debtPositionApisHolder.getDebtPositionSearchApi(accessToken)
+          .crudDebtPositionsFindByOrganizationIdAndInstallmentNav(organizationId, nav, Constants.ORDINARY_DEBT_POSITION_ORIGINS)
+          .getEmbedded())
+        .getDebtPositions();
+     if(CollectionUtils.isEmpty(debtPositions)){
+       return null;
+     } else {
+       return debtPositions.getFirst();
+     }
   }
 
 }

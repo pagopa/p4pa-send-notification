@@ -12,6 +12,8 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class DebtPositionApisHolderTest extends BaseApiHolderTest {
   @Mock
@@ -40,7 +42,7 @@ class DebtPositionApisHolderTest extends BaseApiHolderTest {
   void whenGetOrganizationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       token -> apisHolder.getDebtPositionSearchApi(token)
-        .crudDebtPositionsFindByOrganizationIdAndInstallmentNav(1L, "NAV"),
+        .crudDebtPositionsFindByOrganizationIdAndInstallmentNav(1L, "NAV", List.of()),
       new ParameterizedTypeReference<>() {},
       apisHolder::unload);
   }
