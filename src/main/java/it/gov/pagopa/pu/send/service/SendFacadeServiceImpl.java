@@ -162,7 +162,8 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     // Validate status
     NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
-    Payment payment = notification.getRecipients().getFirst().getPuPayments().stream()
+    Payment payment = notification.getRecipients().stream()
+      .flatMap(recipient -> recipient.getPuPayments().stream())
       .map(PuPayment::getPayment)
       .filter(pagoPa -> nav.equals(pagoPa.getPagoPa().getNoticeCode()))
       .findFirst()
@@ -174,11 +175,11 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   @Override
   public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId,
-    Long organizationId, String accessToken) {
-    if(StringUtils.isBlank(streamId)) {
+                                                             Long organizationId, String accessToken) {
+    if (StringUtils.isBlank(streamId)) {
       List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
-      if(streams.isEmpty())
-        throw new NotFoundException("Streams not found for this organization: "+organizationId);
+      if (streams.isEmpty())
+        throw new NotFoundException("Streams not found for this organization: " + organizationId);
 
       streamId = String.valueOf(streams.getLast().getStreamId());
     }
@@ -196,9 +197,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with nav: " + nav));
   }
 
-  private void createStream(Long organizationId, String accessToken){
-    StreamCreationRequestV25DTO request  = new StreamCreationRequestV25DTO();
-    request.setTitle("SEND-STREAM_"+organizationId);
+  private void createStream(Long organizationId, String accessToken) {
+    StreamCreationRequestV25DTO request = new StreamCreationRequestV25DTO();
+    request.setTitle("SEND-STREAM_" + organizationId);
     request.setEventType(EventTypeEnum.STATUS);
 
     sendStreamService.createStream(request, organizationId, accessToken);
