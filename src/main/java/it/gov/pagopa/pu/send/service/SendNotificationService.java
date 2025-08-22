@@ -8,4 +8,5 @@ public interface SendNotificationService {
   StartNotificationResponse startSendNotification(String sendNotificationId, LoadFileRequest loadFileRequest, String accessToken);
   void deleteSendNotification(String sendNotificationId);
   SendNotificationDTO findSendNotificationDTO(String sendNotificationId);
+  SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav);
 }
