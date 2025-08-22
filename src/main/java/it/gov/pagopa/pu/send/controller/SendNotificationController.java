@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -42,6 +41,12 @@ public class SendNotificationController implements NotificationApi {
     log.info("delete notification request for sendNotificationId {}", sendNotificationId);
     sendNotificationService.deleteSendNotification(sendNotificationId);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<SendNotificationDTO> findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
+    log.info("Retrieving sendNotification  having organizationId {} and nav {}" , organizationId, nav);
+    return ResponseEntity.ok(sendNotificationService.findSendNotificationByOrgIdAndNav(organizationId, nav));
   }
 
   @Override
