@@ -220,4 +220,38 @@ class SendNotificationServiceImplTest {
     Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotificationDTO(sendNotificationId));
   }
 
+  @Test
+  void givenExistentNotificationWhenFindSendNotificationByOrgIdAndNavThenReturnIt(){
+    // Given
+    Long organizationId = 1L;
+    String nav = "NAV";
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+      .thenReturn(expectedResult);
+
+    // When
+    SendNotificationDTO result = sendNotificationService.findSendNotificationByOrgIdAndNav(organizationId, nav);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNotExistentNotificationWhenFindSendNotificationByOrgIdAndNavThenThrowNotFoundException(){
+    // Given
+    Long organizationId = 1L;
+    String nav = "NAV";
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+      .thenReturn(Optional.empty());
+
+    // When, Then
+    Assertions.assertThrows(SendNotificationNotFoundException.class, () ->
+      sendNotificationService.findSendNotificationByOrgIdAndNav(organizationId, nav));
+  }
+
 }

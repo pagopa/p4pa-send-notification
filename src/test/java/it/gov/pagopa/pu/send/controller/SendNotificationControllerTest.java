@@ -163,4 +163,23 @@ class SendNotificationControllerTest {
     Assertions.assertSame(expectedResponse, response.getBody());
   }
 
+  @Test
+  void whenFindSendNotificationByOrgIdAndNavThenInvokeService(){
+    //Given
+    Long organizationId = 1L;
+    String nav = "NAV";
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationServiceMock.findSendNotificationByOrgIdAndNav(organizationId, nav))
+      .thenReturn(expectedResult);
+
+    // When
+    //Then
+    ResponseEntity<SendNotificationDTO> response = sendNotificationController.findSendNotificationByOrgIdAndNav(organizationId, nav);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
+  }
+
+
 }
