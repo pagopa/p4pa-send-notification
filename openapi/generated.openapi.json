@@ -26,7 +26,7 @@
     "description" : "the Streams API"
   } ],
   "paths" : {
-    "/p4pasend/crud-ext/notification/by-sendNotificationId-status" : {
+    "/p4pasend/notification/by-sendNotificationId-status" : {
       "put" : {
         "tags" : [ "send-notification-entity-extended-controller" ],
         "operationId" : "updateNotificationStatus",

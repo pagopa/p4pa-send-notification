@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.controller.generated.NotificationApi;
 import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -64,5 +65,11 @@ public class SendNotificationController implements NotificationApi {
   public ResponseEntity<SendNotificationDTO> getSendNotification(String sendNotificationId) {
     log.info("Retrieving sendNotificationId {}", sendNotificationId);
     return ResponseEntity.ok(sendNotificationService.findSendNotificationDTO(sendNotificationId));
+  }
+
+  @Override
+  public ResponseEntity<Void> updateNotificationStatus(Long sendNotificationId, String status) {
+    sendNotificationService.updateNotificationStatus(String.valueOf(sendNotificationId), NotificationStatus.valueOf(status));
+    return ResponseEntity.ok().build();
   }
 }
