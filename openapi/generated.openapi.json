@@ -16,9 +16,6 @@
     "name" : "Notification",
     "description" : "the Notification API"
   }, {
-    "name" : "send-notification-entity-extended-controller",
-    "description" : "the send-notification-entity-extended-controller API"
-  }, {
     "name" : "Send",
     "description" : "the Send API"
   }, {
@@ -28,7 +25,7 @@
   "paths" : {
     "/p4pasend/notification/by-sendNotificationId-status" : {
       "put" : {
-        "tags" : [ "send-notification-entity-extended-controller" ],
+        "tags" : [ "Notification" ],
         "operationId" : "updateNotificationStatus",
         "parameters" : [ {
           "name" : "sendNotificationId",
