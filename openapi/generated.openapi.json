@@ -1099,7 +1099,7 @@
       },
       "NotificationStatus" : {
         "type" : "string",
-        "enum" : [ "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED", "COMPLETE", "ACCEPTED" ]
+        "enum" : [ "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED", "COMPLETE", "ACCEPTED", "ERROR" ]
       },
       "SendNotificationDTO" : {
         "type" : "object",

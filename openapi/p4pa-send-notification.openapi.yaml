@@ -374,6 +374,34 @@ paths:
           description: Streams not found
         '500':
           description: Internal server error
+  /crud-ext/notification/by-sendNotificationId-status:
+    put:
+      tags:
+        - send-notification-entity-extended-controller
+      operationId: updateNotificationStatus
+      parameters:
+        - name: sendNotificationId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - WAITING_FILE
+              - SENDING
+              - REGISTERED
+              - UPLOADED
+              - COMPLETE
+              - ACCEPTED
+              - ERROR
+      responses:
+        '200':
+          description: OK
 security:
   - BearerAuth: []
 components:
