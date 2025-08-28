@@ -16,6 +16,9 @@
     "name" : "Notification",
     "description" : "the Notification API"
   }, {
+    "name" : "send-notification-entity-extended-controller",
+    "description" : "the send-notification-entity-extended-controller API"
+  }, {
     "name" : "Send",
     "description" : "the Send API"
   }, {
@@ -23,6 +26,36 @@
     "description" : "the Streams API"
   } ],
   "paths" : {
+    "/p4pasend/crud-ext/notification/by-sendNotificationId-status" : {
+      "put" : {
+        "tags" : [ "send-notification-entity-extended-controller" ],
+        "operationId" : "updateNotificationStatus",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/send/{sendNotificationId}/preload" : {
       "post" : {
         "tags" : [ "Send" ],
