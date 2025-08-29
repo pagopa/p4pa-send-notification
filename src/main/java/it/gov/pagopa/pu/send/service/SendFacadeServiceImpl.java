@@ -149,9 +149,12 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     }
     SendNotificationDTO sendNotificationDTO = sendNotificationDTOMapper.apply(notification);
 
-    if (notificationStatus != null && notificationStatus.getErrors() != null)
+    if (notificationStatus != null && notificationStatus.getErrors() != null && !notificationStatus.getErrors().isEmpty()) {
       sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
         .map(ProblemErrorDTO::getDetail).toList());
+      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
+      sendNotificationDTO.setStatus(NotificationStatus.ERROR);
+    }
 
     return sendNotificationDTO;
   }

@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
@@ -230,6 +231,53 @@ class SendFacadeServiceImplTest {
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      .updateNotificationIun(sendNotificationId, response.getIun());
+  }
+
+  @Test
+  void givenValidNotificationWhenNotificationStatusThenErrors() {
+    String accessToken = "ACCESSTOKEN";
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String notificationRequestId = "REQUESTID";
+    Long orgId = 1L;
+
+    ProblemErrorDTO error = new ProblemErrorDTO();
+    error.setCode("001");
+    error.setDetail("ERROR");
+    error.setElement("EL");
+
+    UpdateResult updateResult = UpdateResult.acknowledged(1, 1L, null);
+
+    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    response.setIun("IUN");
+    response.setErrors(List.of(error));
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .notificationRequestId(notificationRequestId)
+      .status(NotificationStatus.COMPLETE)
+      .build();
+
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+    expectedResult.setStatus(NotificationStatus.ERROR);
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    Mockito.when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
+
+    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+      .thenReturn(expectedResult);
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR))
+      .thenReturn(updateResult);
+
+    SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
+
+    assertNotNull(result);
+    Assertions.assertSame(expectedResult, result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(2))
       .updateNotificationIun(sendNotificationId, response.getIun());
   }
 
