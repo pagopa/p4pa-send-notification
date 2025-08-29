@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
@@ -106,10 +107,22 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     return sendNotificationDTOMapper.apply(findSendNotification(sendNotificationId));
   }
 
+  @Override
+  public SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
+    return sendNotificationDTOMapper.apply(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
+      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with orgId "+organizationId+" and nav " + nav)));
+  }
+
+  @Override
+  public UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus) {
+    return sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, newStatus);
+  }
+
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }
+
 
   private void updateFileStatus(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest, Long organizationId) {
     NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());

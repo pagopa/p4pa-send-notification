@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
@@ -13,13 +14,17 @@ import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+
+import java.util.ArrayList;
 import java.util.UUID;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -57,7 +62,7 @@ class SendFacadeServiceImplTest {
   private SendFacadeServiceImpl sendService;
 
   @AfterEach
-  void verifyNoMoreInteractions(){
+  void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(
       sendNotificationNoPIIRepositoryMock,
       sendServiceMock,
@@ -167,11 +172,11 @@ class SendFacadeServiceImplTest {
     response.setNotificationRequestId("NOTIFICATIONREQUESTID");
 
     StreamCreationRequestV25DTO streamCreationRequestV25DTO = new StreamCreationRequestV25DTO();
-    streamCreationRequestV25DTO.setTitle("SEND-STREAM_"+orgId);
+    streamCreationRequestV25DTO.setTitle("SEND-STREAM_" + orgId);
     streamCreationRequestV25DTO.setEventType(StreamCreationRequestV25DTO.EventTypeEnum.STATUS);
 
     StreamMetadataResponseV25DTO streamMetadataResponseV25DTO = new StreamMetadataResponseV25DTO();
-    streamMetadataResponseV25DTO.setTitle("SEND-STREAM_"+orgId);
+    streamMetadataResponseV25DTO.setTitle("SEND-STREAM_" + orgId);
     streamMetadataResponseV25DTO.setEventType(EventTypeEnum.STATUS);
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
@@ -184,7 +189,7 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendNotificationMapperMock.apply(notification))
-        .thenReturn(request);
+      .thenReturn(request);
     Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV25DTO, orgId, accessToken))
       .thenReturn(streamMetadataResponseV25DTO);
 
@@ -234,6 +239,112 @@ class SendFacadeServiceImplTest {
   }
 
   @Test
+  void givenValidNotificationErrorNonNullButEmptyWhenNotificationStatusThenVerify() {
+    String accessToken = "ACCESSTOKEN";
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String notificationRequestId = "REQUESTID";
+    Long orgId = 1L;
+
+    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    response.setIun("IUN");
+    response.setErrors(new ArrayList<>());
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .notificationRequestId(notificationRequestId)
+      .status(NotificationStatus.COMPLETE)
+      .build();
+
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    Mockito.when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
+
+    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+      .thenReturn(expectedResult);
+
+    SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
+
+    assertNotNull(result);
+    Assertions.assertSame(expectedResult, result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      .updateNotificationIun(sendNotificationId, response.getIun());
+  }
+
+  @Test
+  void givenValidNotificationInSendingWhenNotificationStatusThenVerify() {
+    String accessToken = "ACCESSTOKEN";
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String notificationRequestId = "REQUESTID";
+    Long orgId = 1L;
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .notificationRequestId(notificationRequestId)
+      .status(NotificationStatus.SENDING)
+      .build();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    assertThrows(InvalidStatusException.class,
+      () -> sendService.notificationStatus(sendNotificationId, accessToken));
+  }
+
+  @Test
+  void givenValidNotificationWhenNotificationStatusThenErrors() {
+    String accessToken = "ACCESSTOKEN";
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String notificationRequestId = "REQUESTID";
+    Long orgId = 1L;
+
+    ProblemErrorDTO error = new ProblemErrorDTO();
+    error.setCode("001");
+    error.setDetail("ERROR");
+    error.setElement("EL");
+
+    UpdateResult updateResult = UpdateResult.acknowledged(1, 1L, null);
+
+    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    response.setIun("IUN");
+    response.setErrors(List.of(error));
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .notificationRequestId(notificationRequestId)
+      .status(NotificationStatus.COMPLETE)
+      .build();
+
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+    expectedResult.setStatus(NotificationStatus.ERROR);
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    Mockito.when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
+
+    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+      .thenReturn(expectedResult);
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR))
+      .thenReturn(updateResult);
+
+    SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
+
+    assertNotNull(result);
+    Assertions.assertSame(expectedResult, result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      .updateNotificationIun(sendNotificationId, response.getIun());
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      .updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
+  }
+
+  @Test
   void givenValidNotificationWhenRetrieveNotificationDateThenVerify() {
     // Given
     String accessToken = "ACCESSTOKEN";
@@ -276,6 +387,74 @@ class SendFacadeServiceImplTest {
       .updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
     Mockito.verify(sendNotificationDTOMapperMock).apply(Mockito.any());
   }
+
+  @Test
+  void givenNotificationWithNullNotificationStatusWhenNotificationStatusThenReturnDTO() {
+    String accessToken = "ACCESSTOKEN";
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    Long orgId = 1L;
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .notificationRequestId("REQUESTID")
+      .status(NotificationStatus.COMPLETE)
+      .build();
+
+    SendNotificationDTO expectedDTO = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    Mockito.when(sendServiceMock.notificationStatus("REQUESTID", orgId, accessToken))
+      .thenReturn(null);
+
+    Mockito.when(sendNotificationDTOMapperMock.apply(notification))
+      .thenReturn(expectedDTO);
+
+    SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
+
+    assertNotNull(result);
+    assertEquals(expectedDTO, result);
+    Mockito.verify(sendNotificationDTOMapperMock).apply(notification);
+  }
+
+  @Test
+  void givenNotificationStatusWithNullErrorsWhenNotificationStatusThenReturnDTO() {
+    String accessToken = "ACCESSTOKEN";
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    Long orgId = 1L;
+
+    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    response.setIun("IUN");
+    response.setErrors(null);
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .notificationRequestId("REQUESTID")
+      .status(NotificationStatus.COMPLETE)
+      .build();
+
+    SendNotificationDTO expectedDTO = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    Mockito.when(sendServiceMock.notificationStatus("REQUESTID", orgId, accessToken))
+      .thenReturn(response);
+
+    Mockito.when(sendNotificationDTOMapperMock.apply(notification))
+      .thenReturn(expectedDTO);
+
+    SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
+
+    assertNotNull(result);
+    assertEquals(expectedDTO, result);
+    Mockito.verify(sendNotificationDTOMapperMock).apply(notification);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationIun(sendNotificationId, "IUN");
+  }
+
 
   @Test
   void givenValidOrganizationIdAndNavWhenRetrieveNotificationPriceThenSuccess() {
@@ -382,8 +561,6 @@ class SendFacadeServiceImplTest {
 
     assertEquals("Streams not found for this organization: " + organizationId, exception.getMessage());
   }
-
-
 
 
 }

@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.controller.generated.NotificationApi;
 import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -45,6 +45,12 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
+  public ResponseEntity<SendNotificationDTO> findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
+    log.info("Retrieving sendNotification  having organizationId {} and nav {}" , organizationId, nav);
+    return ResponseEntity.ok(sendNotificationService.findSendNotificationByOrgIdAndNav(organizationId, nav));
+  }
+
+  @Override
   public ResponseEntity<StartNotificationResponse> startNotification(String sendNotificationId, LoadFileRequest loadFileRequest) {
     log.info("start notification request for sendNotificationId {}", sendNotificationId);
     String accessToken = SecurityUtils.getAccessToken();
@@ -59,5 +65,11 @@ public class SendNotificationController implements NotificationApi {
   public ResponseEntity<SendNotificationDTO> getSendNotification(String sendNotificationId) {
     log.info("Retrieving sendNotificationId {}", sendNotificationId);
     return ResponseEntity.ok(sendNotificationService.findSendNotificationDTO(sendNotificationId));
+  }
+
+  @Override
+  public ResponseEntity<Void> updateNotificationStatus(Long sendNotificationId, String status) {
+    sendNotificationService.updateNotificationStatus(String.valueOf(sendNotificationId), NotificationStatus.valueOf(status));
+    return ResponseEntity.ok().build();
   }
 }

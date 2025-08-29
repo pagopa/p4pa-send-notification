@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.citizen.model.PersonalData;
 import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
@@ -219,5 +220,63 @@ class SendNotificationServiceImplTest {
     // When, Then
     Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotificationDTO(sendNotificationId));
   }
+
+  @Test
+  void givenExistentNotificationWhenFindSendNotificationByOrgIdAndNavThenReturnIt(){
+    // Given
+    Long organizationId = 1L;
+    String nav = "NAV";
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+      .thenReturn(expectedResult);
+
+    // When
+    SendNotificationDTO result = sendNotificationService.findSendNotificationByOrgIdAndNav(organizationId, nav);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNotExistentNotificationWhenFindSendNotificationByOrgIdAndNavThenThrowNotFoundException(){
+    // Given
+    Long organizationId = 1L;
+    String nav = "NAV";
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+      .thenReturn(Optional.empty());
+
+    // When, Then
+    Assertions.assertThrows(SendNotificationNotFoundException.class, () ->
+      sendNotificationService.findSendNotificationByOrgIdAndNav(organizationId, nav));
+  }
+
+  @Test
+  void whenUpdateNotificationStatus_thenInvokeRepositoryAndReturnResult() {
+    // Given
+    String sendNotificationId = "123";
+    NotificationStatus status = NotificationStatus.ERROR;
+    UpdateResult expectedResult = UpdateResult.acknowledged(1, 1L, null);
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(sendNotificationId, status))
+      .thenReturn(expectedResult);
+
+    // When
+    UpdateResult result = sendNotificationService.updateNotificationStatus(sendNotificationId, status);
+
+    // Then
+    Assertions.assertNotNull(result);
+    Assertions.assertTrue(result.wasAcknowledged());
+    Assertions.assertEquals(1, result.getMatchedCount());
+    Assertions.assertEquals(1, result.getModifiedCount());
+    Assertions.assertSame(expectedResult, result);
+
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatus(sendNotificationId, status);
+  }
+
 
 }

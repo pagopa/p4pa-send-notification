@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
+import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
@@ -161,6 +162,42 @@ class SendNotificationControllerTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertSame(expectedResponse, response.getBody());
+  }
+
+  @Test
+  void whenFindSendNotificationByOrgIdAndNavThenInvokeService(){
+    //Given
+    Long organizationId = 1L;
+    String nav = "NAV";
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationServiceMock.findSendNotificationByOrgIdAndNav(organizationId, nav))
+      .thenReturn(expectedResult);
+
+    // When
+    //Then
+    ResponseEntity<SendNotificationDTO> response = sendNotificationController.findSendNotificationByOrgIdAndNav(organizationId, nav);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
+  }
+
+  @Test
+  void whenUpdateNotificationStatusThenReturnOk() {
+    // Given
+    Long sendNotificationId = 123L;
+    String status = "ERROR";
+    UpdateResult updateResult = UpdateResult.acknowledged(1, 1L, null);
+
+    Mockito.when(sendNotificationServiceMock.updateNotificationStatus(String.valueOf(sendNotificationId), NotificationStatus.valueOf(status)))
+      .thenReturn(updateResult);
+
+    // When
+    ResponseEntity<Void> response = sendNotificationController.updateNotificationStatus(sendNotificationId, status);
+
+    // Then
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
 }

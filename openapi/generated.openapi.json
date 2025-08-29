@@ -23,6 +23,36 @@
     "description" : "the Streams API"
   } ],
   "paths" : {
+    "/p4pasend/notification/by-sendNotificationId-status" : {
+      "put" : {
+        "tags" : [ "Notification" ],
+        "operationId" : "updateNotificationStatus",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/send/{sendNotificationId}/preload" : {
       "post" : {
         "tags" : [ "Send" ],
@@ -780,6 +810,85 @@
           "BearerAuth" : [ ]
         } ]
       }
+    },
+    "/p4pasend/notification/findByOrgIdAndNav" : {
+      "get" : {
+        "tags" : [ "Notification" ],
+        "summary" : "get send notification by orgid and nav",
+        "description" : "get send notification by orgid and nav",
+        "operationId" : "findSendNotificationByOrgIdAndNav",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "nav",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Notification not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
     }
   },
   "components" : {
@@ -1020,7 +1129,7 @@
       },
       "NotificationStatus" : {
         "type" : "string",
-        "enum" : [ "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED", "COMPLETE", "ACCEPTED" ]
+        "enum" : [ "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED", "COMPLETE", "ACCEPTED", "ERROR" ]
       },
       "SendNotificationDTO" : {
         "type" : "object",
