@@ -277,8 +277,10 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(2))
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      .updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
   }
 
   @Test
