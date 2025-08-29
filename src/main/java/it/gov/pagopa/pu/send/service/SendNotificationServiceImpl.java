@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
@@ -110,6 +111,11 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   public SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
     return sendNotificationDTOMapper.apply(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with orgId "+organizationId+" and nav " + nav)));
+  }
+
+  @Override
+  public UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus) {
+    return sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, newStatus);
   }
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
