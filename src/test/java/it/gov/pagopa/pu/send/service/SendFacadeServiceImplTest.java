@@ -33,6 +33,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -562,5 +563,45 @@ class SendFacadeServiceImplTest {
     assertEquals("Streams not found for this organization: " + organizationId, exception.getMessage());
   }
 
+  @Test
+  void givenInvalidNotificationWhenDeliveryNotificationThenError() {
+    String accessToken = "ACCESSTOKEN";
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    Long orgId = 1L;
+
+    StreamCreationRequestV25DTO streamCreationRequestV25DTO = new StreamCreationRequestV25DTO();
+    streamCreationRequestV25DTO.setTitle("SEND-STREAM_" + orgId);
+    streamCreationRequestV25DTO.setEventType(StreamCreationRequestV25DTO.EventTypeEnum.STATUS);
+
+    StreamMetadataResponseV25DTO streamMetadataResponseV25DTO = new StreamMetadataResponseV25DTO();
+    streamMetadataResponseV25DTO.setTitle("SEND-STREAM_" + orgId);
+    streamMetadataResponseV25DTO.setEventType(EventTypeEnum.STATUS);
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .status(NotificationStatus.UPLOADED)
+      .build();
+
+    NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendNotificationMapperMock.apply(notification))
+      .thenReturn(request);
+
+    Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV25DTO, orgId, accessToken))
+      .thenReturn(streamMetadataResponseV25DTO);
+
+    Mockito.when(sendServiceMock.deliveryNotification(request, orgId, accessToken))
+      .thenThrow(HttpClientErrorException.Conflict.class);
+
+    sendService.deliveryNotification(sendNotificationId, accessToken);
+
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      .updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never())
+      .updateNotificationRequestId(Mockito.anyString(), Mockito.anyString());
+  }
 
 }
