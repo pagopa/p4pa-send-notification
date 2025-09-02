@@ -20,9 +20,11 @@ import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.ZoneId;
 import java.util.List;
@@ -113,9 +115,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
         sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
         sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
       }
-    } catch (HttpClientErrorException.Conflict ex) {
+    }  catch (HttpClientErrorException.Conflict ex) {
       sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
-      throw ex;
+      throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
     }
   }
 
