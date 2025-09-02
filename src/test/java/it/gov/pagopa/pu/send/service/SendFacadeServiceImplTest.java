@@ -35,6 +35,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -597,7 +598,7 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendServiceMock.deliveryNotification(request, orgId, accessToken))
       .thenThrow(HttpClientErrorException.Conflict.class);
 
-    Assertions.assertThrows(HttpClientErrorException.Conflict.class, () -> sendService.deliveryNotification(sendNotificationId, accessToken));
+    Assertions.assertThrows(ResponseStatusException.class, () -> sendService.deliveryNotification(sendNotificationId, accessToken));
 
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
