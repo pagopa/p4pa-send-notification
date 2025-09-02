@@ -115,6 +115,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       }
     } catch (HttpClientErrorException.Conflict ex) {
       sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
+      throw ex;
     }
   }
 
