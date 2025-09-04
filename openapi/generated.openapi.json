@@ -1081,7 +1081,7 @@
             "$ref" : "#/components/schemas/F24Payment"
           }
         },
-        "required" : [ "f24", "pagoPa" ]
+        "required" : [ "pagoPa" ]
       },
       "PhysicalCommunicationTypeEnum" : {
         "type" : "string",

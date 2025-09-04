@@ -72,6 +72,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.setPagoPaIntMode(null);
     sendNotification.getPuRecipients().getFirst().getRecipient().setDigitalDomicile(null);
     sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().setAttachment(null);
+    sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().setF24(null);
     SendNotificationNoPII noPII = new SendNotificationNoPII();
 
     Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);

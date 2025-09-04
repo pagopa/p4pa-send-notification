@@ -110,17 +110,17 @@ public class SendNotification2NewNotificationRequestMapper {
       pagoPa.setNoticeCode(puPayment.getPayment().getPagoPa().getNoticeCode());
       pagoPa.setApplyCost(puPayment.getPayment().getPagoPa().getApplyCost());
 
-      F24PaymentDTO f24Payment = new F24PaymentDTO();
-      f24Payment.setTitle(puPayment.getPayment().getF24().getTitle());
-      f24Payment.setApplyCost(puPayment.getPayment().getF24().getApplyCost());
-
-      // pagoPa attachment
       Optional<NotificationPaymentAttachmentDTO> attachment = getAttachment(sendNotification, puPayment);
-      // f24 attachment
-      Optional<NotificationMetadataAttachmentDTO> metadataAttachment = getMetadataAttachment(sendNotification, puPayment);
-
       attachment.ifPresent(pagoPa::setAttachment);
-      metadataAttachment.ifPresent(f24Payment::setMetadataAttachment);
+
+      F24PaymentDTO f24Payment = null;
+      if (puPayment.getPayment().getF24() != null) {
+        f24Payment = new F24PaymentDTO();
+        f24Payment.setTitle(puPayment.getPayment().getF24().getTitle());
+        f24Payment.setApplyCost(puPayment.getPayment().getF24().getApplyCost());
+        Optional<NotificationMetadataAttachmentDTO> metadataAttachment = getMetadataAttachment(sendNotification, puPayment);
+        metadataAttachment.ifPresent(f24Payment::setMetadataAttachment);
+      }
 
       return new NotificationPaymentItemDTO()
         .pagoPa(pagoPa)

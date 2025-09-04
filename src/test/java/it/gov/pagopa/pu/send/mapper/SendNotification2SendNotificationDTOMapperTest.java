@@ -2,10 +2,7 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.generated.PagoPa;
-import it.gov.pagopa.pu.send.dto.generated.Payment;
-import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
-import it.gov.pagopa.pu.send.dto.generated.SendNotificationPaymentsDTO;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -28,9 +25,9 @@ class SendNotification2SendNotificationDTOMapperTest {
   @Test
   void givenSendNotificationWhenMapThenReturnSendNotificationDTO() {
     OffsetDateTime now = OffsetDateTime.now();
-    PuPayment payment1 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE1").build(), null), now);
-    PuPayment payment2 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE2").build(), null), now);
-    PuPayment payment3 = new PuPayment(4L, new Payment(PagoPa.builder().noticeCode("NOTICECODE3").build(), null), now);
+    PuPayment payment1 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE1").build(), F24Payment.builder().title("F24").build()), now);
+    PuPayment payment2 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE2").build(), F24Payment.builder().title("F24").build()), now);
+    PuPayment payment3 = new PuPayment(4L, new Payment(PagoPa.builder().noticeCode("NOTICECODE3").build(), F24Payment.builder().title("F24").build()), now);
 
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO();
     recipient.setPuPayments(List.of(payment1, payment2, payment3));
