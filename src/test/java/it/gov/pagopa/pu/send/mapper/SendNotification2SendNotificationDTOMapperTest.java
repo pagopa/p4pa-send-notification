@@ -28,9 +28,9 @@ class SendNotification2SendNotificationDTOMapperTest {
   @Test
   void givenSendNotificationWhenMapThenReturnSendNotificationDTO() {
     OffsetDateTime now = OffsetDateTime.now();
-    PuPayment payment1 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE1").build()), now);
-    PuPayment payment2 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE2").build()), now);
-    PuPayment payment3 = new PuPayment(4L, new Payment(PagoPa.builder().noticeCode("NOTICECODE3").build()), now);
+    PuPayment payment1 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE1").build(), null), now);
+    PuPayment payment2 = new PuPayment(3L, new Payment(PagoPa.builder().noticeCode("NOTICECODE2").build(), null), now);
+    PuPayment payment3 = new PuPayment(4L, new Payment(PagoPa.builder().noticeCode("NOTICECODE3").build(), null), now);
 
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO();
     recipient.setPuPayments(List.of(payment1, payment2, payment3));

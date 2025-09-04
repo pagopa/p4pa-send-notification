@@ -1015,6 +1015,21 @@
           }
         }
       },
+      "F24Payment" : {
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "type" : "string"
+          },
+          "applyCost" : {
+            "type" : "boolean"
+          },
+          "metadataAttachment" : {
+            "$ref" : "#/components/schemas/Attachment"
+          }
+        },
+        "required" : [ "applyCost", "metadataAttachment", "title" ]
+      },
       "NotificationDigitalAddress" : {
         "type" : "object",
         "properties" : {
@@ -1061,9 +1076,12 @@
         "properties" : {
           "pagoPa" : {
             "$ref" : "#/components/schemas/PagoPa"
+          },
+          "f24" : {
+            "$ref" : "#/components/schemas/F24Payment"
           }
         },
-        "required" : [ "pagoPa" ]
+        "required" : [ "f24", "pagoPa" ]
       },
       "PhysicalCommunicationTypeEnum" : {
         "type" : "string",
