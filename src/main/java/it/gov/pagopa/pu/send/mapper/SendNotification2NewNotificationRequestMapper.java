@@ -166,7 +166,7 @@ public class SendNotification2NewNotificationRequestMapper {
       .flatMap(puPayment -> {
         Payment payment = puPayment.getPayment();
         return Stream.of(
-          payment.getPagoPa() != null ? payment.getPagoPa().getAttachment() : null,
+          payment.getPagoPa().getAttachment(),
           payment.getF24() != null ? payment.getF24().getMetadataAttachment() : null
         );
       })
