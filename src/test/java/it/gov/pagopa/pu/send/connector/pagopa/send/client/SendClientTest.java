@@ -2,13 +2,11 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
-import it.gov.pagopa.pu.send.connector.send.generated.api.EventsApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
-import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.StreamsApi;
+import it.gov.pagopa.pu.send.connector.send.generated.api.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+
+import java.util.Collections;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +34,8 @@ class SendClientTest {
   private StreamsApi streamsApiMock;
   @Mock
   private EventsApi eventsApiMock;
+  @Mock
+  private LegalFactsApi legalFactsApiMock;
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
@@ -176,5 +176,32 @@ class SendClientTest {
       String.valueOf(streamId), null, apiKey, voucherToken);
 
     assertSame(response, result);
+  }
+
+  @Test
+  void givenValidRequestWhengetLegalFactsThenVerifyResponse() {
+    // Given
+    String iun = "REQUEST_ID";
+
+    //LegalFactId from SEND
+    LegalFactsIdV20DTO legalFactsIdDTO = new LegalFactsIdV20DTO();
+    legalFactsIdDTO.setKey("key");
+    legalFactsIdDTO.setCategory("category");
+    //LegalFact from SEND
+    LegalFactListElementV20DTO legalFactListElementV20DTO = new LegalFactListElementV20DTO();
+    legalFactListElementV20DTO.setIun("iun");
+    legalFactListElementV20DTO.setTaxId("taxId");
+    legalFactListElementV20DTO.setLegalFactsId(legalFactsIdDTO); //set id
+    //Expected LegalFact list received from SEND
+    List<LegalFactListElementV20DTO> expectedResult = Collections.singletonList(legalFactListElementV20DTO);
+
+    Mockito.when(apisHolder.getLegalFactsApiByApiKey(apiKey, voucherToken))
+      .thenReturn(legalFactsApiMock);
+    Mockito.when(legalFactsApiMock.retrieveNotificationLegalFactsV20(iun))
+      .thenReturn(expectedResult);
+
+    List<LegalFactListElementV20DTO> result = sendClient.getLegalFacts(iun, apiKey, voucherToken);
+
+    assertSame(expectedResult, result);
   }
 }
