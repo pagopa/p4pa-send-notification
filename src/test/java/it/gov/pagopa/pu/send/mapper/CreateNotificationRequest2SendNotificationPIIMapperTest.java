@@ -3,10 +3,12 @@ package it.gov.pagopa.pu.send.mapper;
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
 import it.gov.pagopa.pu.send.dto.SendNotification;
-import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.NotificationFeePolicyEnum;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PhysicalCommunicationTypeEnum;
+import it.gov.pagopa.pu.send.dto.generated.Document;
+import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.dto.generated.Recipient.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
@@ -95,6 +97,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setVat(null);
     request.setPagoPaIntMode(null);
     request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().setAttachment(null);
+    request.getRecipients().getFirst().getPayments().getFirst().setF24(null);
     String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
 
     String accessToken = "ACCESSTOKEN";

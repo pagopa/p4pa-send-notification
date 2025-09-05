@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
+import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipient;
 import it.gov.pagopa.pu.send.dto.SendNotification;
@@ -9,13 +10,13 @@ import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.stereotype.Service;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 public class CreateNotificationRequest2SendNotificationMapper {
@@ -92,10 +93,15 @@ public class CreateNotificationRequest2SendNotificationMapper {
   }
 
   private List<DocumentDTO> setDocuments(CreateNotificationRequest request) {
-    List<DocumentDTO> documents = new ArrayList<>(request.getRecipients().stream()
+    List<DocumentDTO> documents = new ArrayList<>();
+
+    documents.addAll(request.getRecipients().stream()
       .flatMap(r -> r.getPayments().stream())
-      .filter(p -> p.getPagoPa().getAttachment() != null)
-      .map(p -> p.getPagoPa().getAttachment())
+      .flatMap(p -> Stream.of(
+        p.getPagoPa().getAttachment() != null ? p.getPagoPa().getAttachment() : null,
+        p.getF24() != null ? p.getF24().getMetadataAttachment() : null
+      ))
+      .filter(Objects::nonNull)
       .map(attachment -> DocumentDTO.builder()
         .fileName(attachment.getFileName())
         .contentType(attachment.getContentType())
@@ -104,15 +110,14 @@ public class CreateNotificationRequest2SendNotificationMapper {
         .build())
       .toList());
 
-    // set documents
     documents.addAll(request.getDocuments().stream()
-      .map(document ->
-        DocumentDTO.builder()
-          .fileName(document.getFileName())
-          .contentType(document.getContentType())
-          .digest(document.getDigest())
-          .status(FileStatus.WAITING)
-          .build()).toList());
+      .map(document -> DocumentDTO.builder()
+        .fileName(document.getFileName())
+        .contentType(document.getContentType())
+        .digest(document.getDigest())
+        .status(FileStatus.WAITING)
+        .build())
+      .toList());
 
     return documents;
   }
