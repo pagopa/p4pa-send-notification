@@ -72,7 +72,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.setPagoPaIntMode(null);
     sendNotification.getPuRecipients().getFirst().getRecipient().setDigitalDomicile(null);
     sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().setAttachment(null);
-    sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().setF24(null);
+    sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getF24().setMetadataAttachment(null);
     SendNotificationNoPII noPII = new SendNotificationNoPII();
 
     Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
@@ -108,6 +108,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.setPaymentExpirationDate(null);
     sendNotification.setPagoPaIntMode(null);
     sendNotification.getPuRecipients().getFirst().getRecipient().setDigitalDomicile(null);
+    sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().setF24(null);
     sendNotification.setDocuments(List.of(buildDocumentAttachment()));
     SendNotificationNoPII noPII = new SendNotificationNoPII();
 
