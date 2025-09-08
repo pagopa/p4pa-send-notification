@@ -639,7 +639,7 @@ class SendFacadeServiceImplTest {
     //Mapped LegalFact
     LegalFactListElementDTO legalFactListElementDTO = new LegalFactListElementDTO();
     legalFactListElementDTO.setIun(iun);
-    legalFactListElementDTO.setTaxId(taxId.getBytes());
+    legalFactListElementDTO.setTaxId(taxId);
     legalFactListElementDTO.setLegalFactId(legalFactIdDTO); //set id
     //Expected mapped LegalFact list
     List<LegalFactListElementDTO> expectedResponse = Collections.singletonList(legalFactListElementDTO);
