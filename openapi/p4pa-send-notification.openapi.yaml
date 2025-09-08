@@ -402,6 +402,34 @@ paths:
           description: Streams not found
         '500':
           description: Internal server error
+  /send/{sendNotificationId}/legal-facts:
+    get:
+      tags:
+        - Send
+      summary: retrieve list of legal facts for a given notification
+      description: legal facts
+      operationId: retrieveLegalFacts
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactListDTO'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Legal facts not found
+        '500':
+          description: Internal server error
 security:
   - BearerAuth: []
 components:
@@ -638,3 +666,44 @@ components:
       type: array
       items:
         type: "ProgressResponseElementV25DTO"
+    LegalFactListDTO:
+      description: legal fact list related to a SEND notification
+      type: array
+      items:
+        $ref: "#/components/schemas/LegalFactListElementDTO"
+    LegalFactListElementDTO:
+      description: legal fact related to a SEND notification
+      required:
+        - iun
+        - legalFactId
+      type: object
+      properties:
+        taxId:
+          description: value is set if legal fact relates to a particular recipient
+          type: string
+        iun:
+          description: universal identifier of a notification related to a legal fact
+          type: string
+        legalFactId:
+          $ref: '#/components/schemas/LegalFactIdDTO'
+    LegalFactIdDTO:
+      description: document keys generated during paper/physical delivery process
+      required:
+        - key
+        - category
+      type: object
+      properties:
+        key:
+          description: legal fact identifier generated during delivery process
+          type: string
+        category:
+          description: >-
+            possible types for a legal fact:
+              - SENDER_ACK
+              - DIGITAL_DELIVERY
+              - ANALOG_DELIVERY
+              - RECIPIENT_ACCESS
+              - PEC_RECEIPT
+              - ANALOG_FAILURE_DELIVERY
+              - NOTIFICATION_CANCELLED
+          type: string

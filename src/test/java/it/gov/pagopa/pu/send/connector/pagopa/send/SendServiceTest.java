@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -120,6 +121,27 @@ class SendServiceTest {
 
     // When
     NotificationPriceResponseV23DTO result = service.retrieveNotificationPrice(paTaxId, nav, organizationId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenGetLegalFactsThenInvokeClient() {
+    // Given
+    long organizationId = 123L;
+    String orgSendApiKey = "ORG_SEND_API_KEY";
+    String sendNotificationId = "SEND_NOTIFICATION_ID";
+    List<LegalFactListElementV20DTO>  expectedResult = new ArrayList<>();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+      .thenReturn(orgSendApiKey);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    Mockito.when(clientMock.getLegalFacts(Mockito.same(sendNotificationId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
+      .thenReturn(expectedResult);
+
+    // When
+    List<LegalFactListElementV20DTO> result = service.getLegalFacts(sendNotificationId, organizationId, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);
