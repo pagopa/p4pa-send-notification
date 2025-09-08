@@ -72,6 +72,9 @@ public class SendController implements SendApi {
   public ResponseEntity<List<LegalFactListElementDTO>> retrieveLegalFacts(String sendNotificationId) {
     log.info("retrieve legalF facts for sendNotificationId {}", sendNotificationId);
     List<LegalFactListElementDTO> response = sendFacadeService.retrieveLegalFacts(sendNotificationId, SecurityUtils.getAccessToken());
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    if(response!=null)
+      return new ResponseEntity<>(response, HttpStatus.OK);
+    else
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }
