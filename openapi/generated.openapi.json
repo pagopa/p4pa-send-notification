@@ -1289,7 +1289,6 @@
         "properties" : {
           "taxId" : {
             "type" : "string",
-            "format" : "byte",
             "description" : "value is set if legal fact relates to a particular recipient"
           },
           "iun" : {

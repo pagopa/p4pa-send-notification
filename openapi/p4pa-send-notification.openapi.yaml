@@ -681,7 +681,6 @@ components:
         taxId:
           description: value is set if legal fact relates to a particular recipient
           type: string
-          format: byte
         iun:
           description: universal identifier of a notification related to a legal fact
           type: string
