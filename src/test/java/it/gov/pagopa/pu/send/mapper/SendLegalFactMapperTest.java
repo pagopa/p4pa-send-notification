@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactListElementV2
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactsIdV20DTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactIdDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
+import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,9 +51,7 @@ class SendLegalFactMapperTest {
 
     // Then
     assertNotNull(resultDTO);
-    assertNotNull(resultDTO.getIun());
-    assertNotNull(resultDTO.getTaxId());
-    assertNotNull(resultDTO.getLegalFactId());
+    TestUtils.checkNotNullFields(resultDTO);
     assertEquals(expectedDTO.getIun(), resultDTO.getIun());
     assertEquals(expectedDTO.getTaxId(), resultDTO.getTaxId());
     assertEquals(expectedDTO.getLegalFactId(), resultDTO.getLegalFactId());
@@ -74,8 +73,7 @@ class SendLegalFactMapperTest {
 
     // Then
     assertNotNull(resultDTO);
-    assertNotNull(resultDTO.getIun());
-    assertNotNull(resultDTO.getTaxId());
+    TestUtils.checkNotNullFields(resultDTO, "legalFactId");
     assertNull(resultDTO.getLegalFactId());
     assertEquals(expectedDTO.getIun(), resultDTO.getIun());
     assertEquals(expectedDTO.getTaxId(), resultDTO.getTaxId());
