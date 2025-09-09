@@ -430,6 +430,39 @@ paths:
           description: Legal facts not found
         '500':
           description: Internal server error
+  /send/{sendNotificationId}/legal-facts/{legalFactId}:
+    get:
+      tags:
+        - Send
+      summary: retrieve a specific legal facts for a given notification
+      description: legal fact
+      operationId: retrieveLegalFact
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: legalFactId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactDownloadMetadataDTO'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Legal facts not found
+        '500':
+          description: Internal server error
 security:
   - BearerAuth: []
 components:
@@ -720,3 +753,21 @@ components:
               - ANALOG_FAILURE_DELIVERY
               - NOTIFICATION_CANCELLED
           type: string
+    LegalFactDownloadMetadataDTO:
+      type: object
+      required:
+        - filename
+        - contentLength
+      properties:
+        filename:
+          type: string
+        contentLength:
+          description: content dimension, in bytes.
+          example: 54092
+          type: number
+        url:
+          description: preauthorized URL for making a GET request to obtain the document content. Present only if document is ready for download.
+          type: string
+        retryAfter:
+          description: Estimated wait time in seconds until the document content is available for download.
+          type: number
