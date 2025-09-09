@@ -145,5 +145,36 @@ class SendServiceTest {
 
     // Then
     Assertions.assertSame(expectedResult, result);
+
+    Mockito.verify(organizationServiceMock).getOrganizationApiKey(organizationId, accessToken);
+    Mockito.verify(pdndServiceMock).resolvePdndAccessToken(organizationId, accessToken);
+    Mockito.verify(clientMock).getLegalFacts(sendNotificationId, orgSendApiKey, voucherToken);
   }
+
+  @Test
+  void whenGetLegalFactDownloadMetadataThenInvokeClient() {
+    // Given
+    long organizationId = 123L;
+    String orgSendApiKey = "ORG_SEND_API_KEY";
+    String sendNotificationId = "SEND_NOTIFICATION_ID";
+    String legalFactId = "LEGAL_FACT_ID";
+    LegalFactDownloadMetadataResponseDTO expectedResult = new LegalFactDownloadMetadataResponseDTO();
+
+    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+      .thenReturn(orgSendApiKey);
+    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    Mockito.when(clientMock.getLegalFactDownloadMetadata(Mockito.same(sendNotificationId), Mockito.same(legalFactId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
+      .thenReturn(expectedResult);
+
+    // When
+    LegalFactDownloadMetadataResponseDTO actualResult = service.getLegalFactDownloadMetadata(sendNotificationId, legalFactId, organizationId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, actualResult);
+
+    Mockito.verify(organizationServiceMock).getOrganizationApiKey(organizationId, accessToken);
+    Mockito.verify(pdndServiceMock).resolvePdndAccessToken(organizationId, accessToken);
+    Mockito.verify(clientMock).getLegalFactDownloadMetadata(sendNotificationId, legalFactId, orgSendApiKey, voucherToken);
+  }
+
 }

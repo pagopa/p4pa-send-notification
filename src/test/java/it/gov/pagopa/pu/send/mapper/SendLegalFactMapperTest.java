@@ -1,7 +1,9 @@
 package it.gov.pagopa.pu.send.mapper;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactDownloadMetadataResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactListElementV20DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactsIdV20DTO;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactIdDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -10,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -17,10 +21,12 @@ class SendLegalFactMapperTest {
 
   private SendLegalFactMapper mapper;
   private LegalFactListElementV20DTO sendLegalFactDTO;
+  private LegalFactDownloadMetadataResponseDTO sendLegalFactDownloadMetadataDTO;
 
   @BeforeEach
   void setUp() {
     mapper = new SendLegalFactMapper();
+
     // LegalFactId from SEND
     LegalFactsIdV20DTO legalFactsIdDTO = new LegalFactsIdV20DTO();
     legalFactsIdDTO.setKey("key");
@@ -30,6 +36,13 @@ class SendLegalFactMapperTest {
     sendLegalFactDTO.setIun("iun");
     sendLegalFactDTO.setTaxId("ABCDEF11A01H000A");
     sendLegalFactDTO.setLegalFactsId(legalFactsIdDTO); //set id
+
+    // LegalFactDownloadMetadata from SEND
+    sendLegalFactDownloadMetadataDTO = new LegalFactDownloadMetadataResponseDTO();
+    sendLegalFactDownloadMetadataDTO.setFilename("filename.pdf");
+    sendLegalFactDownloadMetadataDTO.setContentLength(new BigDecimal(1234));
+    sendLegalFactDownloadMetadataDTO.setUrl("http://URL");
+    sendLegalFactDownloadMetadataDTO.setRetryAfter(new BigDecimal(1234));
   }
 
   @Test
@@ -52,9 +65,7 @@ class SendLegalFactMapperTest {
     // Then
     assertNotNull(resultDTO);
     TestUtils.checkNotNullFields(resultDTO);
-    assertEquals(expectedDTO.getIun(), resultDTO.getIun());
-    assertEquals(expectedDTO.getTaxId(), resultDTO.getTaxId());
-    assertEquals(expectedDTO.getLegalFactId(), resultDTO.getLegalFactId());
+    assertEquals(expectedDTO, resultDTO);
   }
 
   @Test
@@ -75,8 +86,26 @@ class SendLegalFactMapperTest {
     assertNotNull(resultDTO);
     TestUtils.checkNotNullFields(resultDTO, "legalFactId");
     assertNull(resultDTO.getLegalFactId());
-    assertEquals(expectedDTO.getIun(), resultDTO.getIun());
-    assertEquals(expectedDTO.getTaxId(), resultDTO.getTaxId());
+    assertEquals(expectedDTO, resultDTO);
+  }
+
+  @Test
+  void givenValidSendLegalFactDownloadMetadataWhenMapThenVerify(){
+    // Given
+    // Mapped LegalFactDownloadMetadata
+    LegalFactDownloadMetadataDTO expectedDTO  = new LegalFactDownloadMetadataDTO();
+    expectedDTO.setFilename(sendLegalFactDownloadMetadataDTO.getFilename());
+    expectedDTO.setContentLength(sendLegalFactDownloadMetadataDTO.getContentLength());
+    expectedDTO.setUrl(sendLegalFactDownloadMetadataDTO.getUrl());
+    expectedDTO.setRetryAfter(sendLegalFactDownloadMetadataDTO.getRetryAfter());
+
+    // When
+    LegalFactDownloadMetadataDTO actualDTO = mapper.mapLegalFactDownloadMetadataFromSend(sendLegalFactDownloadMetadataDTO);
+
+    // Then
+    assertNotNull(actualDTO);
+    TestUtils.checkNotNullFields(actualDTO);
+    assertEquals(expectedDTO, actualDTO);
   }
 
 }
