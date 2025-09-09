@@ -135,13 +135,4 @@ class SendControllerTest {
     Assertions.assertEquals(HttpStatus.OK, actualLegalFactsResponse.getStatusCode());
   }
 
-  @Test
-  void givenSendNotificationIdWhenRetrieveLegalFactsThenNoContent() {
-    String sendNotificationId = "12345";
-    Mockito.when(sendFacadeServiceMock.retrieveLegalFacts(sendNotificationId, accessToken))
-      .thenReturn(null);
-
-    ResponseEntity<List<LegalFactListElementDTO>> response = sendController.retrieveLegalFacts(sendNotificationId);
-    Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-  }
 }

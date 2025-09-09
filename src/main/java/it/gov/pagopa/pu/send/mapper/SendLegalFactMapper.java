@@ -1,7 +1,9 @@
 package it.gov.pagopa.pu.send.mapper;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactDownloadMetadataResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactListElementV20DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactsIdV20DTO;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactIdDTO;
 import org.springframework.stereotype.Service;
@@ -40,4 +42,15 @@ public class SendLegalFactMapper {
       .orElse(null);
   }
 
+  public LegalFactDownloadMetadataDTO mapLegalFactDownloadMetadataFromSend(LegalFactDownloadMetadataResponseDTO legalFactDownloadMetadataResponseDTO) {
+    if(legalFactDownloadMetadataResponseDTO == null) {
+      return null;
+    }
+    return LegalFactDownloadMetadataDTO.builder()
+      .filename(legalFactDownloadMetadataResponseDTO.getFilename())
+      .contentLength(legalFactDownloadMetadataResponseDTO.getContentLength())
+      .url(legalFactDownloadMetadataResponseDTO.getUrl())
+      .retryAfter(legalFactDownloadMetadataResponseDTO.getRetryAfter())
+      .build();
+  }
 }

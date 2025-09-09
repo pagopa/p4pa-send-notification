@@ -10,4 +10,5 @@ public interface SendService {
   NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, Long organizationId, String accessToken);
   NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, Long organizationId, String accessToken);
   List<LegalFactListElementV20DTO> getLegalFacts(String iun, Long organizationId, String accessToken);
+  LegalFactDownloadMetadataResponseDTO getLegalFactDownloadMetadata(String iun, String legalFactId, Long organizationId, String accessToken);
 }
