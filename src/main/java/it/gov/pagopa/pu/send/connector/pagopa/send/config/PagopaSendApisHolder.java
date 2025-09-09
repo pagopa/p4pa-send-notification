@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.StreamsApi;
+import it.gov.pagopa.pu.send.connector.send.generated.api.LegalFactsApi;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +30,7 @@ public class PagopaSendApisHolder {
   private final Map<String, NotificationPriceV23Api> notificationPriceApiMap = new ConcurrentHashMap<>();
   private final Map<String, StreamsApi> streamsApiMap = new ConcurrentHashMap<>();
   private final Map<String, EventsApi> eventsApiMap = new ConcurrentHashMap<>();
+  private final Map<String, LegalFactsApi> legalFactsApiMap = new ConcurrentHashMap<>();
 
   public PagopaSendApisHolder(
     PagopaSendApiClientConfig clientConfig,
@@ -69,6 +71,12 @@ public class PagopaSendApisHolder {
     String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
     return eventsApiMap.computeIfAbsent(cacheKey, key ->
       new EventsApi(buildApiClient(apiKey, pdndAccessToken)));
+  }
+
+  public LegalFactsApi getLegalFactsApiByApiKey(String apiKey, String pdndAccessToken) {
+    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
+    return legalFactsApiMap.computeIfAbsent(cacheKey, key ->
+      new LegalFactsApi(buildApiClient(apiKey, pdndAccessToken)));
   }
 
   private ApiClient buildApiClient(String apiKey, String pdndAccessToken) {

@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.PagoPa;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
@@ -13,6 +14,7 @@ import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
+import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -38,6 +40,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
+  private final SendLegalFactMapper sendLegalFactMapper;
   private final SendStreamService sendStreamService;
 
   public SendFacadeServiceImpl(
@@ -46,12 +49,14 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendUploadFacadeServiceImpl uploadService,
     SendNotification2NewNotificationRequestMapper sendNotificationMapper,
     SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
+    SendLegalFactMapper sendLegalFactMapper,
     SendStreamService sendStreamService) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendService = sendService;
     this.uploadService = uploadService;
     this.sendNotificationMapper = sendNotificationMapper;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
+    this.sendLegalFactMapper = sendLegalFactMapper;
     this.sendStreamService = sendStreamService;
   }
 
@@ -196,6 +201,19 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     }
 
     return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+  }
+
+  @Override
+  public List<LegalFactListElementDTO> retrieveLegalFacts(String sendNotificationId, String accessToken) {
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
+
+    // Validate status
+    NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
+
+    return sendService.getLegalFacts(notification.getIun(), notification.getOrganizationId(), accessToken)
+      .stream()
+      .map(sendLegalFactMapper::mapLegalFactDTOFromSend)
+      .toList();
   }
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {

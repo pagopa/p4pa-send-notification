@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
@@ -15,6 +16,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class SendControllerTest {
@@ -117,4 +121,27 @@ class SendControllerTest {
     Assertions.assertSame(price, response.getBody());
   }
 
+  @Test
+  void givenSendNotificationIdWhenRetrieveLegalFactsThenOk() {
+    String sendNotificationId = "12345";
+
+    List<LegalFactListElementDTO> expectedLegalFacts = new ArrayList<>();
+    Mockito.when(sendFacadeServiceMock.retrieveLegalFacts(sendNotificationId, accessToken))
+      .thenReturn(expectedLegalFacts);
+
+    ResponseEntity<List<LegalFactListElementDTO>> actualLegalFactsResponse = sendController.retrieveLegalFacts(sendNotificationId);
+    Assertions.assertNotNull(actualLegalFactsResponse);
+    Assertions.assertEquals(expectedLegalFacts, actualLegalFactsResponse.getBody());
+    Assertions.assertEquals(HttpStatus.OK, actualLegalFactsResponse.getStatusCode());
+  }
+
+  @Test
+  void givenSendNotificationIdWhenRetrieveLegalFactsThenNoContent() {
+    String sendNotificationId = "12345";
+    Mockito.when(sendFacadeServiceMock.retrieveLegalFacts(sendNotificationId, accessToken))
+      .thenReturn(null);
+
+    ResponseEntity<List<LegalFactListElementDTO>> response = sendController.retrieveLegalFacts(sendNotificationId);
+    Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+  }
 }

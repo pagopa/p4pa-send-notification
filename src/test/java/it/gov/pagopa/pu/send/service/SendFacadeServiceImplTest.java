@@ -9,18 +9,21 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponse
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.generated.PagoPa;
-import it.gov.pagopa.pu.send.dto.generated.Payment;
-import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
+import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
+import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+
+import java.util.*;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -56,6 +59,8 @@ class SendFacadeServiceImplTest {
   @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
   @Mock
+  private SendLegalFactMapper sendLegalFactMapperMock;
+  @Mock
   private SendStreamService sendStreamServiceMock;
 
   @InjectMocks
@@ -69,6 +74,7 @@ class SendFacadeServiceImplTest {
       uploadServiceMock,
       sendNotificationMapperMock,
       sendNotificationDTOMapperMock,
+      sendLegalFactMapperMock,
       sendStreamServiceMock
     );
   }
@@ -603,4 +609,99 @@ class SendFacadeServiceImplTest {
       .updateNotificationRequestId(Mockito.anyString(), Mockito.anyString());
   }
 
+  @Test
+  void givenAcceptedNotificationWhenRetrieveLegalFactsThenSuccess() {
+    String accessToken = "ACCESS_TOKEN";
+    Long organizationId = 1L;
+    String sendNotificationId = "SEND_NOTIFICATION_ID";
+    String iun = "1234";
+    String taxId = "tax_id";
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .iun(iun)
+      .organizationId(organizationId)
+      .status(NotificationStatus.ACCEPTED)
+      .build();
+
+    //LegalFactId from SEND
+    LegalFactsIdV20DTO legalFactsIdDTO = new LegalFactsIdV20DTO();
+    legalFactsIdDTO.setKey("key");
+    legalFactsIdDTO.setCategory("category");
+    //LegalFact from SEND
+    LegalFactListElementV20DTO legalFactListElementV20DTO = new LegalFactListElementV20DTO();
+    legalFactListElementV20DTO.setIun(iun);
+    legalFactListElementV20DTO.setTaxId(taxId);
+    legalFactListElementV20DTO.setLegalFactsId(legalFactsIdDTO); //set id
+    //Mock LegalFact list received from SEND
+    List<LegalFactListElementV20DTO> mockResultList = Collections.singletonList(legalFactListElementV20DTO);
+
+    //Mapped LegalFactId
+    LegalFactIdDTO legalFactIdDTO = new LegalFactIdDTO();
+    legalFactIdDTO.setKey("key");
+    legalFactIdDTO.setCategory("category");
+    //Mapped LegalFact
+    LegalFactListElementDTO legalFactListElementDTO = new LegalFactListElementDTO();
+    legalFactListElementDTO.setIun(iun);
+    legalFactListElementDTO.setTaxId(taxId);
+    legalFactListElementDTO.setLegalFactId(legalFactIdDTO); //set id
+    //Expected mapped LegalFact list
+    List<LegalFactListElementDTO> expectedResponse = Collections.singletonList(legalFactListElementDTO);
+
+    Mockito.when(sendLegalFactMapperMock.mapLegalFactDTOFromSend(legalFactListElementV20DTO))
+      .thenReturn(legalFactListElementDTO);
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendServiceMock.getLegalFacts(iun, organizationId, accessToken))
+      .thenReturn(mockResultList);
+
+    List<LegalFactListElementDTO> result = sendService.retrieveLegalFacts(sendNotificationId, accessToken);
+
+    assertEquals(expectedResponse, result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
+    Mockito.verify(sendServiceMock).getLegalFacts(iun, organizationId, accessToken);
+  }
+
+  @Test
+  void givenNotFoundNotificationWhenRetrieveLegalFactsThenThrowSendNotificationNotFoundException() {
+    String accessToken = "ACCESS_TOKEN";
+    String sendNotificationId = "SEND_NOTIFICATION_ID";
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.empty());
+
+    SendNotificationNotFoundException exception = assertThrows(SendNotificationNotFoundException.class, () ->
+      sendService.retrieveLegalFacts(sendNotificationId, accessToken)
+    );
+
+    assertEquals("Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
+
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
+    Mockito.verifyNoInteractions(sendServiceMock);
+  }
+
+  @Test
+  void givenNotAcceptedNotificationWhenRetrieveLegalFactsThenThrowInvalidStatusException() {
+    String accessToken = "ACCESS_TOKEN";
+    String sendNotificationId = "SEND_NOTIFICATION_ID";
+    String iun = "1234";
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .iun(iun)
+      .status(NotificationStatus.COMPLETE)
+      .build();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    InvalidStatusException exception = assertThrows(InvalidStatusException.class, () ->
+      sendService.retrieveLegalFacts(sendNotificationId, accessToken)
+    );
+
+    assertEquals("Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
+
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
+    Mockito.verifyNoInteractions(sendServiceMock);
+  }
 }
