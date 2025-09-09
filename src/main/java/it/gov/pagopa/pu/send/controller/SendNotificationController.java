@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -30,7 +31,12 @@ public class SendNotificationController implements NotificationApi {
       Optional.ofNullable(createNotificationRequest.getRecipients())
         .map(recipients -> recipients.stream()
           .map(r -> r.getPayments().stream()
-            .map(p->p.getPagoPa().getNoticeCode())).toList())
+            .map(Payment::getPagoPa)
+            .filter(Objects::nonNull)
+            .map(PagoPa::getNoticeCode)
+            .toList()
+          )
+        )
         .orElse(null)
     );
     String accessToken = SecurityUtils.getAccessToken();

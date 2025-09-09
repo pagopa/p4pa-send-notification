@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipient;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
@@ -72,15 +73,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
     return request.getRecipients().stream()
       .map(r -> {
         List<PuPayment> puPayments = r.getPayments().stream()
-          .map(p -> {
-            String nav = p.getPagoPa().getNoticeCode();
-            DebtPosition debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
-            if (debtPosition == null) {
-              throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
-            } else {
-              return new PuPayment(debtPosition.getDebtPositionId(), p, null);
-            }
-          }).toList();
+          .map(p -> getPuPayment(accessToken, organizationId, p)).toList();
         Recipient recipient = Recipient.builder()
           .recipientType(r.getRecipientType())
           .taxId(r.getTaxId())
@@ -92,13 +85,29 @@ public class CreateNotificationRequest2SendNotificationMapper {
       }).toList();
   }
 
+  private PuPayment getPuPayment(String accessToken, Long organizationId, Payment p) {
+    if (p.getPagoPa() != null) {
+      String nav = p.getPagoPa().getNoticeCode();
+      DebtPosition debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
+      if (debtPosition == null) {
+        throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
+      } else {
+        return new PuPayment(debtPosition.getDebtPositionId(), p, null);
+      }
+    }
+    if (p.getF24() != null) {
+      return new PuPayment(null, p, null);
+    }
+    return null;
+  }
+
   private List<DocumentDTO> setDocuments(CreateNotificationRequest request) {
     List<DocumentDTO> documents = new ArrayList<>();
 
     documents.addAll(request.getRecipients().stream()
       .flatMap(r -> r.getPayments().stream())
       .flatMap(p -> Stream.of(
-        p.getPagoPa().getAttachment() != null ? p.getPagoPa().getAttachment() : null,
+        p.getPagoPa() != null ? p.getPagoPa().getAttachment() : null,
         p.getF24() != null ? p.getF24().getMetadataAttachment() : null
       ))
       .filter(Objects::nonNull)

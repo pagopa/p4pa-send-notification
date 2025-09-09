@@ -105,13 +105,16 @@ public class SendNotification2NewNotificationRequestMapper {
 
   private static List<NotificationPaymentItemDTO> getPayments(SendNotification sendNotification, PuRecipient puRecipient) {
     return puRecipient.getPuPayments().stream().map(puPayment -> {
-      PagoPaPaymentDTO pagoPa = new PagoPaPaymentDTO();
-      pagoPa.setCreditorTaxId(puPayment.getPayment().getPagoPa().getCreditorTaxId());
-      pagoPa.setNoticeCode(puPayment.getPayment().getPagoPa().getNoticeCode());
-      pagoPa.setApplyCost(puPayment.getPayment().getPagoPa().getApplyCost());
+      PagoPaPaymentDTO pagoPa = null;
+      if (puPayment.getPayment().getPagoPa() != null) {
+        pagoPa = new PagoPaPaymentDTO();
+        pagoPa.setCreditorTaxId(puPayment.getPayment().getPagoPa().getCreditorTaxId());
+        pagoPa.setNoticeCode(puPayment.getPayment().getPagoPa().getNoticeCode());
+        pagoPa.setApplyCost(puPayment.getPayment().getPagoPa().getApplyCost());
 
-      Optional<NotificationPaymentAttachmentDTO> attachment = getAttachment(sendNotification, puPayment);
-      attachment.ifPresent(pagoPa::setAttachment);
+        Optional<NotificationPaymentAttachmentDTO> attachment = getAttachment(sendNotification, puPayment);
+        attachment.ifPresent(pagoPa::setAttachment);
+      }
 
       F24PaymentDTO f24Payment = null;
       if (puPayment.getPayment().getF24() != null) {
@@ -166,7 +169,7 @@ public class SendNotification2NewNotificationRequestMapper {
       .flatMap(puPayment -> {
         Payment payment = puPayment.getPayment();
         return Stream.of(
-          payment.getPagoPa().getAttachment(),
+          payment.getPagoPa() != null ? payment.getPagoPa().getAttachment() : null,
           payment.getF24() != null ? payment.getF24().getMetadataAttachment() : null
         );
       })

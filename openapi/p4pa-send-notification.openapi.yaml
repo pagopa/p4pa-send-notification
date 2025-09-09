@@ -499,8 +499,6 @@ components:
           type: string
     Payment:
       type: object
-      required:
-        - pagoPa
       properties:
         pagoPa:
           $ref: '#/components/schemas/PagoPa'
