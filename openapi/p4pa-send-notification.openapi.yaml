@@ -527,11 +527,11 @@ components:
           type: string
     Payment:
       type: object
-      required:
-        - pagoPa
       properties:
         pagoPa:
           $ref: '#/components/schemas/PagoPa'
+        f24:
+          $ref: '#/components/schemas/F24Payment'
     PagoPa:
       type: object
       required:
@@ -546,6 +546,19 @@ components:
         applyCost:
           type: boolean
         attachment:
+          $ref: '#/components/schemas/Attachment'
+    F24Payment:
+      type: object
+      required:
+        - title
+        - applyCost
+        - metadataAttachment
+      properties:
+        title:
+          type: string
+        applyCost:
+          type: boolean
+        metadataAttachment:
           $ref: '#/components/schemas/Attachment'
     Attachment:
       type: object

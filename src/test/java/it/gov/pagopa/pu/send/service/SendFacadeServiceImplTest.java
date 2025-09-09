@@ -36,6 +36,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -360,7 +364,7 @@ class SendFacadeServiceImplTest {
     NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
     response.setNotificationViewDate(viewDate);
 
-    Payment payment = new Payment(new PagoPa().creditorTaxId(creditorTaxId).noticeCode(noticeCode));
+    Payment payment = new Payment(new PagoPa().creditorTaxId(creditorTaxId).noticeCode(noticeCode), null);
     PuPayment puPayment = new PuPayment(1L, payment, null);
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
 
@@ -466,7 +470,7 @@ class SendFacadeServiceImplTest {
     String nav = "321";
     String creditorTaxId = "123456789";
 
-    Payment payment = new Payment(new PagoPa().noticeCode(nav).creditorTaxId(creditorTaxId));
+    Payment payment = new Payment(new PagoPa().noticeCode(nav).creditorTaxId(creditorTaxId), null);
     PuPayment puPayment = new PuPayment(1L, payment, OffsetDateTime.now());
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
 

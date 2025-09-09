@@ -2,20 +2,22 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
+import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipient;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.stereotype.Service;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 public class CreateNotificationRequest2SendNotificationMapper {
@@ -71,15 +73,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
     return request.getRecipients().stream()
       .map(r -> {
         List<PuPayment> puPayments = r.getPayments().stream()
-          .map(p -> {
-            String nav = p.getPagoPa().getNoticeCode();
-            DebtPosition debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
-            if (debtPosition == null) {
-              throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
-            } else {
-              return new PuPayment(debtPosition.getDebtPositionId(), p, null);
-            }
-          }).toList();
+          .map(p -> getPuPayment(accessToken, organizationId, p)).toList();
         Recipient recipient = Recipient.builder()
           .recipientType(r.getRecipientType())
           .taxId(r.getTaxId())
@@ -91,11 +85,32 @@ public class CreateNotificationRequest2SendNotificationMapper {
       }).toList();
   }
 
+  private PuPayment getPuPayment(String accessToken, Long organizationId, Payment p) {
+    if (p.getPagoPa() != null) {
+      String nav = p.getPagoPa().getNoticeCode();
+      DebtPosition debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
+      if (debtPosition == null) {
+        throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
+      } else {
+        return new PuPayment(debtPosition.getDebtPositionId(), p, null);
+      }
+    }
+    if (p.getF24() != null) {
+      return new PuPayment(null, p, null);
+    }
+    return null;
+  }
+
   private List<DocumentDTO> setDocuments(CreateNotificationRequest request) {
-    List<DocumentDTO> documents = new ArrayList<>(request.getRecipients().stream()
+    List<DocumentDTO> documents = new ArrayList<>();
+
+    documents.addAll(request.getRecipients().stream()
       .flatMap(r -> r.getPayments().stream())
-      .filter(p -> p.getPagoPa().getAttachment() != null)
-      .map(p -> p.getPagoPa().getAttachment())
+      .flatMap(p -> Stream.of(
+        p.getPagoPa() != null ? p.getPagoPa().getAttachment() : null,
+        p.getF24() != null ? p.getF24().getMetadataAttachment() : null
+      ))
+      .filter(Objects::nonNull)
       .map(attachment -> DocumentDTO.builder()
         .fileName(attachment.getFileName())
         .contentType(attachment.getContentType())
@@ -104,15 +119,14 @@ public class CreateNotificationRequest2SendNotificationMapper {
         .build())
       .toList());
 
-    // set documents
     documents.addAll(request.getDocuments().stream()
-      .map(document ->
-        DocumentDTO.builder()
-          .fileName(document.getFileName())
-          .contentType(document.getContentType())
-          .digest(document.getDigest())
-          .status(FileStatus.WAITING)
-          .build()).toList());
+      .map(document -> DocumentDTO.builder()
+        .fileName(document.getFileName())
+        .contentType(document.getContentType())
+        .digest(document.getDigest())
+        .status(FileStatus.WAITING)
+        .build())
+      .toList());
 
     return documents;
   }

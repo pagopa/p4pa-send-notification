@@ -3,10 +3,12 @@ package it.gov.pagopa.pu.send.mapper;
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
 import it.gov.pagopa.pu.send.dto.SendNotification;
-import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.NotificationFeePolicyEnum;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PhysicalCommunicationTypeEnum;
+import it.gov.pagopa.pu.send.dto.generated.Document;
+import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.dto.generated.Recipient.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
@@ -17,6 +19,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -84,8 +88,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals(PagoPaIntModeEnum.NONE.getValue(), result.getPagoPaIntMode());
   }
 
-  @Test
-  void givenCreateNotificationRequestWithSomeNullValuesWhenMapToModelThenOk() {
+  @ParameterizedTest
+  @ValueSource(strings = {"pagoPaNull", "f24null", "bothNull"})
+  void givenCreateNotificationRequestWithSomeNullValuesWhenMapToModelThenOk(String paymentNull) {
     // Given
     CreateNotificationRequest request = buildRequest();
     request.setDocuments(new ArrayList<>());
@@ -95,15 +100,25 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setVat(null);
     request.setPagoPaIntMode(null);
     request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().setAttachment(null);
-    String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
+    if (paymentNull.equals("pagoPaNull")) {
+      request.getRecipients().getFirst().getPayments().getFirst().setPagoPa(null);
+    } else if (paymentNull.equals("f24null")) {
+      request.getRecipients().getFirst().getPayments().getFirst().setF24(null);
+    } else {
+      request.getRecipients().getFirst().getPayments().getFirst().setPagoPa(null);
+      request.getRecipients().getFirst().getPayments().getFirst().setF24(null);
+    }
 
     String accessToken = "ACCESSTOKEN";
 
     DebtPosition debtPosition = new DebtPosition();
     debtPosition.setDebtPositionId(3L);
 
-    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
-      .thenReturn(debtPosition);
+    if (paymentNull.equals("f24null")) {
+      String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
+      Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
+        .thenReturn(debtPosition);
+    }
 
     // When
     SendNotification result = mapper.mapToModel(request, accessToken);
@@ -115,7 +130,11 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
     Assertions.assertEquals("ROSSI MARIO", result.getPuRecipients().getFirst().getRecipient().getDenomination());
-    checkPayments(debtPosition, result);
+    if (paymentNull.equals("pagoPaNull")) {
+      checkPayments(null, result);
+    } else if (paymentNull.equals("f24null")) {
+      checkPayments(debtPosition, result);
+    }
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
@@ -158,10 +177,12 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
   }
 
   private void checkPayments(DebtPosition debtPosition, SendNotification result) {
-    Assertions.assertSame(debtPosition.getDebtPositionId(), result.getPuRecipients().getFirst().getPuPayments().getFirst().getDebtPositionId());
-    Assertions.assertEquals("CREDITORTAXID", result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getCreditorTaxId());
-    Assertions.assertEquals("NOTICECODE", result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getNoticeCode());
-    Assertions.assertEquals(true, result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getApplyCost());
+    if (debtPosition != null) {
+      Assertions.assertSame(debtPosition.getDebtPositionId(), result.getPuRecipients().getFirst().getPuPayments().getFirst().getDebtPositionId());
+      Assertions.assertEquals("CREDITORTAXID", result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getCreditorTaxId());
+      Assertions.assertEquals("NOTICECODE", result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getNoticeCode());
+      Assertions.assertEquals(true, result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getApplyCost());
+    }
   }
 
   private void checkDocuments(SendNotification result) {

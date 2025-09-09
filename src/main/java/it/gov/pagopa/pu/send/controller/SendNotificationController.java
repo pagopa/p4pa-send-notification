@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -25,13 +27,25 @@ public class SendNotificationController implements NotificationApi {
 
   @Override
   public ResponseEntity<CreateNotificationResponse> createSendNotification(CreateNotificationRequest createNotificationRequest) {
-    log.info("new notification request for organizationId {} and nav {}",
+    log.info("New notification request - organizationId={} - payments={}",
       createNotificationRequest.getOrganizationId(),
       Optional.ofNullable(createNotificationRequest.getRecipients())
         .map(recipients -> recipients.stream()
-          .map(r -> r.getPayments().stream()
-            .map(p->p.getPagoPa().getNoticeCode())).toList())
-        .orElse(null)
+          .flatMap(r -> r.getPayments().stream())
+          .map(p -> {
+            List<String> details = new ArrayList<>();
+            if (p.getPagoPa() != null) {
+              details.add("PagoPa[noticeCode=" + p.getPagoPa().getNoticeCode() + "]");
+            }
+            if (p.getF24() != null) {
+              details.add("F24[title=" + p.getF24().getTitle() + "]");
+            }
+            return String.join(" ", details);
+          })
+          .filter(s -> !s.isEmpty())
+          .toList()
+        )
+        .orElse(List.of())
     );
     String accessToken = SecurityUtils.getAccessToken();
     return new ResponseEntity<>(sendNotificationService.createSendNotification(createNotificationRequest, accessToken), HttpStatus.OK);
