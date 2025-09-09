@@ -436,7 +436,7 @@ paths:
         - Send
       summary: retrieve a specific legal facts for a given notification
       description: legal fact
-      operationId: retrieveLegalFact
+      operationId: retrieveLegalFactDownloadMetadata
       parameters:
         - name: sendNotificationId
           in: path
