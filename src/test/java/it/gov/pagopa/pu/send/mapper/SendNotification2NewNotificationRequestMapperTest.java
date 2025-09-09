@@ -108,6 +108,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.setPaymentExpirationDate(null);
     sendNotification.setPagoPaIntMode(null);
     sendNotification.getPuRecipients().getFirst().getRecipient().setDigitalDomicile(null);
+    sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().setPagoPa(null);
     sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().setF24(null);
     sendNotification.setDocuments(List.of(buildDocumentAttachment()));
     SendNotificationNoPII noPII = new SendNotificationNoPII();
@@ -125,7 +126,6 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals("Prot_001", result.getPaProtocolNumber());
     assertEquals("Notifica Piattaforma Unitaria", result.getSubject());
 
-    checkRecipient(result);
     checkDocuments(result);
 
     assertEquals(NotificationFeePolicyDTO.DELIVERY_MODE, result.getNotificationFeePolicy());

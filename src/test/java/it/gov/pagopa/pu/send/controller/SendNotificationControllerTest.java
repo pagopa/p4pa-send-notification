@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -18,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationControllerTest {
@@ -130,38 +134,116 @@ class SendNotificationControllerTest {
     Assertions.assertSame(expectedResult, response.getBody());
   }
 
-  @Test
-  void givenNotificationRequestWithRecipientsAndPaymentsThenLogNoticeCodes() {
+  @ParameterizedTest
+  @MethodSource("provideNotificationRequests")
+  void givenNotificationRequestWithDifferentPaymentsThenLogCorrectly(
+    CreateNotificationRequest request,
+    CreateNotificationResponse expectedResponse
+  ) {
     // Given
-    PagoPa pagoPa = new PagoPa();
-    pagoPa.setNoticeCode("NOTICE123");
-
-    Payment payment = new Payment();
-    payment.setPagoPa(pagoPa);
-
-    Recipient recipient = new Recipient();
-    recipient.setPayments(List.of(payment));
-
-    CreateNotificationRequest request = CreateNotificationRequest.builder()
-      .organizationId(123L)
-      .recipients(List.of(recipient))
-      .build();
-
-    CreateNotificationResponse expectedResponse = CreateNotificationResponse.builder()
-      .sendNotificationId("SENDID")
-      .preloadUrl("url")
-      .status(NotificationStatus.WAITING_FILE.name())
-      .build();
-
-    Mockito.when(sendNotificationServiceMock.createSendNotification(request, accessToken)).thenReturn(expectedResponse);
+    Mockito.when(sendNotificationServiceMock.createSendNotification(request, accessToken))
+      .thenReturn(expectedResponse);
 
     // When
-    ResponseEntity<CreateNotificationResponse> response = sendNotificationController.createSendNotification(request);
+    ResponseEntity<CreateNotificationResponse> response =
+      sendNotificationController.createSendNotification(request);
 
     // Then
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertSame(expectedResponse, response.getBody());
+  }
+
+  private static Stream<Arguments> provideNotificationRequests() {
+    // PagoPa only
+    PagoPa pagoPa = new PagoPa();
+    pagoPa.setNoticeCode("NOTICE123");
+    Payment pagoPaPayment = new Payment();
+    pagoPaPayment.setPagoPa(pagoPa);
+    Recipient pagoPaRecipient = new Recipient();
+    pagoPaRecipient.setPayments(List.of(pagoPaPayment));
+    CreateNotificationRequest requestPagoPa = CreateNotificationRequest.builder()
+      .organizationId(1L)
+      .recipients(List.of(pagoPaRecipient))
+      .build();
+    CreateNotificationResponse respPagoPa = CreateNotificationResponse.builder()
+      .sendNotificationId("SENDID_PAGOPA")
+      .preloadUrl("url")
+      .status(NotificationStatus.WAITING_FILE.name())
+      .build();
+
+    // F24 only
+    F24Payment f24 = new F24Payment();
+    f24.setTitle("F24TITLE");
+    Payment f24Payment = new Payment();
+    f24Payment.setF24(f24);
+    Recipient f24Recipient = new Recipient();
+    f24Recipient.setPayments(List.of(f24Payment));
+    CreateNotificationRequest requestF24 = CreateNotificationRequest.builder()
+      .organizationId(2L)
+      .recipients(List.of(f24Recipient))
+      .build();
+    CreateNotificationResponse respF24 = CreateNotificationResponse.builder()
+      .sendNotificationId("SENDID_F24")
+      .preloadUrl("url")
+      .status(NotificationStatus.WAITING_FILE.name())
+      .build();
+
+    // PagoPa + F24
+    Payment bothPayment = new Payment();
+    bothPayment.setPagoPa(pagoPa);
+    bothPayment.setF24(f24);
+    Recipient bothRecipient = new Recipient();
+    bothRecipient.setPayments(List.of(bothPayment));
+    CreateNotificationRequest requestBoth = CreateNotificationRequest.builder()
+      .organizationId(3L)
+      .recipients(List.of(bothRecipient))
+      .build();
+    CreateNotificationResponse respBoth = CreateNotificationResponse.builder()
+      .sendNotificationId("SENDID_BOTH")
+      .preloadUrl("url")
+      .status(NotificationStatus.WAITING_FILE.name())
+      .build();
+
+    // No payments
+    Recipient noPaymentRecipient = new Recipient();
+    CreateNotificationRequest requestNoPay = CreateNotificationRequest.builder()
+      .organizationId(4L)
+      .recipients(List.of(noPaymentRecipient))
+      .build();
+    CreateNotificationResponse respNoPay = CreateNotificationResponse.builder()
+      .sendNotificationId("SENDID_NOPAY")
+      .preloadUrl("url")
+      .status(NotificationStatus.WAITING_FILE.name())
+      .build();
+
+    // Empty values
+    PagoPa emptyPagoPa = new PagoPa();
+    emptyPagoPa.setNoticeCode("");
+    F24Payment emptyF24 = new F24Payment();
+    emptyF24.setTitle("");
+    Payment emptyPayment = new Payment();
+    emptyPayment.setPagoPa(emptyPagoPa);
+    emptyPayment.setF24(emptyF24);
+    Recipient emptyRecipient = new Recipient();
+    emptyRecipient.setPayments(List.of(emptyPayment));
+    CreateNotificationRequest requestEmpty = CreateNotificationRequest.builder()
+      .organizationId(5L)
+      .recipients(List.of(emptyRecipient))
+      .build();
+    CreateNotificationResponse respEmpty = CreateNotificationResponse.builder()
+      .sendNotificationId("SENDID_EMPTY")
+      .preloadUrl("url")
+      .status(NotificationStatus.WAITING_FILE.name())
+      .build();
+
+    return Stream.of(
+      Arguments.of(requestPagoPa, respPagoPa),
+      Arguments.of(requestF24, respF24),
+      Arguments.of(requestBoth, respBoth),
+      Arguments.of(requestNoPay, respNoPay),
+      Arguments.of(requestEmpty, respEmpty)
+    );
   }
 
   @Test

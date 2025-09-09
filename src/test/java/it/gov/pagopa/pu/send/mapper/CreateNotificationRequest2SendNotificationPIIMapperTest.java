@@ -89,8 +89,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
   }
 
   @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  void givenCreateNotificationRequestWithSomeNullValuesWhenMapToModelThenOk(boolean isPagoPaNull) {
+  @ValueSource(strings = {"pagoPaNull", "f24null", "bothNull"})
+  void givenCreateNotificationRequestWithSomeNullValuesWhenMapToModelThenOk(String paymentNull) {
     // Given
     CreateNotificationRequest request = buildRequest();
     request.setDocuments(new ArrayList<>());
@@ -100,17 +100,21 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setVat(null);
     request.setPagoPaIntMode(null);
     request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().setAttachment(null);
-    if (isPagoPaNull) {
+    if (paymentNull.equals("pagoPaNull")) {
       request.getRecipients().getFirst().getPayments().getFirst().setPagoPa(null);
+    } else if (paymentNull.equals("f24null")) {
+      request.getRecipients().getFirst().getPayments().getFirst().setF24(null);
+    } else {
+      request.getRecipients().getFirst().getPayments().getFirst().setPagoPa(null);
+      request.getRecipients().getFirst().getPayments().getFirst().setF24(null);
     }
-    request.getRecipients().getFirst().getPayments().getFirst().setF24(null);
 
     String accessToken = "ACCESSTOKEN";
 
     DebtPosition debtPosition = new DebtPosition();
     debtPosition.setDebtPositionId(3L);
 
-    if (!isPagoPaNull) {
+    if (paymentNull.equals("f24null")) {
       String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
       Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
         .thenReturn(debtPosition);
@@ -126,9 +130,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
     Assertions.assertEquals("ROSSI MARIO", result.getPuRecipients().getFirst().getRecipient().getDenomination());
-    if (isPagoPaNull) {
+    if (paymentNull.equals("pagoPaNull")) {
       checkPayments(null, result);
-    } else {
+    } else if (paymentNull.equals("f24null")) {
       checkPayments(debtPosition, result);
     }
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
