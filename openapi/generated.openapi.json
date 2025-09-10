@@ -592,12 +592,13 @@
     "/p4pasend/send/{sendNotificationId}/legal-facts/{legalFactId}" : {
       "get" : {
         "tags" : [ "Send" ],
-        "summary" : "retrieve a specific legal facts for a given notification",
-        "description" : "legal fact",
+        "summary" : "retrieve legal fact metadata for downloading document content",
+        "description" : "legal fact metadata for downloading document content",
         "operationId" : "retrieveLegalFactDownloadMetadata",
         "parameters" : [ {
           "name" : "sendNotificationId",
           "in" : "path",
+          "description" : "notification id referenced by the legal fact",
           "required" : true,
           "schema" : {
             "type" : "string"
@@ -605,6 +606,7 @@
         }, {
           "name" : "legalFactId",
           "in" : "path",
+          "description" : "id of legal fact",
           "required" : true,
           "schema" : {
             "type" : "string"

@@ -434,16 +434,18 @@ paths:
     get:
       tags:
         - Send
-      summary: retrieve a specific legal facts for a given notification
-      description: legal fact
+      summary: retrieve legal fact metadata for downloading document content
+      description: legal fact metadata for downloading document content
       operationId: retrieveLegalFactDownloadMetadata
       parameters:
         - name: sendNotificationId
+          description: notification id referenced by the legal fact
           in: path
           required: true
           schema:
             type: string
         - name: legalFactId
+          description: id of legal fact
           in: path
           required: true
           schema:
