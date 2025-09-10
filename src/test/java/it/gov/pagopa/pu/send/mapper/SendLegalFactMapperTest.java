@@ -69,6 +69,17 @@ class SendLegalFactMapperTest {
   }
 
   @Test
+  void givenValidSendLegalFactWhenMapThenMapToNull(){
+    // Given
+
+    // When
+    LegalFactListElementDTO resultDTO = mapper.mapLegalFactDTOFromSend(null);
+
+    // Then
+    assertNull(resultDTO);
+  }
+
+  @Test
   void givenNullLegalFactIdWhenMapThenVerify() {
     // Given
     sendLegalFactDTO.setLegalFactsId(null);
@@ -108,4 +119,14 @@ class SendLegalFactMapperTest {
     assertEquals(expectedDTO, actualDTO);
   }
 
+  @Test
+  void givenValidSendLegalFactDownloadMetadataWhenMapThenMapToNull(){
+    // Given
+
+    // When
+    LegalFactDownloadMetadataDTO actualDTO = mapper.mapLegalFactDownloadMetadataFromSend(null);
+
+    // Then
+    assertNull(actualDTO);
+  }
 }
