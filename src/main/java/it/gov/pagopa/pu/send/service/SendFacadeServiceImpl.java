@@ -6,10 +6,8 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
-import it.gov.pagopa.pu.send.dto.generated.PagoPa;
-import it.gov.pagopa.pu.send.dto.generated.Payment;
-import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
@@ -214,6 +212,24 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       .stream()
       .map(sendLegalFactMapper::mapLegalFactDTOFromSend)
       .toList();
+  }
+
+  @Override
+  public LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId, String legalFactId,
+                                                                        String accessToken) {
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
+
+    // Validate status
+    NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
+
+    LegalFactDownloadMetadataResponseDTO legalFactDownloadMetadata = sendService.getLegalFactDownloadMetadata(
+      notification.getIun(),
+      legalFactId,
+      notification.getOrganizationId(),
+      accessToken
+    );
+
+    return sendLegalFactMapper.mapLegalFactDownloadMetadataFromSend(legalFactDownloadMetadata);
   }
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {

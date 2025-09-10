@@ -6,8 +6,11 @@ import it.gov.pagopa.pu.send.connector.send.generated.api.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +47,19 @@ class SendClientTest {
   @BeforeEach
   void setUp() {
     sendClient = new SendClient(apisHolder);
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      apisHolder,
+      newNotificationApiMock,
+      senderReadB2BApiMock,
+      notificationPriceApiMock,
+      streamsApiMock,
+      eventsApiMock,
+      legalFactsApiMock
+    );
   }
 
   @Test
@@ -179,8 +195,8 @@ class SendClientTest {
   }
 
   @Test
-  void givenValidRequestWhengetLegalFactsThenVerifyResponse() {
-    // Given
+  void givenValidRequestWhenGetLegalFactsThenVerifyResponse() {
+    // GIVEN
     String iun = "REQUEST_ID";
 
     //LegalFactId from SEND
@@ -200,8 +216,38 @@ class SendClientTest {
     Mockito.when(legalFactsApiMock.retrieveNotificationLegalFactsV20(iun))
       .thenReturn(expectedResult);
 
+    // WHEN
     List<LegalFactListElementV20DTO> result = sendClient.getLegalFacts(iun, apiKey, voucherToken);
 
+    // THEN
     assertSame(expectedResult, result);
   }
+
+  @Test
+  void givenValidRequestWhenGetLegalFactDownloadMetadataThenVerifyResponse() {
+    // GIVEN
+    String iun = "NOTIFICATION_ID";
+    String legalFactId = "LEGAL_FACT_ID";
+    String filename = "filename.pdf";
+    String url = "http://URL";
+    BigDecimal contentLength = new BigDecimal(1234);
+
+    //Mock LegalFactDownloadMetadata received from SEND
+    LegalFactDownloadMetadataResponseDTO expectedResult = new LegalFactDownloadMetadataResponseDTO();
+    expectedResult.setFilename(filename);
+    expectedResult.setContentLength(contentLength);
+    expectedResult.setUrl(url);
+
+    Mockito.when(apisHolder.getLegalFactsApiByApiKey(apiKey, voucherToken))
+      .thenReturn(legalFactsApiMock);
+    Mockito.when(legalFactsApiMock.downloadLegalFactById(iun, legalFactId))
+      .thenReturn(expectedResult);
+
+    // WHEN
+    LegalFactDownloadMetadataResponseDTO actualResult = sendClient.getLegalFactDownloadMetadata(iun,legalFactId, apiKey, voucherToken);
+
+    // THEN
+    assertSame(expectedResult, actualResult);
+  }
+
 }

@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
@@ -67,14 +68,18 @@ public class SendController implements SendApi {
     return new ResponseEntity<>(sendFacadeService.notificationStatus(sendNotificationId, SecurityUtils.getAccessToken()), HttpStatus.OK);
   }
 
-
   @Override
   public ResponseEntity<List<LegalFactListElementDTO>> retrieveLegalFacts(String sendNotificationId) {
-    log.info("retrieve legalF facts for sendNotificationId {}", sendNotificationId);
+    log.info("retrieve legal fact list for sendNotificationId {} from SEND", sendNotificationId);
     List<LegalFactListElementDTO> response = sendFacadeService.retrieveLegalFacts(sendNotificationId, SecurityUtils.getAccessToken());
-    if(response!=null)
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    else
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
+
+  @Override
+  public ResponseEntity<LegalFactDownloadMetadataDTO> retrieveLegalFactDownloadMetadata(String sendNotificationId, String legalFactId) {
+    log.info("retrieve legal fact download metadata for sendNotificationId {} and legalFactId {} from SEND", sendNotificationId, legalFactId);
+    LegalFactDownloadMetadataDTO response = sendFacadeService.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, SecurityUtils.getAccessToken());
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
 }
