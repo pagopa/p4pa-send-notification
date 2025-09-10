@@ -9,6 +9,8 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.Htt
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +47,19 @@ class SendClientTest {
   @BeforeEach
   void setUp() {
     sendClient = new SendClient(apisHolder);
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      apisHolder,
+      newNotificationApiMock,
+      senderReadB2BApiMock,
+      notificationPriceApiMock,
+      streamsApiMock,
+      eventsApiMock,
+      legalFactsApiMock
+    );
   }
 
   @Test
@@ -206,9 +221,6 @@ class SendClientTest {
 
     // THEN
     assertSame(expectedResult, result);
-
-    Mockito.verify(apisHolder).getLegalFactsApiByApiKey(apiKey, voucherToken);
-    Mockito.verify(legalFactsApiMock).retrieveNotificationLegalFactsV20(iun);
   }
 
   @Test
@@ -236,9 +248,6 @@ class SendClientTest {
 
     // THEN
     assertSame(expectedResult, actualResult);
-
-    Mockito.verify(apisHolder).getLegalFactsApiByApiKey(apiKey, voucherToken);
-    Mockito.verify(legalFactsApiMock).downloadLegalFactById(iun, legalFactId);
   }
 
 }

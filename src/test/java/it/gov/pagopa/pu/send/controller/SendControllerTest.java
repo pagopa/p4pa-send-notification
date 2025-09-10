@@ -36,9 +36,13 @@ class SendControllerTest {
   void init(){
     SecurityUtilsTest.configureSecurityContext(accessToken, "MAPPEDEXTERNALUSERID");
   }
+
   @AfterEach
   void clear(){
     SecurityUtilsTest.clearSecurityContext();
+    Mockito.verifyNoMoreInteractions(
+      sendFacadeServiceMock
+    );
   }
 
   @Test
@@ -138,8 +142,6 @@ class SendControllerTest {
     Assertions.assertNotNull(actualLegalFactsResponse);
     Assertions.assertEquals(expectedLegalFacts, actualLegalFactsResponse.getBody());
     Assertions.assertEquals(HttpStatus.OK, actualLegalFactsResponse.getStatusCode());
-
-    Mockito.verify(sendFacadeServiceMock).retrieveLegalFacts(sendNotificationId, accessToken);
   }
 
   @Test
@@ -159,8 +161,6 @@ class SendControllerTest {
     Assertions.assertNotNull(actualResponse);
     Assertions.assertEquals(mockedResponse, actualResponse.getBody());
     Assertions.assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
-
-    Mockito.verify(sendFacadeServiceMock).retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, accessToken);
   }
 
 }

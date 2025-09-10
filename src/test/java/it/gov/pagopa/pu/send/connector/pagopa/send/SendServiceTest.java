@@ -145,10 +145,6 @@ class SendServiceTest {
 
     // Then
     Assertions.assertSame(expectedResult, result);
-
-    Mockito.verify(organizationServiceMock).getOrganizationApiKey(organizationId, accessToken);
-    Mockito.verify(pdndServiceMock).resolvePdndAccessToken(organizationId, accessToken);
-    Mockito.verify(clientMock).getLegalFacts(sendNotificationId, orgSendApiKey, voucherToken);
   }
 
   @Test
@@ -171,10 +167,6 @@ class SendServiceTest {
 
     // Then
     Assertions.assertSame(expectedResult, actualResult);
-
-    Mockito.verify(organizationServiceMock).getOrganizationApiKey(organizationId, accessToken);
-    Mockito.verify(pdndServiceMock).resolvePdndAccessToken(organizationId, accessToken);
-    Mockito.verify(clientMock).getLegalFactDownloadMetadata(sendNotificationId, legalFactId, orgSendApiKey, voucherToken);
   }
 
 }

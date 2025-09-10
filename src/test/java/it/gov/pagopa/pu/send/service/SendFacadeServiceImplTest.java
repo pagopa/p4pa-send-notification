@@ -662,10 +662,6 @@ class SendFacadeServiceImplTest {
 
     // THEN
     assertEquals(expectedResponse, result);
-
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
-    Mockito.verify(sendServiceMock).getLegalFacts(iun, organizationId, accessToken);
-    Mockito.verify(sendLegalFactMapperMock).mapLegalFactDTOFromSend(legalFactListElementV20DTO);
   }
 
   @Test
@@ -684,10 +680,6 @@ class SendFacadeServiceImplTest {
 
     // THEN
     assertEquals("Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
-
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
-    Mockito.verifyNoInteractions(sendServiceMock);
-    Mockito.verifyNoInteractions(sendLegalFactMapperMock);
   }
 
   @Test
@@ -713,10 +705,6 @@ class SendFacadeServiceImplTest {
 
     // THEN
     assertEquals("Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
-
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
-    Mockito.verifyNoInteractions(sendServiceMock);
-    Mockito.verifyNoInteractions(sendLegalFactMapperMock);
   }
 
   @Test
@@ -762,10 +750,6 @@ class SendFacadeServiceImplTest {
 
     // THEN
     assertEquals(expectedResult, actualResult);
-
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
-    Mockito.verify(sendServiceMock).getLegalFactDownloadMetadata(iun, legalFactId, organizationId, accessToken);
-    Mockito.verify(sendLegalFactMapperMock).mapLegalFactDownloadMetadataFromSend(mockedResponse);
   }
 
   @Test
@@ -785,10 +769,6 @@ class SendFacadeServiceImplTest {
 
     // THEN
     assertEquals("Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
-
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
-    Mockito.verifyNoInteractions(sendServiceMock);
-    Mockito.verifyNoInteractions(sendLegalFactMapperMock);
   }
 
   @Test
@@ -815,10 +795,6 @@ class SendFacadeServiceImplTest {
 
     // THEN
     assertEquals("Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
-
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
-    Mockito.verifyNoInteractions(sendServiceMock);
-    Mockito.verifyNoInteractions(sendLegalFactMapperMock);
   }
 
 }
