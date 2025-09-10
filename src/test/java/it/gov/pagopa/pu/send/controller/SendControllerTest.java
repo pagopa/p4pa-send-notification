@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
@@ -35,9 +36,13 @@ class SendControllerTest {
   void init(){
     SecurityUtilsTest.configureSecurityContext(accessToken, "MAPPEDEXTERNALUSERID");
   }
+
   @AfterEach
   void clear(){
     SecurityUtilsTest.clearSecurityContext();
+    Mockito.verifyNoMoreInteractions(
+      sendFacadeServiceMock
+    );
   }
 
   @Test
@@ -123,25 +128,39 @@ class SendControllerTest {
 
   @Test
   void givenSendNotificationIdWhenRetrieveLegalFactsThenOk() {
+    // GIVEN
     String sendNotificationId = "12345";
 
     List<LegalFactListElementDTO> expectedLegalFacts = new ArrayList<>();
     Mockito.when(sendFacadeServiceMock.retrieveLegalFacts(sendNotificationId, accessToken))
       .thenReturn(expectedLegalFacts);
 
+    // WHEN
     ResponseEntity<List<LegalFactListElementDTO>> actualLegalFactsResponse = sendController.retrieveLegalFacts(sendNotificationId);
+
+    // THEN
     Assertions.assertNotNull(actualLegalFactsResponse);
     Assertions.assertEquals(expectedLegalFacts, actualLegalFactsResponse.getBody());
     Assertions.assertEquals(HttpStatus.OK, actualLegalFactsResponse.getStatusCode());
   }
 
   @Test
-  void givenSendNotificationIdWhenRetrieveLegalFactsThenNoContent() {
+  void givenSendNotificationIdAndLegalFactIdWhenRetrieveLegalFactDownloadMetadataThenOk() {
+    // GIVEN
     String sendNotificationId = "12345";
-    Mockito.when(sendFacadeServiceMock.retrieveLegalFacts(sendNotificationId, accessToken))
-      .thenReturn(null);
+    String legalFactId = "12345";
 
-    ResponseEntity<List<LegalFactListElementDTO>> response = sendController.retrieveLegalFacts(sendNotificationId);
-    Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    LegalFactDownloadMetadataDTO mockedResponse = new LegalFactDownloadMetadataDTO();
+    Mockito.when(sendFacadeServiceMock.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, accessToken))
+      .thenReturn(mockedResponse);
+
+    // WHEN
+    ResponseEntity<LegalFactDownloadMetadataDTO> actualResponse = sendController.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId);
+
+    // THEN
+    Assertions.assertNotNull(actualResponse);
+    Assertions.assertEquals(mockedResponse, actualResponse.getBody());
+    Assertions.assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
   }
+
 }

@@ -58,4 +58,9 @@ public class SendClient {
       .retrieveNotificationLegalFactsV20(iun);
   }
 
+  public LegalFactDownloadMetadataResponseDTO getLegalFactDownloadMetadata(String iun, String legalFactId, String apiKey, String pdndAccessToken){
+    return apisHolder.getLegalFactsApiByApiKey(apiKey, pdndAccessToken)
+      .downloadLegalFactById(iun, legalFactId);
+  }
+
 }

@@ -22,6 +22,7 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.junit.jupiter.api.AfterEach;
@@ -611,6 +612,7 @@ class SendFacadeServiceImplTest {
 
   @Test
   void givenAcceptedNotificationWhenRetrieveLegalFactsThenSuccess() {
+    // GIVEN
     String accessToken = "ACCESS_TOKEN";
     Long organizationId = 1L;
     String sendNotificationId = "SEND_NOTIFICATION_ID";
@@ -655,33 +657,34 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendServiceMock.getLegalFacts(iun, organizationId, accessToken))
       .thenReturn(mockResultList);
 
+    // WHEN
     List<LegalFactListElementDTO> result = sendService.retrieveLegalFacts(sendNotificationId, accessToken);
 
+    // THEN
     assertEquals(expectedResponse, result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
-    Mockito.verify(sendServiceMock).getLegalFacts(iun, organizationId, accessToken);
   }
 
   @Test
   void givenNotFoundNotificationWhenRetrieveLegalFactsThenThrowSendNotificationNotFoundException() {
+    //GIVEN
     String accessToken = "ACCESS_TOKEN";
     String sendNotificationId = "SEND_NOTIFICATION_ID";
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.empty());
 
+    // WHEN
     SendNotificationNotFoundException exception = assertThrows(SendNotificationNotFoundException.class, () ->
       sendService.retrieveLegalFacts(sendNotificationId, accessToken)
     );
 
+    // THEN
     assertEquals("Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
-
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
-    Mockito.verifyNoInteractions(sendServiceMock);
   }
 
   @Test
   void givenNotAcceptedNotificationWhenRetrieveLegalFactsThenThrowInvalidStatusException() {
+    // GIVEN
     String accessToken = "ACCESS_TOKEN";
     String sendNotificationId = "SEND_NOTIFICATION_ID";
     String iun = "1234";
@@ -695,13 +698,103 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
+    // WHEN
     InvalidStatusException exception = assertThrows(InvalidStatusException.class, () ->
       sendService.retrieveLegalFacts(sendNotificationId, accessToken)
     );
 
+    // THEN
     assertEquals("Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
-
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findById(sendNotificationId);
-    Mockito.verifyNoInteractions(sendServiceMock);
   }
+
+  @Test
+  void givenAcceptedNotificationWhenRetrieveLegalFactDownloadMetadataThenSuccess() {
+    // GIVEN
+    String accessToken = "ACCESS_TOKEN";
+    Long organizationId = 1L;
+    String sendNotificationId = "SEND_NOTIFICATION_ID";
+    String iun = "1234";
+    String legalFactId = "LEGAL_FACT_ID";
+    String filename = "filename.pdf";
+    String url = "http://URL";
+    BigDecimal contentLength = new BigDecimal(1234);
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .iun(iun)
+      .organizationId(organizationId)
+      .status(NotificationStatus.ACCEPTED)
+      .build();
+
+    //Mock LegalFactDownloadMetadata received from SEND
+    LegalFactDownloadMetadataResponseDTO mockedResponse = new LegalFactDownloadMetadataResponseDTO();
+    mockedResponse.setFilename(filename);
+    mockedResponse.setContentLength(contentLength);
+    mockedResponse.setUrl(url);
+
+    //Expected mapped LegalFactDownloadMetadata
+    LegalFactDownloadMetadataDTO expectedResult = new LegalFactDownloadMetadataDTO();
+    mockedResponse.setFilename(filename);
+    mockedResponse.setContentLength(contentLength);
+    mockedResponse.setUrl(url);
+
+    Mockito.when(sendLegalFactMapperMock.mapLegalFactDownloadMetadataFromSend(mockedResponse))
+      .thenReturn(expectedResult);
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendServiceMock.getLegalFactDownloadMetadata(iun, legalFactId, organizationId, accessToken))
+      .thenReturn(mockedResponse);
+
+    // WHEN
+    LegalFactDownloadMetadataDTO actualResult = sendService.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, accessToken);
+
+    // THEN
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  void givenNotFoundNotificationWhenRetrieveLegalFactDownloadMetadataThenThrowSendNotificationNotFoundException() {
+    // GIVEN
+    String accessToken = "ACCESS_TOKEN";
+    String sendNotificationId = "SEND_NOTIFICATION_ID";
+    String legalFactId = "LEGAL_FACT_ID";
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.empty());
+
+    // WHEN
+    SendNotificationNotFoundException exception = assertThrows(SendNotificationNotFoundException.class, () ->
+      sendService.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, accessToken)
+    );
+
+    // THEN
+    assertEquals("Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
+  }
+
+  @Test
+  void givenNotAcceptedNotificationWhenRetrieveLegalFactDownloadMetadataThenThrowInvalidStatusException() {
+    // GIVEN
+    String accessToken = "ACCESS_TOKEN";
+    String sendNotificationId = "SEND_NOTIFICATION_ID";
+    String legalFactId = "LEGAL_FACT_ID";
+    String iun = "1234";
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .iun(iun)
+      .status(NotificationStatus.COMPLETE)
+      .build();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    // WHEN
+    InvalidStatusException exception = assertThrows(InvalidStatusException.class, () ->
+      sendService.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, accessToken)
+    );
+
+    // THEN
+    assertEquals("Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
+  }
+
 }

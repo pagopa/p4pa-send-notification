@@ -589,6 +589,86 @@
         } ]
       }
     },
+    "/p4pasend/send/{sendNotificationId}/legal-facts/{legalFactId}" : {
+      "get" : {
+        "tags" : [ "Send" ],
+        "summary" : "retrieve legal fact metadata for downloading document content",
+        "description" : "legal fact metadata for downloading document content",
+        "operationId" : "retrieveLegalFactDownloadMetadata",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "description" : "notification id referenced by the legal fact",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "legalFactId",
+          "in" : "path",
+          "description" : "id of legal fact",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Legal facts not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/send/streams/events" : {
       "get" : {
         "tags" : [ "Streams" ],
@@ -1317,6 +1397,28 @@
           }
         },
         "required" : [ "iun", "legalFactId" ]
+      },
+      "LegalFactDownloadMetadataDTO" : {
+        "type" : "object",
+        "properties" : {
+          "filename" : {
+            "type" : "string"
+          },
+          "contentLength" : {
+            "type" : "number",
+            "description" : "content dimension, in bytes.",
+            "example" : 54092
+          },
+          "url" : {
+            "type" : "string",
+            "description" : "preauthorized URL for making a GET request to obtain the document content. Present only if document is ready for download."
+          },
+          "retryAfter" : {
+            "type" : "number",
+            "description" : "Estimated wait time in seconds until the document content is available for download."
+          }
+        },
+        "required" : [ "contentLength", "filename" ]
       },
       "AttachmentDetailsDTO" : {
         "type" : "object",
