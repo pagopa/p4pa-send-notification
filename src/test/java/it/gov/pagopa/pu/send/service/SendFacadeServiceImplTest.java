@@ -9,8 +9,8 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponse
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
@@ -21,14 +21,12 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMappe
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
-
-import java.math.BigDecimal;
-import java.util.*;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -36,11 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -351,8 +347,9 @@ class SendFacadeServiceImplTest {
       .updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
   }
 
-  @Test
-  void givenValidNotificationWhenRetrieveNotificationDateThenVerify() {
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void givenValidNotificationWhenRetrieveNotificationDateThenVerify(boolean isPagoPaNull) {
     // Given
     String accessToken = "ACCESSTOKEN";
     String sendNotificationId = "SENDNOTIFICATIONID";
@@ -366,6 +363,9 @@ class SendFacadeServiceImplTest {
     response.setNotificationViewDate(viewDate);
 
     Payment payment = new Payment(new PagoPa().creditorTaxId(creditorTaxId).noticeCode(noticeCode), null);
+    if (isPagoPaNull) {
+      payment = new Payment(null, F24Payment.builder().title("F24").build());
+    }
     PuPayment puPayment = new PuPayment(1L, payment, null);
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
 
@@ -379,8 +379,10 @@ class SendFacadeServiceImplTest {
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, noticeCode, orgId, accessToken))
-      .thenReturn(response);
+    if (!isPagoPaNull) {
+      Mockito.when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, noticeCode, orgId, accessToken))
+        .thenReturn(response);
+    }
     Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.any()))
       .thenReturn(expectedDTO);
 
@@ -390,8 +392,10 @@ class SendFacadeServiceImplTest {
     // Then
     assertNotNull(result);
     assertEquals(expectedDTO, result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock)
-      .updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+    if (!isPagoPaNull) {
+      Mockito.verify(sendNotificationNoPIIRepositoryMock)
+        .updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+    }
     Mockito.verify(sendNotificationDTOMapperMock).apply(Mockito.any());
   }
 
