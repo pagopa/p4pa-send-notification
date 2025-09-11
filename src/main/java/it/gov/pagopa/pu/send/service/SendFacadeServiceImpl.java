@@ -6,8 +6,8 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
-import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
@@ -132,11 +132,13 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     notification.getRecipients().forEach(puRecipientNoPIIDTO ->
       puRecipientNoPIIDTO.getPuPayments().forEach(puPayment -> {
         PagoPa payment = puPayment.getPayment().getPagoPa();
-        NotificationPriceResponseV23DTO notificationPriceResponseV23DTO = sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
+        if (payment != null) {
+          NotificationPriceResponseV23DTO notificationPriceResponseV23DTO = sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
 
-        if (notificationPriceResponseV23DTO.getNotificationViewDate() != null) {
-          puPayment.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
-          sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+          if (notificationPriceResponseV23DTO.getNotificationViewDate() != null) {
+            puPayment.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
+            sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+          }
         }
       })
     );
