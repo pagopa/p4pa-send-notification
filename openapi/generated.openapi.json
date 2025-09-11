@@ -503,6 +503,172 @@
         } ]
       }
     },
+    "/p4pasend/send/{sendNotificationId}/legal-facts" : {
+      "get" : {
+        "tags" : [ "Send" ],
+        "summary" : "retrieve list of legal facts for a given notification",
+        "description" : "legal facts",
+        "operationId" : "retrieveLegalFacts",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactListElementDTO"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactListElementDTO"
+                  }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactListElementDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Legal facts not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactListElementDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactListElementDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/p4pasend/send/{sendNotificationId}/legal-facts/{legalFactId}" : {
+      "get" : {
+        "tags" : [ "Send" ],
+        "summary" : "retrieve legal fact metadata for downloading document content",
+        "description" : "legal fact metadata for downloading document content",
+        "operationId" : "retrieveLegalFactDownloadMetadata",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "description" : "notification id referenced by the legal fact",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "legalFactId",
+          "in" : "path",
+          "description" : "id of legal fact",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Legal facts not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/send/streams/events" : {
       "get" : {
         "tags" : [ "Streams" ],
@@ -1015,6 +1181,21 @@
           }
         }
       },
+      "F24Payment" : {
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "type" : "string"
+          },
+          "applyCost" : {
+            "type" : "boolean"
+          },
+          "metadataAttachment" : {
+            "$ref" : "#/components/schemas/Attachment"
+          }
+        },
+        "required" : [ "applyCost", "metadataAttachment", "title" ]
+      },
       "NotificationDigitalAddress" : {
         "type" : "object",
         "properties" : {
@@ -1061,9 +1242,11 @@
         "properties" : {
           "pagoPa" : {
             "$ref" : "#/components/schemas/PagoPa"
+          },
+          "f24" : {
+            "$ref" : "#/components/schemas/F24Payment"
           }
-        },
-        "required" : [ "pagoPa" ]
+        }
       },
       "PhysicalCommunicationTypeEnum" : {
         "type" : "string",
@@ -1181,6 +1364,61 @@
           }
         },
         "required" : [ "debtPositionId", "navList" ]
+      },
+      "LegalFactIdDTO" : {
+        "type" : "object",
+        "description" : "document keys generated during paper/physical delivery process",
+        "properties" : {
+          "key" : {
+            "type" : "string",
+            "description" : "legal fact identifier generated during delivery process"
+          },
+          "category" : {
+            "type" : "string",
+            "description" : "possible types for a legal fact:   - SENDER_ACK   - DIGITAL_DELIVERY   - ANALOG_DELIVERY   - RECIPIENT_ACCESS   - PEC_RECEIPT   - ANALOG_FAILURE_DELIVERY   - NOTIFICATION_CANCELLED"
+          }
+        },
+        "required" : [ "category", "key" ]
+      },
+      "LegalFactListElementDTO" : {
+        "type" : "object",
+        "description" : "legal fact related to a SEND notification",
+        "properties" : {
+          "taxId" : {
+            "type" : "string",
+            "description" : "value is set if legal fact relates to a particular recipient"
+          },
+          "iun" : {
+            "type" : "string",
+            "description" : "universal identifier of a notification related to a legal fact"
+          },
+          "legalFactId" : {
+            "$ref" : "#/components/schemas/LegalFactIdDTO"
+          }
+        },
+        "required" : [ "iun", "legalFactId" ]
+      },
+      "LegalFactDownloadMetadataDTO" : {
+        "type" : "object",
+        "properties" : {
+          "filename" : {
+            "type" : "string"
+          },
+          "contentLength" : {
+            "type" : "number",
+            "description" : "content dimension, in bytes.",
+            "example" : 54092
+          },
+          "url" : {
+            "type" : "string",
+            "description" : "preauthorized URL for making a GET request to obtain the document content. Present only if document is ready for download."
+          },
+          "retryAfter" : {
+            "type" : "number",
+            "description" : "Estimated wait time in seconds until the document content is available for download."
+          }
+        },
+        "required" : [ "contentLength", "filename" ]
       },
       "AttachmentDetailsDTO" : {
         "type" : "object",

@@ -42,6 +42,16 @@ public class SendServiceImpl implements SendService {
     return client.retrieveNotificationPrice(paTaxId, noticeCode, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
 
+  @Override
+  public List<LegalFactListElementV20DTO> getLegalFacts(String iun, Long organizationId, String accessToken) {
+    return client.getLegalFacts(iun, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
+  }
+
+  @Override
+  public LegalFactDownloadMetadataResponseDTO getLegalFactDownloadMetadata(String iun, String legalFactId, Long organizationId, String accessToken) {
+    return client.getLegalFactDownloadMetadata(iun, legalFactId, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
+  }
+
   private String getApiKeyFromOrganization(Long organizationId, String accessToken) {
     return organizationService.getOrganizationApiKey(organizationId, accessToken);
   }

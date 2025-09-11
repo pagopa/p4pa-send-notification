@@ -53,5 +53,14 @@ public class SendClient {
       .consumeEventStreamV25(UUID.fromString(streamId), lastEventId);
   }
 
+  public List<LegalFactListElementV20DTO> getLegalFacts(String iun, String apiKey, String pdndAccessToken){
+    return apisHolder.getLegalFactsApiByApiKey(apiKey, pdndAccessToken)
+      .retrieveNotificationLegalFactsV20(iun);
+  }
+
+  public LegalFactDownloadMetadataResponseDTO getLegalFactDownloadMetadata(String iun, String legalFactId, String apiKey, String pdndAccessToken){
+    return apisHolder.getLegalFactsApiByApiKey(apiKey, pdndAccessToken)
+      .downloadLegalFactById(iun, legalFactId);
+  }
 
 }

@@ -4,18 +4,20 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PhysicalCommunicationTypeEnum;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO.RecipientTypeEnum;
+import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.PuRecipient;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.Attachment;
+import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
-
-import java.util.Objects;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class SendNotification2NewNotificationRequestMapper {
@@ -93,29 +95,7 @@ public class SendNotification2NewNotificationRequestMapper {
         //end digital address domain
 
         //payments domain to implements
-        List<NotificationPaymentItemDTO> payments = puRecipient.getPuPayments().stream().map(puPayment -> {
-          PagoPaPaymentDTO pagoPa = new PagoPaPaymentDTO();
-          pagoPa.setCreditorTaxId(puPayment.getPayment().getPagoPa().getCreditorTaxId());
-          pagoPa.setNoticeCode(puPayment.getPayment().getPagoPa().getNoticeCode());
-          pagoPa.setApplyCost(puPayment.getPayment().getPagoPa().getApplyCost());
-
-          Optional<NotificationPaymentAttachmentDTO> attachment = sendNotification.getDocuments().stream()
-            .filter(doc -> puPayment.getPayment().getPagoPa().getAttachment() != null
-              && doc.getFileName().equals(puPayment.getPayment().getPagoPa().getAttachment().getFileName()))
-            .findFirst()
-            .map(doc -> {
-              NotificationPaymentAttachmentDTO attachmentDTO = new NotificationPaymentAttachmentDTO();
-              attachmentDTO.setContentType(doc.getContentType());
-              attachmentDTO.setDigests(new NotificationAttachmentDigestsDTO().sha256(doc.getDigest()));
-              attachmentDTO.setRef(new NotificationAttachmentBodyRefDTO()
-                .key(doc.getKey())
-                .versionToken(doc.getVersionId()));
-              return attachmentDTO;
-            });
-          attachment.ifPresent(pagoPa::setAttachment);
-          return new NotificationPaymentItemDTO().pagoPa(pagoPa);
-        }).toList();
-
+        List<NotificationPaymentItemDTO> payments = getPayments(sendNotification, puRecipient);
         notificationRecipient.setPayments(payments);
         //end payments
 
@@ -123,14 +103,79 @@ public class SendNotification2NewNotificationRequestMapper {
       }).toList();
   }
 
+  private static List<NotificationPaymentItemDTO> getPayments(SendNotification sendNotification, PuRecipient puRecipient) {
+    return puRecipient.getPuPayments().stream().map(puPayment -> {
+      PagoPaPaymentDTO pagoPa = null;
+      if (puPayment.getPayment().getPagoPa() != null) {
+        pagoPa = new PagoPaPaymentDTO();
+        pagoPa.setCreditorTaxId(puPayment.getPayment().getPagoPa().getCreditorTaxId());
+        pagoPa.setNoticeCode(puPayment.getPayment().getPagoPa().getNoticeCode());
+        pagoPa.setApplyCost(puPayment.getPayment().getPagoPa().getApplyCost());
+
+        Optional<NotificationPaymentAttachmentDTO> attachment = getAttachment(sendNotification, puPayment);
+        attachment.ifPresent(pagoPa::setAttachment);
+      }
+
+      F24PaymentDTO f24Payment = null;
+      if (puPayment.getPayment().getF24() != null) {
+        f24Payment = new F24PaymentDTO();
+        f24Payment.setTitle(puPayment.getPayment().getF24().getTitle());
+        f24Payment.setApplyCost(puPayment.getPayment().getF24().getApplyCost());
+        Optional<NotificationMetadataAttachmentDTO> metadataAttachment = getMetadataAttachment(sendNotification, puPayment);
+        metadataAttachment.ifPresent(f24Payment::setMetadataAttachment);
+      }
+
+      return new NotificationPaymentItemDTO()
+        .pagoPa(pagoPa)
+        .f24(f24Payment);
+    }).toList();
+  }
+
+  private static Optional<NotificationPaymentAttachmentDTO> getAttachment(SendNotification sendNotification, PuPayment puPayment) {
+    return sendNotification.getDocuments().stream()
+      .filter(doc -> puPayment.getPayment().getPagoPa().getAttachment() != null
+        && doc.getFileName().equals(puPayment.getPayment().getPagoPa().getAttachment().getFileName()))
+      .findFirst()
+      .map(doc -> {
+        NotificationPaymentAttachmentDTO attachmentDTO = new NotificationPaymentAttachmentDTO();
+        attachmentDTO.setContentType(doc.getContentType());
+        attachmentDTO.setDigests(new NotificationAttachmentDigestsDTO().sha256(doc.getDigest()));
+        attachmentDTO.setRef(new NotificationAttachmentBodyRefDTO()
+          .key(doc.getKey())
+          .versionToken(doc.getVersionId()));
+        return attachmentDTO;
+      });
+  }
+
+  private static Optional<NotificationMetadataAttachmentDTO> getMetadataAttachment(SendNotification sendNotification, PuPayment puPayment) {
+    return sendNotification.getDocuments().stream()
+      .filter(doc -> puPayment.getPayment().getF24().getMetadataAttachment() != null
+        && doc.getFileName().equals(puPayment.getPayment().getF24().getMetadataAttachment().getFileName()))
+      .findFirst()
+      .map(doc -> {
+        NotificationMetadataAttachmentDTO attachmentDTO = new NotificationMetadataAttachmentDTO();
+        attachmentDTO.setContentType(doc.getContentType());
+        attachmentDTO.setDigests(new NotificationAttachmentDigestsDTO().sha256(doc.getDigest()));
+        attachmentDTO.setRef(new NotificationAttachmentBodyRefDTO()
+          .key(doc.getKey())
+          .versionToken(doc.getVersionId()));
+        return attachmentDTO;
+      });
+  }
+
   private List<NotificationDocumentDTO> setDocuments(SendNotification sendNotification) {
-    Set<String> attachmentFileNames =
-      sendNotification.getPuRecipients().stream()
-        .flatMap(r -> r.getPuPayments().stream())
-        .map(payment -> payment.getPayment().getPagoPa().getAttachment())
-        .filter(Objects::nonNull)
-        .map(Attachment::getFileName)
-        .collect(Collectors.toSet());
+    Set<String> attachmentFileNames = sendNotification.getPuRecipients().stream()
+      .flatMap(r -> r.getPuPayments().stream())
+      .flatMap(puPayment -> {
+        Payment payment = puPayment.getPayment();
+        return Stream.of(
+          payment.getPagoPa() != null ? payment.getPagoPa().getAttachment() : null,
+          payment.getF24() != null ? payment.getF24().getMetadataAttachment() : null
+        );
+      })
+      .filter(Objects::nonNull)
+      .map(Attachment::getFileName)
+      .collect(Collectors.toSet());
 
     return sendNotification.getDocuments().stream()
       .filter(doc -> !attachmentFileNames.contains(doc.getFileName()))
@@ -142,6 +187,8 @@ public class SendNotification2NewNotificationRequestMapper {
           .key(doc.getKey())
           .versionToken(doc.getVersionId()));
         return documentDTO;
-      }).toList();
+      })
+      .toList();
   }
+
 }

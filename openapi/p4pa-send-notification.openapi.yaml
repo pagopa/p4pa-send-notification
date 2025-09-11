@@ -402,6 +402,69 @@ paths:
           description: Streams not found
         '500':
           description: Internal server error
+  /send/{sendNotificationId}/legal-facts:
+    get:
+      tags:
+        - Send
+      summary: retrieve list of legal facts for a given notification
+      description: legal facts
+      operationId: retrieveLegalFacts
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactListDTO'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Legal facts not found
+        '500':
+          description: Internal server error
+  /send/{sendNotificationId}/legal-facts/{legalFactId}:
+    get:
+      tags:
+        - Send
+      summary: retrieve legal fact metadata for downloading document content
+      description: legal fact metadata for downloading document content
+      operationId: retrieveLegalFactDownloadMetadata
+      parameters:
+        - name: sendNotificationId
+          description: notification id referenced by the legal fact
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: legalFactId
+          description: id of legal fact
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactDownloadMetadataDTO'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Legal facts not found
+        '500':
+          description: Internal server error
 security:
   - BearerAuth: []
 components:
@@ -499,11 +562,11 @@ components:
           type: string
     Payment:
       type: object
-      required:
-        - pagoPa
       properties:
         pagoPa:
           $ref: '#/components/schemas/PagoPa'
+        f24:
+          $ref: '#/components/schemas/F24Payment'
     PagoPa:
       type: object
       required:
@@ -518,6 +581,19 @@ components:
         applyCost:
           type: boolean
         attachment:
+          $ref: '#/components/schemas/Attachment'
+    F24Payment:
+      type: object
+      required:
+        - title
+        - applyCost
+        - metadataAttachment
+      properties:
+        title:
+          type: string
+        applyCost:
+          type: boolean
+        metadataAttachment:
           $ref: '#/components/schemas/Attachment'
     Attachment:
       type: object
@@ -638,3 +714,62 @@ components:
       type: array
       items:
         type: "ProgressResponseElementV25DTO"
+    LegalFactListDTO:
+      description: legal fact list related to a SEND notification
+      type: array
+      items:
+        $ref: "#/components/schemas/LegalFactListElementDTO"
+    LegalFactListElementDTO:
+      description: legal fact related to a SEND notification
+      required:
+        - iun
+        - legalFactId
+      type: object
+      properties:
+        taxId:
+          description: value is set if legal fact relates to a particular recipient
+          type: string
+        iun:
+          description: universal identifier of a notification related to a legal fact
+          type: string
+        legalFactId:
+          $ref: '#/components/schemas/LegalFactIdDTO'
+    LegalFactIdDTO:
+      description: document keys generated during paper/physical delivery process
+      required:
+        - key
+        - category
+      type: object
+      properties:
+        key:
+          description: legal fact identifier generated during delivery process
+          type: string
+        category:
+          description: >-
+            possible types for a legal fact:
+              - SENDER_ACK
+              - DIGITAL_DELIVERY
+              - ANALOG_DELIVERY
+              - RECIPIENT_ACCESS
+              - PEC_RECEIPT
+              - ANALOG_FAILURE_DELIVERY
+              - NOTIFICATION_CANCELLED
+          type: string
+    LegalFactDownloadMetadataDTO:
+      type: object
+      required:
+        - filename
+        - contentLength
+      properties:
+        filename:
+          type: string
+        contentLength:
+          description: content dimension, in bytes.
+          example: 54092
+          type: number
+        url:
+          description: preauthorized URL for making a GET request to obtain the document content. Present only if document is ready for download.
+          type: string
+        retryAfter:
+          description: Estimated wait time in seconds until the document content is available for download.
+          type: number

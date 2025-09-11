@@ -2,14 +2,15 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
-import it.gov.pagopa.pu.send.connector.send.generated.api.EventsApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
-import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.StreamsApi;
+import it.gov.pagopa.pu.send.connector.send.generated.api.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,8 @@ class SendClientTest {
   private StreamsApi streamsApiMock;
   @Mock
   private EventsApi eventsApiMock;
+  @Mock
+  private LegalFactsApi legalFactsApiMock;
 
   private SendClient sendClient;
   private final String apiKey = "apiKey";
@@ -44,6 +47,19 @@ class SendClientTest {
   @BeforeEach
   void setUp() {
     sendClient = new SendClient(apisHolder);
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      apisHolder,
+      newNotificationApiMock,
+      senderReadB2BApiMock,
+      notificationPriceApiMock,
+      streamsApiMock,
+      eventsApiMock,
+      legalFactsApiMock
+    );
   }
 
   @Test
@@ -177,4 +193,61 @@ class SendClientTest {
 
     assertSame(response, result);
   }
+
+  @Test
+  void givenValidRequestWhenGetLegalFactsThenVerifyResponse() {
+    // GIVEN
+    String iun = "REQUEST_ID";
+
+    //LegalFactId from SEND
+    LegalFactsIdV20DTO legalFactsIdDTO = new LegalFactsIdV20DTO();
+    legalFactsIdDTO.setKey("key");
+    legalFactsIdDTO.setCategory("category");
+    //LegalFact from SEND
+    LegalFactListElementV20DTO legalFactListElementV20DTO = new LegalFactListElementV20DTO();
+    legalFactListElementV20DTO.setIun("iun");
+    legalFactListElementV20DTO.setTaxId("taxId");
+    legalFactListElementV20DTO.setLegalFactsId(legalFactsIdDTO); //set id
+    //Expected LegalFact list received from SEND
+    List<LegalFactListElementV20DTO> expectedResult = Collections.singletonList(legalFactListElementV20DTO);
+
+    Mockito.when(apisHolder.getLegalFactsApiByApiKey(apiKey, voucherToken))
+      .thenReturn(legalFactsApiMock);
+    Mockito.when(legalFactsApiMock.retrieveNotificationLegalFactsV20(iun))
+      .thenReturn(expectedResult);
+
+    // WHEN
+    List<LegalFactListElementV20DTO> result = sendClient.getLegalFacts(iun, apiKey, voucherToken);
+
+    // THEN
+    assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenValidRequestWhenGetLegalFactDownloadMetadataThenVerifyResponse() {
+    // GIVEN
+    String iun = "NOTIFICATION_ID";
+    String legalFactId = "LEGAL_FACT_ID";
+    String filename = "filename.pdf";
+    String url = "http://URL";
+    BigDecimal contentLength = new BigDecimal(1234);
+
+    //Mock LegalFactDownloadMetadata received from SEND
+    LegalFactDownloadMetadataResponseDTO expectedResult = new LegalFactDownloadMetadataResponseDTO();
+    expectedResult.setFilename(filename);
+    expectedResult.setContentLength(contentLength);
+    expectedResult.setUrl(url);
+
+    Mockito.when(apisHolder.getLegalFactsApiByApiKey(apiKey, voucherToken))
+      .thenReturn(legalFactsApiMock);
+    Mockito.when(legalFactsApiMock.downloadLegalFactById(iun, legalFactId))
+      .thenReturn(expectedResult);
+
+    // WHEN
+    LegalFactDownloadMetadataResponseDTO actualResult = sendClient.getLegalFactDownloadMetadata(iun,legalFactId, apiKey, voucherToken);
+
+    // THEN
+    assertSame(expectedResult, actualResult);
+  }
+
 }

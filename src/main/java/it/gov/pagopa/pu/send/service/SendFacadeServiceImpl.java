@@ -6,13 +6,13 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
-import it.gov.pagopa.pu.send.dto.generated.PagoPa;
-import it.gov.pagopa.pu.send.dto.generated.Payment;
-import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
+import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -20,8 +20,11 @@ import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.ZoneId;
 import java.util.List;
@@ -35,6 +38,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
+  private final SendLegalFactMapper sendLegalFactMapper;
   private final SendStreamService sendStreamService;
 
   public SendFacadeServiceImpl(
@@ -43,12 +47,14 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendUploadFacadeServiceImpl uploadService,
     SendNotification2NewNotificationRequestMapper sendNotificationMapper,
     SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
+    SendLegalFactMapper sendLegalFactMapper,
     SendStreamService sendStreamService) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendService = sendService;
     this.uploadService = uploadService;
     this.sendNotificationMapper = sendNotificationMapper;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
+    this.sendLegalFactMapper = sendLegalFactMapper;
     this.sendStreamService = sendStreamService;
   }
 
@@ -106,10 +112,15 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     //create stream if not already exists in cache
     createStream(notification.getOrganizationId(), accessToken);
 
-    NewNotificationResponseDTO responseDTO = sendService.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId(), accessToken);
-    if (responseDTO != null) {
-      sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
-      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
+    try {
+      NewNotificationResponseDTO responseDTO = sendService.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId(), accessToken);
+      if (responseDTO != null) {
+        sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
+        sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
+      }
+    }  catch (HttpClientErrorException.Conflict ex) {
+      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
+      throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
     }
   }
 
@@ -121,11 +132,13 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     notification.getRecipients().forEach(puRecipientNoPIIDTO ->
       puRecipientNoPIIDTO.getPuPayments().forEach(puPayment -> {
         PagoPa payment = puPayment.getPayment().getPagoPa();
-        NotificationPriceResponseV23DTO notificationPriceResponseV23DTO = sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
+        if (payment != null) {
+          NotificationPriceResponseV23DTO notificationPriceResponseV23DTO = sendService.retrieveNotificationPrice(payment.getCreditorTaxId(), payment.getNoticeCode(), notification.getOrganizationId(), accessToken);
 
-        if (notificationPriceResponseV23DTO.getNotificationViewDate() != null) {
-          puPayment.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
-          sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+          if (notificationPriceResponseV23DTO.getNotificationViewDate() != null) {
+            puPayment.setNotificationDate(notificationPriceResponseV23DTO.getNotificationViewDate().toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
+            sendNotificationNoPIIRepository.updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+          }
         }
       })
     );
@@ -188,6 +201,37 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     }
 
     return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+  }
+
+  @Override
+  public List<LegalFactListElementDTO> retrieveLegalFacts(String sendNotificationId, String accessToken) {
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
+
+    // Validate status
+    NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
+
+    return sendService.getLegalFacts(notification.getIun(), notification.getOrganizationId(), accessToken)
+      .stream()
+      .map(sendLegalFactMapper::mapLegalFactDTOFromSend)
+      .toList();
+  }
+
+  @Override
+  public LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId, String legalFactId,
+                                                                        String accessToken) {
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
+
+    // Validate status
+    NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
+
+    LegalFactDownloadMetadataResponseDTO legalFactDownloadMetadata = sendService.getLegalFactDownloadMetadata(
+      notification.getIun(),
+      legalFactId,
+      notification.getOrganizationId(),
+      accessToken
+    );
+
+    return sendLegalFactMapper.mapLegalFactDownloadMetadataFromSend(legalFactDownloadMetadata);
   }
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {

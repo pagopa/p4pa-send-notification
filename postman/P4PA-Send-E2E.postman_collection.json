@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "acae94b1-348c-4c28-a79e-8358d9d857ef",
+		"_postman_id": "90b414df-70c8-4448-a900-b2ff26b99ecb",
 		"name": "P4PA-Send-E2E",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "36568841"
+		"_exporter_id": "29297333"
 	},
 	"item": [
 		{
@@ -648,6 +648,132 @@
 								"send",
 								"{{sendNotificationId}}",
 								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieveLegalFacts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send notification status - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"P4PA Send notification status - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).to.be.an(\"array\");\r",
+									"    pm.expect(jsonResponse[0]).to.have.keys('iun','legalFactId').and.be.an(\"object\");\r",
+									"    pm.expect(jsonResponse[0].legalFactId).to.have.keys('key','category').and.be.an(\"object\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/legal-facts",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"legal-facts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieveLegalFactDownloadMetadata",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"P4PA Send notification status - Responses with 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"P4PA Send notification status - Verify response body\", function () {\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.expect(jsonResponse).have.property(\"filename\");\r",
+									"    pm.expect(jsonResponse).have.property(\"contentLength\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sendNotificationBaseUrl}}/p4pasend/send/{{sendNotificationId}}/legal-facts/{{legalFactId}}",
+							"host": [
+								"{{sendNotificationBaseUrl}}"
+							],
+							"path": [
+								"p4pasend",
+								"send",
+								"{{sendNotificationId}}",
+								"legal-facts",
+								"{{legalFactId}}"
 							]
 						}
 					},
