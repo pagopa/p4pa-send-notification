@@ -25,6 +25,7 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Assertions;
@@ -208,7 +209,7 @@ class SendNotificationServiceImplTest {
     Mockito.when(fileRetrieverServiceMock.buildRelativeSendPath(
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
     try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
-      mockedFiles.when(() -> Files.deleteIfExists(any(Path.class))).thenThrow(new DeleteFileException("DUMMY"));
+      mockedFiles.when(() -> Files.deleteIfExists(any(Path.class))).thenThrow(new IOException("DUMMY"));
       //Then
       Assertions.assertThrows(DeleteFileException.class, () -> sendNotificationService.deleteSendNotification(sendNotificationId));
     }
