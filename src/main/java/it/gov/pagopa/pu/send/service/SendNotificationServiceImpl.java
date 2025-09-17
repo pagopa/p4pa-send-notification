@@ -183,7 +183,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   private void deleteFile(Path basePath, String fileName, String sendNotificationId) {
-    Path filePath = basePath.resolve(sendNotificationId + fileName + AESUtils.CIPHER_EXTENSION);
+    Path filePath = basePath.resolve(sendNotificationId + "_" + fileName + AESUtils.CIPHER_EXTENSION);
     try {
       Files.deleteIfExists(filePath);
     } catch (IOException e) {
