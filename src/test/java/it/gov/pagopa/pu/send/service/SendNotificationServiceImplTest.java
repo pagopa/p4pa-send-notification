@@ -221,7 +221,7 @@ class SendNotificationServiceImplTest {
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
-    notification.setStatus(NotificationStatus.COMPLETE);
+    notification.setStatus(NotificationStatus.ACCEPTED);
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
