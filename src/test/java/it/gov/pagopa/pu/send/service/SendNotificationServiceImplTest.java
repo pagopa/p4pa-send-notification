@@ -1,5 +1,8 @@
 package it.gov.pagopa.pu.send.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
+
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.citizen.model.PersonalData;
 import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
@@ -11,6 +14,7 @@ import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.DeleteFileException;
 import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.exception.SendNotificationFileNotFoundException;
@@ -21,13 +25,14 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -174,6 +179,39 @@ class SendNotificationServiceImplTest {
     sendNotificationService.deleteSendNotification(sendNotificationId);
     Mockito.verify(sendNotificationNoPIIRepositoryMock).deleteById(sendNotificationId);
 
+  }
+
+  @Test
+  void givenDeleteNotificationRequestWhenDeleteSendNotificationThenDeleteFileException() {
+    //Given
+    String sendNotificationId = "sendNotificationId";
+    String fileName = "file.pdf";
+    Path relativePath = Path.of("1/sendNotificationId");
+
+    SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    PuPayment puPayment = new PuPayment();
+    Payment payment = new Payment();
+    PagoPa pagoPa = new PagoPa();
+    Attachment attachment = new Attachment();
+    attachment.setFileName("FILENAME");
+    pagoPa.setAttachment(attachment);
+    F24Payment f24 = new F24Payment();
+    f24.setMetadataAttachment(attachment);
+    payment.setF24(f24);
+    payment.setPagoPa(pagoPa);
+    puPayment.setPayment(payment);
+    notification.getRecipients().getFirst().setPuPayments(List.of(puPayment));
+
+    //When
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
+      Optional.of(notification));
+    Mockito.when(fileRetrieverServiceMock.buildRelativeSendPath(
+      notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
+    try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
+      mockedFiles.when(() -> Files.deleteIfExists(any(Path.class))).thenThrow(new DeleteFileException("DUMMY"));
+      //Then
+      Assertions.assertThrows(DeleteFileException.class, () -> sendNotificationService.deleteSendNotification(sendNotificationId));
+    }
   }
 
   @Test
