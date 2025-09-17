@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.citizen.model.PersonalData;
 import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
@@ -19,6 +20,8 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -145,13 +148,18 @@ class SendNotificationServiceImplTest {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
+    Path relativePath = Path.of("1/sendNotificationId");
+
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     //When
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
+    Mockito.when(fileRetrieverServiceMock.buildRelativeSendPath(
+      notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
     //Then
     sendNotificationService.deleteSendNotification(sendNotificationId);
     Mockito.verify(sendNotificationNoPIIRepositoryMock).deleteById(sendNotificationId);
+
   }
 
   @Test
@@ -177,6 +185,8 @@ class SendNotificationServiceImplTest {
     notification.setOrganizationId(1L);
     notification.setSendNotificationId(sendNotificationId);
     notification.setStatus(NotificationStatus.WAITING_FILE);
+    PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO();
+    notification.setRecipients(List.of(recipient));
 
     DocumentDTO documentDTO = DocumentDTO.builder()
       .fileName(fileName)

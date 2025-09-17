@@ -3,10 +3,12 @@ package it.gov.pagopa.pu.send.service;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.DeleteFileException;
 import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.exception.SendNotificationFileNotFoundException;
@@ -16,9 +18,15 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
+import it.gov.pagopa.pu.send.util.AESUtils;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,8 +104,11 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   @Override
   public void deleteSendNotification(String sendNotificationId) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
-    if (!notification.getStatus().equals(NotificationStatus.COMPLETE))
+    if (!notification.getStatus().equals(NotificationStatus.COMPLETE)
+      && !notification.getStatus().equals(NotificationStatus.ACCEPTED)) {
       sendNotificationNoPIIRepository.deleteById(sendNotificationId);
+      deleteSendNotificationFiles(notification);
+    }
     else
       throw new InvalidStatusException("Cannot delete notification with status complete");
   }
@@ -136,4 +147,50 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     }
     sendNotificationNoPIIRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.READY);
   }
+
+
+  private void deleteSendNotificationFiles(SendNotificationNoPII sendNotification) {
+    Path relativePath = fileRetrieverService.buildRelativeSendPath(
+      sendNotification.getOrganizationId(),
+      sendNotification.getSendNotificationId()
+    );
+
+    // Delete documents
+    sendNotification.getDocuments().forEach(documentDTO ->
+      deleteFile(relativePath, documentDTO.getFileName(), sendNotification.getSendNotificationId()));
+
+    // Delete attachments
+    sendNotification.getRecipients().forEach(recipient -> {
+      List<PuPayment> puPayments = recipient.getPuPayments();
+      if(puPayments!=null) {
+        recipient.getPuPayments().forEach(puPayment -> {
+          Optional.ofNullable(puPayment.getPayment().getPagoPa())
+            .map(PagoPa::getAttachment)
+            .ifPresent(attachment ->
+              deleteFile(relativePath, attachment.getFileName(),
+                sendNotification.getSendNotificationId())
+            );
+
+          Optional.ofNullable(puPayment.getPayment().getF24())
+            .map(F24Payment::getMetadataAttachment)
+            .ifPresent(attachment ->
+              deleteFile(relativePath, attachment.getFileName(),
+                sendNotification.getSendNotificationId())
+            );
+        });
+      }
+    });
+  }
+
+  private void deleteFile(Path basePath, String fileName, String sendNotificationId) {
+    Path filePath = basePath.resolve(sendNotificationId + fileName + AESUtils.CIPHER_EXTENSION);
+    try {
+      Files.deleteIfExists(filePath);
+    } catch (IOException e) {
+      throw new DeleteFileException(String.format(
+        "Error while deleting file %s for sendNotificationId %s.", filePath.getFileName(), sendNotificationId
+      ));
+    }
+  }
+
 }
