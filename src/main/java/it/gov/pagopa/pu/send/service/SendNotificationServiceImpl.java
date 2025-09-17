@@ -180,6 +180,17 @@ public class SendNotificationServiceImpl implements SendNotificationService {
         });
       }
     });
+
+    // Delete root directory if empty
+    try {
+      Files.deleteIfExists(relativePath);
+    } catch (IOException e) {
+      throw new DeleteFileException(String.format(
+        "Error while deleting root directory for sendNotificationId %s.",
+        sendNotification.getSendNotificationId()
+      ));
+    }
+
   }
 
   private void deleteFile(Path basePath, String fileName, String sendNotificationId) {
