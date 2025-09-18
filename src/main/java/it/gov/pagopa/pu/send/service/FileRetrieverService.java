@@ -21,11 +21,14 @@ public class FileRetrieverService {
   }
 
   public InputStream retrieveFile(Long organizationId, String sendNotificationId, String fileName) {
-    Path relativePath = Path.of(sharedFolder, String.valueOf(organizationId), sendFilePath, sendNotificationId);
-    return decryptFile(relativePath, fileName);
+    return decryptFile(buildRelativeSendPath(organizationId, sendNotificationId), fileName);
   }
 
   public InputStream decryptFile(Path filePath, String fileName) {
     return AESUtils.decrypt(fileEncryptPassword, filePath, fileName);
+  }
+
+  public Path buildRelativeSendPath(Long organizationId, String sendNotificationId) {
+    return Path.of(sharedFolder, String.valueOf(organizationId), sendFilePath, sendNotificationId);
   }
 }

@@ -88,8 +88,8 @@ public class SendNotificationExceptionHandler {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_BAD_REQUEST);
   }
 
-  @ExceptionHandler({UploadFileException.class})
-  public ResponseEntity<SendNotificationErrorDTO> handleUploadFileException(RuntimeException ex, HttpServletRequest request) {
+  @ExceptionHandler({UploadFileException.class, DeleteFileException.class})
+  public ResponseEntity<SendNotificationErrorDTO> handleFileException(RuntimeException ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_GENERIC_ERROR);
   }
 
