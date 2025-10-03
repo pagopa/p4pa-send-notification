@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.InvalidStatusException;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
@@ -208,7 +209,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
-    NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
+    if(!NotificationStatus.ACCEPTED.equals(notification.getStatus())){
+      throw new InvalidStatusException(NotificationStatus.ACCEPTED, notification.getStatus());
+    }
 
     return sendService.getLegalFacts(notification.getIun(), notification.getOrganizationId(), accessToken)
       .stream()
@@ -222,7 +225,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
-    NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
+    if(!NotificationStatus.ACCEPTED.equals(notification.getStatus())) {
+      throw new InvalidStatusException(NotificationStatus.ACCEPTED, notification.getStatus());
+    }
 
     LegalFactDownloadMetadataResponseDTO legalFactDownloadMetadata = sendService.getLegalFactDownloadMetadata(
       notification.getIun(),
