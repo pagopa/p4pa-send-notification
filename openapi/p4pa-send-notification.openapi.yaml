@@ -695,6 +695,8 @@ components:
             - SEND_NOTIFICATION_ALREADY_PROCESSED
         message:
           type: string
+        traceId:
+          type: string
     NotificationDigitalAddress:
       required:
         - address
