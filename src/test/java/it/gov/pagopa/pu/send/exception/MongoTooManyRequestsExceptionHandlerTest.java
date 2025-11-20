@@ -4,7 +4,10 @@ import com.mongodb.MongoQueryException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteError;
+import it.gov.pagopa.pu.send.util.UtilitiesTest;
 import org.bson.BsonDocument;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +44,16 @@ class MongoTooManyRequestsExceptionHandlerTest {
 
     @MockitoSpyBean
     private SendNotificationExceptionHandlerTest.TestController testControllerSpy;
+
+    private final String traceId = "TRACEID";
+    @BeforeEach
+    void setTraceId(){
+      UtilitiesTest.setTraceId(traceId);
+    }
+    @AfterEach
+    void clearTraceId(){
+      UtilitiesTest.clearTraceIdContext();
+    }
 
     @Test
     void handleUncategorizedMongoDbException() throws Exception {
@@ -108,7 +121,8 @@ class MongoTooManyRequestsExceptionHandlerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{\"requiredField\":\"data\"}"))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"DUMMY\"}", JsonCompareMode.LENIENT));
+                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"DUMMY\"}", JsonCompareMode.LENIENT))
+          .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
     }
 
 

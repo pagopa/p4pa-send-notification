@@ -197,3 +197,7 @@ docker build -t <APP_NAME> .
 docker run --env-file <ENV_FILE> <APP_NAME>
 ```
 
+### ⚖️ Generate dependencies licenses
+```sh
+./gradlew generateLicenseReport
+```
