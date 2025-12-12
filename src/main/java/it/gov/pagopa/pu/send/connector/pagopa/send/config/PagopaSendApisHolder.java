@@ -8,11 +8,9 @@ import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Ap
 import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.StreamsApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.LegalFactsApi;
-import java.util.Objects;
 
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
