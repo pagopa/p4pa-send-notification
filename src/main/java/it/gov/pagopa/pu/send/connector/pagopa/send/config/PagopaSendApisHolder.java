@@ -9,6 +9,8 @@ import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.StreamsApi;
 import it.gov.pagopa.pu.send.connector.send.generated.api.LegalFactsApi;
 import java.util.Objects;
+
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -32,6 +34,8 @@ public class PagopaSendApisHolder {
   private final Map<String, EventsApi> eventsApiMap = new ConcurrentHashMap<>();
   private final Map<String, LegalFactsApi> legalFactsApiMap = new ConcurrentHashMap<>();
 
+  private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
+
   public PagopaSendApisHolder(
     PagopaSendApiClientConfig clientConfig,
     RestTemplateBuilder restTemplateBuilder){
@@ -44,48 +48,51 @@ public class PagopaSendApisHolder {
   }
 
   public NewNotificationApi getNewNotificationApiByApiKey(String apiKey, String pdndAccessToken) {
-    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
-    return newNotificationApiMap.computeIfAbsent(cacheKey, key ->
-      new NewNotificationApi(buildApiClient(apiKey, pdndAccessToken)));
+    bearerTokenHolder.set(pdndAccessToken);
+    return newNotificationApiMap.computeIfAbsent(apiKey, key ->
+      new NewNotificationApi(buildApiClient(apiKey)));
   }
 
   public SenderReadB2BApi getSenderReadB2BApiByApiKey(String apiKey, String pdndAccessToken) {
-    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
-    return senderReadB2BApiMap.computeIfAbsent(cacheKey, key ->
-      new SenderReadB2BApi(buildApiClient(apiKey, pdndAccessToken)));
+    bearerTokenHolder.set(pdndAccessToken);
+    return senderReadB2BApiMap.computeIfAbsent(apiKey, key ->
+      new SenderReadB2BApi(buildApiClient(apiKey)));
   }
 
   public NotificationPriceV23Api getNotificationPriceApi(String apiKey, String pdndAccessToken) {
-    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
-    return notificationPriceApiMap.computeIfAbsent(cacheKey, key ->
-      new NotificationPriceV23Api(buildApiClient(apiKey, pdndAccessToken)));
+    bearerTokenHolder.set(pdndAccessToken);
+    return notificationPriceApiMap.computeIfAbsent(apiKey, key ->
+      new NotificationPriceV23Api(buildApiClient(apiKey)));
   }
 
   public StreamsApi getStreamsApi(String apiKey, String pdndAccessToken) {
-    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
-    return streamsApiMap.computeIfAbsent(cacheKey, key ->
-      new StreamsApi(buildApiClient(apiKey, pdndAccessToken)));
+    bearerTokenHolder.set(pdndAccessToken);
+    return streamsApiMap.computeIfAbsent(apiKey, key ->
+      new StreamsApi(buildApiClient(apiKey)));
   }
 
   public EventsApi getEventsApi(String apiKey, String pdndAccessToken){
-    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
-    return eventsApiMap.computeIfAbsent(cacheKey, key ->
-      new EventsApi(buildApiClient(apiKey, pdndAccessToken)));
+    bearerTokenHolder.set(pdndAccessToken);
+    return eventsApiMap.computeIfAbsent(apiKey, key ->
+      new EventsApi(buildApiClient(apiKey)));
   }
 
   public LegalFactsApi getLegalFactsApiByApiKey(String apiKey, String pdndAccessToken) {
-    String cacheKey = apiKey+Objects.toString(pdndAccessToken,"");
-    return legalFactsApiMap.computeIfAbsent(cacheKey, key ->
-      new LegalFactsApi(buildApiClient(apiKey, pdndAccessToken)));
+    bearerTokenHolder.set(pdndAccessToken);
+    return legalFactsApiMap.computeIfAbsent(apiKey, key ->
+      new LegalFactsApi(buildApiClient(apiKey)));
   }
 
-  private ApiClient buildApiClient(String apiKey, String pdndAccessToken) {
+  @PreDestroy
+  public void unload(){
+    bearerTokenHolder.remove();
+  }
+
+  private ApiClient buildApiClient(String apiKey) {
     ApiClient apiClient = new ApiClient(restTemplate);
     apiClient.setBasePath(clientConfig.getBaseUrl());
     apiClient.setApiKey(apiKey);
-    if (StringUtils.isNotEmpty(pdndAccessToken)) {
-      apiClient.setBearerToken(pdndAccessToken);
-    }
+    apiClient.setBearerToken(bearerTokenHolder::get);
     apiClient.setMaxAttemptsForRetry(Math.max(1, clientConfig.getMaxAttempts()));
     apiClient.setWaitTimeMillis(clientConfig.getWaitTimeMillis());
     return apiClient;

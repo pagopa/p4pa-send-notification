@@ -46,8 +46,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
       apiKey -> apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken)
         .sendNewNotificationV24(new NewNotificationRequestV24DTO()),
       new ParameterizedTypeReference<>() {},
-      () -> {
-      },
+      apisHolder::unload,
       AUTH_TYPE.API_KEY,
       "x-api-key");
   }
@@ -58,7 +57,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
       apiKey -> apisHolder.getSenderReadB2BApiByApiKey(apiKey, voucherToken)
         .retrieveNotificationRequestStatusV24("REQUESTID",null, null),
       new ParameterizedTypeReference<>() {},
-      () -> {},
+      apisHolder::unload,
       AUTH_TYPE.API_KEY,
       "x-api-key");
   }
@@ -69,7 +68,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
       apiKey -> apisHolder.getNotificationPriceApi(apiKey, voucherToken)
         .retrieveNotificationPriceV23("PATAXID","NOTICECODE"),
       new ParameterizedTypeReference<>() {},
-      () -> {},
+      apisHolder::unload,
       AUTH_TYPE.API_KEY,
       "x-api-key");
   }
@@ -80,7 +79,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
       apiKey -> apisHolder.getStreamsApi(apiKey, voucherToken)
         .listEventStreamsV25(),
       new ParameterizedTypeReference<>() {},
-      () -> {},
+      apisHolder::unload,
       AUTH_TYPE.API_KEY,
       "x-api-key");
   }
@@ -91,7 +90,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
       apiKey -> apisHolder.getEventsApi(apiKey, voucherToken)
         .consumeEventStreamV25(UUID.randomUUID(),null),
       new ParameterizedTypeReference<>() {},
-      () -> {},
+      apisHolder::unload,
       AUTH_TYPE.API_KEY,
       "x-api-key");
   }
@@ -102,7 +101,7 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
       apiKey -> apisHolder.getLegalFactsApiByApiKey(apiKey, voucherToken)
         .retrieveNotificationLegalFactsV20("iun"),
       new ParameterizedTypeReference<>() {},
-      () -> {},
+      apisHolder::unload,
       AUTH_TYPE.API_KEY,
       "x-api-key");
   }
