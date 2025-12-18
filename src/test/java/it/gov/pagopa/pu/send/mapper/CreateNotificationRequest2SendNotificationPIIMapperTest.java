@@ -1,7 +1,10 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
+import it.gov.pagopa.pu.organization.dto.generated.Broker;
+import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
+import it.gov.pagopa.pu.send.connector.organization.service.BrokerService;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.NotificationFeePolicyEnum;
@@ -38,26 +41,37 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
   @Mock
   private DebtPositionService debtPositionServiceMock;
+  @Mock
+  private BrokerService brokerServiceMock;
 
   private CreateNotificationRequest2SendNotificationMapper mapper;
 
   @BeforeEach
   void init() {
-    mapper = new CreateNotificationRequest2SendNotificationMapper(debtPositionServiceMock);
+    mapper = new CreateNotificationRequest2SendNotificationMapper(debtPositionServiceMock, brokerServiceMock);
   }
 
   @AfterEach
   void verifyNoMoreInteractions() {
-    Mockito.verifyNoMoreInteractions(debtPositionServiceMock);
+    Mockito.verifyNoMoreInteractions(debtPositionServiceMock, brokerServiceMock);
   }
 
   @Test
   void givenCreateNotificationRequestWhenMapToModelThenOk() {
     // Given
     CreateNotificationRequest request = buildRequest();
-    String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
-
     String accessToken = "ACCESSTOKEN";
+
+    Broker broker = Mockito.mock(Broker.class);
+
+    Mockito.when(broker.getPagoPaInteractionModel())
+      .thenReturn(PagoPaInteractionModel.SYNC);
+
+    Mockito.when(brokerServiceMock.getBrokerByOrganizationId(request.getOrganizationId(), accessToken))
+      .thenReturn(broker);
+
+    String nav = request.getRecipients().getFirst()
+      .getPayments().getFirst().getPagoPa().getNoticeCode();
 
     DebtPosition debtPosition = new DebtPosition();
     debtPosition.setDebtPositionId(3L);
@@ -85,7 +99,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals(100, result.getPaFee());
     Assertions.assertEquals(22, result.getVat());
     Assertions.assertEquals(LocalDate.now().toString(), result.getPaymentExpirationDate());
-    Assertions.assertEquals(PagoPaIntModeEnum.NONE.getValue(), result.getPagoPaIntMode());
+    Assertions.assertEquals(PagoPaInteractionModel.SYNC.getValue(), result.getPagoPaIntMode());
   }
 
   @ParameterizedTest
@@ -98,7 +112,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setPaFee(null);
     request.setPaymentExpirationDate(null);
     request.setVat(null);
-    request.setPagoPaIntMode(null);
     request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().setAttachment(null);
     if (paymentNull.equals("pagoPaNull")) {
       request.getRecipients().getFirst().getPayments().getFirst().setPagoPa(null);
@@ -110,6 +123,15 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     }
 
     String accessToken = "ACCESSTOKEN";
+
+    Broker broker = Mockito.mock(Broker.class);
+
+    Mockito.when(broker.getPagoPaInteractionModel())
+      .thenReturn(PagoPaInteractionModel.ASYNC_GPD);
+
+    Mockito.when(brokerServiceMock.getBrokerByOrganizationId(request.getOrganizationId(), accessToken))
+      .thenReturn(broker);
+
 
     DebtPosition debtPosition = new DebtPosition();
     debtPosition.setDebtPositionId(3L);
@@ -125,7 +147,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
     // Then
     TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun",
-      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate", "pagoPaIntMode");
+      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -140,6 +162,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("TAXID", result.getSenderTaxId());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
+    Assertions.assertEquals(PagoPaInteractionModel.ASYNC_GPD.getValue(), result.getPagoPaIntMode());
   }
 
   @Test
