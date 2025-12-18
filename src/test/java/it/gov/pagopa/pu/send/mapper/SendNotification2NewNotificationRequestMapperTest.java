@@ -58,7 +58,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals(100, result.getPaFee());
     assertEquals(22, result.getVat());
     assertEquals("2025-12-31", result.getPaymentExpirationDate());
-    assertEquals(NewNotificationRequestV24DTO.PagoPaIntModeEnum.NONE, result.getPagoPaIntMode());
+    assertEquals(NewNotificationRequestV24DTO.PagoPaIntModeEnum.SYNC, result.getPagoPaIntMode());
   }
 
   @Test

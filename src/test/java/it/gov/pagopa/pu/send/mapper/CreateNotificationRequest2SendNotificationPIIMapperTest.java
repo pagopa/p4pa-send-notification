@@ -8,7 +8,6 @@ import it.gov.pagopa.pu.send.connector.organization.service.BrokerService;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.NotificationFeePolicyEnum;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PagoPaIntModeEnum;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PhysicalCommunicationTypeEnum;
 import it.gov.pagopa.pu.send.dto.generated.Document;
 import it.gov.pagopa.pu.send.dto.generated.Recipient;
@@ -99,7 +98,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals(100, result.getPaFee());
     Assertions.assertEquals(22, result.getVat());
     Assertions.assertEquals(LocalDate.now().toString(), result.getPaymentExpirationDate());
-    Assertions.assertEquals(PagoPaInteractionModel.SYNC.getValue(), result.getPagoPaIntMode());
+    Assertions.assertEquals("SYNC", result.getPagoPaIntMode());
   }
 
   @ParameterizedTest
@@ -162,7 +161,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("TAXID", result.getSenderTaxId());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
-    Assertions.assertEquals(PagoPaInteractionModel.ASYNC_GPD.getValue(), result.getPagoPaIntMode());
+    Assertions.assertEquals("ASYNC", result.getPagoPaIntMode());
   }
 
   @Test
@@ -195,7 +194,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setPaFee(100);
     request.setVat(22);
     request.setPaymentExpirationDate(LocalDate.now());
-    request.setPagoPaIntMode(PagoPaIntModeEnum.NONE);
     return request;
   }
 

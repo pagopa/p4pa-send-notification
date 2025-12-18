@@ -79,6 +79,7 @@ class SendNotificationPIIMapperTest {
   @Test
   void givenFullDTOWhenExtractNoPiiEntityThenVerify() {
     SendNotification sendNotification = getFullDTO();
+    sendNotification.setPagoPaIntMode("SYNC");
     byte[] expectedHash = "BNRMHL75C06G702B".getBytes();
 
     Mockito.when(dataCipherService.hash(Mockito.anyString()))

@@ -68,7 +68,10 @@ public class CreateNotificationRequest2SendNotificationMapper {
     }
 
     Broker broker = brokerService.getBrokerByOrganizationId(organizationId, accessToken);
-    sendNotification.setPagoPaIntMode(broker.getPagoPaInteractionModel().getValue());
+    sendNotification.setPagoPaIntMode(
+      broker.getPagoPaInteractionModel().getValue().contains("ASYNC")
+      ? "ASYNC"
+      : "SYNC");
 
     return sendNotification;
   }

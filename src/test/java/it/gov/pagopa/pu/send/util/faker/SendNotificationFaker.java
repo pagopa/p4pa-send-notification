@@ -3,7 +3,6 @@ package it.gov.pagopa.pu.send.util.faker;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationFeePolicyDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 
 import java.util.List;
@@ -32,7 +31,6 @@ public class SendNotificationFaker {
       .paFee(100)
       .vat(22)
       .paymentExpirationDate("2025-12-31")
-      .pagoPaIntMode(CreateNotificationRequest.PagoPaIntModeEnum.NONE.getValue())
       .puRecipients(List.of(buildPuRecipient()))
       .build();
   }
