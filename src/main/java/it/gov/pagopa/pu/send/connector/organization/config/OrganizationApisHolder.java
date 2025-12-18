@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.organization.config;
 
-
+import it.gov.pagopa.pu.organization.client.generated.BrokerSearchControllerApi;
 import it.gov.pagopa.pu.organization.client.generated.OrganizationApi;
 import it.gov.pagopa.pu.organization.client.generated.OrganizationEntityControllerApi;
 import it.gov.pagopa.pu.organization.generated.ApiClient;
@@ -16,6 +16,7 @@ public class OrganizationApisHolder {
 
   private final OrganizationApi organizationApi;
   private final OrganizationEntityControllerApi organizationEntityControllerApi;
+  private final BrokerSearchControllerApi brokerSearchControllerApi;
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
   public OrganizationApisHolder(OrganizationApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder) {
@@ -28,6 +29,7 @@ public class OrganizationApisHolder {
 
     this.organizationApi = new OrganizationApi(apiClient);
     this.organizationEntityControllerApi = new OrganizationEntityControllerApi(apiClient);
+    this.brokerSearchControllerApi = new BrokerSearchControllerApi(apiClient);
   }
 
   @PreDestroy
@@ -41,6 +43,10 @@ public class OrganizationApisHolder {
 
   public OrganizationEntityControllerApi getOrganizationEntityControllerApi(String accessToken) {
     return getApi(accessToken, organizationEntityControllerApi);
+  }
+
+  public BrokerSearchControllerApi getBrokerSearchControllerApi(String accessToken) {
+    return getApi(accessToken, brokerSearchControllerApi);
   }
 
   private ApiClient buildApiClient(RestTemplate restTemplate, OrganizationApiClientConfig clientConfig) {
