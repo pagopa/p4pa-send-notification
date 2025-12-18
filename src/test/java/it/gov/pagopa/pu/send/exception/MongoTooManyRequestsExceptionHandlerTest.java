@@ -4,6 +4,7 @@ import com.mongodb.MongoQueryException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteError;
+import it.gov.pagopa.pu.send.config.json.JsonConfig;
 import it.gov.pagopa.pu.send.util.UtilitiesTest;
 import org.bson.BsonDocument;
 import org.junit.jupiter.api.AfterEach;
@@ -11,8 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.mongodb.UncategorizedMongoDbException;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +37,8 @@ import static org.mockito.Mockito.doThrow;
 @ContextConfiguration(classes = {
         SendNotificationExceptionHandlerTest.class,
         MongoTooManyRequestsExceptionHandler.class,
-        SendNotificationExceptionHandlerTest.TestController.class})
+        SendNotificationExceptionHandlerTest.TestController.class,
+        JsonConfig.class})
 @AutoConfigureMockMvc(addFilters = false)
 class MongoTooManyRequestsExceptionHandlerTest {
     @Autowired

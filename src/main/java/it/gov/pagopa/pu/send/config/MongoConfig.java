@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import lombok.Setter;
-import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer;
+import org.springframework.boot.mongodb.autoconfigure.MongoClientSettingsBuilderCustomizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 public class MongoConfig {
 
     @Configuration
-    @ConfigurationProperties(prefix = "spring.data.mongodb.config")
+    @ConfigurationProperties(prefix = "spring.mongodb.config")
     @Setter
     public static class MongoDbCustomProperties {
         @NestedConfigurationProperty
