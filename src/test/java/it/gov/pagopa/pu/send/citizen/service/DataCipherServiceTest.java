@@ -1,17 +1,20 @@
 package it.gov.pagopa.pu.send.citizen.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Base64;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.exc.JacksonIOException;
+import tools.jackson.databind.json.JsonMapper;
+
+import java.io.IOException;
+import java.util.Base64;
 
 @ExtendWith(MockitoExtension.class)
 class DataCipherServiceTest {
 
-  private final DataCipherService service = new DataCipherService("PSW","PEPPER", new ObjectMapper());
+  private DataCipherService service = new DataCipherService("PSW","PEPPER", new JsonMapper());
 
   @Test
   void testEncrypt() {
@@ -63,7 +66,14 @@ class DataCipherServiceTest {
   @Test
   void testEncryptObjThrowsIllegalStateException() {
     // When
-    Object mockItem = Mockito.mock(Object.class);
+    Object mockItem = new Object();
+    JsonMapper mockMapper = Mockito.mock(JsonMapper.class);
+
+    Mockito.doThrow(JacksonIOException.construct(new IOException("DUMMY IO EXCEPTION")))
+      .when(mockMapper)
+      .writeValueAsString(Mockito.same(mockItem));
+
+    service = new DataCipherService("PSW", "PEPPER", mockMapper);
 
     // Then
     Assertions.assertThrows(IllegalStateException.class, () -> service.encryptObj(mockItem));
