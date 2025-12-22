@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.pdnd.generated.BaseApi;
 import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
