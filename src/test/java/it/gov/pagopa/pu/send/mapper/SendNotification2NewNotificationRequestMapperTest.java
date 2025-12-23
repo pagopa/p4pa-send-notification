@@ -31,6 +31,7 @@ class SendNotification2NewNotificationRequestMapperTest {
   void givenSendNotificationWhenMapThenOk() {
     //given
     SendNotification sendNotification = buildSendNotification();
+    sendNotification.setPagoPaIntMode("SYNC");
     SendNotificationNoPII noPII = new SendNotificationNoPII();
 
     Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
@@ -39,7 +40,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     NewNotificationRequestV24DTO result = mapper.apply(noPII);
 
     //then
-    TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate", "pagoPaIntMode");
+    TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate");
 
     assertNotNull(result);
     assertEquals("12345", result.getIdempotenceToken());
@@ -58,7 +59,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals(100, result.getPaFee());
     assertEquals(22, result.getVat());
     assertEquals("2025-12-31", result.getPaymentExpirationDate());
-    assertEquals(NewNotificationRequestV24DTO.PagoPaIntModeEnum.NONE, result.getPagoPaIntMode());
+    assertEquals(NewNotificationRequestV24DTO.PagoPaIntModeEnum.SYNC, result.getPagoPaIntMode());
   }
 
   @Test

@@ -1,7 +1,9 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
+import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
+import it.gov.pagopa.pu.send.connector.organization.service.BrokerService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipient;
@@ -23,9 +25,11 @@ import java.util.stream.Stream;
 public class CreateNotificationRequest2SendNotificationMapper {
 
   private final DebtPositionService debtPositionService;
+  private final BrokerService brokerService;
 
-  public CreateNotificationRequest2SendNotificationMapper(DebtPositionService debtPositionService) {
+  public CreateNotificationRequest2SendNotificationMapper(DebtPositionService debtPositionService, BrokerService brokerService) {
     this.debtPositionService = debtPositionService;
+    this.brokerService = brokerService;
   }
 
   public SendNotification mapToModel(CreateNotificationRequest request, String accessToken) {
@@ -62,9 +66,12 @@ public class CreateNotificationRequest2SendNotificationMapper {
     if (request.getPaymentExpirationDate() != null) {
       sendNotification.setPaymentExpirationDate(request.getPaymentExpirationDate().toString());
     }
-    if (request.getPagoPaIntMode() != null) {
-      sendNotification.setPagoPaIntMode(request.getPagoPaIntMode().getValue());
-    }
+
+    Broker broker = brokerService.getBrokerByOrganizationId(organizationId, accessToken);
+    sendNotification.setPagoPaIntMode(
+      broker.getPagoPaInteractionModel().getValue().contains("ASYNC")
+      ? "ASYNC"
+      : "SYNC");
 
     return sendNotification;
   }

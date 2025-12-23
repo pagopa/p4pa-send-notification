@@ -520,9 +520,6 @@ components:
           type: integer
           minimum: 0
           maximum: 100
-        pagoPaIntMode:
-          type: string
-          enum: [ SYNC, ASYNC, NONE ]
     Recipient:
       type: object
       required:

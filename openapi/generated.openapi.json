@@ -1160,9 +1160,6 @@
             "format" : "int32",
             "maximum" : 100,
             "minimum" : 0
-          },
-          "pagoPaIntMode" : {
-            "$ref" : "#/components/schemas/PagoPaIntModeEnum"
           }
         },
         "required" : [ "notificationFeePolicy", "organizationId", "paProtocolNumber", "physicalCommunicationType", "recipients" ]
@@ -1232,10 +1229,6 @@
           }
         },
         "required" : [ "applyCost", "creditorTaxId", "noticeCode" ]
-      },
-      "PagoPaIntModeEnum" : {
-        "type" : "string",
-        "enum" : [ "SYNC", "ASYNC", "NONE" ]
       },
       "Payment" : {
         "type" : "object",
