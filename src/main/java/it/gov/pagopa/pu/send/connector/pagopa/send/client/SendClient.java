@@ -8,7 +8,6 @@ import it.gov.pagopa.pu.send.repository.SendStreamRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -44,10 +43,8 @@ public class SendClient {
     return apisHolder.getNotificationPriceApi(apiKey, pdndAccessToken).retrieveNotificationPriceV23(paTaxId, noticeCode);
   }
 
-  public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, String apikey, String pdndAccessToken){
-    Optional<SendStream> sendStreamOptional = sendStreamRepository.findById(
-      apikey  //TODO P4ADEV-3717 the needed id probably will be different
-    );
+  public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, String orgIpaCode, String apikey, String pdndAccessToken){
+    List<SendStream> sendStreamOptional = sendStreamRepository.findByIpaCode(orgIpaCode);
     if(sendStreamOptional.isEmpty()) {
       StreamMetadataResponseV25DTO streamMetadataResponseV25DTO =
         apisHolder.getStreamsApi(apikey, pdndAccessToken)
@@ -55,7 +52,7 @@ public class SendClient {
       sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO));
       return streamMetadataResponseV25DTO;
     }
-    return sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStreamOptional.get());
+    return sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStreamOptional.getFirst());
   }
 
   public List<StreamListElementDTO> getStreams(String apikey, String pdndAccessToken){

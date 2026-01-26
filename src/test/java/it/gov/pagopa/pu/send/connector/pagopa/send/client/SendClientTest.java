@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.api.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
@@ -14,6 +15,7 @@ import java.util.UUID;
 import it.gov.pagopa.pu.send.mapper.SendStreamMapper;
 import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendStreamRepository;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +53,7 @@ class SendClientTest {
   private SendClient sendClient;
   private final String apiKey = "apiKey";
   private final String voucherToken = "voucherToken";
+  private final String ipaCode = "ipaCode";
 
   @BeforeEach
   void setUp() {
@@ -165,12 +168,12 @@ class SendClientTest {
     StreamMetadataResponseV25DTO response = new StreamMetadataResponseV25DTO();
     SendStream sendStream = new SendStream();
 
-    Mockito.when(sendStreamRepositoryMock.findById(apiKey))
-      .thenReturn(Optional.of(sendStream));
+    Mockito.when(sendStreamRepositoryMock.findByIpaCode(ipaCode))
+      .thenReturn(List.of(sendStream));
     Mockito.when(sendStreamMapperMock.mapToStreamMetadataResponseV25DTO(sendStream))
       .thenReturn(response);
 
-    StreamMetadataResponseV25DTO result = sendClient.createStream(request, apiKey, voucherToken);
+    StreamMetadataResponseV25DTO result = sendClient.createStream(request, ipaCode, apiKey, voucherToken);
 
     assertSame(response, result);
   }
@@ -182,8 +185,8 @@ class SendClientTest {
     StreamMetadataResponseV25DTO response = new StreamMetadataResponseV25DTO();
     SendStream sendStream = new SendStream();
 
-    Mockito.when(sendStreamRepositoryMock.findById(apiKey))
-      .thenReturn(Optional.empty());
+    Mockito.when(sendStreamRepositoryMock.findByIpaCode(ipaCode))
+      .thenReturn(Collections.emptyList());
     Mockito.when(apisHolder.getStreamsApi(apiKey, voucherToken))
       .thenReturn(streamsApiMock);
     Mockito.when(streamsApiMock.createEventStreamV25(request))
@@ -191,7 +194,7 @@ class SendClientTest {
     Mockito.when(sendStreamMapperMock.mapToSendStream(response))
       .thenReturn(sendStream);
 
-    StreamMetadataResponseV25DTO result = sendClient.createStream(request, apiKey, voucherToken);
+    StreamMetadataResponseV25DTO result = sendClient.createStream(request, ipaCode, apiKey, voucherToken);
 
     assertSame(response, result);
     Mockito.verify(sendStreamRepositoryMock, Mockito.times(1)).save(sendStream);
