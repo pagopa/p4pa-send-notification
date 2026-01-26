@@ -2,12 +2,10 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO;
 import it.gov.pagopa.pu.send.model.SendStream;
-import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 class SendStreamMapperTest {
@@ -31,13 +29,12 @@ class SendStreamMapperTest {
     expectedResponse.setStreamId(STREAM_ID);
     expectedResponse.setTitle(TITLE);
     expectedResponse.setEventType(EVENT_TYPE_ENUM);
-    expectedResponse.setActivationDate(LocalDate.now().atStartOfDay(Constants.ZONEID).toOffsetDateTime());
     //When
     StreamMetadataResponseV25DTO actualResponse =
       sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStream);
     //Then
     Assertions.assertEquals(expectedResponse, actualResponse);
-    TestUtils.checkNotNullFields(actualResponse, "disabledDate", "version");
+    TestUtils.checkNotNullFields(actualResponse, "disabledDate", "activationDate", "version");
   }
 
   @Test

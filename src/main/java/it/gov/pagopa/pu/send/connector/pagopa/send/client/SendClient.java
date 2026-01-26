@@ -44,15 +44,15 @@ public class SendClient {
   }
 
   public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, String orgIpaCode, String apikey, String pdndAccessToken){
-    List<SendStream> sendStreamOptional = sendStreamRepository.findByIpaCode(orgIpaCode);
-    if(sendStreamOptional.isEmpty()) {
+    List<SendStream> sendStreamList = sendStreamRepository.findByIpaCode(orgIpaCode);
+    if(sendStreamList.isEmpty()) {
       StreamMetadataResponseV25DTO streamMetadataResponseV25DTO =
         apisHolder.getStreamsApi(apikey, pdndAccessToken)
           .createEventStreamV25(createStreamRequest);
       sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO));
       return streamMetadataResponseV25DTO;
     }
-    return sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStreamOptional.getFirst());
+    return sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStreamList.getFirst());
   }
 
   public List<StreamListElementDTO> getStreams(String apikey, String pdndAccessToken){
