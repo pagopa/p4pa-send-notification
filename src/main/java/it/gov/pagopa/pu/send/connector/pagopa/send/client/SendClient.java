@@ -2,22 +2,27 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import it.gov.pagopa.pu.send.mapper.SendStreamMapper;
+import it.gov.pagopa.pu.send.model.SendStream;
+import it.gov.pagopa.pu.send.repository.SendStreamRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class SendClient {
 
   private final PagopaSendApisHolder apisHolder;
 
-  private final ConcurrentHashMap<String, StreamMetadataResponseV25DTO> streamCache = new ConcurrentHashMap<>();
+  private final SendStreamRepository sendStreamRepository;
+  private final SendStreamMapper sendStreamMapper;
 
-
-  public SendClient(PagopaSendApisHolder apisHolder) {
+  public SendClient(PagopaSendApisHolder apisHolder, SendStreamRepository sendStreamRepository, SendStreamMapper sendStreamMapper) {
     this.apisHolder = apisHolder;
+    this.sendStreamRepository = sendStreamRepository;
+    this.sendStreamMapper = sendStreamMapper;
   }
 
   public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, String apiKey, String pdndAccessToken) {
@@ -40,8 +45,17 @@ public class SendClient {
   }
 
   public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, String apikey, String pdndAccessToken){
-    return streamCache.computeIfAbsent(apikey, key ->
-      apisHolder.getStreamsApi(apikey, pdndAccessToken).createEventStreamV25(createStreamRequest));
+    Optional<SendStream> sendStreamOptional = sendStreamRepository.findById(
+      apikey  //TODO P4ADEV-3717 the needed id probably will be different
+    );
+    if(sendStreamOptional.isEmpty()) {
+      StreamMetadataResponseV25DTO streamMetadataResponseV25DTO =
+        apisHolder.getStreamsApi(apikey, pdndAccessToken)
+          .createEventStreamV25(createStreamRequest);
+      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO));
+      return streamMetadataResponseV25DTO;
+    }
+    return sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStreamOptional.get());
   }
 
   public List<StreamListElementDTO> getStreams(String apikey, String pdndAccessToken){
