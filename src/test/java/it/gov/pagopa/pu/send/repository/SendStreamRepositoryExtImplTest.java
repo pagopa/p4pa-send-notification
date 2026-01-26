@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class SendStreamRepositoryExtImplTest {
+class SendStreamRepositoryExtImplTest {
 
   @Mock
   private MongoTemplate mongoTemplate;

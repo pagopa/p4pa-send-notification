@@ -1,7 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.api.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
@@ -9,13 +8,11 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.Htt
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.UUID;
 
 import it.gov.pagopa.pu.send.mapper.SendStreamMapper;
 import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendStreamRepository;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
