@@ -11,6 +11,7 @@ import java.util.UUID;
 class SendStreamMapperTest {
 
   public static final UUID STREAM_ID = UUID.randomUUID();
+  public static final String ORG_IPA_CODE = "orgIpaCode";
   public static final StreamMetadataResponseV25DTO.EventTypeEnum EVENT_TYPE_ENUM = StreamMetadataResponseV25DTO.EventTypeEnum.STATUS;
   public static final String TITLE = "title";
   private final SendStreamMapper sendStreamMapper = new SendStreamMapper();
@@ -50,12 +51,13 @@ class SendStreamMapperTest {
         .streamId(STREAM_ID.toString())
         .title(TITLE)
         .eventType(EVENT_TYPE_ENUM.getValue())
+        .organizationIpaCode(ORG_IPA_CODE)
         .build();
     //When
     SendStream actualResponse =
-      sendStreamMapper.mapToSendStream(streamMetadataResponse);
+      sendStreamMapper.mapToSendStream(streamMetadataResponse, ORG_IPA_CODE);
     //Then
     Assertions.assertEquals(expectedResponse, actualResponse);
-    TestUtils.checkNotNullFields(actualResponse, "organizationIpaCode", "lastEventId");
+    TestUtils.checkNotNullFields(actualResponse, "lastEventId");
   }
 }

@@ -49,7 +49,7 @@ public class SendClient {
       StreamMetadataResponseV25DTO streamMetadataResponseV25DTO =
         apisHolder.getStreamsApi(apikey, pdndAccessToken)
           .createEventStreamV25(createStreamRequest);
-      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO));
+      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO, orgIpaCode));
       return streamMetadataResponseV25DTO;
     }
     return sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStreamList.getFirst());

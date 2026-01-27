@@ -188,7 +188,7 @@ class SendClientTest {
       .thenReturn(streamsApiMock);
     Mockito.when(streamsApiMock.createEventStreamV25(request))
       .thenReturn(response);
-    Mockito.when(sendStreamMapperMock.mapToSendStream(response))
+    Mockito.when(sendStreamMapperMock.mapToSendStream(response, ipaCode))
       .thenReturn(sendStream);
 
     StreamMetadataResponseV25DTO result = sendClient.createStream(request, ipaCode, apiKey, voucherToken);

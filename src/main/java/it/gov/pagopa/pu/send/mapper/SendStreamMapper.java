@@ -17,9 +17,10 @@ public class SendStreamMapper {
     return streamMetadataResponseV25DTO;
   }
 
-  public SendStream mapToSendStream(StreamMetadataResponseV25DTO streamMetadataResponseV25DTO) {
+  public SendStream mapToSendStream(StreamMetadataResponseV25DTO streamMetadataResponseV25DTO, String orgIpaCode) {
     SendStream sendStream = new SendStream();
     sendStream.setStreamId(streamMetadataResponseV25DTO.getStreamId().toString());
+    sendStream.setOrganizationIpaCode(orgIpaCode);
     sendStream.setEventType(streamMetadataResponseV25DTO.getEventType().getValue());
     sendStream.setTitle(streamMetadataResponseV25DTO.getTitle());
     return sendStream;
