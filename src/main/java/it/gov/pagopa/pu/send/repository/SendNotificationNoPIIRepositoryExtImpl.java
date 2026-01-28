@@ -32,6 +32,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_DOCUMENT_VERSIONID = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.versionId);
   public static final String FIELD_PAYMENT_NOTICE_CODE = "%s.%s.%s.pagoPa.noticeCode".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.puPayments, PuPayment.Fields.payment);
   private static final String FIELD_FILTERED_NOTIFICATION_DATE = "recipients.$[].puPayments.$[elem].notificationDate";
+  public static final String FIELD_NOTIFICATION_REQUEST_ID = FIELD_TEMPLATE.formatted(Fields.notificationRequestId, DocumentDTO.Fields.key);
 
   private final MongoTemplate mongoTemplate;
 
@@ -128,6 +129,15 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     Query query = new Query();
     query.addCriteria(Criteria.where(Fields.organizationId).is(organizationId)
       .and(FIELD_PAYMENT_NOTICE_CODE).is(nav));
+
+    return Optional.ofNullable(mongoTemplate.findOne(query, SendNotificationNoPII.class));
+  }
+
+  @Override
+  public Optional<SendNotificationNoPII> findByNotificationRequestId(String notificationRequestId) {
+    Query query = new Query();
+    query.addCriteria(Criteria.where(Fields.notificationRequestId).is(notificationRequestId)
+      .and(FIELD_NOTIFICATION_REQUEST_ID).is(notificationRequestId));
 
     return Optional.ofNullable(mongoTemplate.findOne(query, SendNotificationNoPII.class));
   }

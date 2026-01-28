@@ -120,6 +120,36 @@ paths:
           description: Wrong notification status
         '500':
           description: Internal server error
+  /notification/by-notification-request-id/{notificationRequestId}:
+    get:
+      tags:
+        - Notification
+      summary: get send notification by notificationRequestId
+      description: get send notification by notificationRequestId
+      operationId: getSendNotificationByNotificationRequestId
+      parameters:
+        - name: notificationRequestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendNotificationDTO'
+        '204':
+          description: NotificationDate not found
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal server error
   /notification/{sendNotificationId}/start:
     post:
       tags:
