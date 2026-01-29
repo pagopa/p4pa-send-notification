@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mockStatic;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.citizen.model.PersonalData;
-import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -57,8 +56,6 @@ class SendNotificationServiceImplTest {
   private FileRetrieverService fileRetrieverServiceMock;
   @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
-  @Mock
-  private DataCipherService dataCipherServiceMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -282,6 +279,37 @@ class SendNotificationServiceImplTest {
 
     // When, Then
     Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotificationDTO(sendNotificationId));
+  }
+
+  @Test
+  void givenExistentNotificationWhenFindSendNotificationDTOByNotificationRequestIdThenReturnIt(){
+    // Given
+    String notificationRequestId = "NOTIFICATION_REQUEST_ID";
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+      .thenReturn(Optional.of(notification));
+    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+      .thenReturn(expectedResult);
+
+    // When
+    SendNotificationDTO result = sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNotExistentNotificationWhenFindSendNotificationDTOThenThrowFoundException(){
+    // Given
+    String notificationRequestId = "NOTIFICATION_REQUEST_ID";
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+      .thenReturn(Optional.empty());
+
+    // When, Then
+    Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId));
   }
 
   @Test

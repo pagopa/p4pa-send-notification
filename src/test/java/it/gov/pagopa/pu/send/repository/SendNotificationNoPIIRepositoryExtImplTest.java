@@ -194,4 +194,22 @@ class SendNotificationNoPIIRepositoryExtImplTest {
     Mockito.verify(mongoTemplate, Mockito.times(1)).findOne(Mockito.any(Query.class), Mockito.eq(
       SendNotificationNoPII.class));
   }
+
+  @Test
+  void givenNotificationRequestIdWhenFindByNotificationRequestIdThenOk() {
+    String notificationRequestId = "NOTIFICATION_REQUEST_ID";
+    SendNotificationNoPII expectedResult = new SendNotificationNoPII();
+
+    Mockito.when(mongoTemplate.findOne(Mockito.any(Query.class), Mockito.eq(
+      SendNotificationNoPII.class))).thenReturn(expectedResult);
+
+    Optional<SendNotificationNoPII> actualResult = repository.findByNotificationRequestId(notificationRequestId);
+
+    assertTrue(actualResult.isPresent());
+    assertEquals(expectedResult, actualResult.get());
+
+    Mockito.verify(mongoTemplate, Mockito.times(1))
+      .findOne(Mockito.any(Query.class), Mockito.eq(SendNotificationNoPII.class));
+  }
+
 }
