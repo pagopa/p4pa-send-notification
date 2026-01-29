@@ -19,4 +19,5 @@ public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult updateNotificationDate(String sendNotificationId, OffsetDateTime notificationDate, String nav);
   Optional<SendNotificationNoPII> findByIdAndOrganizationId(String notificationId, Long organizationId);
   Optional<SendNotificationNoPII> findByOrganizationIdAndNav(Long organizationId, String nav);
+  Optional<SendNotificationNoPII> findByNotificationRequestId(String notificationRequestId);
 }

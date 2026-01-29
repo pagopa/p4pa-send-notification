@@ -118,6 +118,16 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
+  public SendNotificationDTO findSendNotificationDTOByNotificationRequestId(String notificationRequestId) {
+    return sendNotificationDTOMapper.apply(findSendNotificationByNotificationRequestId(notificationRequestId));
+  }
+
+  private SendNotificationNoPII findSendNotificationByNotificationRequestId(String notificationRequestId) {
+    return sendNotificationNoPIIRepository.findByNotificationRequestId(notificationRequestId)
+      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with notificationRequestId: " + notificationRequestId));
+  }
+
+  @Override
   public SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
     return sendNotificationDTOMapper.apply(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with orgId "+organizationId+" and nav " + nav)));

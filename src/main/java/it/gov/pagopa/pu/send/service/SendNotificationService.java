@@ -10,6 +10,7 @@ public interface SendNotificationService {
   StartNotificationResponse startSendNotification(String sendNotificationId, LoadFileRequest loadFileRequest, String accessToken);
   void deleteSendNotification(String sendNotificationId);
   SendNotificationDTO findSendNotificationDTO(String sendNotificationId);
+  SendNotificationDTO findSendNotificationDTOByNotificationRequestId(String notificationRequestId);
   SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav);
   UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus);
 }

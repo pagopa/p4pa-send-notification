@@ -131,4 +131,14 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
     return Optional.ofNullable(mongoTemplate.findOne(query, SendNotificationNoPII.class));
   }
+
+  @Override
+  public Optional<SendNotificationNoPII> findByNotificationRequestId(String notificationRequestId) {
+    Query query = new Query();
+    query.addCriteria(
+      Criteria.where(Fields.notificationRequestId).is(notificationRequestId)
+    );
+
+    return Optional.ofNullable(mongoTemplate.findOne(query, SendNotificationNoPII.class));
+  }
 }
