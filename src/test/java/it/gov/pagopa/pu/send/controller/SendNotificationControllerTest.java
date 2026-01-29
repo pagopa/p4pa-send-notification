@@ -118,6 +118,21 @@ class SendNotificationControllerTest {
   }
 
   @Test
+  void givenValidNotificationRequestIdWhenGetSendNotificationThenOk(){
+    //Given
+    String notificationRequestId = "NOTIFICATION_REQUEST_ID";
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+    // When
+    Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
+      .thenReturn(expectedResult);
+    //Then
+    ResponseEntity<SendNotificationDTO> response = sendNotificationController.getSendNotificationByNotificationRequestId(notificationRequestId);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertEquals(expectedResult, response.getBody());
+  }
+
+  @Test
   void whenGetSendNotificationThenInvokeService(){
     //Given
     String sendNotificationId = "SENDNOTIFICATIONID";

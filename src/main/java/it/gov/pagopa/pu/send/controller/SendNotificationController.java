@@ -82,6 +82,12 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
+  public ResponseEntity<SendNotificationDTO> getSendNotificationByNotificationRequestId(String notificationRequestId) {
+    log.info("Retrieving send notification by notificationRequestId {}", notificationRequestId);
+    return ResponseEntity.ok(sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId));
+  }
+
+  @Override
   public ResponseEntity<Void> updateNotificationStatus(Long sendNotificationId, String status) {
     sendNotificationService.updateNotificationStatus(String.valueOf(sendNotificationId), NotificationStatus.valueOf(status));
     return ResponseEntity.ok().build();
