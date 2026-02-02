@@ -53,7 +53,7 @@ class SendNotificationServiceImplTest {
   @Mock
   private WorkflowService workflowServiceMock;
   @Mock
-  private FileRetrieverService fileRetrieverServiceMock;
+  private FileStorerService fileStorerServiceMock;
   @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
 
@@ -99,7 +99,7 @@ class SendNotificationServiceImplTest {
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification))
       .thenReturn(Optional.of(updatedNotification));
-    Mockito.when(fileRetrieverServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
+    Mockito.when(fileStorerServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
     Mockito.when(workflowServiceMock.sendNotificationProcess(sendNotificationId, null))
         .thenReturn(workflow);
 
@@ -137,7 +137,7 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
     InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
-    Mockito.when(fileRetrieverServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId,sendNotificationId+"_"+fileName)).thenReturn(inputStream);
+    Mockito.when(fileStorerServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId,sendNotificationId+"_"+fileName)).thenReturn(inputStream);
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
@@ -171,7 +171,7 @@ class SendNotificationServiceImplTest {
     //When
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
-    Mockito.when(fileRetrieverServiceMock.buildRelativeSendPath(
+    Mockito.when(fileStorerServiceMock.buildRelativeSendPath(
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
     //Then
     sendNotificationService.deleteSendNotification(sendNotificationId);
@@ -203,7 +203,7 @@ class SendNotificationServiceImplTest {
     //When
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
-    Mockito.when(fileRetrieverServiceMock.buildRelativeSendPath(
+    Mockito.when(fileStorerServiceMock.buildRelativeSendPath(
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
     try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
       mockedFiles.when(() -> Files.deleteIfExists(any(Path.class))).thenThrow(new IOException("DUMMY"));

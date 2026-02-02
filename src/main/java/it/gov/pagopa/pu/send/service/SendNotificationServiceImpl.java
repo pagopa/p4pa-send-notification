@@ -1,18 +1,16 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.exception.DeleteFileException;
-import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
-import it.gov.pagopa.pu.send.exception.InvalidStatusException;
-import it.gov.pagopa.pu.send.exception.SendNotificationFileNotFoundException;
-import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
+import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -27,9 +25,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 
@@ -41,19 +42,19 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final WorkflowService workflowService;
   private final CreateNotificationRequest2SendNotificationMapper mapper;
   private final String fileShareBaseUrl;
-  private final FileRetrieverService fileRetrieverService;
+  private final FileStorerService fileStorerService;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
 
   public SendNotificationServiceImpl(@Value("${fileshare-public-base-url}") String fileShareBaseUrl,
                                      SendNotificationPIIRepository sendNotificationPIIRepository,
-    SendNotificationNoPIIRepository sendNotificationNoPIIRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
-                                     FileRetrieverService fileRetrieverService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
+                                     SendNotificationNoPIIRepository sendNotificationNoPIIRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
+                                     FileStorerService fileStorerService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.mapper = mapper;
     this.workflowService = workflowService;
-    this.fileRetrieverService = fileRetrieverService;
+    this.fileStorerService = fileStorerService;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
   }
 
@@ -138,6 +139,26 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     return sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, newStatus);
   }
 
+  @Override
+  public void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, MultipartFile legalFactFile) {
+    SendNotificationNoPII notification = findSendNotification(sendNotificationId);
+    if (notification.getLegalFacts().stream().anyMatch(fact -> fact.getCategory().equals(category)))
+      throw new FileAlreadyExistsException("[LEGAL_FACT_ALREADY_EXISTS] Legal-fact having "+category.name()+" category already exists");
+
+    String url;
+    try {
+      url = fileStorerService.saveToSharedFolder(notification.getOrganizationId(), sendNotificationId, legalFactFile, fileName);
+    } catch (FileUploadException e) {
+      throw new UploadFileException("[LEGAL_FACT_UPLOAD_ERROR] Error while upload legal-fact file for sendNotificationId: "+sendNotificationId);
+    }
+
+    sendNotificationNoPIIRepository.addLegalFact(sendNotificationId, LegalFactDTO.builder()
+      .fileName(fileName)
+      .url(url)
+      .category(category)
+      .build());
+  }
+
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
@@ -148,7 +169,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());
     try {
       String fileName = sendNotificationId +"_" + doc.getFileName();
-      InputStream file = fileRetrieverService.retrieveFile(organizationId, sendNotificationId, fileName);
+      InputStream file = fileStorerService.retrieveFile(organizationId, sendNotificationId, fileName);
       if (!FileUtils.calculateFileHash(file).equals(loadFileRequest.getDigest()))
         throw new InvalidSignatureException("File " + doc.getFileName() + " has not a valid signature");
     } catch (Exception e) {
@@ -159,7 +180,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
 
   private void deleteSendNotificationFiles(SendNotificationNoPII sendNotification) {
-    Path relativePath = fileRetrieverService.buildRelativeSendPath(
+    Path relativePath = fileStorerService.buildRelativeSendPath(
       sendNotification.getOrganizationId(),
       sendNotification.getSendNotificationId()
     );

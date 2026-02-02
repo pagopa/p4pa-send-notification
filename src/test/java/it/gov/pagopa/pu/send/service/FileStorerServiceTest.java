@@ -15,18 +15,18 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class FileRetrieverServiceTest {
+class FileStorerServiceTest {
 
   private static final String FILE_ENCRYPT_PASSWORD = "testPassword123";
   private static final String SEND_FILE_PATH = "send";
   private static final String SHARED_FOLDER = "/shared";
   private static final String FILECONTENT = "TEST FILE HASH P4PA SEND";
 
-  private FileRetrieverService fileRetrieverService;
+  private FileStorerService fileStorerService;
 
   @BeforeEach
   void setUp() {
-    fileRetrieverService = new FileRetrieverService(
+    fileStorerService = new FileStorerService(
       FILE_ENCRYPT_PASSWORD,
       SEND_FILE_PATH,
       SHARED_FOLDER
@@ -50,7 +50,7 @@ class FileRetrieverServiceTest {
       )).thenReturn(expectedInputStream);
 
       // When
-      InputStream result = fileRetrieverService.retrieveFile(organizationId, sendNotificationId, fileName);
+      InputStream result = fileStorerService.retrieveFile(organizationId, sendNotificationId, fileName);
 
       // Then
       assertNotNull(result);
@@ -73,7 +73,7 @@ class FileRetrieverServiceTest {
       )).thenReturn(expectedInputStream);
 
       // When
-      InputStream result = fileRetrieverService.decryptFile(filePath, fileName);
+      InputStream result = fileStorerService.decryptFile(filePath, fileName);
 
       // Then
       assertNotNull(result);
