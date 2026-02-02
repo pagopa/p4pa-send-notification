@@ -215,6 +215,45 @@ paths:
       responses:
         '200':
           description: OK
+  /notification/{sendNotificationId}/legal-fact:
+    post:
+      tags:
+        - Notification
+      summary: uploadSendLegalFact
+      description: Service to store a legal fact
+      operationId: uploadSendLegalFact
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: true
+          schema:
+            type: 'LegalFactCategoryDTO'
+      requestBody:
+        content:
+          'multipart/form-data':
+            schema:
+              required:
+                - fileName
+                - legalFactFile
+              type: object
+              properties:
+                fileName:
+                  type: string
+                legalFactFile:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal server error
   /send/{sendNotificationId}/retrieveNotificationDate:
     get:
       tags:

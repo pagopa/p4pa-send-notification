@@ -1,7 +1,9 @@
 package it.gov.pagopa.pu.send.util.faker;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationFeePolicyDTO;
+import it.gov.pagopa.pu.send.dto.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 
@@ -32,6 +34,11 @@ public class SendNotificationFaker {
       .vat(22)
       .paymentExpirationDate("2025-12-31")
       .puRecipients(List.of(buildPuRecipient()))
+      .legalFacts(List.of(LegalFactDTO.builder()
+        .fileName("fileName")
+        .url("url")
+        .category(LegalFactCategoryDTO.ANALOG_DELIVERY)
+        .build()))
       .build();
   }
 }

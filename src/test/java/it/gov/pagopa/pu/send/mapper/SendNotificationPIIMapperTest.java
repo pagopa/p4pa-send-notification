@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.citizen.service.PersonalDataService;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -129,6 +130,11 @@ class SendNotificationPIIMapperTest {
     noPii.setPaFee(0);
     noPii.setVat(22);
     noPii.setPagoPaIntMode("PA");
+    noPii.setLegalFacts(List.of(LegalFactDTO.builder()
+      .fileName("fileName")
+      .url("url")
+      .category(LegalFactCategoryDTO.ANALOG_DELIVERY)
+      .build()));
     return noPii;
   }
 
