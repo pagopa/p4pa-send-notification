@@ -145,12 +145,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     if (notification.getLegalFacts().stream().anyMatch(fact -> fact.getCategory().equals(category)))
       throw new FileAlreadyExistsException("[LEGAL_FACT_ALREADY_EXISTS] Legal-fact having "+category.name()+" category already exists");
 
-    String url;
-    try {
-      url = fileStorerService.saveToSharedFolder(notification.getOrganizationId(), sendNotificationId, legalFactFile, fileName);
-    } catch (FileUploadException e) {
-      throw new UploadFileException("[LEGAL_FACT_UPLOAD_ERROR] Error while upload legal-fact file for sendNotificationId: "+sendNotificationId);
-    }
+    String url = fileStorerService.saveToSharedFolder(notification.getOrganizationId(), sendNotificationId, legalFactFile, fileName);
 
     sendNotificationNoPIIRepository.addLegalFact(sendNotificationId, LegalFactDTO.builder()
       .fileName(fileName)

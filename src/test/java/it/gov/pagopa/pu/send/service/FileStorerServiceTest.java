@@ -3,16 +3,22 @@ package it.gov.pagopa.pu.send.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 
+import it.gov.pagopa.pu.send.exception.UploadFileException;
 import it.gov.pagopa.pu.send.util.AESUtils;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class FileStorerServiceTest {
@@ -78,6 +84,55 @@ class FileStorerServiceTest {
       // Then
       assertNotNull(result);
       assertEquals(expectedInputStream, result);
+    }
+  }
+
+  @Test
+  void givenInvalidFileWhenSaveToSharedFolderThenUploadFileException() {
+    Assertions.assertThrows(UploadFileException.class, () ->
+      fileStorerService.saveToSharedFolder(0L, "ID", null, ""));
+  }
+
+  @Test
+  void givenInvalidFilenameWhenSaveToSharedFolderThenUploadFileException() {
+    MockMultipartFile file = new MockMultipartFile(
+      "legalFactFile",
+      "test.txt",
+      MediaType.TEXT_PLAIN_VALUE,
+      "this is a test file".getBytes()
+    );
+
+    Assertions.assertThrows(UploadFileException.class, () ->
+      fileStorerService.saveToSharedFolder(0L, "ID", file, "../test.txt"));
+  }
+
+  @Test
+  void givenValidFileWhenSaveToSharedFolderThenOK() throws IOException {
+    MockMultipartFile fileSpy = Mockito.spy(new MockMultipartFile(
+      "legalFactFile",
+      "test.txt",
+      MediaType.TEXT_PLAIN_VALUE,
+      "this is a test file".getBytes()
+    ));
+    long organizationId = 0L;
+    String relativeFilePath = "/shared/0/send/ID";
+    String fileName = fileSpy.getOriginalFilename();
+    String expectedUrl = Path.of(relativeFilePath, fileName).toString();
+
+    InputStream inpustStreamMock = Mockito.mock(InputStream.class);
+    Mockito.doReturn(inpustStreamMock)
+      .when(fileSpy)
+      .getInputStream();
+
+    try (MockedStatic<AESUtils> aesUtilsMockedStatic = Mockito.mockStatic(AESUtils.class)) {
+
+      String result = fileStorerService.saveToSharedFolder(organizationId, "ID", fileSpy, fileName);
+
+      Assertions.assertEquals(expectedUrl, result);
+      aesUtilsMockedStatic.verify(() -> AESUtils.encryptAndSave(FILE_ENCRYPT_PASSWORD,
+        inpustStreamMock,
+        Path.of(SHARED_FOLDER).resolve(organizationId+"").resolve(relativeFilePath),
+        fileName));
     }
   }
 

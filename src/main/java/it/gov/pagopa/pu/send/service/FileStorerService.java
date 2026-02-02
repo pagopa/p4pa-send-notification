@@ -1,12 +1,12 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.exception.UploadFileException;
 import it.gov.pagopa.pu.send.util.AESUtils;
 import java.io.InputStream;
 import java.nio.file.Path;
 
 import it.gov.pagopa.pu.send.util.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,10 +37,9 @@ public class FileStorerService {
     return Path.of(sharedFolder, String.valueOf(organizationId), sendFilePath, sendNotificationId);
   }
 
-  public String saveToSharedFolder(Long organizationId, String sendNotificationId, MultipartFile file, String fileName)
-    throws FileUploadException {
+  public String saveToSharedFolder(Long organizationId, String sendNotificationId, MultipartFile file, String fileName) {
     if (file == null) {
-      throw new FileUploadException("File is mandatory");
+      throw new UploadFileException("File is mandatory");
     }
 
     fileName = org.springframework.util.StringUtils.cleanPath(StringUtils.defaultString(fileName));
@@ -49,7 +48,7 @@ public class FileStorerService {
     try {
       AESUtils.encryptAndSave(fileEncryptPassword, file.getInputStream(), relativePath, fileName);
     } catch (Exception e) {
-      throw new FileUploadException("Error uploading file to shared folder %s".formatted(relativePath), e);
+      throw new UploadFileException("Error uploading file to shared folder %s".formatted(relativePath));
     }
 
     return relativePath+"/"+fileName;

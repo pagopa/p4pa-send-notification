@@ -98,6 +98,7 @@ public class SendNotificationController implements NotificationApi {
   @Override
   public ResponseEntity<Void> uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, MultipartFile legalFactFile) {
     log.info("Upload legal-fact having category {} for sendNotificationId {}", category, sendNotificationId);
+    sendNotificationService.uploadSendLegalFact(sendNotificationId, category, fileName, legalFactFile);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

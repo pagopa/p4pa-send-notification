@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.util;
 
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import it.gov.pagopa.pu.send.exception.UploadFileException;
 
 import java.io.IOException;
 
@@ -27,10 +27,9 @@ public class FileUtils {
     return Base64.getEncoder().encodeToString(hash);
   }
 
-  public static void validateFilename(String filename)
-    throws FileUploadException {
+  public static void validateFilename(String filename) {
     if (Stream.of("..", "\\", "/").anyMatch(filename::contains)) {
-      throw new FileUploadException("Invalid filename");
+      throw new UploadFileException("Invalid filename");
     }
   }
 }
