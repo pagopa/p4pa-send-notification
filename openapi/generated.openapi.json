@@ -341,6 +341,66 @@
         } ]
       }
     },
+    "/p4pasend/notification/{sendNotificationId}/legal-fact" : {
+      "post" : {
+        "tags" : [ "Notification" ],
+        "summary" : "uploadSendLegalFact",
+        "description" : "Service to store a legal fact",
+        "operationId" : "uploadSendLegalFact",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "category",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/LegalFactCategoryDTO"
+          }
+        }, {
+          "name" : "fileName",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "legalFactFile" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "legalFactFile" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "404" : {
+            "description" : "Notification not found"
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/send/{sendNotificationId}/status" : {
       "get" : {
         "tags" : [ "Send" ],
@@ -1383,6 +1443,10 @@
           }
         },
         "required" : [ "digest", "fileName" ]
+      },
+      "LegalFactCategoryDTO" : {
+        "type" : "string",
+        "enum" : [ "SENDER_ACK", "DIGITAL_DELIVERY", "ANALOG_DELIVERY", "RECIPIENT_ACCESS", "PEC_RECEIPT", "ANALOG_FAILURE_DELIVERY" ]
       },
       "NotificationStatus" : {
         "type" : "string",
