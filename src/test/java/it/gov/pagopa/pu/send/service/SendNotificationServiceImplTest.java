@@ -1,23 +1,17 @@
 package it.gov.pagopa.pu.send.service;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mockStatic;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.citizen.model.PersonalData;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
-import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.PuPayment;
-import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.SendNotification;
+import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.exception.DeleteFileException;
-import it.gov.pagopa.pu.send.exception.InvalidSignatureException;
-import it.gov.pagopa.pu.send.exception.InvalidStatusException;
-import it.gov.pagopa.pu.send.exception.SendNotificationFileNotFoundException;
-import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
+import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -35,9 +29,12 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -367,6 +364,62 @@ class SendNotificationServiceImplTest {
     Assertions.assertSame(expectedResult, result);
 
     Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatus(sendNotificationId, status);
+  }
+
+  @Test
+  void givenNewFileWhenUploadSendLegalFactThenSaveFileAndInvokeRepository() {
+    // Given
+    String notificationId = "123";
+    LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
+    String fileName = "test.pdf";
+    MultipartFile mockFile = new MockMultipartFile("file", "content".getBytes());
+    String expectedUrl = "test.pdf";
+
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setSendNotificationId(notificationId);
+    notification.setOrganizationId(1L);
+    notification.setLegalFacts(new ArrayList<>());
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+    Mockito.when(fileStorerServiceMock.saveToSharedFolder(eq(1L), eq(notificationId), eq(mockFile), eq(fileName)))
+      .thenReturn(expectedUrl);
+
+    // When
+    Assertions.assertDoesNotThrow(() ->
+      sendNotificationService.uploadSendLegalFact(notificationId, category, fileName, mockFile)
+    );
+
+    // Then
+    Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, mockFile, fileName);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
+      fact.getFileName().equals(fileName) &&
+        fact.getUrl().equals(expectedUrl) &&
+        fact.getCategory().equals(category)
+    ));
+  }
+
+  @Test
+  void givenExistingCategoryFileWhenUploadSendLegalFactThenThrowFileAlreadyExistsException() {
+    // Given
+    String id = "123";
+    LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
+    MultipartFile mockFile = new MockMultipartFile("file", "content".getBytes());
+
+    LegalFactDTO existingFact = LegalFactDTO.builder().category(category).build();
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setLegalFacts(List.of(existingFact));
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(id)).thenReturn(Optional.of(notification));
+
+    // When & Then
+    FileAlreadyExistsException exception = Assertions.assertThrows(FileAlreadyExistsException.class, () ->
+      sendNotificationService.uploadSendLegalFact(id, category, "newFile.pdf", mockFile)
+    );
+
+    Assertions.assertTrue(exception.getMessage().contains("[LEGAL_FACT_ALREADY_EXISTS]"));
+
+    Mockito.verifyNoInteractions(fileStorerServiceMock);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never()).addLegalFact(any(), any());
   }
 
 
