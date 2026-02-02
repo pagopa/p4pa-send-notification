@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
 import it.gov.pagopa.pu.send.exception.UploadFileException;
@@ -104,6 +105,31 @@ class FileStorerServiceTest {
 
     Assertions.assertThrows(UploadFileException.class, () ->
       fileStorerService.saveToSharedFolder(0L, "ID", file, "../test.txt"));
+  }
+
+  @Test
+  void givenErrorWhenSaveToSharedFolderThenFileUploadException() throws IOException {
+    MockMultipartFile fileSpy = Mockito.spy(new MockMultipartFile(
+      "legalFactFile",
+      "test.txt",
+      MediaType.TEXT_PLAIN_VALUE,
+      "this is a test file".getBytes()
+    ));
+    long organizationId = 0L;
+    String fileName = fileSpy.getOriginalFilename();
+
+    InputStream inpustStreamMock = Mockito.mock(InputStream.class);
+    Mockito.doReturn(inpustStreamMock)
+      .when(fileSpy)
+      .getInputStream();
+
+    try (MockedStatic<AESUtils> aesUtilsMockedStatic = Mockito.mockStatic(AESUtils.class)) {
+      aesUtilsMockedStatic.when(() -> AESUtils.encryptAndSave(any(), any(), any(), any()))
+        .thenThrow(new RuntimeException());
+
+      Assertions.assertThrows(UploadFileException.class, () ->
+        fileStorerService.saveToSharedFolder(organizationId, "ID", fileSpy, fileName));
+    }
   }
 
   @Test

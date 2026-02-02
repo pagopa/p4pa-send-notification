@@ -341,4 +341,15 @@ class SendNotificationExceptionHandlerTest {
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
+
+  @Test
+  void handleFileAlreadyExistsExceptionError() throws Exception {
+    doThrow(new FileAlreadyExistsException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isConflict())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
 }

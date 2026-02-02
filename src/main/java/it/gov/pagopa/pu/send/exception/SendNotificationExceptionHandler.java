@@ -76,7 +76,7 @@ public class SendNotificationExceptionHandler {
   }
 
   @ExceptionHandler({InvalidStatusException.class, FileAlreadyExistsException.class})
-  public ResponseEntity<SendNotificationErrorDTO> handleInvalidStatusException(InvalidStatusException ex, HttpServletRequest request) {
+  public ResponseEntity<SendNotificationErrorDTO> handleInvalidStatusException(RuntimeException ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.CONFLICT, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_BAD_REQUEST);
   }
 
