@@ -81,7 +81,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .findFirst().ifPresentOrElse(
         doc -> updateFileStatus(sendNotificationId, doc, loadFileRequest, notification.getOrganizationId()),
         () -> {
-          throw new SendNotificationFileNotFoundException("File not found with id: " + loadFileRequest.getFileName());
+          throw new SendNotificationFileNotFoundException("[FILE_NOT_FOUND] File not found with id: " + loadFileRequest.getFileName());
         }
       );
 
@@ -124,13 +124,13 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
   private SendNotificationNoPII findSendNotificationByNotificationRequestId(String notificationRequestId) {
     return sendNotificationNoPIIRepository.findByNotificationRequestId(notificationRequestId)
-      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with notificationRequestId: " + notificationRequestId));
+      .orElseThrow(() -> new SendNotificationNotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with notificationRequestId: " + notificationRequestId));
   }
 
   @Override
   public SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
     return sendNotificationDTOMapper.apply(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
-      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with orgId "+organizationId+" and nav " + nav)));
+      .orElseThrow(() -> new SendNotificationNotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with orgId "+organizationId+" and nav " + nav)));
   }
 
   @Override
@@ -140,7 +140,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
+      .orElseThrow(() -> new SendNotificationNotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with id: " + sendNotificationId));
   }
 
 
@@ -150,7 +150,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       String fileName = sendNotificationId +"_" + doc.getFileName();
       InputStream file = fileRetrieverService.retrieveFile(organizationId, sendNotificationId, fileName);
       if (!FileUtils.calculateFileHash(file).equals(loadFileRequest.getDigest()))
-        throw new InvalidSignatureException("File " + doc.getFileName() + " has not a valid signature");
+        throw new InvalidSignatureException("[INVALID_SIGNATURE] File " + doc.getFileName() + " has not a valid signature");
     } catch (Exception e) {
       throw new InvalidSignatureException(e.getMessage());
     }
@@ -194,10 +194,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     try {
       Files.deleteIfExists(relativePath);
     } catch (IOException e) {
-      throw new DeleteFileException(String.format(
-        "Error while deleting root directory for sendNotificationId %s.",
-        sendNotification.getSendNotificationId()
-      ));
+      throw new DeleteFileException(String.format("[DELETE_ERROR] Error while deleting root directory for sendNotificationId %s.", sendNotification.getSendNotificationId()));
     }
 
   }

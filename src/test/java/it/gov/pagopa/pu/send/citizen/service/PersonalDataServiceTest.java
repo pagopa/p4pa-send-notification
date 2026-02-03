@@ -99,7 +99,7 @@ class PersonalDataServiceTest {
     //when
     NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> service.get(1L, SendNotificationPIIDTO.class));
     //then
-    Assertions.assertEquals("installment pii not found for id 1", notFoundException.getMessage());
+    Assertions.assertEquals("[PERSONAL_DATA_NOT_FOUND] installment pii not found for id 1", notFoundException.getMessage());
     Mockito.verify(repositoryMock, Mockito.times(1)).findById(1L);
     Mockito.verifyNoInteractions(cipherServiceMock);
   }

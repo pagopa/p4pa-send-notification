@@ -125,7 +125,7 @@ class SendNotificationServiceImplTest {
 
     Exception exception = Assertions.assertThrows(SendNotificationFileNotFoundException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null));
 
-    Assertions.assertEquals("File not found with id: NOTEXISTS", exception.getMessage());
+    Assertions.assertEquals("[FILE_NOT_FOUND] File not found with id: NOTEXISTS", exception.getMessage());
   }
 
 
@@ -143,7 +143,7 @@ class SendNotificationServiceImplTest {
 
     Exception exception = Assertions.assertThrows(InvalidSignatureException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null));
 
-    Assertions.assertEquals("File "+fileName+" has not a valid signature", exception.getMessage());
+    Assertions.assertEquals("[INVALID_SIGNATURE] File "+fileName+" has not a valid signature", exception.getMessage());
   }
 
 
