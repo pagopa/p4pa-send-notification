@@ -378,7 +378,6 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setSendNotificationId(notificationId);
     notification.setOrganizationId(1L);
-    notification.setLegalFacts(new ArrayList<>());
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
     Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, mockFile, fileName))
