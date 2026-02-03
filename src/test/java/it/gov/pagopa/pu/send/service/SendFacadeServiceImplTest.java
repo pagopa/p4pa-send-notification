@@ -127,7 +127,7 @@ class SendFacadeServiceImplTest {
 
     Exception exception = assertThrows(SendNotificationNotFoundException.class, () -> sendService.preloadFiles(sendNotificationId, accessToken));
 
-    assertEquals("Notification not found with id: " + sendNotificationId, exception.getMessage());
+    assertEquals("[NOTIFICATION_NOT_FOUND] Notification not found with id: " + sendNotificationId, exception.getMessage());
   }
 
   @Test
@@ -570,7 +570,7 @@ class SendFacadeServiceImplTest {
       sendService.getStreamEvents(null, lastEventId, organizationId, accessToken)
     );
 
-    assertEquals("Streams not found for this organization: " + organizationId, exception.getMessage());
+    assertEquals("[STREAMS_NOT_FOUND] Streams not found for this organization: " + organizationId, exception.getMessage());
   }
 
   @Test
@@ -683,7 +683,7 @@ class SendFacadeServiceImplTest {
     );
 
     // THEN
-    assertEquals("Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
+    assertEquals("[NOTIFICATION_NOT_FOUND] Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
   }
 
   @Test
@@ -708,7 +708,7 @@ class SendFacadeServiceImplTest {
     );
 
     // THEN
-    assertEquals("Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
+    assertEquals("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
   }
 
   @Test
@@ -772,7 +772,7 @@ class SendFacadeServiceImplTest {
     );
 
     // THEN
-    assertEquals("Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
+    assertEquals("[NOTIFICATION_NOT_FOUND] Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
   }
 
   @Test
@@ -798,7 +798,7 @@ class SendFacadeServiceImplTest {
     );
 
     // THEN
-    assertEquals("Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
+    assertEquals("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
   }
 
 }

@@ -184,7 +184,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       .map(PuPayment::getPayment)
       .filter(pagoPa -> nav.equals(pagoPa.getPagoPa().getNoticeCode()))
       .findFirst()
-      .orElseThrow(() -> new NotFoundException("Notification not found with nav: " + nav));
+      .orElseThrow(() -> new NotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with nav: " + nav));
 
     return sendService.retrieveNotificationPrice(payment.getPagoPa().getCreditorTaxId(),
       payment.getPagoPa().getNoticeCode(), notification.getOrganizationId(), accessToken);
@@ -196,7 +196,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if (StringUtils.isBlank(streamId)) {
       List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
       if (streams.isEmpty())
-        throw new NotFoundException("Streams not found for this organization: " + organizationId);
+        throw new NotFoundException("[STREAMS_NOT_FOUND] Streams not found for this organization: " + organizationId);
 
       streamId = String.valueOf(streams.getLast().getStreamId());
     }
@@ -241,12 +241,12 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
+      .orElseThrow(() -> new SendNotificationNotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with id: " + sendNotificationId));
   }
 
   private SendNotificationNoPII findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
     return sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
-      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with nav: " + nav));
+      .orElseThrow(() -> new SendNotificationNotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with nav: " + nav));
   }
 
   private void createStream(Long organizationId, String accessToken) {

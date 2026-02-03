@@ -12,11 +12,11 @@ public class InvalidStatusException extends RuntimeException{
 
   private static String buildMessage(Enum<?> expected, Enum<?> actual) {
     if (expected instanceof FileStatus) {
-      return String.format("Notification file status error: Expected: %s, Actual: %s", expected, actual);
+      return String.format("[INVALID_NOTIFICATION_STATUS] Notification file status error: Expected: %s, Actual: %s", expected, actual);
     } else if (expected instanceof NotificationStatus) {
-      return String.format("Notification status error: Expected: %s, Actual: %s", expected, actual);
+      return String.format("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: %s, Actual: %s", expected, actual);
     } else {
-      return String.format("Notification generic status error: Expected: %s, Actual: %s", expected, actual);
+      return String.format("[INVALID_NOTIFICATION_STATUS] Notification generic status error: Expected: %s, Actual: %s", expected, actual);
     }
   }
 }

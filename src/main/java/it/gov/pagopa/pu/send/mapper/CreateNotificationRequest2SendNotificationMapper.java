@@ -97,7 +97,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
       String nav = p.getPagoPa().getNoticeCode();
       DebtPosition debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
       if (debtPosition == null) {
-        throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
+        throw new UnknownDebtPositionException("[DEBT_POSITION_NOT_FOUND] Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
       } else {
         return new PuPayment(debtPosition.getDebtPositionId(), p, null);
       }

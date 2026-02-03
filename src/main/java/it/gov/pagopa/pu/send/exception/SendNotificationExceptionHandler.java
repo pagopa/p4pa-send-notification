@@ -33,19 +33,19 @@ public class SendNotificationExceptionHandler {
 
   @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class})
   public ResponseEntity<SendNotificationErrorDTO> handleViolationException(Exception ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.BAD_REQUEST, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_BAD_REQUEST);
+    return handleException(ex, request, HttpStatus.BAD_REQUEST, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_BAD_REQUEST);
   }
 
   @ExceptionHandler({ServletException.class, ErrorResponseException.class})
   public ResponseEntity<SendNotificationErrorDTO> handleServletException(Exception ex, HttpServletRequest request) {
     HttpStatusCode httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-    SendNotificationErrorDTO.CodeEnum errorCode = SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_GENERIC_ERROR;
+    SendNotificationErrorDTO.CategoryEnum errorCode = SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_GENERIC_ERROR;
     if (ex instanceof ErrorResponse errorResponse) {
       httpStatus = errorResponse.getStatusCode();
       if (httpStatus.isSameCodeAs(HttpStatus.NOT_FOUND)) {
-        errorCode = SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_NOT_FOUND;
+        errorCode = SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_NOT_FOUND;
       } else if (httpStatus.is4xxClientError()) {
-        errorCode = SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_BAD_REQUEST;
+        errorCode = SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_BAD_REQUEST;
       }
     }
     return handleException(ex, request, httpStatus, errorCode);
@@ -62,40 +62,40 @@ public class SendNotificationExceptionHandler {
 
   @ExceptionHandler({RuntimeException.class})
   public ResponseEntity<SendNotificationErrorDTO> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_GENERIC_ERROR);
+    return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_GENERIC_ERROR);
   }
 
   @ExceptionHandler(UnknownDebtPositionException.class)
   public ResponseEntity<SendNotificationErrorDTO> handleUnknownDebtPositionException(UnknownDebtPositionException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.NOT_FOUND, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_NOT_FOUND);
+    return handleException(ex, request, HttpStatus.NOT_FOUND, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_NOT_FOUND);
   }
 
   @ExceptionHandler(StatusAlreadyProcessedException.class)
   public ResponseEntity<SendNotificationErrorDTO> handleStatusAlreadyProcessedException(StatusAlreadyProcessedException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.ALREADY_REPORTED, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_ALREADY_PROCESSED);
+    return handleException(ex, request, HttpStatus.ALREADY_REPORTED, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_ALREADY_PROCESSED);
   }
 
-  @ExceptionHandler({InvalidStatusException.class, FileAlreadyExistsException.class})
-  public ResponseEntity<SendNotificationErrorDTO> handleInvalidStatusException(RuntimeException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.CONFLICT, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_BAD_REQUEST);
+  @ExceptionHandler(InvalidStatusException.class)
+  public ResponseEntity<SendNotificationErrorDTO> handleInvalidStatusException(InvalidStatusException ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.CONFLICT, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_BAD_REQUEST);
   }
 
   @ExceptionHandler({SendNotificationNotFoundException.class, SendNotificationFileNotFoundException.class, NotFoundException.class})
   public ResponseEntity<SendNotificationErrorDTO> handleNotFoundExceptions(RuntimeException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.NOT_FOUND, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_BAD_REQUEST);
+    return handleException(ex, request, HttpStatus.NOT_FOUND, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_BAD_REQUEST);
   }
 
   @ExceptionHandler({InvalidSignatureException.class})
   public ResponseEntity<SendNotificationErrorDTO> handleInvalidSignatureException(RuntimeException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.BAD_REQUEST, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_BAD_REQUEST);
+    return handleException(ex, request, HttpStatus.BAD_REQUEST, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_BAD_REQUEST);
   }
 
   @ExceptionHandler({UploadFileException.class, DeleteFileException.class})
   public ResponseEntity<SendNotificationErrorDTO> handleFileException(RuntimeException ex, HttpServletRequest request) {
-    return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, SendNotificationErrorDTO.CodeEnum.SEND_NOTIFICATION_GENERIC_ERROR);
+    return handleException(ex, request, HttpStatus.INTERNAL_SERVER_ERROR, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_GENERIC_ERROR);
   }
 
-  static ResponseEntity<SendNotificationErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, SendNotificationErrorDTO.CodeEnum errorEnum) {
+  static ResponseEntity<SendNotificationErrorDTO> handleException(Exception ex, HttpServletRequest request, HttpStatusCode httpStatus, SendNotificationErrorDTO.CategoryEnum errorEnum) {
     logException(ex, request, httpStatus);
 
     String message = buildReturnedMessage(ex);
