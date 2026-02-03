@@ -732,6 +732,78 @@
         } ]
       }
     },
+    "/p4pasend/send/streams" : {
+      "get" : {
+        "tags" : [ "Streams" ],
+        "summary" : "retrieve stream by organization id",
+        "description" : "get stream by specifying relative organization id",
+        "operationId" : "getStreamByOrganizationId",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Stream not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/send/streams/events" : {
       "get" : {
         "tags" : [ "Streams" ],
@@ -1560,6 +1632,28 @@
           }
         },
         "required" : [ "contentLength", "filename" ]
+      },
+      "SendStreamDTO" : {
+        "type" : "object",
+        "description" : "stream related to a SEND notification",
+        "properties" : {
+          "streamId" : {
+            "type" : "string"
+          },
+          "organizationIpaCode" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "eventType" : {
+            "type" : "string"
+          },
+          "lastEventId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "eventType", "organizationIpaCode", "streamId", "title" ]
       },
       "AttachmentDetailsDTO" : {
         "type" : "object",

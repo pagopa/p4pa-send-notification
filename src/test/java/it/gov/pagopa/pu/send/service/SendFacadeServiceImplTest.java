@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
@@ -19,13 +21,17 @@ import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.mapper.SendStreamMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.repository.SendStreamRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,6 +43,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,6 +55,8 @@ class SendFacadeServiceImplTest {
   @Mock
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
   @Mock
+  private SendStreamRepository sendStreamRepositoryMock;
+  @Mock
   private SendService sendServiceMock;
   @Mock
   private SendUploadFacadeServiceImpl uploadServiceMock;
@@ -58,7 +67,11 @@ class SendFacadeServiceImplTest {
   @Mock
   private SendLegalFactMapper sendLegalFactMapperMock;
   @Mock
+  private SendStreamMapper sendStreamMapperMock;
+  @Mock
   private SendStreamService sendStreamServiceMock;
+  @Mock
+  private OrganizationService organizationServiceMock;
 
   @InjectMocks
   private SendFacadeServiceImpl sendService;
@@ -67,12 +80,15 @@ class SendFacadeServiceImplTest {
   void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(
       sendNotificationNoPIIRepositoryMock,
+      sendStreamRepositoryMock,
       sendServiceMock,
       uploadServiceMock,
       sendNotificationMapperMock,
       sendNotificationDTOMapperMock,
       sendLegalFactMapperMock,
-      sendStreamServiceMock
+      sendStreamMapperMock,
+      sendStreamServiceMock,
+      organizationServiceMock
     );
   }
 
@@ -523,11 +539,16 @@ class SendFacadeServiceImplTest {
     String streamId = "STREAMID";
     String lastEventId = "LASTEVENTID";
     Long organizationId = 1L;
+    String newLastEventId = "newLastEventId";
 
-    List<ProgressResponseElementV25DTO> expectedEvents = List.of(new ProgressResponseElementV25DTO());
+    ProgressResponseElementV25DTO sendStreamEvent = new ProgressResponseElementV25DTO();
+    sendStreamEvent.setEventId(newLastEventId);
+    List<ProgressResponseElementV25DTO> expectedEvents = List.of(sendStreamEvent);
 
     Mockito.when(sendStreamServiceMock.getStreamEvents(streamId, lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
+    Mockito.when(sendStreamRepositoryMock.updateLastEventId(streamId, newLastEventId))
+      .thenReturn(UpdateResult.unacknowledged()); //only for stubbing, not used in getStreamEvents method
 
     List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
 
@@ -541,16 +562,21 @@ class SendFacadeServiceImplTest {
     String lastEventId = "LASTEVENTID";
     UUID streamId = UUID.randomUUID();
     Long organizationId = 1L;
+    String newLastEventId = "newLastEventId";
 
     StreamListElementDTO lastStream = new StreamListElementDTO();
     lastStream.setStreamId(streamId);
 
     List<StreamListElementDTO> streams = List.of(new StreamListElementDTO(), lastStream);
-    List<ProgressResponseElementV25DTO> expectedEvents = List.of(new ProgressResponseElementV25DTO());
+    ProgressResponseElementV25DTO sendStreamEvent = new ProgressResponseElementV25DTO();
+    sendStreamEvent.setEventId(newLastEventId);
+    List<ProgressResponseElementV25DTO> expectedEvents = List.of(sendStreamEvent);
 
     Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(streams);
     Mockito.when(sendStreamServiceMock.getStreamEvents(String.valueOf(streamId), lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
+    Mockito.when(sendStreamRepositoryMock.updateLastEventId(String.valueOf(streamId), newLastEventId))
+      .thenReturn(UpdateResult.unacknowledged()); //only for stubbing, not used in getStreamEvents method
 
     List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(null, lastEventId, organizationId, accessToken);
 
@@ -571,6 +597,81 @@ class SendFacadeServiceImplTest {
     );
 
     assertEquals("[STREAMS_NOT_FOUND] Streams not found for this organization: " + organizationId, exception.getMessage());
+  }
+
+  @Test
+  void givenValidParamsWhenGetStreamThenReturnSendStreamByOrganizationId() {
+    //GIVEN
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String orgIpaCode = "orgIpaCode";
+    Organization organization = new Organization();
+    organization.setIpaCode(orgIpaCode);
+    SendStream sendStream = new SendStream();
+    SendStreamDTO expectedResponse = new SendStreamDTO();
+
+    Mockito.when(organizationServiceMock.getOrganization(organizationId, accessToken))
+      .thenReturn(organization);
+    Mockito.when(sendStreamRepositoryMock.findByIpaCode(orgIpaCode))
+      .thenReturn(List.of(sendStream));
+    Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStream)).thenReturn(expectedResponse);
+
+    //WHEN
+    SendStreamDTO actualResult = sendService.getStreamByOrganizationId(organizationId, accessToken);
+
+    //THEN
+    assertNotNull(actualResult);
+    assertEquals(expectedResponse, actualResult);
+  }
+
+  @Test
+  void givenInvalidOrganizationIdWhenGetStreamByOrganizationIdThenThrowIllegalArgumentException() {
+    //GIVEN
+    String accessToken = "ACCESSTOKEN";
+    String expectedErrorMessage = "In getStreamByOrganizationId method organizationId parameter cannot be null";
+
+    //WHEN
+    IllegalArgumentException exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> sendService.getStreamByOrganizationId(null, accessToken)
+    );
+
+    //THEN
+    Assertions.assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideSendStreamListScenarios")
+  void givenNotFoundStreamIdWhenGetStreamByOrganizationIdThenThrowNotFoundException(List<SendStream> sendStreamList) {
+    //GIVEN
+    String accessToken = "ACCESSTOKEN";
+    Long organizationId = 1L;
+    String orgIpaCode = "orgIpaCode";
+    Organization organization = new Organization();
+    organization.setIpaCode(orgIpaCode);
+
+    Mockito.when(organizationServiceMock.getOrganization(organizationId, accessToken))
+      .thenReturn(organization);
+    Mockito.when(sendStreamRepositoryMock.findByIpaCode(orgIpaCode))
+      .thenReturn(sendStreamList);
+
+    String expectedErrorMessage = "Send stream not found for organization with id: 1";
+
+    //WHEN
+    NotFoundException exception = assertThrows(
+      NotFoundException.class,
+      () -> sendService.getStreamByOrganizationId(organizationId, accessToken)
+    );
+
+    //THEN
+    Assertions.assertEquals(expectedErrorMessage, exception.getMessage());
+  }
+
+  private static Stream<List<SendStream>> provideSendStreamListScenarios() {
+    return Stream.of(
+      null,
+      new ArrayList<>()
+    );
   }
 
   @Test

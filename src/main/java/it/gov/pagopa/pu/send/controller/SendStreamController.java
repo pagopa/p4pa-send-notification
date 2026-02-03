@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO;
 import it.gov.pagopa.pu.send.controller.generated.StreamsApi;
+import it.gov.pagopa.pu.send.dto.generated.SendStreamDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import java.util.List;
@@ -25,7 +26,17 @@ public class SendStreamController implements StreamsApi {
     log.info("retrieve stream events for organizationId {}", organizationId);
     String accessToken = SecurityUtils.getAccessToken();
     return new ResponseEntity<>(
-      sendFacadeService.getStreamEvents(streamId, lastEventId ,organizationId, accessToken),
+      sendFacadeService.getStreamEvents(streamId, lastEventId, organizationId, accessToken),
       HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<SendStreamDTO> getStreamByOrganizationId(Long organizationId) {
+    log.info("Retrieve stream for organization with id {}", organizationId);
+    String accessToken = SecurityUtils.getAccessToken();
+    return new ResponseEntity<>(
+      sendFacadeService.getStreamByOrganizationId(organizationId, accessToken),
+      HttpStatus.OK
+    );
   }
 }
