@@ -43,7 +43,7 @@ public class SendUploadClient {
     if(response.getStatusCode().is2xxSuccessful()) {
       return Optional.ofNullable(response.getHeaders().getFirst("x-amz-version-id"));
     } else {
-      throw new UploadFileException("Something went wrong while uploading file to send: " + doc.getFileName() + ". " + response.getStatusCode());
+      throw new UploadFileException("[UPLOAD_ERROR] Something went wrong while uploading file to send: " + doc.getFileName() + ". " + response.getStatusCode());
     }
   }
 }
