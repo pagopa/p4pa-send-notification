@@ -1,5 +1,7 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
@@ -16,8 +18,11 @@ import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.mapper.SendStreamMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.repository.SendStreamRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,28 +40,35 @@ import java.util.Optional;
 @Slf4j
 public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
+  private final SendStreamRepository sendStreamRepository;
   private final SendService sendService;
   private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
   private final SendLegalFactMapper sendLegalFactMapper;
+  private final SendStreamMapper sendStreamMapper;
   private final SendStreamService sendStreamService;
+  private final OrganizationService organizationService;
 
   public SendFacadeServiceImpl(
     SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
+    SendStreamRepository sendStreamRepository, OrganizationService organizationService,
     SendService sendService,
     SendUploadFacadeServiceImpl uploadService,
     SendNotification2NewNotificationRequestMapper sendNotificationMapper,
     SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
-    SendLegalFactMapper sendLegalFactMapper,
+    SendLegalFactMapper sendLegalFactMapper, SendStreamMapper sendStreamMapper,
     SendStreamService sendStreamService) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
+    this.sendStreamRepository = sendStreamRepository;
     this.sendService = sendService;
     this.uploadService = uploadService;
     this.sendNotificationMapper = sendNotificationMapper;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
     this.sendLegalFactMapper = sendLegalFactMapper;
+    this.sendStreamMapper = sendStreamMapper;
     this.sendStreamService = sendStreamService;
+    this.organizationService = organizationService;
   }
 
   @Transactional
@@ -202,6 +214,18 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     }
 
     return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+  }
+
+  @Override
+  public SendStreamDTO getStreamByOrganizationId(Long organizationId, String accessToken) {
+    if (organizationId == null) {
+      throw new IllegalArgumentException("In getStreamByOrganizationId method organizationId parameter cannot be null");
+    }
+    Organization organization = organizationService.getOrganization(organizationId, accessToken);
+    List<SendStream> sendStream = sendStreamRepository.findByIpaCode(organization.getIpaCode());
+    if (sendStream == null || sendStream.isEmpty())
+      throw new NotFoundException(String.format("Send stream not found for organization with id: %s", organizationId));
+    return sendStreamMapper.mapFromSendStream(sendStream.getFirst());
   }
 
   @Override
