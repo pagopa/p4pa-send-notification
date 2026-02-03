@@ -30,6 +30,7 @@ public class SendStreamController implements StreamsApi {
       HttpStatus.OK);
   }
 
+  @Override
   public ResponseEntity<SendStreamDTO> getStreamByOrganizationId(Long organizationId) {
     log.info("Retrieve stream for organization with id {}", organizationId);
     String accessToken = SecurityUtils.getAccessToken();
