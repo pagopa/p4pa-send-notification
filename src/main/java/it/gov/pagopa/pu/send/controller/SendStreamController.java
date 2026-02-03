@@ -26,7 +26,7 @@ public class SendStreamController implements StreamsApi {
     log.info("retrieve stream events for organizationId {}", organizationId);
     String accessToken = SecurityUtils.getAccessToken();
     return new ResponseEntity<>(
-      sendFacadeService.getStreamEvents(streamId, lastEventId ,organizationId, accessToken),
+      sendFacadeService.getStreamEvents(streamId, lastEventId, organizationId, accessToken),
       HttpStatus.OK);
   }
 

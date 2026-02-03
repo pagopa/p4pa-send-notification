@@ -33,7 +33,7 @@ public class SendStreamRepositoryExtImpl implements SendStreamRepositoryExt {
     query.addCriteria(
       Criteria.where(Fields.streamId).is(streamId)
     );
-    Update update = new Update().push(Fields.lastEventId, lastEventId);
+    Update update = new Update().set(Fields.lastEventId, lastEventId);
     return mongoTemplate.updateFirst(query, update, SendStream.class);
   }
 }
