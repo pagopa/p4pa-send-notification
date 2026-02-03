@@ -27,7 +27,7 @@ public class SendStreamMapper {
     return sendStream;
   }
 
-  public SendStreamDTO mapFromSendStream(SendStream sendStream) {
+  public SendStreamDTO mapToSendStreamDTO(SendStream sendStream) {
     SendStreamDTO sendStreamDTO = new SendStreamDTO();
     sendStreamDTO.setStreamId(sendStream.getStreamId());
     sendStreamDTO.setOrganizationIpaCode(sendStream.getOrganizationIpaCode());

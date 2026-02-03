@@ -614,7 +614,7 @@ class SendFacadeServiceImplTest {
       .thenReturn(organization);
     Mockito.when(sendStreamRepositoryMock.findByIpaCode(orgIpaCode))
       .thenReturn(List.of(sendStream));
-    Mockito.when(sendStreamMapperMock.mapFromSendStream(sendStream)).thenReturn(expectedResponse);
+    Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStream)).thenReturn(expectedResponse);
 
     //WHEN
     SendStreamDTO actualResult = sendService.getStreamByOrganizationId(organizationId, accessToken);

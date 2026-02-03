@@ -228,7 +228,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     List<SendStream> sendStream = sendStreamRepository.findByIpaCode(organization.getIpaCode());
     if (sendStream == null || sendStream.isEmpty())
       throw new NotFoundException(String.format("Send stream not found for organization with id: %s", organizationId));
-    return sendStreamMapper.mapFromSendStream(sendStream.getFirst());
+    return sendStreamMapper.mapToSendStreamDTO(sendStream.getFirst());
   }
 
   @Override
