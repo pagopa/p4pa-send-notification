@@ -213,7 +213,10 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       streamId = String.valueOf(streams.getLast().getStreamId());
     }
 
-    return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+    List<ProgressResponseElementV25DTO> streamEvents = sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+    String newLastEventId = streamEvents.getLast().getEventId();
+    sendStreamRepository.updateLastEventId(streamId, newLastEventId);
+    return streamEvents;
   }
 
   @Override

@@ -86,6 +86,7 @@ class SendFacadeServiceImplTest {
       sendNotificationMapperMock,
       sendNotificationDTOMapperMock,
       sendLegalFactMapperMock,
+      sendStreamMapperMock,
       sendStreamServiceMock,
       organizationServiceMock
     );
@@ -538,11 +539,16 @@ class SendFacadeServiceImplTest {
     String streamId = "STREAMID";
     String lastEventId = "LASTEVENTID";
     Long organizationId = 1L;
+    String newLastEventId = "newLastEventId";
 
-    List<ProgressResponseElementV25DTO> expectedEvents = List.of(new ProgressResponseElementV25DTO());
+    ProgressResponseElementV25DTO sendStreamEvent = new ProgressResponseElementV25DTO();
+    sendStreamEvent.setEventId(newLastEventId);
+    List<ProgressResponseElementV25DTO> expectedEvents = List.of(sendStreamEvent);
 
     Mockito.when(sendStreamServiceMock.getStreamEvents(streamId, lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
+    Mockito.when(sendStreamRepositoryMock.updateLastEventId(streamId, newLastEventId))
+      .thenReturn(UpdateResult.unacknowledged()); //only for stubbing, not used in getStreamEvents method
 
     List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
 
@@ -556,16 +562,21 @@ class SendFacadeServiceImplTest {
     String lastEventId = "LASTEVENTID";
     UUID streamId = UUID.randomUUID();
     Long organizationId = 1L;
+    String newLastEventId = "newLastEventId";
 
     StreamListElementDTO lastStream = new StreamListElementDTO();
     lastStream.setStreamId(streamId);
 
     List<StreamListElementDTO> streams = List.of(new StreamListElementDTO(), lastStream);
-    List<ProgressResponseElementV25DTO> expectedEvents = List.of(new ProgressResponseElementV25DTO());
+    ProgressResponseElementV25DTO sendStreamEvent = new ProgressResponseElementV25DTO();
+    sendStreamEvent.setEventId(newLastEventId);
+    List<ProgressResponseElementV25DTO> expectedEvents = List.of(sendStreamEvent);
 
     Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(streams);
     Mockito.when(sendStreamServiceMock.getStreamEvents(String.valueOf(streamId), lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
+    Mockito.when(sendStreamRepositoryMock.updateLastEventId(String.valueOf(streamId), newLastEventId))
+      .thenReturn(UpdateResult.unacknowledged()); //only for stubbing, not used in getStreamEvents method
 
     List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(null, lastEventId, organizationId, accessToken);
 
@@ -590,6 +601,7 @@ class SendFacadeServiceImplTest {
 
   @Test
   void givenValidParamsWhenGetStreamThenReturnSendStreamByOrganizationId() {
+    //GIVEN
     String accessToken = "ACCESSTOKEN";
     Long organizationId = 1L;
     String orgIpaCode = "orgIpaCode";
@@ -604,28 +616,34 @@ class SendFacadeServiceImplTest {
       .thenReturn(List.of(sendStream));
     Mockito.when(sendStreamMapperMock.mapFromSendStream(sendStream)).thenReturn(expectedResponse);
 
+    //WHEN
     SendStreamDTO actualResult = sendService.getStreamByOrganizationId(organizationId, accessToken);
 
+    //THEN
     assertNotNull(actualResult);
     assertEquals(expectedResponse, actualResult);
   }
 
   @Test
   void givenInvalidOrganizationIdWhenGetStreamByOrganizationIdThenThrowIllegalArgumentException() {
+    //GIVEN
     String accessToken = "ACCESSTOKEN";
     String expectedErrorMessage = "In getStreamByOrganizationId method organizationId parameter cannot be null";
 
+    //WHEN
     IllegalArgumentException exception = assertThrows(
       IllegalArgumentException.class,
       () -> sendService.getStreamByOrganizationId(null, accessToken)
     );
 
+    //THEN
     Assertions.assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
   @ParameterizedTest
   @MethodSource("provideSendStreamListScenarios")
   void givenNotFoundStreamIdWhenGetStreamByOrganizationIdThenThrowNotFoundException(List<SendStream> sendStreamList) {
+    //GIVEN
     String accessToken = "ACCESSTOKEN";
     Long organizationId = 1L;
     String orgIpaCode = "orgIpaCode";
@@ -639,11 +657,13 @@ class SendFacadeServiceImplTest {
 
     String expectedErrorMessage = "Send stream not found for organization with id: 1";
 
+    //WHEN
     NotFoundException exception = assertThrows(
       NotFoundException.class,
       () -> sendService.getStreamByOrganizationId(organizationId, accessToken)
     );
 
+    //THEN
     Assertions.assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
