@@ -378,6 +378,38 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setSendNotificationId(notificationId);
     notification.setOrganizationId(1L);
+    notification.setLegalFacts(new ArrayList<>());
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+    Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, mockFile, fileName))
+      .thenReturn(expectedUrl);
+
+    // When
+    Assertions.assertDoesNotThrow(() ->
+      sendNotificationService.uploadSendLegalFact(notificationId, category, fileName, mockFile)
+    );
+
+    // Then
+    Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, mockFile, fileName);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
+      fact.getFileName().equals(fileName) &&
+        fact.getUrl().equals(expectedUrl) &&
+        fact.getCategory().equals(category)
+    ));
+  }
+
+  @Test
+  void givenNewFileWhenUploadSendLegalFactWithoutLegalFactThenSaveFileAndInvokeRepository() {
+    // Given
+    String notificationId = "123";
+    LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
+    String fileName = "test.pdf";
+    MultipartFile mockFile = new MockMultipartFile("file", "content".getBytes());
+    String expectedUrl = "test.pdf";
+
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setSendNotificationId(notificationId);
+    notification.setOrganizationId(1L);
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
     Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, mockFile, fileName))
