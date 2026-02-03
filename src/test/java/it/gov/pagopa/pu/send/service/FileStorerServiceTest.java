@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -94,8 +96,9 @@ class FileStorerServiceTest {
       fileStorerService.saveToSharedFolder(0L, "ID", null, ""));
   }
 
-  @Test
-  void givenInvalidFilenameWhenSaveToSharedFolderThenUploadFileException() {
+  @ParameterizedTest
+  @ValueSource(strings = {"","../test.txt"})
+  void givenInvalidFilenameWhenSaveToSharedFolderThenUploadFileException(String fileName) {
     MockMultipartFile file = new MockMultipartFile(
       "legalFactFile",
       "test.txt",
@@ -104,7 +107,7 @@ class FileStorerServiceTest {
     );
 
     Assertions.assertThrows(UploadFileException.class, () ->
-      fileStorerService.saveToSharedFolder(0L, "ID", file, "../test.txt"));
+      fileStorerService.saveToSharedFolder(0L, "ID", file, fileName));
   }
 
   @Test
