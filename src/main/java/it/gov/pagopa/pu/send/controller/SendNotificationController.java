@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.controller.generated.NotificationApi;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,5 +93,12 @@ public class SendNotificationController implements NotificationApi {
   public ResponseEntity<Void> updateNotificationStatus(Long sendNotificationId, String status) {
     sendNotificationService.updateNotificationStatus(String.valueOf(sendNotificationId), NotificationStatus.valueOf(status));
     return ResponseEntity.ok().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, MultipartFile legalFactFile) {
+    log.info("Upload legal-fact having category {} for sendNotificationId {}", category, sendNotificationId);
+    sendNotificationService.uploadSendLegalFact(sendNotificationId, category, fileName, legalFactFile);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

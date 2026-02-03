@@ -12,18 +12,18 @@ import org.springframework.stereotype.Service;
 public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
 
   private final SendUploadClient sendUploadClient;
-  private final FileRetrieverService fileRetrieverService;
+  private final FileStorerService fileStorerService;
 
   public SendUploadFacadeServiceImpl(SendUploadClient sendUploadClient,
-    FileRetrieverService fileRetrieverService) {
+    FileStorerService fileStorerService) {
     this.sendUploadClient = sendUploadClient;
-    this.fileRetrieverService = fileRetrieverService;
+    this.fileStorerService = fileStorerService;
   }
 
   @Override
   public Optional<String> uploadFile(Long organizationId, String sendNotificationId, DocumentDTO documentDTO) {
     String fileName = sendNotificationId + "_" + documentDTO.getFileName();
-    try(InputStream inputStream = fileRetrieverService.retrieveFile(organizationId, sendNotificationId, fileName)) {
+    try(InputStream inputStream = fileStorerService.retrieveFile(organizationId, sendNotificationId, fileName)) {
       if(inputStream==null)
         throw new FileNotFoundException("File not found: " + documentDTO.getFileName());
       byte[] fileBytes = inputStream.readAllBytes();

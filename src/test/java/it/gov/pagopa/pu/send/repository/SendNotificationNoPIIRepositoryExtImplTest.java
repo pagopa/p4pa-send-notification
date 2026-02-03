@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.pu.send.dto.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -210,6 +211,22 @@ class SendNotificationNoPIIRepositoryExtImplTest {
 
     Mockito.verify(mongoTemplate, Mockito.times(1))
       .findOne(Mockito.any(Query.class), Mockito.eq(SendNotificationNoPII.class));
+  }
+
+  @Test
+  void givenAddNotificationLegalFactThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    LegalFactDTO fact = LegalFactDTO.builder().fileName("fileName").build();
+
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+      SendNotificationNoPII.class))).thenReturn(updateResult);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.addLegalFact(sendNotificationId, fact);
+
+    assertEquals(1L, result.getModifiedCount());
+    Mockito.verify(mongoTemplate, Mockito.times(1)).updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+      SendNotificationNoPII.class));
   }
 
 }

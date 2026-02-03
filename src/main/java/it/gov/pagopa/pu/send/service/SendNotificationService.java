@@ -1,8 +1,10 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface SendNotificationService {
 
@@ -13,4 +15,5 @@ public interface SendNotificationService {
   SendNotificationDTO findSendNotificationDTOByNotificationRequestId(String notificationRequestId);
   SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav);
   UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus);
+  void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, MultipartFile legalFactFile);
 }

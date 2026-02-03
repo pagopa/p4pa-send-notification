@@ -1,5 +1,7 @@
 package it.gov.pagopa.pu.send.util;
 
+import it.gov.pagopa.pu.send.exception.UploadFileException;
+
 import java.io.IOException;
 
 import java.io.InputStream;
@@ -7,6 +9,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.stream.Stream;
 
 public class FileUtils {
 
@@ -22,5 +25,11 @@ public class FileUtils {
     }
     byte[] hash = digest.digest();
     return Base64.getEncoder().encodeToString(hash);
+  }
+
+  public static void validateFilename(String filename) {
+    if (Stream.of("..", "\\", "/").anyMatch(filename::contains)) {
+      throw new UploadFileException("Invalid filename");
+    }
   }
 }
