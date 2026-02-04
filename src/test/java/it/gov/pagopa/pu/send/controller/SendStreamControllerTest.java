@@ -55,15 +55,16 @@ class SendStreamControllerTest {
   }
 
   @Test
-  void givenOrganizationIdWhenGetStreamByOrganizationIdThenOk(){
+  void givenOrganizationIdWhenGetStreamThenOk(){
     Long organizationId = 1L;
+    String streamId = "streamId";
     SendStreamDTO expectedResult = new SendStreamDTO();
 
-    Mockito.when(sendFacadeServiceMock.getStreamByOrganizationId(organizationId, accessToken))
+    Mockito.when(sendFacadeServiceMock.getStream(streamId, organizationId, accessToken))
       .thenReturn(expectedResult);
 
     ResponseEntity<SendStreamDTO> actualResponse = sendStreamController
-      .getStreamByOrganizationId(organizationId);
+      .getStream(streamId, organizationId);
 
     Assertions.assertNotNull(actualResponse);
     Assertions.assertEquals(HttpStatus.OK, actualResponse.getStatusCode());

@@ -1,11 +1,10 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO.EventTypeEnum;
+import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
@@ -35,6 +34,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -48,17 +48,19 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendLegalFactMapper sendLegalFactMapper;
   private final SendStreamMapper sendStreamMapper;
   private final SendStreamService sendStreamService;
-  private final OrganizationService organizationService;
+  private final WorkflowService workflowService;
 
   public SendFacadeServiceImpl(
     SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
-    SendStreamRepository sendStreamRepository, OrganizationService organizationService,
+    SendStreamRepository sendStreamRepository,
     SendService sendService,
     SendUploadFacadeServiceImpl uploadService,
     SendNotification2NewNotificationRequestMapper sendNotificationMapper,
     SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
-    SendLegalFactMapper sendLegalFactMapper, SendStreamMapper sendStreamMapper,
-    SendStreamService sendStreamService) {
+    SendLegalFactMapper sendLegalFactMapper,
+    SendStreamMapper sendStreamMapper,
+    SendStreamService sendStreamService,
+    WorkflowService workflowService) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendStreamRepository = sendStreamRepository;
     this.sendService = sendService;
@@ -68,7 +70,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     this.sendLegalFactMapper = sendLegalFactMapper;
     this.sendStreamMapper = sendStreamMapper;
     this.sendStreamService = sendStreamService;
-    this.organizationService = organizationService;
+    this.workflowService = workflowService;
   }
 
   @Transactional
@@ -212,23 +214,27 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
       streamId = String.valueOf(streams.getLast().getStreamId());
     }
-
-    List<ProgressResponseElementV25DTO> streamEvents = sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
-    String newLastEventId = streamEvents.getLast().getEventId();
-    sendStreamRepository.updateLastEventId(streamId, newLastEventId);
-    return streamEvents;
+    sendStreamRepository.updateLastEventId(streamId, lastEventId);
+    return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
   }
 
   @Override
-  public SendStreamDTO getStreamByOrganizationId(Long organizationId, String accessToken) {
-    if (organizationId == null) {
-      throw new IllegalArgumentException("In getStreamByOrganizationId method organizationId parameter cannot be null");
+  public SendStreamDTO getStream(String streamId, Long organizationId, String accessToken) {
+    if (streamId == null || organizationId == null) {
+      throw new IllegalArgumentException("In getStream method both streamId and organizationId parameters cannot be null");
     }
-    Organization organization = organizationService.getOrganization(organizationId, accessToken);
-    List<SendStream> sendStream = sendStreamRepository.findByIpaCode(organization.getIpaCode());
-    if (sendStream == null || sendStream.isEmpty())
-      throw new NotFoundException(String.format("Send stream not found for organization with id: %s", organizationId));
-    return sendStreamMapper.mapToSendStreamDTO(sendStream.getFirst());
+    Optional<SendStream> sendStream = sendStreamRepository.findById(streamId);
+    if (sendStream.isEmpty() || !cachedStreamDoesExistOnSend(streamId, organizationId, accessToken)) {
+      sendStreamRepository.deleteById(streamId);
+      throw new NotFoundException(String.format("Send stream not found for streamId: %s, and organizationId: %d", streamId, organizationId));
+    }
+    return sendStreamMapper.mapToSendStreamDTO(sendStream.get());
+  }
+
+  private boolean cachedStreamDoesExistOnSend(String streamId, Long organizationId, String accessToken) {
+    return sendStreamService.getStreams(organizationId, accessToken).stream()
+      .map(StreamListElementDTO::getStreamId)
+      .anyMatch(s -> s.toString().equals(streamId));
   }
 
   @Override
@@ -281,6 +287,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     request.setTitle("SEND-STREAM_" + organizationId);
     request.setEventType(EventTypeEnum.STATUS);
 
-    sendStreamService.createStream(request, organizationId, accessToken);
+    StreamMetadataResponseV25DTO stream = sendStreamService.createStream(request, organizationId, accessToken);
+    UUID streamId = stream.getStreamId();
+
+    workflowService.sendNotificationStreamConsume(streamId.toString(), organizationId, accessToken);
   }
 }

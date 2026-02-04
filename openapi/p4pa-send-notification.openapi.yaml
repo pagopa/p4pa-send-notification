@@ -477,10 +477,15 @@ paths:
     get:
       tags:
         - Streams
-      summary: retrieve stream by organization id
-      description: get stream by specifying relative organization id
-      operationId: getStreamByOrganizationId
+      summary: retrieve stream by stream id and organization id
+      description: get stream by specifying stream id and relative organization id
+      operationId: getStream
       parameters:
+        - name: streamId
+          in: query
+          required: true
+          schema:
+            type: string
         - name: organizationId
           in: query
           required: true
