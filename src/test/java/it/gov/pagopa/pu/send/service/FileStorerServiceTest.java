@@ -169,7 +169,7 @@ class FileStorerServiceTest {
   }
 
   @Test
-  void givenInvalidPathWhenConcatenatePathsThenUploadFileException() throws IOException {
+  void givenInvalidPathWhenConcatenatePathsThenUploadFileException() {
     MockMultipartFile fileSpy = Mockito.spy(new MockMultipartFile(
       "legalFactFile",
       "test.txt",
