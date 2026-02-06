@@ -1647,8 +1647,9 @@
           "streamId" : {
             "type" : "string"
           },
-          "organizationIpaCode" : {
-            "type" : "string"
+          "organizationId" : {
+            "type" : "integer",
+            "format" : "int64"
           },
           "title" : {
             "type" : "string"
@@ -1660,7 +1661,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "eventType", "organizationIpaCode", "streamId", "title" ]
+        "required" : [ "eventType", "streamId", "title" ]
       },
       "AttachmentDetailsDTO" : {
         "type" : "object",

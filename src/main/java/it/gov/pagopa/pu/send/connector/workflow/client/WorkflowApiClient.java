@@ -18,8 +18,8 @@ public class WorkflowApiClient {
       .sendNotificationProcess(sendNotificationId);
   }
 
-  public WorkflowCreatedDTO sendNotificationStreamConsume(String sendStreamId, Long organizationId, String accessToken) {
+  public WorkflowCreatedDTO sendNotificationStreamConsume(String sendStreamId, String accessToken) {
     return workflowApisHolder.getSendNotificationApi(accessToken)
-      .consumeSendStream(sendStreamId, organizationId);
+      .consumeSendStream(sendStreamId);
   }
 }

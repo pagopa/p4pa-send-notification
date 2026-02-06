@@ -12,7 +12,7 @@ import java.util.UUID;
 class SendStreamMapperTest {
 
   public static final UUID STREAM_ID = UUID.randomUUID();
-  public static final String ORG_IPA_CODE = "orgIpaCode";
+  public static final Long ORGANIZATION_ID = 1L;
   public static final StreamMetadataResponseV25DTO.EventTypeEnum EVENT_TYPE_ENUM = StreamMetadataResponseV25DTO.EventTypeEnum.STATUS;
   public static final String TITLE = "title";
   public static final String LAST_EVENT_ID = "lastEventId";
@@ -53,11 +53,11 @@ class SendStreamMapperTest {
         .streamId(STREAM_ID.toString())
         .title(TITLE)
         .eventType(EVENT_TYPE_ENUM.getValue())
-        .organizationIpaCode(ORG_IPA_CODE)
+        .organizationId(ORGANIZATION_ID)
         .build();
     //When
     SendStream actualResponse =
-      sendStreamMapper.mapToSendStream(streamMetadataResponse, ORG_IPA_CODE);
+      sendStreamMapper.mapToSendStream(streamMetadataResponse, ORGANIZATION_ID);
     //Then
     Assertions.assertEquals(expectedResponse, actualResponse);
     TestUtils.checkNotNullFields(actualResponse, "lastEventId");
@@ -70,7 +70,7 @@ class SendStreamMapperTest {
       SendStream.builder()
         .streamId(STREAM_ID.toString())
         .title(TITLE)
-        .organizationIpaCode(ORG_IPA_CODE)
+        .organizationId(ORGANIZATION_ID)
         .eventType(EVENT_TYPE_ENUM.getValue())
         .lastEventId(LAST_EVENT_ID)
         .build();
@@ -78,7 +78,7 @@ class SendStreamMapperTest {
       SendStreamDTO.builder()
         .streamId(STREAM_ID.toString())
         .title(TITLE)
-        .organizationIpaCode(ORG_IPA_CODE)
+        .organizationId(ORGANIZATION_ID)
         .eventType(EVENT_TYPE_ENUM.getValue())
         .lastEventId(LAST_EVENT_ID)
         .build();

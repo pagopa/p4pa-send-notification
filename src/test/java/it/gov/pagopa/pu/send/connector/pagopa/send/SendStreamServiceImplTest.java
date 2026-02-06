@@ -48,11 +48,9 @@ class SendStreamServiceImplTest {
   void whenCreateStreamThenInvokeClient() {
     // Given
     long organizationId = 123L;
-    String orgIpaCode = "IPA_CODE";
     String orgSendApiKey = "ORG_SEND_API_KEY";
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
-    organization.setIpaCode(orgIpaCode);
 
     StreamCreationRequestV25DTO request = new StreamCreationRequestV25DTO();
     StreamMetadataResponseV25DTO expectedResult = new StreamMetadataResponseV25DTO();
@@ -60,9 +58,7 @@ class SendStreamServiceImplTest {
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
     Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(organizationServiceMock.getOrganization(organizationId, accessToken))
-      .thenReturn(organization);
-    Mockito.when(clientMock.createStream(request, orgIpaCode, orgSendApiKey, voucherToken)).thenReturn(expectedResult);
+    Mockito.when(clientMock.createStream(request, organizationId, orgSendApiKey, voucherToken)).thenReturn(expectedResult);
 
     //When
     StreamMetadataResponseV25DTO result = service.createStream(request, organizationId, accessToken);

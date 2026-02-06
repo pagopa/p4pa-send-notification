@@ -6,6 +6,6 @@ import it.gov.pagopa.pu.send.model.SendStream;
 import java.util.List;
 
 public interface SendStreamRepositoryExt {
-  List<SendStream> findByIpaCode(String ipaCode);
+  List<SendStream> findByOrganizationId(Long organizationId);
   UpdateResult updateLastEventId(String streamId, String lastEventId);
 }

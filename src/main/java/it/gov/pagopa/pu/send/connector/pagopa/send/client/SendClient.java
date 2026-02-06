@@ -43,13 +43,13 @@ public class SendClient {
     return apisHolder.getNotificationPriceApi(apiKey, pdndAccessToken).retrieveNotificationPriceV23(paTaxId, noticeCode);
   }
 
-  public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, String orgIpaCode, String apikey, String pdndAccessToken){
-    List<SendStream> sendStreamList = sendStreamRepository.findByIpaCode(orgIpaCode);
+  public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, Long organizationId, String apikey, String pdndAccessToken){
+    List<SendStream> sendStreamList = sendStreamRepository.findByOrganizationId(organizationId);
     if(sendStreamList.isEmpty()) {
       StreamMetadataResponseV25DTO streamMetadataResponseV25DTO =
         apisHolder.getStreamsApi(apikey, pdndAccessToken)
           .createEventStreamV25(createStreamRequest);
-      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO, orgIpaCode));
+      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO, organizationId));
       return streamMetadataResponseV25DTO;
     }
     return sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStreamList.getFirst());

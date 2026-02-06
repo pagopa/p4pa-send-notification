@@ -50,7 +50,7 @@ class SendClientTest {
   private SendClient sendClient;
   private final String apiKey = "apiKey";
   private final String voucherToken = "voucherToken";
-  private final String ipaCode = "ipaCode";
+  private final Long organizationId = 1L;
 
   @BeforeEach
   void setUp() {
@@ -165,12 +165,12 @@ class SendClientTest {
     StreamMetadataResponseV25DTO response = new StreamMetadataResponseV25DTO();
     SendStream sendStream = new SendStream();
 
-    Mockito.when(sendStreamRepositoryMock.findByIpaCode(ipaCode))
+    Mockito.when(sendStreamRepositoryMock.findByOrganizationId(organizationId))
       .thenReturn(List.of(sendStream));
     Mockito.when(sendStreamMapperMock.mapToStreamMetadataResponseV25DTO(sendStream))
       .thenReturn(response);
 
-    StreamMetadataResponseV25DTO result = sendClient.createStream(request, ipaCode, apiKey, voucherToken);
+    StreamMetadataResponseV25DTO result = sendClient.createStream(request, organizationId, apiKey, voucherToken);
 
     assertSame(response, result);
   }
@@ -182,16 +182,16 @@ class SendClientTest {
     StreamMetadataResponseV25DTO response = new StreamMetadataResponseV25DTO();
     SendStream sendStream = new SendStream();
 
-    Mockito.when(sendStreamRepositoryMock.findByIpaCode(ipaCode))
+    Mockito.when(sendStreamRepositoryMock.findByOrganizationId(organizationId))
       .thenReturn(Collections.emptyList());
     Mockito.when(apisHolder.getStreamsApi(apiKey, voucherToken))
       .thenReturn(streamsApiMock);
     Mockito.when(streamsApiMock.createEventStreamV25(request))
       .thenReturn(response);
-    Mockito.when(sendStreamMapperMock.mapToSendStream(response, ipaCode))
+    Mockito.when(sendStreamMapperMock.mapToSendStream(response, organizationId))
       .thenReturn(sendStream);
 
-    StreamMetadataResponseV25DTO result = sendClient.createStream(request, ipaCode, apiKey, voucherToken);
+    StreamMetadataResponseV25DTO result = sendClient.createStream(request, organizationId, apiKey, voucherToken);
 
     assertSame(response, result);
     Mockito.verify(sendStreamRepositoryMock, Mockito.times(1)).save(sendStream);

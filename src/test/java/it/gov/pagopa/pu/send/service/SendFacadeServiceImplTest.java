@@ -210,7 +210,7 @@ class SendFacadeServiceImplTest {
       .thenReturn(request);
     Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV25DTO, orgId, accessToken))
       .thenReturn(streamMetadataResponseV25DTO);
-    Mockito.when(workflowService.sendNotificationStreamConsume(sendStreamId.toString(), orgId, accessToken))
+    Mockito.when(workflowService.sendNotificationStreamConsume(sendStreamId.toString(), accessToken))
       .thenReturn(WorkflowCreatedDTO.builder()
         .workflowId("wfId")
         .runId("runID")
@@ -727,7 +727,7 @@ class SendFacadeServiceImplTest {
 
     Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV25DTO, orgId, accessToken))
       .thenReturn(streamMetadataResponseV25DTO);
-    Mockito.when(workflowService.sendNotificationStreamConsume(sendStreamId.toString(), orgId, accessToken))
+    Mockito.when(workflowService.sendNotificationStreamConsume(sendStreamId.toString(), accessToken))
       .thenReturn(WorkflowCreatedDTO.builder()
         .workflowId("wfId")
         .runId("runID")

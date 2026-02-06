@@ -21,7 +21,7 @@ public class SendStream implements Serializable {
   @Id
   private String streamId;
   @NotNull
-  private String organizationIpaCode;
+  private Long organizationId;
   @NotNull
   private String title;
   @NotNull

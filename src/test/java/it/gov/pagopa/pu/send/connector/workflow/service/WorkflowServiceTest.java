@@ -55,14 +55,13 @@ class WorkflowServiceTest {
     // Given
     String accessToken = "ACCESSTOKEN";
     String sendStreamId = "sendStreamId";
-    Long organizationId = 1L;
     WorkflowCreatedDTO expectedResult = new WorkflowCreatedDTO();
 
-    Mockito.when(workflowApiClientMock.sendNotificationStreamConsume(Mockito.same(sendStreamId), Mockito.same(organizationId), Mockito.same(accessToken)))
+    Mockito.when(workflowApiClientMock.sendNotificationStreamConsume(Mockito.same(sendStreamId), Mockito.same(accessToken)))
       .thenReturn(expectedResult);
 
     // When
-    WorkflowCreatedDTO result = workflowService.sendNotificationStreamConsume(sendStreamId, organizationId, accessToken);
+    WorkflowCreatedDTO result = workflowService.sendNotificationStreamConsume(sendStreamId, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

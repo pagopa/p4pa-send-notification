@@ -5,5 +5,5 @@ import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 public interface WorkflowService {
 
   WorkflowCreatedDTO sendNotificationProcess(String sendNotificationId, String accessToken);
-  WorkflowCreatedDTO sendNotificationStreamConsume(String sendStreamId, Long organizationId, String accessToken);
+  WorkflowCreatedDTO sendNotificationStreamConsume(String sendStreamId, String accessToken);
 }

@@ -26,7 +26,7 @@ public class SendStreamServiceImpl implements SendStreamService{
 
   @Override
   public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, Long organizationId, String accessToken) {
-    return client.createStream(createStreamRequest, getIpaCodeFromOrganization(organizationId, accessToken), getApiKeyFromOrganization(organizationId, accessToken),
+    return client.createStream(createStreamRequest, organizationId, getApiKeyFromOrganization(organizationId, accessToken),
       pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
 
@@ -45,8 +45,4 @@ public class SendStreamServiceImpl implements SendStreamService{
     return organizationService.getOrganizationApiKey(organizationId, accessToken);
   }
 
-  private String getIpaCodeFromOrganization(Long organizationId, String accessToken) {
-    return organizationService.getOrganization(organizationId, accessToken)
-      .getIpaCode();
-  }
 }

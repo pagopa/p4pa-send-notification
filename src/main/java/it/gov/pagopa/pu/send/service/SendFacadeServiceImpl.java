@@ -290,6 +290,6 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     StreamMetadataResponseV25DTO stream = sendStreamService.createStream(request, organizationId, accessToken);
     UUID streamId = stream.getStreamId();
 
-    workflowService.sendNotificationStreamConsume(streamId.toString(), organizationId, accessToken);
+    workflowService.sendNotificationStreamConsume(streamId.toString(), accessToken);
   }
 }
