@@ -23,9 +23,11 @@ import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -172,6 +174,17 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     sendNotificationNoPIIRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.READY);
   }
 
+  /**
+   * This method expects two paths whose concatenation does not resolve into an outer folder.
+   * The normalized path still starts with the first path.
+   */
+  public static Path concatenatePaths(String firstPath, String secondPath) {
+    Path concatenatedPath = Paths.get(firstPath, secondPath).normalize();
+    if (!concatenatedPath.startsWith(firstPath)) {
+      throw new UploadFileException("[INVALID_FILE_PATH] Invalid file path");
+    }
+    return concatenatedPath;
+  }
 
   private void deleteSendNotificationFiles(SendNotificationNoPII sendNotification) {
     Path relativePath = fileStorerService.buildRelativeSendPath(
