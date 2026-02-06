@@ -287,9 +287,16 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     request.setTitle("SEND-STREAM_" + organizationId);
     request.setEventType(EventTypeEnum.STATUS);
 
-    StreamMetadataResponseV25DTO stream = sendStreamService.createStream(request, organizationId, accessToken);
-    UUID streamId = stream.getStreamId();
-
-    workflowService.sendNotificationStreamConsume(streamId.toString(), accessToken);
+    List<SendStream> sendStreamList = sendStreamRepository.findByOrganizationId(organizationId);
+    if(sendStreamList.isEmpty()) {
+      StreamMetadataResponseV25DTO streamMetadataResponseV25DTO =
+        sendStreamService.createStream(request, organizationId, accessToken);
+      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO, organizationId));
+      workflowService.sendNotificationStreamConsume(
+        streamMetadataResponseV25DTO.getStreamId().toString(),
+        accessToken
+      );
+    }
   }
+
 }

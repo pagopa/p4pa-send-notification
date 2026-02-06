@@ -58,7 +58,7 @@ class SendStreamServiceImplTest {
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
     Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.createStream(request, organizationId, orgSendApiKey, voucherToken)).thenReturn(expectedResult);
+    Mockito.when(clientMock.createStream(request, orgSendApiKey, voucherToken)).thenReturn(expectedResult);
 
     //When
     StreamMetadataResponseV25DTO result = service.createStream(request, organizationId, accessToken);

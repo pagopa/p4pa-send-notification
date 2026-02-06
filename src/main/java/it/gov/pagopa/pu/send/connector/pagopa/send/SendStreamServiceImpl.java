@@ -26,7 +26,7 @@ public class SendStreamServiceImpl implements SendStreamService{
 
   @Override
   public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, Long organizationId, String accessToken) {
-    return client.createStream(createStreamRequest, organizationId, getApiKeyFromOrganization(organizationId, accessToken),
+    return client.createStream(createStreamRequest, getApiKeyFromOrganization(organizationId, accessToken),
       pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
 

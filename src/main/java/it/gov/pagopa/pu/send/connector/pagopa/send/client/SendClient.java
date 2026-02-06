@@ -2,9 +2,6 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.mapper.SendStreamMapper;
-import it.gov.pagopa.pu.send.model.SendStream;
-import it.gov.pagopa.pu.send.repository.SendStreamRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,13 +12,8 @@ public class SendClient {
 
   private final PagopaSendApisHolder apisHolder;
 
-  private final SendStreamRepository sendStreamRepository;
-  private final SendStreamMapper sendStreamMapper;
-
-  public SendClient(PagopaSendApisHolder apisHolder, SendStreamRepository sendStreamRepository, SendStreamMapper sendStreamMapper) {
+  public SendClient(PagopaSendApisHolder apisHolder) {
     this.apisHolder = apisHolder;
-    this.sendStreamRepository = sendStreamRepository;
-    this.sendStreamMapper = sendStreamMapper;
   }
 
   public List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, String apiKey, String pdndAccessToken) {
@@ -43,16 +35,9 @@ public class SendClient {
     return apisHolder.getNotificationPriceApi(apiKey, pdndAccessToken).retrieveNotificationPriceV23(paTaxId, noticeCode);
   }
 
-  public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, Long organizationId, String apikey, String pdndAccessToken){
-    List<SendStream> sendStreamList = sendStreamRepository.findByOrganizationId(organizationId);
-    if(sendStreamList.isEmpty()) {
-      StreamMetadataResponseV25DTO streamMetadataResponseV25DTO =
-        apisHolder.getStreamsApi(apikey, pdndAccessToken)
-          .createEventStreamV25(createStreamRequest);
-      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO, organizationId));
-      return streamMetadataResponseV25DTO;
-    }
-    return sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStreamList.getFirst());
+  public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, String apikey, String pdndAccessToken){
+    return apisHolder.getStreamsApi(apikey, pdndAccessToken)
+      .createEventStreamV25(createStreamRequest);
   }
 
   public List<StreamListElementDTO> getStreams(String apikey, String pdndAccessToken){
