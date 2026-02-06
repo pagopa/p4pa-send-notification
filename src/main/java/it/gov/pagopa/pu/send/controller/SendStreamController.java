@@ -31,11 +31,11 @@ public class SendStreamController implements StreamsApi {
   }
 
   @Override
-  public ResponseEntity<SendStreamDTO> getStream(String streamId, Long organizationId) {
-    log.info("Retrieve stream with id {} for organization with id {}", streamId, organizationId);
+  public ResponseEntity<SendStreamDTO> getStream(String streamId) {
+    log.info("Retrieve SEND stream with id {}", streamId);
     String accessToken = SecurityUtils.getAccessToken();
     return new ResponseEntity<>(
-      sendFacadeService.getStream(streamId, organizationId, accessToken),
+      sendFacadeService.getStream(streamId, accessToken),
       HttpStatus.OK
     );
   }

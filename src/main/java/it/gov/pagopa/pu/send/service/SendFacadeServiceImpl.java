@@ -219,14 +219,11 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public SendStreamDTO getStream(String streamId, Long organizationId, String accessToken) {
-    if (streamId == null || organizationId == null) {
-      throw new IllegalArgumentException("In getStream method both streamId and organizationId parameters cannot be null");
-    }
+  public SendStreamDTO getStream(String streamId, String accessToken) {
     Optional<SendStream> sendStream = sendStreamRepository.findById(streamId);
-    if (sendStream.isEmpty() || !cachedStreamDoesExistOnSend(streamId, organizationId, accessToken)) {
+    if (sendStream.isEmpty() || !cachedStreamDoesExistOnSend(streamId, sendStream.get().getOrganizationId(), accessToken)) {
       sendStreamRepository.deleteById(streamId);
-      throw new NotFoundException(String.format("Send stream not found for streamId: %s, and organizationId: %d", streamId, organizationId));
+      throw new NotFoundException(String.format("[STREAMS_NOT_FOUND] Send stream not found for streamId: %s", streamId));
     }
     return sendStreamMapper.mapToSendStreamDTO(sendStream.get());
   }

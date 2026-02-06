@@ -26,7 +26,7 @@ public interface SendFacadeService {
    * @throws NotFoundException if doesn't exist at leat one stream
    */
   List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId, Long organizationId, String accessToken);
-  SendStreamDTO getStream(String streamId, Long organizationId, String accessToken);
+  SendStreamDTO getStream(String streamId, String accessToken);
   List<LegalFactListElementDTO> retrieveLegalFacts(String sendNotificationId, String accessToken);
   LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId, String legalFactId, String accessToken);
 }

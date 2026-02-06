@@ -628,8 +628,10 @@ class SendFacadeServiceImplTest {
     String streamId = UUID.randomUUID().toString();
     SendStream sendStream = new SendStream();
     sendStream.setStreamId(streamId);
+    sendStream.setOrganizationId(organizationId);
     SendStreamDTO expectedResponse = new SendStreamDTO();
     expectedResponse.setStreamId(streamId);
+    expectedResponse.setOrganizationId(organizationId);
     StreamListElementDTO streamListElementDTO = new StreamListElementDTO();
     streamListElementDTO.setStreamId(UUID.fromString(streamId));
 
@@ -640,35 +642,17 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStream)).thenReturn(expectedResponse);
 
     //WHEN
-    SendStreamDTO actualResult = sendService.getStream(streamId, organizationId, accessToken);
+    SendStreamDTO actualResult = sendService.getStream(streamId, accessToken);
 
     //THEN
     assertNotNull(actualResult);
     assertEquals(expectedResponse, actualResult);
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"streamId", ""})
-  void givenInvalidStreamIdOrOrganizationIdWhenGetStreamThenThrowIllegalArgumentException(String streamId) {
-    //GIVEN
-    String accessToken = "ACCESSTOKEN";
-    String expectedErrorMessage = "In getStream method both streamId and organizationId parameters cannot be null";
-
-    //WHEN
-    IllegalArgumentException exception = assertThrows(
-      IllegalArgumentException.class,
-      () -> sendService.getStream(streamId.isEmpty()? null : streamId, null, accessToken)
-    );
-
-    //THEN
-    Assertions.assertEquals(expectedErrorMessage, exception.getMessage());
-  }
-
   @Test
   void givenNotFoundStreamInCacheWhenGetStreamThenThrowNotFoundException() {
     //GIVEN
     String accessToken = "ACCESSTOKEN";
-    Long organizationId = 1L;
     String streamId = "streamId";
 
     Mockito.when(sendStreamRepositoryMock.findById(streamId))
@@ -677,12 +661,12 @@ class SendFacadeServiceImplTest {
       .when(sendStreamRepositoryMock)
       .deleteById(streamId);
 
-    String expectedErrorMessage = "Send stream not found for streamId: streamId, and organizationId: 1";
+    String expectedErrorMessage = "[STREAMS_NOT_FOUND] Send stream not found for streamId: streamId";
 
     //WHEN
     NotFoundException exception = assertThrows(
       NotFoundException.class,
-      () -> sendService.getStream(streamId, organizationId, accessToken)
+      () -> sendService.getStream(streamId, accessToken)
     );
 
     //THEN
@@ -695,21 +679,23 @@ class SendFacadeServiceImplTest {
     String accessToken = "ACCESSTOKEN";
     Long organizationId = 1L;
     String streamId = "streamId";
+    SendStream sendStream = new SendStream();
+    sendStream.setOrganizationId(organizationId);
 
     Mockito.when(sendStreamRepositoryMock.findById(streamId))
-      .thenReturn(Optional.of(new SendStream()));
+      .thenReturn(Optional.of(sendStream));
     Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken))
         .thenReturn(Collections.emptyList());
     Mockito.doNothing()
       .when(sendStreamRepositoryMock)
       .deleteById(streamId);
 
-    String expectedErrorMessage = "Send stream not found for streamId: streamId, and organizationId: 1";
+    String expectedErrorMessage = "[STREAMS_NOT_FOUND] Send stream not found for streamId: streamId";
 
     //WHEN
     NotFoundException exception = assertThrows(
       NotFoundException.class,
-      () -> sendService.getStream(streamId, organizationId, accessToken)
+      () -> sendService.getStream(streamId, accessToken)
     );
 
     //THEN

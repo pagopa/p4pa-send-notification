@@ -745,14 +745,6 @@
           "schema" : {
             "type" : "string"
           }
-        }, {
-          "name" : "organizationId",
-          "in" : "query",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
         } ],
         "responses" : {
           "200" : {
