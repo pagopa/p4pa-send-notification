@@ -50,7 +50,7 @@ public class FileStorerService {
     Path relativeSendPath =  buildRelativeSendPath(organizationId, sendNotificationId);
     Path absolutePath = concatenatePaths(relativeSendPath.toString(), fileName);
     try {
-      AESUtils.encryptAndSave(fileEncryptPassword, file.getInputStream(), absolutePath, fileName);
+      AESUtils.encryptAndSave(fileEncryptPassword, file.getInputStream(), absolutePath.getParent(), absolutePath.getFileName().toString());
     } catch (Exception e) {
       throw new UploadFileException("Error uploading file to shared folder %s".formatted(absolutePath));
     }

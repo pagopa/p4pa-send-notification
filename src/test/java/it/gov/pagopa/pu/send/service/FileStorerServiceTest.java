@@ -163,8 +163,8 @@ class FileStorerServiceTest {
       Assertions.assertEquals(fileName, result);
       aesUtilsMockedStatic.verify(() -> AESUtils.encryptAndSave(FILE_ENCRYPT_PASSWORD,
         inpustStreamMock,
-        absolutePath,
-        fileName));
+        absolutePath.getParent(),
+        absolutePath.getFileName().toString()));
     }
   }
 
