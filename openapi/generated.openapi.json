@@ -735,8 +735,8 @@
     "/p4pasend/send/streams" : {
       "get" : {
         "tags" : [ "Streams" ],
-        "summary" : "retrieve stream by stream id and organization id",
-        "description" : "get stream by specifying stream id and relative organization id",
+        "summary" : "retrieve stream by stream id",
+        "description" : "get stream by specifying stream id",
         "operationId" : "getStream",
         "parameters" : [ {
           "name" : "streamId",

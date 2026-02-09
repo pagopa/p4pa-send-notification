@@ -36,7 +36,7 @@ class SendStreamRepositoryExtImplTest {
 
     Query query = Query.query(Criteria.where(SendStream.Fields.organizationId)
       .is(organizationId));
-    Mockito.when(mongoTemplate.find(Mockito.eq(query), Mockito.eq(SendStream.class)))
+    Mockito.when(mongoTemplate.find(query, SendStream.class))
       .thenReturn(expectedResponse);
 
     //WHEN
@@ -45,7 +45,7 @@ class SendStreamRepositoryExtImplTest {
     //THEN
     Assertions.assertEquals(expectedResponse, actualResult);
     Mockito.verify(mongoTemplate, Mockito.times(1))
-      .find(Mockito.eq(query), Mockito.eq(SendStream.class));
+      .find(query, SendStream.class);
   }
 
   @Test
@@ -60,9 +60,9 @@ class SendStreamRepositoryExtImplTest {
     Update update = Update.update(SendStream.Fields.lastEventId, lastEventId);
     Mockito.when(
       mongoTemplate.updateFirst(
-        Mockito.eq(query),
-        Mockito.eq(update),
-        Mockito.eq(SendStream.class)
+        query,
+        update,
+        SendStream.class
       )
     ).thenReturn(expectedResponse);
 
@@ -76,9 +76,9 @@ class SendStreamRepositoryExtImplTest {
     Assertions.assertEquals(1L, actualResult.getModifiedCount());
     Mockito.verify(mongoTemplate, Mockito.times(1))
       .updateFirst(
-        Mockito.eq(query),
-        Mockito.eq(update),
-        Mockito.eq(SendStream.class)
+        query,
+        update,
+        SendStream.class
       );
   }
 
