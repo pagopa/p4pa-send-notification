@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
@@ -28,21 +29,23 @@ class SendStreamRepositoryExtImplTest {
   @Test
   void givenIdAndOrganizationIdThenVerify() {
     //GIVEN
-    String orgIpaCode = "ipaCode";
+    Long organizationId = 1L;
 
     List<SendStream> expectedResponse = new ArrayList<>();
     expectedResponse.add(SendStream.builder().build());
 
-    Mockito.when(mongoTemplate.find(Mockito.any(Query.class), Mockito.eq(
-      SendStream.class))).thenReturn(expectedResponse);
+    Query query = Query.query(Criteria.where(SendStream.Fields.organizationId)
+      .is(organizationId));
+    Mockito.when(mongoTemplate.find(query, SendStream.class))
+      .thenReturn(expectedResponse);
 
     //WHEN
-    List<SendStream> actualResult = repository.findByIpaCode(orgIpaCode);
+    List<SendStream> actualResult = repository.findByOrganizationId(organizationId);
 
     //THEN
     Assertions.assertEquals(expectedResponse, actualResult);
     Mockito.verify(mongoTemplate, Mockito.times(1))
-      .find(Mockito.any(Query.class), Mockito.eq(SendStream.class));
+      .find(query, SendStream.class);
   }
 
   @Test
@@ -53,11 +56,13 @@ class SendStreamRepositoryExtImplTest {
 
     UpdateResult expectedResponse = Mockito.mock(UpdateResult.class);
 
+    Query query = Query.query(Criteria.where(SendStream.Fields.streamId).is(streamId));
+    Update update = Update.update(SendStream.Fields.lastEventId, lastEventId);
     Mockito.when(
       mongoTemplate.updateFirst(
-        Mockito.any(Query.class),
-        Mockito.any(Update.class),
-        Mockito.eq(SendStream.class)
+        query,
+        update,
+        SendStream.class
       )
     ).thenReturn(expectedResponse);
 
@@ -71,9 +76,9 @@ class SendStreamRepositoryExtImplTest {
     Assertions.assertEquals(1L, actualResult.getModifiedCount());
     Mockito.verify(mongoTemplate, Mockito.times(1))
       .updateFirst(
-        Mockito.any(Query.class),
-        Mockito.any(Update.class),
-        Mockito.eq(SendStream.class)
+        query,
+        update,
+        SendStream.class
       );
   }
 

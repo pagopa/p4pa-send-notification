@@ -23,7 +23,7 @@ public class SendStreamController implements StreamsApi {
 
   @Override
   public ResponseEntity<List<ProgressResponseElementV25DTO>> getStreamEvents(Long organizationId, String streamId, String lastEventId) {
-    log.info("retrieve stream events for organizationId {}", organizationId);
+    log.info("Retrieve stream events for organization with id {} from stream with id {}, starting after last processed event with id {}", organizationId, streamId, lastEventId);
     String accessToken = SecurityUtils.getAccessToken();
     return new ResponseEntity<>(
       sendFacadeService.getStreamEvents(streamId, lastEventId, organizationId, accessToken),
@@ -31,11 +31,11 @@ public class SendStreamController implements StreamsApi {
   }
 
   @Override
-  public ResponseEntity<SendStreamDTO> getStreamByOrganizationId(Long organizationId) {
-    log.info("Retrieve stream for organization with id {}", organizationId);
+  public ResponseEntity<SendStreamDTO> getStream(String streamId) {
+    log.info("Retrieve SEND stream with id {}", streamId);
     String accessToken = SecurityUtils.getAccessToken();
     return new ResponseEntity<>(
-      sendFacadeService.getStreamByOrganizationId(organizationId, accessToken),
+      sendFacadeService.getStream(streamId, accessToken),
       HttpStatus.OK
     );
   }

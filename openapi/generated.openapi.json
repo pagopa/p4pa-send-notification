@@ -735,16 +735,15 @@
     "/p4pasend/send/streams" : {
       "get" : {
         "tags" : [ "Streams" ],
-        "summary" : "retrieve stream by organization id",
-        "description" : "get stream by specifying relative organization id",
-        "operationId" : "getStreamByOrganizationId",
+        "summary" : "retrieve stream by stream id",
+        "description" : "get stream by specifying stream id",
+        "operationId" : "getStream",
         "parameters" : [ {
-          "name" : "organizationId",
+          "name" : "streamId",
           "in" : "query",
           "required" : true,
           "schema" : {
-            "type" : "integer",
-            "format" : "int64"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -1640,8 +1639,9 @@
           "streamId" : {
             "type" : "string"
           },
-          "organizationIpaCode" : {
-            "type" : "string"
+          "organizationId" : {
+            "type" : "integer",
+            "format" : "int64"
           },
           "title" : {
             "type" : "string"
@@ -1653,7 +1653,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "eventType", "organizationIpaCode", "streamId", "title" ]
+        "required" : [ "eventType", "streamId", "title" ]
       },
       "AttachmentDetailsDTO" : {
         "type" : "object",
