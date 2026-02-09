@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import static it.gov.pagopa.pu.send.service.SendNotificationServiceImpl.concatenatePaths;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -93,7 +94,7 @@ class FileStorerServiceTest {
   @Test
   void givenInvalidFileWhenSaveToSharedFolderThenUploadFileException() {
     Assertions.assertThrows(UploadFileException.class, () ->
-      fileStorerService.saveToSharedFolder(0L, "ID", null, ""));
+      fileStorerService.saveToSharedFolder(0L, "ID", null,""));
   }
 
   @ParameterizedTest
@@ -137,6 +138,7 @@ class FileStorerServiceTest {
 
   @Test
   void givenValidFileWhenSaveToSharedFolderThenOK() throws IOException {
+    String sendNotificationId = "ID";
     MockMultipartFile fileSpy = Mockito.spy(new MockMultipartFile(
       "legalFactFile",
       "test.txt",
@@ -144,9 +146,7 @@ class FileStorerServiceTest {
       "this is a test file".getBytes()
     ));
     long organizationId = 0L;
-    String relativeFilePath = "/shared/0/send/ID";
     String fileName = fileSpy.getOriginalFilename();
-    String expectedUrl = Path.of(relativeFilePath, fileName).toString();
 
     InputStream inpustStreamMock = Mockito.mock(InputStream.class);
     Mockito.doReturn(inpustStreamMock)
@@ -155,14 +155,31 @@ class FileStorerServiceTest {
 
     try (MockedStatic<AESUtils> aesUtilsMockedStatic = Mockito.mockStatic(AESUtils.class)) {
 
-      String result = fileStorerService.saveToSharedFolder(organizationId, "ID", fileSpy, fileName);
+      Path relativeSendPath =  fileStorerService.buildRelativeSendPath(organizationId, sendNotificationId);
+      Path absolutePath = concatenatePaths(relativeSendPath.toString(), fileName);
 
-      Assertions.assertEquals(expectedUrl, result);
+      String result = fileStorerService.saveToSharedFolder(organizationId, sendNotificationId, fileSpy, fileName);
+
+      Assertions.assertEquals(fileName, result);
       aesUtilsMockedStatic.verify(() -> AESUtils.encryptAndSave(FILE_ENCRYPT_PASSWORD,
         inpustStreamMock,
-        Path.of(SHARED_FOLDER).resolve(organizationId+"").resolve(relativeFilePath),
-        fileName));
+        absolutePath.getParent(),
+        absolutePath.getFileName().toString()));
     }
+  }
+
+  @Test
+  void givenInvalidPathWhenConcatenatePathsThenUploadFileException() {
+    MockMultipartFile fileSpy = Mockito.spy(new MockMultipartFile(
+      "legalFactFile",
+      "test.txt",
+      MediaType.TEXT_PLAIN_VALUE,
+      "this is a test file".getBytes()
+    ));
+    String fileName = fileSpy.getOriginalFilename();
+
+    Assertions.assertThrows(UploadFileException.class, () ->
+        concatenatePaths("", fileName));
   }
 
 }
