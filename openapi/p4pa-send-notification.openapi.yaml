@@ -215,7 +215,30 @@ paths:
       responses:
         '200':
           description: OK
-  /notification/{sendNotificationId}/legal-fact:
+  /notification/{sendNotificationId}/legal-facts:
+    get:
+      tags:
+        - Notification
+      summary: get legal-facts
+      description: Service retrieve legal facts
+      operationId: getLegalFacts
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactsDTO'
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal server error
     post:
       tags:
         - Notification
@@ -832,6 +855,25 @@ components:
       type: array
       items:
         type: "ProgressResponseElementV25DTO"
+    LegalFactsDTO:
+      description: legal fact list related to a SEND notification
+      type: array
+      items:
+        $ref: '#/components/schemas/LegalFactDTO'
+    LegalFactDTO:
+      type: object
+      description: legal fact related to a SEND notification
+      required:
+        - fileName
+        - category
+        - url
+      properties:
+        fileName:
+          type: string
+        category:
+          type: 'LegalFactCategoryDTO'
+        url:
+          type: string
     LegalFactListDTO:
       description: legal fact list related to a SEND notification
       type: array
