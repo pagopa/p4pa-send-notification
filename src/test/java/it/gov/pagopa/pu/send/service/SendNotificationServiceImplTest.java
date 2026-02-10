@@ -433,10 +433,14 @@ class SendNotificationServiceImplTest {
   void givenExistingCategoryFileWhenUploadSendLegalFactThenThrowFileAlreadyExistsException() {
     // Given
     String id = "123";
+    String fileName = "file.pdf";
     LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
-    MultipartFile mockFile = new MockMultipartFile("file", "content".getBytes());
+    MultipartFile mockFile = new MockMultipartFile(fileName, "content".getBytes());
 
-    LegalFactDTO existingFact = LegalFactDTO.builder().category(category).build();
+    LegalFactDTO existingFact = LegalFactDTO.builder()
+      .category(category)
+      .fileName(fileName)
+      .build();
     SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setLegalFacts(List.of(existingFact));
 
@@ -444,7 +448,7 @@ class SendNotificationServiceImplTest {
 
     // When & Then
     FileAlreadyExistsException exception = Assertions.assertThrows(FileAlreadyExistsException.class, () ->
-      sendNotificationService.uploadSendLegalFact(id, category, "newFile.pdf", mockFile)
+      sendNotificationService.uploadSendLegalFact(id, category, fileName, mockFile)
     );
 
     Assertions.assertTrue(exception.getMessage().contains("[LEGAL_FACT_ALREADY_EXISTS]"));

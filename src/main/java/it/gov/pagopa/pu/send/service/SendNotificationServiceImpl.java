@@ -141,8 +141,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   @Override
   public void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, MultipartFile legalFactFile) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
-    if (notification.getLegalFacts()!=null && notification.getLegalFacts().stream().anyMatch(fact -> fact.getCategory().equals(category)))
-      throw new FileAlreadyExistsException("[LEGAL_FACT_ALREADY_EXISTS] Legal-fact having "+category.name()+" category already exists");
+    if (notification.getLegalFacts()!=null && notification.getLegalFacts().stream().anyMatch(fact -> fact.getFileName().equals(fileName)))
+      throw new FileAlreadyExistsException("[LEGAL_FACT_ALREADY_EXISTS] Legal-fact having "+fileName+" fileName already exists");
 
     String url = fileStorerService.saveToSharedFolder(notification.getOrganizationId(), sendNotificationId, legalFactFile, fileName);
 
