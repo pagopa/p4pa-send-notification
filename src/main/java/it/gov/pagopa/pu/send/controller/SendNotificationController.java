@@ -68,7 +68,8 @@ public class SendNotificationController implements NotificationApi {
 
   @Override
   public ResponseEntity<List<LegalFactDTO>> getLegalFacts(String sendNotificationId) {
-    return NotificationApi.super.getLegalFacts(sendNotificationId);
+    log.info("Retrieving legal-facts having sendNotificationId {}" , sendNotificationId);
+    return ResponseEntity.ok(sendNotificationService.getLegalFacts(sendNotificationId));
   }
 
   @Override
