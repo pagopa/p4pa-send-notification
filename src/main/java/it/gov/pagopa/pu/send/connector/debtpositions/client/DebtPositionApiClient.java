@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.client;
 
-import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
+import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.send.connector.debtpositions.config.DebtPositionApisHolder;
 import it.gov.pagopa.pu.send.util.Constants;
 import lombok.extern.slf4j.Slf4j;
@@ -12,19 +12,17 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-public class DebtPositionSearchApiClient {
+public class DebtPositionApiClient {
 
   private final DebtPositionApisHolder debtPositionApisHolder;
 
-  public DebtPositionSearchApiClient(DebtPositionApisHolder debtPositionApisHolder) {
+  public DebtPositionApiClient(DebtPositionApisHolder debtPositionApisHolder) {
     this.debtPositionApisHolder = debtPositionApisHolder;
   }
 
-  public DebtPosition findDebtPositionByInstallment(Long organizationId, String nav, String accessToken) {
-      List<DebtPosition> debtPositions = Objects.requireNonNull(debtPositionApisHolder.getDebtPositionSearchApi(accessToken)
-          .crudDebtPositionsFindByOrganizationIdAndInstallmentNav(organizationId, nav, Constants.ORDINARY_DEBT_POSITION_ORIGINS)
-          .getEmbedded())
-        .getDebtPositions();
+  public DebtPositionDTO findDebtPositionByInstallment(Long organizationId, String nav, String accessToken) {
+      List<DebtPositionDTO> debtPositions = Objects.requireNonNull(debtPositionApisHolder.getDebtPositionApi(accessToken)
+        .getDebtPositionsByOrganizationIdAndNav(organizationId, nav, Constants.ORDINARY_DEBT_POSITION_ORIGINS));
      if(CollectionUtils.isEmpty(debtPositions)){
        return null;
      } else {
