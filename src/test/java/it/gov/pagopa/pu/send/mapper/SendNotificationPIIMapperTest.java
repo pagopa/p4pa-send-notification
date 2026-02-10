@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.*;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;

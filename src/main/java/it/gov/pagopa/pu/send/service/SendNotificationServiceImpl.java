@@ -4,7 +4,6 @@ import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
@@ -152,6 +151,11 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .url(url)
       .category(category)
       .build());
+  }
+
+  @Override
+  public List<LegalFactDTO> getLegalFacts(String sendNotificationId) {
+    return findSendNotification(sendNotificationId).getLegalFacts();
   }
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {

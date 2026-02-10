@@ -67,6 +67,11 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
+  public ResponseEntity<List<LegalFactDTO>> getLegalFacts(String sendNotificationId) {
+    return NotificationApi.super.getLegalFacts(sendNotificationId);
+  }
+
+  @Override
   public ResponseEntity<StartNotificationResponse> startNotification(String sendNotificationId, LoadFileRequest loadFileRequest) {
     log.info("start notification request for sendNotificationId {}", sendNotificationId);
     String accessToken = SecurityUtils.getAccessToken();

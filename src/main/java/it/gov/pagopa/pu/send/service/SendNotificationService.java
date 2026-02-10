@@ -6,6 +6,8 @@ import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 public interface SendNotificationService {
 
   CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, String accessToken);
@@ -16,4 +18,5 @@ public interface SendNotificationService {
   SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav);
   UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus);
   void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, MultipartFile legalFactFile);
+  List<LegalFactDTO> getLegalFacts(String sendNotificationId);
 }
