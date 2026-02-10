@@ -341,10 +341,10 @@
         } ]
       }
     },
-    "/p4pasend/notification/{sendNotificationId}/legal-fact" : {
+    "/p4pasend/notification/{sendNotificationId}/legal-facts" : {
       "get" : {
         "tags" : [ "Notification" ],
-        "summary" : "get legal-fact",
+        "summary" : "get legal-facts",
         "description" : "Service retrieve legal facts",
         "operationId" : "getLegalFacts",
         "parameters" : [ {
