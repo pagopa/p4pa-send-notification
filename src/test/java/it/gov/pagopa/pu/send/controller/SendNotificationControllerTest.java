@@ -322,4 +322,24 @@ class SendNotificationControllerTest {
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
+  @Test
+  void givenSendNotificationIdWhenGetLegalFactsThenOk(){
+    // Given
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    LegalFactDTO legalFactDTO = LegalFactDTO.builder()
+      .fileName("NAME")
+      .category(LegalFactCategoryDTO.SENDER_ACK)
+      .url("URL")
+      .build();
+
+    Mockito.when(sendNotificationServiceMock.getLegalFacts(sendNotificationId)).thenReturn(List.of(legalFactDTO));
+
+    // When
+    ResponseEntity<List<LegalFactDTO>> response = sendNotificationController.getLegalFacts(sendNotificationId);
+
+    // Then
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertEquals(List.of(legalFactDTO), response.getBody());
+  }
+
 }

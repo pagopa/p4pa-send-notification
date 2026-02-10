@@ -453,5 +453,26 @@ class SendNotificationServiceImplTest {
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never()).addLegalFact(any(), any());
   }
 
+  @Test
+  void givenSendNotificationIdWhenGetLegalFactsThenOk() {
+    // Given
+    String notificationId = "123";
 
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setSendNotificationId(notificationId);
+    notification.setOrganizationId(1L);
+    notification.setLegalFacts(List.of(LegalFactDTO.builder()
+      .fileName("FILENAME")
+      .url("URL")
+      .category(LegalFactCategoryDTO.SENDER_ACK)
+      .build()));
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+
+    List<LegalFactDTO> response = sendNotificationService.getLegalFacts(notificationId);
+
+    // When
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(notification.getLegalFacts(), response);
+  }
 }
