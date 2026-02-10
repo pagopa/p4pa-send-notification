@@ -475,4 +475,19 @@ class SendNotificationServiceImplTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(notification.getLegalFacts(), response);
   }
+
+  @Test
+  void givenNullLegalFactWhenGetLegalFactsThenDoNotThrow() {
+    // Given
+    String notificationId = "123";
+
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setSendNotificationId(notificationId);
+    notification.setOrganizationId(1L);
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+
+    // When
+    Assertions.assertDoesNotThrow(() -> sendNotificationService.getLegalFacts(notificationId));
+  }
 }
