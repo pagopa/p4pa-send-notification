@@ -16,4 +16,9 @@ public class WorkflowServiceImpl implements WorkflowService {
   public WorkflowCreatedDTO sendNotificationProcess(String sendNotificationId, String accessToken) {
     return workflowApiClient.sendNotificationProcess(sendNotificationId, accessToken);
   }
+
+  @Override
+  public WorkflowCreatedDTO sendNotificationStreamConsume(String sendStreamId, String accessToken) {
+    return workflowApiClient.sendNotificationStreamConsume(sendStreamId, accessToken);
+  }
 }

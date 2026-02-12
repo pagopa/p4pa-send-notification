@@ -17,4 +17,9 @@ public class WorkflowApiClient {
     return workflowApisHolder.getSendNotificationApi(accessToken)
       .sendNotificationProcess(sendNotificationId);
   }
+
+  public WorkflowCreatedDTO sendNotificationStreamConsume(String sendStreamId, String accessToken) {
+    return workflowApisHolder.getSendNotificationApi(accessToken)
+      .consumeSendStream(sendStreamId);
+  }
 }

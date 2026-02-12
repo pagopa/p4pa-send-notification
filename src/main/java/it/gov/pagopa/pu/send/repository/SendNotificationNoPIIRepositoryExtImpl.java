@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -140,5 +141,13 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     );
 
     return Optional.ofNullable(mongoTemplate.findOne(query, SendNotificationNoPII.class));
+  }
+
+  @Override
+  public UpdateResult addLegalFact(String sendNotificationId, LegalFactDTO legalFact) {
+    Query query = Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
+    Update update = new Update().push(Fields.legalFacts, legalFact);
+
+    return mongoTemplate.updateFirst(query, update, SendNotificationNoPII.class);
   }
 }

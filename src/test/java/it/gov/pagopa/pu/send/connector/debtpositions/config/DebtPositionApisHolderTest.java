@@ -41,8 +41,8 @@ class DebtPositionApisHolderTest extends BaseApiHolderTest {
   @Test
   void whenGetOrganizationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
-      token -> apisHolder.getDebtPositionSearchApi(token)
-        .crudDebtPositionsFindByOrganizationIdAndInstallmentNav(1L, "NAV", List.of()),
+      token -> apisHolder.getDebtPositionApi(token)
+        .getDebtPositionsByOrganizationIdAndNav(1L, "NAV", List.of()),
       new ParameterizedTypeReference<>() {},
       apisHolder::unload);
   }

@@ -1,9 +1,7 @@
 package it.gov.pagopa.pu.send.model;
 
-import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.PuPayment;
-import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
+import it.gov.pagopa.pu.send.dto.*;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -16,7 +14,6 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -45,6 +42,7 @@ public class SendNotificationNoPII implements Serializable, NoPIIEntity<SendNoti
   private int paFee;
   private int vat;
   private String pagoPaIntMode;
+  private List<LegalFactDTO> legalFacts;
   @NotNull
   private Long personalDataId;
 }

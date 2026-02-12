@@ -50,4 +50,21 @@ class WorkflowServiceTest {
     Assertions.assertSame(expectedResult, result);
   }
 
+  @Test
+  void whenSendNotificationStreamConsumeThenOk() {
+    // Given
+    String accessToken = "ACCESSTOKEN";
+    String sendStreamId = "sendStreamId";
+    WorkflowCreatedDTO expectedResult = new WorkflowCreatedDTO();
+
+    Mockito.when(workflowApiClientMock.sendNotificationStreamConsume(Mockito.same(sendStreamId), Mockito.same(accessToken)))
+      .thenReturn(expectedResult);
+
+    // When
+    WorkflowCreatedDTO result = workflowService.sendNotificationStreamConsume(sendStreamId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
 }

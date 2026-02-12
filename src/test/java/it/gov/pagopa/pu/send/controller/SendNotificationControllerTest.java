@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.controller;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
@@ -18,7 +19,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -280,6 +283,28 @@ class SendNotificationControllerTest {
   }
 
   @Test
+  void givenValidRequestWhenUploadLegalFactThenOk(){
+    //Given
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String fileName = "test.txt";
+    MockMultipartFile file
+      = new MockMultipartFile(
+      "factFile",
+      "test.txt",
+      MediaType.TEXT_PLAIN_VALUE,
+      "file di test".getBytes()
+    );
+
+    // When
+    Mockito.doNothing().when(sendNotificationServiceMock).uploadSendLegalFact(sendNotificationId, LegalFactCategoryDTO.SENDER_ACK, fileName, file);
+
+    //Then
+    ResponseEntity<Void> response = sendNotificationController.uploadSendLegalFact(sendNotificationId, LegalFactCategoryDTO.SENDER_ACK, fileName, file);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  @Test
   void whenUpdateNotificationStatusThenReturnOk() {
     // Given
     Long sendNotificationId = 123L;
@@ -295,6 +320,26 @@ class SendNotificationControllerTest {
     // Then
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  @Test
+  void givenSendNotificationIdWhenGetLegalFactsThenOk(){
+    // Given
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    LegalFactDTO legalFactDTO = LegalFactDTO.builder()
+      .fileName("NAME")
+      .category(LegalFactCategoryDTO.SENDER_ACK)
+      .url("URL")
+      .build();
+
+    Mockito.when(sendNotificationServiceMock.getLegalFacts(sendNotificationId)).thenReturn(List.of(legalFactDTO));
+
+    // When
+    ResponseEntity<List<LegalFactDTO>> response = sendNotificationController.getLegalFacts(sendNotificationId);
+
+    // Then
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertEquals(List.of(legalFactDTO), response.getBody());
   }
 
 }

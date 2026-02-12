@@ -341,6 +341,127 @@
         } ]
       }
     },
+    "/p4pasend/notification/{sendNotificationId}/legal-facts" : {
+      "get" : {
+        "tags" : [ "Notification" ],
+        "summary" : "get legal-facts",
+        "description" : "Service retrieve legal facts",
+        "operationId" : "getLegalFacts",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Notification not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Notification" ],
+        "summary" : "uploadSendLegalFact",
+        "description" : "Service to store a legal fact",
+        "operationId" : "uploadSendLegalFact",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "category",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/LegalFactCategoryDTO"
+          }
+        }, {
+          "name" : "fileName",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "legalFactFile" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "legalFactFile" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "404" : {
+            "description" : "Notification not found"
+          },
+          "409" : {
+            "description" : "Legal-fact document already exists"
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/send/{sendNotificationId}/status" : {
       "get" : {
         "tags" : [ "Send" ],
@@ -659,6 +780,77 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/LegalFactDownloadMetadataDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/p4pasend/send/streams" : {
+      "get" : {
+        "tags" : [ "Streams" ],
+        "summary" : "retrieve stream by stream id",
+        "description" : "get stream by specifying stream id",
+        "operationId" : "getStream",
+        "parameters" : [ {
+          "name" : "streamId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Stream not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
                 }
               }
             }
@@ -1384,6 +1576,10 @@
         },
         "required" : [ "digest", "fileName" ]
       },
+      "LegalFactCategoryDTO" : {
+        "type" : "string",
+        "enum" : [ "SENDER_ACK", "DIGITAL_DELIVERY", "ANALOG_DELIVERY", "RECIPIENT_ACCESS", "PEC_RECEIPT", "ANALOG_FAILURE_DELIVERY" ]
+      },
       "NotificationStatus" : {
         "type" : "string",
         "enum" : [ "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED", "COMPLETE", "ACCEPTED", "ERROR" ]
@@ -1493,6 +1689,29 @@
           }
         },
         "required" : [ "contentLength", "filename" ]
+      },
+      "SendStreamDTO" : {
+        "type" : "object",
+        "description" : "stream related to a SEND notification",
+        "properties" : {
+          "streamId" : {
+            "type" : "string"
+          },
+          "organizationId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "eventType" : {
+            "type" : "string"
+          },
+          "lastEventId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "eventType", "streamId", "title" ]
       },
       "AttachmentDetailsDTO" : {
         "type" : "object",
@@ -2057,6 +2276,22 @@
             "format" : "int32"
           }
         }
+      },
+      "LegalFactDTO" : {
+        "type" : "object",
+        "description" : "legal fact related to a SEND notification",
+        "properties" : {
+          "fileName" : {
+            "type" : "string"
+          },
+          "category" : {
+            "$ref" : "#/components/schemas/LegalFactCategoryDTO"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "category", "fileName", "url" ]
       }
     },
     "securitySchemes" : {

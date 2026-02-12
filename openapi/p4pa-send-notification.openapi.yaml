@@ -215,6 +215,70 @@ paths:
       responses:
         '200':
           description: OK
+  /notification/{sendNotificationId}/legal-facts:
+    get:
+      tags:
+        - Notification
+      summary: get legal-facts
+      description: Service retrieve legal facts
+      operationId: getLegalFacts
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactsDTO'
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - Notification
+      summary: uploadSendLegalFact
+      description: Service to store a legal fact
+      operationId: uploadSendLegalFact
+      parameters:
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: true
+          schema:
+            type: 'LegalFactCategoryDTO'
+      requestBody:
+        content:
+          'multipart/form-data':
+            schema:
+              required:
+                - fileName
+                - legalFactFile
+              type: object
+              properties:
+                fileName:
+                  type: string
+                legalFactFile:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Notification not found
+        '409':
+          description: Legal-fact document already exists
+        '500':
+          description: Internal server error
   /send/{sendNotificationId}/retrieveNotificationDate:
     get:
       tags:
@@ -430,6 +494,34 @@ paths:
           description: Forbidden
         '404':
           description: Streams not found
+        '500':
+          description: Internal server error
+  /send/streams:
+    get:
+      tags:
+        - Streams
+      summary: retrieve stream by stream id
+      description: get stream by specifying stream id
+      operationId: getStream
+      parameters:
+        - name: streamId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendStreamDTO'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Stream not found
         '500':
           description: Internal server error
   /send/{sendNotificationId}/legal-facts:
@@ -710,10 +802,10 @@ components:
     SendNotificationErrorDTO:
       type: object
       required:
-        - code
+        - category
         - message
       properties:
-        code:
+        category:
           type: string
           enum:
             - SEND_NOTIFICATION_NOT_FOUND
@@ -739,10 +831,49 @@ components:
           pattern: >-
             ^(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$
           maxLength: 320
+    SendStreamDTO:
+      type: object
+      description: stream related to a SEND notification
+      required:
+        - streamId
+        - organizationIpaCode
+        - title
+        - eventType
+      properties:
+        streamId:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        eventType:
+          type: string
+        lastEventId:
+          type: string
     StreamEventsResponse:
       type: array
       items:
         type: "ProgressResponseElementV25DTO"
+    LegalFactsDTO:
+      description: legal fact list related to a SEND notification
+      type: array
+      items:
+        $ref: '#/components/schemas/LegalFactDTO'
+    LegalFactDTO:
+      type: object
+      description: legal fact related to a SEND notification
+      required:
+        - fileName
+        - category
+        - url
+      properties:
+        fileName:
+          type: string
+        category:
+          type: 'LegalFactCategoryDTO'
+        url:
+          type: string
     LegalFactListDTO:
       description: legal fact list related to a SEND notification
       type: array

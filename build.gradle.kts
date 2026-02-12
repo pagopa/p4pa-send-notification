@@ -176,6 +176,7 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
       "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus",
       "NotificationPriceResponseV23DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO",
       "ProgressResponseElementV25DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO",
+      "LegalFactCategoryDTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO"
     )
   )
   configOptions.set(

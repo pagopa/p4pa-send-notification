@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.service;
 
-import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
-import it.gov.pagopa.pu.send.connector.debtpositions.client.DebtPositionSearchApiClient;
+import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.send.connector.debtpositions.client.DebtPositionApiClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,18 +15,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DebtPositionServiceTest {
 
   @Mock
-  private DebtPositionSearchApiClient debtPositionSearchApiClientMock;
+  private DebtPositionApiClient debtPositionApiClientMock;
 
   private DebtPositionService service;
 
   @BeforeEach
   void init(){
-    service = new DebtPositionServiceImpl(debtPositionSearchApiClientMock);
+    service = new DebtPositionServiceImpl(debtPositionApiClientMock);
   }
 
   @AfterEach
   void verifyNoMoreInteractions(){
-    Mockito.verifyNoMoreInteractions(debtPositionSearchApiClientMock);
+    Mockito.verifyNoMoreInteractions(debtPositionApiClientMock);
   }
 
   @Test
@@ -36,13 +36,13 @@ class DebtPositionServiceTest {
     String nav = "NAV";
     String accessToken = "accessToken";
 
-    DebtPosition expectedResult = new DebtPosition();
+    DebtPositionDTO expectedResult = new DebtPositionDTO();
 
-    Mockito.when(debtPositionSearchApiClientMock.findDebtPositionByInstallment(organizationId, nav, accessToken))
+    Mockito.when(debtPositionApiClientMock.findDebtPositionByInstallment(organizationId, nav, accessToken))
       .thenReturn(expectedResult);
 
     // When
-    DebtPosition result = service.findDebtPositionByInstallment(organizationId, nav, accessToken);
+    DebtPositionDTO result = service.findDebtPositionByInstallment(organizationId, nav, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.send.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
-import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,6 +34,7 @@ public class SendNotification implements FullPIIDTO<SendNotificationNoPII, SendN
   private int paFee;
   private int vat;
   private String pagoPaIntMode;
+  private List<LegalFactDTO> legalFacts;
 
   @JsonIgnore
   private SendNotificationNoPII noPII;

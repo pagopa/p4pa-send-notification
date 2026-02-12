@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO.EventTypeEnum;
+import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
@@ -16,8 +17,11 @@ import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
 import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.mapper.SendStreamMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.repository.SendStreamRepository;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,28 +39,37 @@ import java.util.Optional;
 @Slf4j
 public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
+  private final SendStreamRepository sendStreamRepository;
   private final SendService sendService;
   private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
   private final SendLegalFactMapper sendLegalFactMapper;
+  private final SendStreamMapper sendStreamMapper;
   private final SendStreamService sendStreamService;
+  private final WorkflowService workflowService;
 
   public SendFacadeServiceImpl(
     SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
+    SendStreamRepository sendStreamRepository,
     SendService sendService,
     SendUploadFacadeServiceImpl uploadService,
     SendNotification2NewNotificationRequestMapper sendNotificationMapper,
     SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
     SendLegalFactMapper sendLegalFactMapper,
-    SendStreamService sendStreamService) {
+    SendStreamMapper sendStreamMapper,
+    SendStreamService sendStreamService,
+    WorkflowService workflowService) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
+    this.sendStreamRepository = sendStreamRepository;
     this.sendService = sendService;
     this.uploadService = uploadService;
     this.sendNotificationMapper = sendNotificationMapper;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
     this.sendLegalFactMapper = sendLegalFactMapper;
+    this.sendStreamMapper = sendStreamMapper;
     this.sendStreamService = sendStreamService;
+    this.workflowService = workflowService;
   }
 
   @Transactional
@@ -184,7 +197,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       .map(PuPayment::getPayment)
       .filter(pagoPa -> nav.equals(pagoPa.getPagoPa().getNoticeCode()))
       .findFirst()
-      .orElseThrow(() -> new NotFoundException("Notification not found with nav: " + nav));
+      .orElseThrow(() -> new NotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with nav: " + nav));
 
     return sendService.retrieveNotificationPrice(payment.getPagoPa().getCreditorTaxId(),
       payment.getPagoPa().getNoticeCode(), notification.getOrganizationId(), accessToken);
@@ -196,12 +209,28 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if (StringUtils.isBlank(streamId)) {
       List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
       if (streams.isEmpty())
-        throw new NotFoundException("Streams not found for this organization: " + organizationId);
+        throw new NotFoundException("[STREAMS_NOT_FOUND] Streams not found for this organization: " + organizationId);
 
       streamId = String.valueOf(streams.getLast().getStreamId());
     }
-
+    sendStreamRepository.updateLastEventId(streamId, lastEventId);
     return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+  }
+
+  @Override
+  public SendStreamDTO getStream(String streamId, String accessToken) {
+    Optional<SendStream> sendStream = sendStreamRepository.findById(streamId);
+    if (sendStream.isEmpty() || !cachedStreamDoesExistOnSend(streamId, sendStream.get().getOrganizationId(), accessToken)) {
+      sendStreamRepository.deleteById(streamId);
+      throw new NotFoundException(String.format("[STREAMS_NOT_FOUND] Send stream not found for streamId: %s", streamId));
+    }
+    return sendStreamMapper.mapToSendStreamDTO(sendStream.get());
+  }
+
+  private boolean cachedStreamDoesExistOnSend(String streamId, Long organizationId, String accessToken) {
+    return sendStreamService.getStreams(organizationId, accessToken).stream()
+      .map(StreamListElementDTO::getStreamId)
+      .anyMatch(s -> s.toString().equals(streamId));
   }
 
   @Override
@@ -241,12 +270,12 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
+      .orElseThrow(() -> new SendNotificationNotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with id: " + sendNotificationId));
   }
 
   private SendNotificationNoPII findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
     return sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
-      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with nav: " + nav));
+      .orElseThrow(() -> new SendNotificationNotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with nav: " + nav));
   }
 
   private void createStream(Long organizationId, String accessToken) {
@@ -254,6 +283,16 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     request.setTitle("SEND-STREAM_" + organizationId);
     request.setEventType(EventTypeEnum.STATUS);
 
-    sendStreamService.createStream(request, organizationId, accessToken);
+    List<SendStream> sendStreamList = sendStreamRepository.findByOrganizationId(organizationId);
+    if(sendStreamList.isEmpty()) {
+      StreamMetadataResponseV25DTO streamMetadataResponseV25DTO =
+        sendStreamService.createStream(request, organizationId, accessToken);
+      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO, organizationId));
+      workflowService.sendNotificationStreamConsume(
+        streamMetadataResponseV25DTO.getStreamId().toString(),
+        accessToken
+      );
+    }
   }
+
 }

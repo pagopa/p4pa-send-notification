@@ -52,4 +52,23 @@ class WorkflowApiClientTest {
     Assertions.assertSame(expectedResult.getWorkflowId(), result.getWorkflowId());
   }
 
+  @Test
+  void whenSendNotificationStreamConsumeThenInvokeWithAccessToken() {
+    // Given
+    String accessToken = "ACCESSTOKEN";
+    String sendStreamId = "sendStreamId";
+    WorkflowCreatedDTO expectedResult = new WorkflowCreatedDTO();
+
+    Mockito.when(workflowApisHolderMock.getSendNotificationApi(accessToken))
+      .thenReturn(sendNotificationApiMock);
+    Mockito.when(sendNotificationApiMock.consumeSendStream(Mockito.same(sendStreamId)))
+      .thenReturn(expectedResult);
+
+    // When
+    WorkflowCreatedDTO result = workflowApiClient.sendNotificationStreamConsume(sendStreamId, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult.getWorkflowId(), result.getWorkflowId());
+  }
+
 }

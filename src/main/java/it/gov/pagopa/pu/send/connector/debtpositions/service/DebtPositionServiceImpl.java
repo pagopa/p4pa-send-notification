@@ -1,20 +1,20 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.service;
 
-import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
-import it.gov.pagopa.pu.send.connector.debtpositions.client.DebtPositionSearchApiClient;
+import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.send.connector.debtpositions.client.DebtPositionApiClient;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DebtPositionServiceImpl implements DebtPositionService {
 
-  private final DebtPositionSearchApiClient debtPositionSearchApiClient;
+  private final DebtPositionApiClient debtPositionApiClient;
 
-  public DebtPositionServiceImpl(DebtPositionSearchApiClient debtPositionSearchApiClient) {
-    this.debtPositionSearchApiClient = debtPositionSearchApiClient;
+  public DebtPositionServiceImpl(DebtPositionApiClient debtPositionApiClient) {
+    this.debtPositionApiClient = debtPositionApiClient;
   }
 
   @Override
-  public DebtPosition findDebtPositionByInstallment(Long organizationId, String nav, String accessToken) {
-    return debtPositionSearchApiClient.findDebtPositionByInstallment(organizationId, nav, accessToken);
+  public DebtPositionDTO findDebtPositionByInstallment(Long organizationId, String nav, String accessToken) {
+    return debtPositionApiClient.findDebtPositionByInstallment(organizationId, nav, accessToken);
   }
 }

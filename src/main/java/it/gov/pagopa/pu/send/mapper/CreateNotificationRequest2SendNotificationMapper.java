@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
+import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
 import it.gov.pagopa.pu.send.connector.organization.service.BrokerService;
@@ -95,9 +95,9 @@ public class CreateNotificationRequest2SendNotificationMapper {
   private PuPayment getPuPayment(String accessToken, Long organizationId, Payment p) {
     if (p.getPagoPa() != null) {
       String nav = p.getPagoPa().getNoticeCode();
-      DebtPosition debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
+      DebtPositionDTO debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
       if (debtPosition == null) {
-        throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
+        throw new UnknownDebtPositionException("[DEBT_POSITION_NOT_FOUND] Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
       } else {
         return new PuPayment(debtPosition.getDebtPositionId(), p, null);
       }

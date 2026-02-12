@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.debtposition.dto.generated.DebtPosition;
+import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
@@ -72,7 +72,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     String nav = request.getRecipients().getFirst()
       .getPayments().getFirst().getPagoPa().getNoticeCode();
 
-    DebtPosition debtPosition = new DebtPosition();
+    DebtPositionDTO debtPosition = new DebtPositionDTO();
     debtPosition.setDebtPositionId(3L);
 
     Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
@@ -82,7 +82,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     SendNotification result = mapper.mapToModel(request, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII");
+    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -132,7 +132,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .thenReturn(broker);
 
 
-    DebtPosition debtPosition = new DebtPosition();
+    DebtPositionDTO debtPosition = new DebtPositionDTO();
     debtPosition.setDebtPositionId(3L);
 
     if (paymentNull.equals("f24null")) {
@@ -146,7 +146,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
     // Then
     TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun",
-      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate");
+      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate", "legalFacts");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -197,7 +197,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     return request;
   }
 
-  private void checkPayments(DebtPosition debtPosition, SendNotification result) {
+  private void checkPayments(DebtPositionDTO debtPosition, SendNotification result) {
     if (debtPosition != null) {
       Assertions.assertSame(debtPosition.getDebtPositionId(), result.getPuRecipients().getFirst().getPuPayments().getFirst().getDebtPositionId());
       Assertions.assertEquals("CREDITORTAXID", result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getCreditorTaxId());
