@@ -60,6 +60,7 @@ val httpClientVersion = "5.5.1"
 val postgresJdbcVersion = "42.7.8"
 val caffeineVersion = "3.2.3"
 val commonsLang3Version = "3.20.0"
+val podamVersion = "8.0.2.RELEASE"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -94,6 +95,7 @@ dependencies {
   testImplementation("org.mockito:mockito-core")
   testImplementation("org.projectlombok:lombok")
   testImplementation("com.h2database:h2")
+  testImplementation ("uk.co.jemos.podam:podam:${podamVersion}")
 }
 
 tasks.withType<Test> {

@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-public class PuRecipientNoPIIDTO implements Serializable, PIIDTO {
+public class PuRecipientNoPIIDTO implements Serializable {
   private byte[] fiscalCodeHash;
   private List<PuPayment> puPayments;
 }
