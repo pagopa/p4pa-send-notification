@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.common.pii.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
+import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;

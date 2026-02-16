@@ -4,7 +4,7 @@ import it.gov.pagopa.pu.common.pii.citizen.enums.PersonalDataType;
 import it.gov.pagopa.pu.common.pii.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.common.pii.repository.BasePIIRepository;
 import it.gov.pagopa.pu.send.dto.SendNotification;
-import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
+import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.mapper.SendNotificationPIIMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import org.springframework.stereotype.Service;

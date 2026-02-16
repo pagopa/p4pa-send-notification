@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.send.dto;
 
-import it.gov.pagopa.pu.common.pii.dto.PIIDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-public class PuRecipientNoPIIDTO implements Serializable, PIIDTO {
+public class PuRecipientNoPIIDTO implements Serializable {
   private byte[] fiscalCodeHash;
   private List<PuPayment> puPayments;
 }

@@ -1,7 +1,5 @@
 package it.gov.pagopa.pu.common.pii.mapper;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import it.gov.pagopa.pu.common.pii.dto.TestFullEntityPIIDTO;
 import it.gov.pagopa.pu.common.pii.dto.TestPIIDTO;
 import it.gov.pagopa.pu.send.model.TestNoPIIEntity;
@@ -10,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.util.Pair;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class BaseEntityPIIMapperTest {
@@ -92,6 +92,10 @@ class BaseEntityPIIMapperTest {
 
   // Test mapper implementation
   private static class TestPIIMapper extends BaseEntityPIIMapper<TestFullEntityPIIDTO, TestNoPIIEntity, TestPIIDTO> {
+    protected TestPIIMapper() {
+      super(TestPIIDTO.class, null);
+    }
+
     @Override
     protected TestNoPIIEntity extractNoPiiEntity(TestFullEntityPIIDTO fullDTO) {
       return new TestNoPIIEntity(fullDTO.getId());
@@ -104,6 +108,11 @@ class BaseEntityPIIMapperTest {
 
     @Override
     public TestFullEntityPIIDTO map(TestNoPIIEntity noPii) {
+      return null;
+    }
+
+    @Override
+    protected TestFullEntityPIIDTO map(TestNoPIIEntity noPii, TestPIIDTO pii) {
       return null;
     }
   }

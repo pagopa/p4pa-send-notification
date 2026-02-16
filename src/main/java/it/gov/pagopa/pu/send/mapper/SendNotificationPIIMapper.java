@@ -5,20 +5,19 @@ import it.gov.pagopa.pu.common.pii.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.common.pii.mapper.BaseEntityPIIMapper;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
-import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
+import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
-import java.util.List;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
 
-  private final PersonalDataService personalDataService;
   private final DataCipherService dataCipherService;
 
-  public SendNotificationPIIMapper(PersonalDataService personalDataService,
-    DataCipherService dataCipherService) {
-    this.personalDataService = personalDataService;
+  public SendNotificationPIIMapper(PersonalDataService personalDataService, DataCipherService dataCipherService) {
+    super(SendNotificationPIIDTO.class, personalDataService);
     this.dataCipherService = dataCipherService;
   }
 
@@ -53,15 +52,19 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
 
   @Override
   protected SendNotificationPIIDTO extractPiiDto(SendNotification fullDTO) {
-    SendNotificationPIIDTO piidto = new SendNotificationPIIDTO();
-    piidto.setPuRecipients(fullDTO.getPuRecipients());
-    return piidto;
+    SendNotificationPIIDTO piiDto = new SendNotificationPIIDTO();
+    piiDto.setPuRecipients(fullDTO.getPuRecipients());
+    return piiDto;
   }
 
   @Override
   public SendNotification map(SendNotificationNoPII noPii) {
     SendNotificationPIIDTO pii = personalDataService.get(noPii.getPersonalDataId(), SendNotificationPIIDTO.class);
+    return map(noPii, pii);
+  }
 
+  @Override
+  protected SendNotification map(SendNotificationNoPII noPii, SendNotificationPIIDTO pii) {
     SendNotification sendNotification = new SendNotification();
     sendNotification.setSendNotificationId(noPii.getSendNotificationId());
     sendNotification.setOrganizationId(noPii.getOrganizationId());
