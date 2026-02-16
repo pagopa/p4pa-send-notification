@@ -6,8 +6,8 @@ import static it.gov.pagopa.pu.send.util.faker.PuRecipientFaker.buildPuRecipient
 import static it.gov.pagopa.pu.send.util.faker.SendNotificationFaker.buildSendNotification;
 import static org.junit.jupiter.api.Assertions.*;
 
-import it.gov.pagopa.pu.send.citizen.service.DataCipherService;
-import it.gov.pagopa.pu.send.citizen.service.PersonalDataService;
+import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
+import it.gov.pagopa.pu.common.pii.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;

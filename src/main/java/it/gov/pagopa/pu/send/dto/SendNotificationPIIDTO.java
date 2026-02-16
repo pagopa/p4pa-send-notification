@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.dto;
 
 import java.util.List;
 
+import it.gov.pagopa.pu.common.pii.dto.PIIDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

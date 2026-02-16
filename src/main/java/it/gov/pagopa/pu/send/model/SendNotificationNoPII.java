@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.model;
 
+import it.gov.pagopa.pu.common.pii.model.NoPIIEntity;
 import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;

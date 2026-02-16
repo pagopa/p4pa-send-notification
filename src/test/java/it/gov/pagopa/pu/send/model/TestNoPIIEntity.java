@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.model;
 
-import it.gov.pagopa.pu.send.dto.TestPIIDTO;
+import it.gov.pagopa.pu.common.pii.model.NoPIIEntity;
+import it.gov.pagopa.pu.common.pii.dto.TestPIIDTO;
 import lombok.Getter;
 import lombok.Setter;
 
