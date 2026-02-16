@@ -1,23 +1,17 @@
-package it.gov.pagopa.pu.send.mapper;
-
-import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocumentDTO;
-import static it.gov.pagopa.pu.send.util.faker.PuPaymentFaker.buildPuPayment;
-import static it.gov.pagopa.pu.send.util.faker.PuRecipientFaker.buildPuRecipient;
-import static it.gov.pagopa.pu.send.util.faker.SendNotificationFaker.buildSendNotification;
-import static org.junit.jupiter.api.Assertions.*;
+package it.gov.pagopa.pu.send.mapper.pii;
 
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
-import it.gov.pagopa.pu.common.pii.citizen.service.PersonalDataService;
+import it.gov.pagopa.pu.common.pii.mapper.BasePIIMapperTest;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
-import it.gov.pagopa.pu.send.dto.*;
+import it.gov.pagopa.pu.send.dto.PuRecipient;
+import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
+import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
-
-import java.util.List;
-
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,18 +20,35 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
+import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocumentDTO;
+import static it.gov.pagopa.pu.send.util.faker.PuPaymentFaker.buildPuPayment;
+import static it.gov.pagopa.pu.send.util.faker.PuRecipientFaker.buildPuRecipient;
+import static it.gov.pagopa.pu.send.util.faker.SendNotificationFaker.buildSendNotification;
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
-class SendNotificationPIIMapperTest {
+class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
 
   @Mock
-  private PersonalDataService personalDataService;
-  @Mock
-  private DataCipherService dataCipherService;
-  private SendNotificationPIIMapper sendNotificationPIIMapper;
+  private DataCipherService dataCipherServiceMock;
+
+  private SendNotificationPIIMapper mapper;
 
   @BeforeEach
   void setUp() {
-    sendNotificationPIIMapper = new SendNotificationPIIMapper(personalDataService, dataCipherService);
+    mapper = new SendNotificationPIIMapper(personalDataServiceMock, dataCipherServiceMock);
+  }
+
+  @AfterEach
+  void verifyNoMoreInteractions(){
+    Mockito.verifyNoMoreInteractions(dataCipherServiceMock);
+  }
+
+  @Override
+  public SendNotificationPIIMapper getMapper() {
+    return mapper;
   }
 
   @Test
@@ -50,10 +61,10 @@ class SendNotificationPIIMapperTest {
     List<PuRecipient> puRecipients = List.of(buildPuRecipient());
     piiDto.setPuRecipients(puRecipients);
 
-    Mockito.when(personalDataService.get(personalDataId, SendNotificationPIIDTO.class)).thenReturn(piiDto);
+    Mockito.when(personalDataServiceMock.get(personalDataId, SendNotificationPIIDTO.class)).thenReturn(piiDto);
 
     // When
-    SendNotification result = sendNotificationPIIMapper.map(noPii);
+    SendNotification result = mapper.map(noPii);
 
     // Then
     TestUtils.checkNotNullFields(result);
@@ -85,10 +96,10 @@ class SendNotificationPIIMapperTest {
     sendNotification.setPagoPaIntMode("SYNC");
     byte[] expectedHash = "BNRMHL75C06G702B".getBytes();
 
-    Mockito.when(dataCipherService.hash(Mockito.anyString()))
+    Mockito.when(dataCipherServiceMock.hash(Mockito.anyString()))
       .thenReturn(expectedHash);
 
-    SendNotificationNoPII result = sendNotificationPIIMapper.extractNoPiiEntity(sendNotification);
+    SendNotificationNoPII result = mapper.extractNoPiiEntity(sendNotification);
 
     TestUtils.checkNotNullFields(result, "personalDataId");
     assertNotNull(result);
@@ -102,7 +113,7 @@ class SendNotificationPIIMapperTest {
   void givenFullDTOWhenExtractPiiEntityThenVerify() {
     SendNotification sendNotification = getFullDTO();
 
-    SendNotificationPIIDTO result = sendNotificationPIIMapper.extractPiiDto(sendNotification);
+    SendNotificationPIIDTO result = mapper.extractPiiDto(sendNotification);
 
     TestUtils.checkNotNullFields(result);
     assertNotNull(result);

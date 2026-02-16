@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.send.mapper;
+package it.gov.pagopa.pu.send.mapper.pii;
 
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.common.pii.citizen.service.PersonalDataService;
