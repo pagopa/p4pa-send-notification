@@ -8,7 +8,7 @@ import it.gov.pagopa.pu.common.pii.citizen.enums.PersonalDataType;
 import it.gov.pagopa.pu.common.pii.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.common.pii.dto.TestFullEntityPIIDTO;
 import it.gov.pagopa.pu.common.pii.dto.TestPIIDTO;
-import it.gov.pagopa.pu.common.pii.mapper.BasePIIMapper;
+import it.gov.pagopa.pu.common.pii.mapper.BaseEntityPIIMapper;
 import it.gov.pagopa.pu.send.model.TestNoPIIEntity;
 import java.util.Optional;
 
@@ -25,7 +25,7 @@ import org.springframework.data.util.Pair;
 class BasePIIRepositoryTest {
 
   @Mock
-  private BasePIIMapper<TestFullEntityPIIDTO, TestNoPIIEntity, TestPIIDTO> mockPiiMapper;
+  private BaseEntityPIIMapper<TestFullEntityPIIDTO, TestNoPIIEntity, TestPIIDTO> mockPiiMapper;
 
   @Mock
   private PersonalDataService mockPersonalDataService;

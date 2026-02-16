@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.util.Pair;
 
 @ExtendWith(MockitoExtension.class)
-class BasePIIMapperTest {
+class BaseEntityPIIMapperTest {
   private TestPIIMapper mapper;
   private TestFullEntityPIIDTO fullDTO;
 
@@ -91,7 +91,7 @@ class BasePIIMapperTest {
   }
 
   // Test mapper implementation
-  private static class TestPIIMapper extends BasePIIMapper<TestFullEntityPIIDTO, TestNoPIIEntity, TestPIIDTO> {
+  private static class TestPIIMapper extends BaseEntityPIIMapper<TestFullEntityPIIDTO, TestNoPIIEntity, TestPIIDTO> {
     @Override
     protected TestNoPIIEntity extractNoPiiEntity(TestFullEntityPIIDTO fullDTO) {
       return new TestNoPIIEntity(fullDTO.getId());

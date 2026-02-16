@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.common.pii.citizen.service.PersonalDataService;
-import it.gov.pagopa.pu.common.pii.mapper.BasePIIMapper;
+import it.gov.pagopa.pu.common.pii.mapper.BaseEntityPIIMapper;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.SendNotificationPIIDTO;
@@ -11,7 +11,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SendNotificationPIIMapper extends BasePIIMapper<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
+public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
 
   private final PersonalDataService personalDataService;
   private final DataCipherService dataCipherService;

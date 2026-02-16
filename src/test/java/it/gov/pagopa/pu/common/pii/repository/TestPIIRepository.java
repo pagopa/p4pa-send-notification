@@ -4,14 +4,14 @@ import it.gov.pagopa.pu.common.pii.citizen.enums.PersonalDataType;
 import it.gov.pagopa.pu.common.pii.citizen.service.PersonalDataService;
 import it.gov.pagopa.pu.common.pii.dto.TestFullEntityPIIDTO;
 import it.gov.pagopa.pu.common.pii.dto.TestPIIDTO;
-import it.gov.pagopa.pu.common.pii.mapper.BasePIIMapper;
+import it.gov.pagopa.pu.common.pii.mapper.BaseEntityPIIMapper;
 import it.gov.pagopa.pu.send.model.TestNoPIIEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public class TestPIIRepository extends BasePIIRepository<TestFullEntityPIIDTO, TestNoPIIEntity, TestPIIDTO, Long> {
 
   public TestPIIRepository(
-    BasePIIMapper<TestFullEntityPIIDTO, TestNoPIIEntity, TestPIIDTO> piiMapper,
+    BaseEntityPIIMapper<TestFullEntityPIIDTO, TestNoPIIEntity, TestPIIDTO> piiMapper,
     PersonalDataService personalDataService,
     MongoRepository<TestNoPIIEntity, Long> noPIIRepository) {
     super(piiMapper, personalDataService, noPIIRepository);
