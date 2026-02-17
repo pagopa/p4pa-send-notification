@@ -25,7 +25,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.nio.file.Path;
 
 class HttpUtilsTest {
 
