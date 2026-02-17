@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -161,6 +163,21 @@ class SendControllerTest {
     Assertions.assertNotNull(actualResponse);
     Assertions.assertEquals(mockedResponse, actualResponse.getBody());
     Assertions.assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
+  }
+
+  @Test
+  void givenValidRequestWhenUploadLegalFactThenOk() throws IOException {
+    //Given
+    String notificationRequestId = "notificationRequestId";
+    String fileName = "test.txt";
+
+    // When
+    Mockito.doNothing().when(sendFacadeServiceMock).downloadAndCacheSendLegalFact(notificationRequestId, LegalFactCategoryDTO.SENDER_ACK, fileName, accessToken);
+
+    //Then
+    ResponseEntity<Void> response = sendController.downloadAndCacheSendLegalFact(notificationRequestId, LegalFactCategoryDTO.SENDER_ACK, fileName);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
 }

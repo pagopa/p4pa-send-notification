@@ -111,7 +111,6 @@ jwt:
 folders:
   shared: "\${SHARED_FOLDER_ROOT:/shared}"
   send-file-folder: "data/send"
-  tmp: "\${TMP_FOLDER:\${java.io.tmpdir}}"
 
 fileshare-public-base-url: "\${FILESHARE_PUBLIC_BASE_URL:}"
 

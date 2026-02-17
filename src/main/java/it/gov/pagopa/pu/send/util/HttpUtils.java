@@ -15,10 +15,7 @@ import org.apache.hc.core5.util.Timeout;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Path;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
