@@ -31,5 +31,5 @@ public interface SendFacadeService {
   SendStreamDTO getStream(String streamId, String accessToken);
   List<LegalFactListElementDTO> retrieveLegalFacts(String sendNotificationId, String accessToken);
   LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId, String legalFactId, String accessToken);
-  void downloadAndCacheSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String legalFactId, String accessToken) throws IOException;
+  void downloadAndArchiveSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String legalFactId, String accessToken) throws IOException;
 }

@@ -87,10 +87,10 @@ public class SendController implements SendApi {
   }
 
   @Override
-  public ResponseEntity<Void> downloadAndCacheSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String fileName) {
+  public ResponseEntity<Void> downloadAndArchiveSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String fileName) {
     log.info("Upload legal-fact having category {} for notificationRequestId {}", category, notificationRequestId);
     try {
-      sendFacadeService.downloadAndCacheSendLegalFact(notificationRequestId, category, fileName, SecurityUtils.getAccessToken());
+      sendFacadeService.downloadAndArchiveSendLegalFact(notificationRequestId, category, fileName, SecurityUtils.getAccessToken());
     } catch (IOException e) {
       throw new HttpServerErrorException(
         HttpStatusCode.valueOf(500),

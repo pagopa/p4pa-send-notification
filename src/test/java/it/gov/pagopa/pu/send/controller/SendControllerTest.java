@@ -174,7 +174,7 @@ class SendControllerTest {
 
     Mockito.doNothing()
       .when(sendFacadeServiceMock)
-      .downloadAndCacheSendLegalFact(
+      .downloadAndArchiveSendLegalFact(
         notificationRequestId,
         LegalFactCategoryDTO.SENDER_ACK,
         fileName,
@@ -182,7 +182,7 @@ class SendControllerTest {
       );
 
     // When
-    ResponseEntity<Void> response = sendController.downloadAndCacheSendLegalFact(notificationRequestId, LegalFactCategoryDTO.SENDER_ACK, fileName);
+    ResponseEntity<Void> response = sendController.downloadAndArchiveSendLegalFact(notificationRequestId, LegalFactCategoryDTO.SENDER_ACK, fileName);
 
     //Then
     Assertions.assertNotNull(response);
@@ -197,7 +197,7 @@ class SendControllerTest {
 
     Mockito.doThrow(new IOException("IO error message"))
       .when(sendFacadeServiceMock)
-      .downloadAndCacheSendLegalFact(
+      .downloadAndArchiveSendLegalFact(
         notificationRequestId,
         LegalFactCategoryDTO.SENDER_ACK,
         fileName,
@@ -207,7 +207,7 @@ class SendControllerTest {
     // When
     HttpServerErrorException httpServerErrorException = Assertions.assertThrows(
       HttpServerErrorException.class,
-      () -> sendController.downloadAndCacheSendLegalFact(
+      () -> sendController.downloadAndArchiveSendLegalFact(
         notificationRequestId,
         LegalFactCategoryDTO.SENDER_ACK,
         fileName

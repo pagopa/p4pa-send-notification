@@ -26,6 +26,7 @@ import it.gov.pagopa.pu.send.util.HttpUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +56,8 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final WorkflowService workflowService;
   private final SendNotificationService sendNotificationService;
 
+  private final CloseableHttpClient httpClient;
+
   public SendFacadeServiceImpl(
     SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
     SendStreamRepository sendStreamRepository,
@@ -65,7 +68,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendLegalFactMapper sendLegalFactMapper,
     SendStreamMapper sendStreamMapper,
     SendStreamService sendStreamService,
-    WorkflowService workflowService, SendNotificationService sendNotificationService) {
+    WorkflowService workflowService,
+    SendNotificationService sendNotificationService,
+    CloseableHttpClient httpClient) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendStreamRepository = sendStreamRepository;
     this.sendService = sendService;
@@ -77,6 +82,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     this.sendStreamService = sendStreamService;
     this.workflowService = workflowService;
     this.sendNotificationService = sendNotificationService;
+    this.httpClient = httpClient;
   }
 
   @Transactional
@@ -310,7 +316,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public void downloadAndCacheSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String legalFactId, String accessToken) throws IOException {
+  public void downloadAndArchiveSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String legalFactId, String accessToken) throws IOException {
     SendNotificationDTO sendNotificationDTO = sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId);
     if(sendNotificationDTO == null) {
       String formattedErrorMessage = "[NOTIFICATION_NOT_FOUND] Error in fetching SEND notification by notificationRequestId %s".formatted(notificationRequestId);
@@ -331,7 +337,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     }
     String preSignedUrl = legalFactDownloadMetadataDTO.getUrl();
 
-    byte[] bytes = HttpUtils.downloadFromPreSignedUrl(URI.create(preSignedUrl));
+    byte[] bytes = HttpUtils.downloadFromPreSignedUrl(URI.create(preSignedUrl), httpClient);
     try(ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
       sendNotificationService.uploadSendLegalFact(sendNotificationId, category, polishedLegalFactId, inputStream);
     }

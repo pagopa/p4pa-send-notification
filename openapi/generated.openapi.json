@@ -344,9 +344,9 @@
     "/p4pasend/notification-request/{notificationRequestId}/legal-facts" : {
       "post" : {
         "tags" : [ "Send" ],
-        "summary" : "downloadAndCacheSendLegalFact",
+        "summary" : "downloadAndArchiveSendLegalFact",
         "description" : "Service to store a legal fact",
-        "operationId" : "downloadAndCacheSendLegalFact",
+        "operationId" : "downloadAndArchiveSendLegalFact",
         "parameters" : [ {
           "name" : "notificationRequestId",
           "in" : "path",

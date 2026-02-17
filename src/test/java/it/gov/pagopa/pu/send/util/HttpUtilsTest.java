@@ -90,66 +90,59 @@ class HttpUtilsTest {
     @Test
     void givenCorrectRequestWhenDownloadFromPreSignedUrlThenOk() throws IOException {
         //GIVEN
-        try (MockedStatic<HttpClients> httpClientStaticMock = Mockito.mockStatic(HttpClients.class);
-             CloseableHttpClient httpClientMock = Mockito.mock(CloseableHttpClient.class)) {
+        CloseableHttpClient httpClientMock = Mockito.mock(CloseableHttpClient.class);
 
-          HttpClientBuilder httpClientBuilderMock = Mockito.mock(HttpClientBuilder.class);
+        ArgumentCaptor<HttpClientResponseHandler<ClassicHttpResponse>> classicHttpResponseArgumentCaptor =
+          ArgumentCaptor.forClass(HttpClientResponseHandler.class);
 
-          httpClientStaticMock.when(HttpClients::custom)
-            .thenReturn(httpClientBuilderMock);
-          Mockito.when(httpClientBuilderMock.setDefaultRequestConfig(Mockito.isA(RequestConfig.class)))
-            .thenReturn(httpClientBuilderMock);
-          Mockito.when(httpClientBuilderMock.build())
-            .thenReturn(httpClientMock);
+        byte[] expectedBytes = new byte[0];
+        Mockito.when(
+          httpClientMock.execute(
+            Mockito.isA(HttpGet.class),
+            classicHttpResponseArgumentCaptor.capture()
+          )
+        ).thenAnswer(i -> expectedBytes);
 
-          ArgumentCaptor<HttpClientResponseHandler<ClassicHttpResponse>> classicHttpResponseArgumentCaptor =
-            ArgumentCaptor.forClass(HttpClientResponseHandler.class);
+        URI uri = Mockito.mock(URI.class);
 
-          byte[] expectedBytes = new byte[0];
-          Mockito.when(
-            httpClientMock.execute(
-              Mockito.isA(HttpGet.class),
-              classicHttpResponseArgumentCaptor.capture()
-            )
-          ).thenAnswer(i -> expectedBytes);
+        //WHEN
+        byte[] bytes = HttpUtils.downloadFromPreSignedUrl(uri, httpClientMock);
 
-          URI uri = Mockito.mock(URI.class);
-
-          //WHEN
-          byte[] bytes = HttpUtils.downloadFromPreSignedUrl(uri);
-
-          //THEN
-          Mockito.verify(httpClientMock)
-            .execute(
-              Mockito.isA(HttpGet.class),
-              Mockito.eq(classicHttpResponseArgumentCaptor.getValue())
-            );
-          Assertions.assertEquals(expectedBytes, bytes);
-        }
+        //THEN
+        Mockito.verify(httpClientMock)
+          .execute(
+            Mockito.isA(HttpGet.class),
+            Mockito.eq(classicHttpResponseArgumentCaptor.getValue())
+          );
+        Assertions.assertEquals(expectedBytes, bytes);
     }
 
     @Test
-    void givenExceptionWhenDownloadFromPreSignedUrlThenThrowHttpPreSignedGetRequestException() {
-        //GIVEN
-        try (MockedStatic<HttpClients> httpClientStaticMock = Mockito.mockStatic(HttpClients.class)) {
-          httpClientStaticMock.when(HttpClients::custom)
-            .thenThrow(new RuntimeException());
+    void givenExceptionWhenDownloadFromPreSignedUrlThenThrowHttpPreSignedGetRequestException() throws IOException {
+      //GIVEN
+      URI uri = Mockito.mock(URI.class);
+        Mockito.when(uri.getPath()).thenReturn("/path/id/123");
+      CloseableHttpClient httpClientMock = Mockito.mock(CloseableHttpClient.class);
 
-          URI uri = Mockito.mock(URI.class);
-          Mockito.when(uri.getScheme()).thenReturn("http://");
-          Mockito.when(uri.getAuthority()).thenReturn("pagopa.com");
-          Mockito.when(uri.getPath()).thenReturn("/path/id/123");
+      Mockito.doThrow(new IOException())
+        .when(httpClientMock)
+        .execute(
+          Mockito.isA(HttpGet.class),
+          Mockito.isA(HttpClientResponseHandler.class)
+        );
 
-          //WHEN
-          HttpUtils.HttpPreSignedGetRequestException httpPreSignedGetRequestException =
-            Assertions.assertThrows(HttpUtils.HttpPreSignedGetRequestException.class, () -> HttpUtils.downloadFromPreSignedUrl(uri));
+      //WHEN
+      HttpUtils.HttpPreSignedGetRequestException httpPreSignedGetRequestException =
+        Assertions.assertThrows(
+          HttpUtils.HttpPreSignedGetRequestException.class,
+          () -> HttpUtils.downloadFromPreSignedUrl(uri, httpClientMock)
+        );
 
-          //THEN
-          Assertions.assertEquals(
-            "Error in downloading file %s".formatted("http://pagopa.com/path/id/123"),
-            httpPreSignedGetRequestException.getMessage()
-          );
-        }
+      //THEN
+      Assertions.assertEquals(
+        "Error in downloading file %s".formatted("/path/id/123"),
+        httpPreSignedGetRequestException.getMessage()
+      );
     }
 
 }

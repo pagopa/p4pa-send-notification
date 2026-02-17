@@ -25,8 +25,10 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendStreamRepository;
-import it.gov.pagopa.pu.send.util.HttpUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -76,6 +78,8 @@ class SendFacadeServiceImplTest {
   private WorkflowService workflowService;
   @Mock
   private SendNotificationService sendNotificationServiceMock;
+  @Mock
+  private CloseableHttpClient httpClientMock;
 
   @InjectMocks
   private SendFacadeServiceImpl sendService;
@@ -1033,7 +1037,7 @@ class SendFacadeServiceImplTest {
   }
 
   @Test
-  void givenNullSendNotificationDTOWhenDownloadAndCacheSendLegalFactThenThrowSendNotificationNotFoundException() {
+  void givenNullSendNotificationDTOWhenDownloadAndArchiveSendLegalFactThenThrowSendNotificationNotFoundException() {
     //GIVEN
     String accessToken = "ACCESS_TOKEN";
     String notificationRequestId = "notificationRequestId";
@@ -1050,7 +1054,7 @@ class SendFacadeServiceImplTest {
     //WHEN
     SendNotificationNotFoundException sendNotificationNotFoundException = assertThrows(
       SendNotificationNotFoundException.class,
-      () -> sendService.downloadAndCacheSendLegalFact(
+      () -> sendService.downloadAndArchiveSendLegalFact(
         notificationRequestId,
         category,
         legalFactId,
@@ -1067,7 +1071,7 @@ class SendFacadeServiceImplTest {
   }
 
   @Test
-  void givenNotificationInInvalidStatusWhenDownloadAndCacheSendLegalFactThenThrowInvalidStatusException() {
+  void givenNotificationInInvalidStatusWhenDownloadAndArchiveSendLegalFactThenThrowInvalidStatusException() {
     //GIVEN
     String accessToken = "accessToken";
     String notificationRequestId = "notificationRequestId";
@@ -1090,7 +1094,7 @@ class SendFacadeServiceImplTest {
     //WHEN
     InvalidStatusException invalidStatusException = assertThrows(
       InvalidStatusException.class,
-      () -> sendService.downloadAndCacheSendLegalFact(
+      () -> sendService.downloadAndArchiveSendLegalFact(
         notificationRequestId,
         category,
         legalFactId,
@@ -1107,7 +1111,7 @@ class SendFacadeServiceImplTest {
   }
 
   @Test
-  void givenNullLegalFactDownloadMetadataDTOWhenDownloadAndCacheSendLegalFactThenThrowNotFoundException() {
+  void givenNullLegalFactDownloadMetadataDTOWhenDownloadAndArchiveSendLegalFactThenThrowNotFoundException() {
     //GIVEN
     String accessToken = "accessToken";
     String notificationRequestId = "notificationRequestId";
@@ -1138,7 +1142,7 @@ class SendFacadeServiceImplTest {
     //WHEN
     NotFoundException notFoundException = assertThrows(
       NotFoundException.class,
-      () -> sendService.downloadAndCacheSendLegalFact(
+      () -> sendService.downloadAndArchiveSendLegalFact(
         notificationRequestId,
         category,
         legalFactId,
@@ -1157,7 +1161,7 @@ class SendFacadeServiceImplTest {
   }
 
   @Test
-  void givenNullPreSignedUrlWhenDownloadAndCacheSendLegalFactThenThrowNotFoundException() {
+  void givenNullPreSignedUrlWhenDownloadAndArchiveSendLegalFactThenThrowNotFoundException() {
     //GIVEN
     String accessToken = "accessToken";
     String notificationRequestId = "notificationRequestId";
@@ -1198,7 +1202,7 @@ class SendFacadeServiceImplTest {
     //WHEN
     NotFoundException notFoundException = assertThrows(
       NotFoundException.class,
-      () -> sendService.downloadAndCacheSendLegalFact(
+      () -> sendService.downloadAndArchiveSendLegalFact(
         notificationRequestId,
         category,
         legalFactId,
@@ -1215,7 +1219,7 @@ class SendFacadeServiceImplTest {
   }
 
   @Test
-  void givenCorrectPreSignedUrlWhenDownloadAndCacheSendLegalFactThenReturnOk() throws IOException {
+  void givenCorrectPreSignedUrlWhenDownloadAndArchiveSendLegalFactThenReturnOk() throws IOException {
     //GIVEN
     String accessToken = "accessToken";
     String notificationRequestId = "notificationRequestId";
@@ -1253,43 +1257,43 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
       .thenReturn("sendLegalFact.pdf");
 
-    try (MockedStatic<HttpUtils> utilities = Mockito.mockStatic(HttpUtils.class)) {
-      byte[] testBytes = "test".getBytes();
-      utilities.when(
-        () -> HttpUtils.downloadFromPreSignedUrl(
-          Mockito.isA(URI.class)
-        )
-      ).thenAnswer(i -> testBytes);
+    byte[] testBytes = "test".getBytes();
+    Mockito.when(
+      httpClientMock.execute(
+        Mockito.isA(HttpGet.class),
+        Mockito.isA(HttpClientResponseHandler.class)
+      )
+    ).thenReturn(testBytes);
 
-      ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
+    ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
 
-      Mockito.doNothing().when(sendNotificationServiceMock).uploadSendLegalFact(
-        Mockito.eq(sendNotificationId),
-        Mockito.eq(category),
-        Mockito.eq("sendLegalFact.pdf"),
-        inputStreamArgumentCaptor.capture()
-      );
+    Mockito.doNothing().when(sendNotificationServiceMock).uploadSendLegalFact(
+      Mockito.eq(sendNotificationId),
+      Mockito.eq(category),
+      Mockito.eq("sendLegalFact.pdf"),
+      inputStreamArgumentCaptor.capture()
+    );
 
-      //WHEN
-      sendService.downloadAndCacheSendLegalFact(
-        notificationRequestId,
-        category,
-        legalFactId,
-        accessToken
-      );
+    //WHEN
+    sendService.downloadAndArchiveSendLegalFact(
+      notificationRequestId,
+      category,
+      legalFactId,
+      accessToken
+    );
 
-      //THEN
-      Mockito.verify(sendNotificationServiceMock).uploadSendLegalFact(
-        Mockito.eq(sendNotificationId),
-        Mockito.eq(category),
-        Mockito.eq("sendLegalFact.pdf"),
-        inputStreamArgumentCaptor.capture()
-      );
-      Assertions.assertEquals(
-        new String(new ByteArrayInputStream(testBytes).readAllBytes()),
-        new String(inputStreamArgumentCaptor.getValue().readAllBytes())
-      );
-    }
+    //THEN
+    Mockito.verify(sendNotificationServiceMock).uploadSendLegalFact(
+      Mockito.eq(sendNotificationId),
+      Mockito.eq(category),
+      Mockito.eq("sendLegalFact.pdf"),
+      inputStreamArgumentCaptor.capture()
+    );
+    Assertions.assertEquals(
+      new String(new ByteArrayInputStream(testBytes).readAllBytes()),
+      new String(inputStreamArgumentCaptor.getValue().readAllBytes())
+    );
+
   }
 
 }
