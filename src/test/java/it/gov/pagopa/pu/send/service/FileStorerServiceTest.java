@@ -8,9 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
 import it.gov.pagopa.pu.send.util.AESUtils;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
@@ -20,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;

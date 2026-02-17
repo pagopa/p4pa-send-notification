@@ -137,7 +137,9 @@ class HttpUtilsTest {
             .thenThrow(new RuntimeException());
 
           URI uri = Mockito.mock(URI.class);
-          Path fileNamePath = Path.of("fileName.txt");
+          Mockito.when(uri.getScheme()).thenReturn("http://");
+          Mockito.when(uri.getAuthority()).thenReturn("pagopa.com");
+          Mockito.when(uri.getPath()).thenReturn("/path/id/123");
 
           //WHEN
           HttpUtils.HttpPreSignedGetRequestException httpPreSignedGetRequestException =
@@ -145,7 +147,7 @@ class HttpUtilsTest {
 
           //THEN
           Assertions.assertEquals(
-            "Error in downloading file %s".formatted(fileNamePath),
+            "Error in downloading file %s".formatted("http://pagopa.com/path/id/123"),
             httpPreSignedGetRequestException.getMessage()
           );
         }
