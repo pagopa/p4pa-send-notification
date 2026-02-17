@@ -256,19 +256,26 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId, String legalFactId,
+  public LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId,
+                                                                        String legalFactId,
                                                                         String accessToken) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
+    return this.retrieveLegalFactDownloadMetadata(sendNotificationDTOMapper.apply(notification), legalFactId, accessToken);
+  }
+
+  private LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(SendNotificationDTO sendNotification,
+                                                                         String legalFactId,
+                                                                        String accessToken) {
     // Validate status
-    if(!NotificationStatus.ACCEPTED.equals(notification.getStatus())) {
-      throw new InvalidStatusException(NotificationStatus.ACCEPTED, notification.getStatus());
+    if(!NotificationStatus.ACCEPTED.equals(sendNotification.getStatus())) {
+      throw new InvalidStatusException(NotificationStatus.ACCEPTED, sendNotification.getStatus());
     }
 
     LegalFactDownloadMetadataResponseDTO legalFactDownloadMetadata = sendService.getLegalFactDownloadMetadata(
-      notification.getIun(),
+      sendNotification.getIun(),
       legalFactId,
-      notification.getOrganizationId(),
+      sendNotification.getOrganizationId(),
       accessToken
     );
 
@@ -307,27 +314,26 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendNotificationDTO sendNotificationDTO = sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId);
     if(sendNotificationDTO == null) {
       String formattedErrorMessage = "[NOTIFICATION_NOT_FOUND] Error in fetching SEND notification by notificationRequestId %s".formatted(notificationRequestId);
-      log.error(formattedErrorMessage);
-      return;
+      throw new SendNotificationNotFoundException(formattedErrorMessage);
     }
     String sendNotificationId = sendNotificationDTO.getSendNotificationId();
+    String polishedLegalFactId = sendLegalFactMapper.polishLegalFactIdKey(legalFactId);
     LegalFactDownloadMetadataDTO legalFactDownloadMetadataDTO =
-      this.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, accessToken);
+      this.retrieveLegalFactDownloadMetadata(
+        sendNotificationDTO,
+        polishedLegalFactId,
+        accessToken
+      );
     if(legalFactDownloadMetadataDTO == null || legalFactDownloadMetadataDTO.getUrl() == null) {
-      String formattedErrorMessage = "[LEGAL_FACT_URL_FETCH_ERROR] Error in fetching SEND LegalFact pre-signed URL for sendNotificationId %s, category %s, legalFactId %s"
-        .formatted(sendNotificationId, category.getValue(), sendLegalFactMapper.polishLegalFactIdKey(legalFactId));
-      log.error(formattedErrorMessage);
-      return;
+      String formattedErrorMessage = "[LEGAL_FACT_URL_NOT_FOUND] Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s"
+        .formatted(sendNotificationId, category.getValue(), polishedLegalFactId);
+      throw new NotFoundException(formattedErrorMessage);
     }
     String preSignedUrl = legalFactDownloadMetadataDTO.getUrl();
 
-    ByteArrayInputStream inputStream = null;
-    try {
-      byte[] bytes = HttpUtils.downloadFromPreSignedUrl(URI.create(preSignedUrl));
-      inputStream = new ByteArrayInputStream(bytes);
-      sendNotificationService.uploadSendLegalFact(sendNotificationId, category, legalFactId, inputStream);
-    } finally {
-      if(inputStream!=null) inputStream.close();
+    byte[] bytes = HttpUtils.downloadFromPreSignedUrl(URI.create(preSignedUrl));
+    try(ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
+      sendNotificationService.uploadSendLegalFact(sendNotificationId, category, polishedLegalFactId, inputStream);
     }
   }
 

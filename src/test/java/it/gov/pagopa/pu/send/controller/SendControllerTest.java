@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -171,13 +172,54 @@ class SendControllerTest {
     String notificationRequestId = "notificationRequestId";
     String fileName = "test.txt";
 
+    Mockito.doNothing()
+      .when(sendFacadeServiceMock)
+      .downloadAndCacheSendLegalFact(
+        notificationRequestId,
+        LegalFactCategoryDTO.SENDER_ACK,
+        fileName,
+        accessToken
+      );
+
     // When
-    Mockito.doNothing().when(sendFacadeServiceMock).downloadAndCacheSendLegalFact(notificationRequestId, LegalFactCategoryDTO.SENDER_ACK, fileName, accessToken);
+    ResponseEntity<Void> response = sendController.downloadAndCacheSendLegalFact(notificationRequestId, LegalFactCategoryDTO.SENDER_ACK, fileName);
 
     //Then
-    ResponseEntity<Void> response = sendController.downloadAndCacheSendLegalFact(notificationRequestId, LegalFactCategoryDTO.SENDER_ACK, fileName);
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  @Test
+  void givenIOExceptionIsThrownWhenUploadLegalFactThenThrowHttpServerErrorException() throws IOException {
+    //Given
+    String notificationRequestId = "notificationRequestId";
+    String fileName = "test.txt";
+
+    Mockito.doThrow(new IOException("IO error message"))
+      .when(sendFacadeServiceMock)
+      .downloadAndCacheSendLegalFact(
+        notificationRequestId,
+        LegalFactCategoryDTO.SENDER_ACK,
+        fileName,
+        accessToken
+      );
+
+    // When
+    HttpServerErrorException httpServerErrorException = Assertions.assertThrows(
+      HttpServerErrorException.class,
+      () -> sendController.downloadAndCacheSendLegalFact(
+        notificationRequestId,
+        LegalFactCategoryDTO.SENDER_ACK,
+        fileName
+      )
+    );
+
+    //Then
+    Assertions.assertNotNull(httpServerErrorException);
+    Assertions.assertEquals(
+      "500 IO error message",
+      httpServerErrorException.getMessage()
+    );
   }
 
 }
