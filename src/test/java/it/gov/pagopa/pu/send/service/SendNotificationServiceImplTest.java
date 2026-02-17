@@ -4,7 +4,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mockStatic;
 
 import com.mongodb.client.result.UpdateResult;
-import it.gov.pagopa.pu.send.citizen.model.PersonalData;
+import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.*;

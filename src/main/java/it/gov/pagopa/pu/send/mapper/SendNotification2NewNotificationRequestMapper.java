@@ -9,6 +9,7 @@ import it.gov.pagopa.pu.send.dto.PuRecipient;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.Attachment;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
+import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import org.springframework.stereotype.Service;
 

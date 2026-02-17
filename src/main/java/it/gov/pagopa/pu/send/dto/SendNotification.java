@@ -1,7 +1,9 @@
 package it.gov.pagopa.pu.send.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import it.gov.pagopa.pu.common.pii.dto.FullEntityPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
+import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import java.util.List;
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SendNotification implements FullPIIDTO<SendNotificationNoPII, SendNotificationPIIDTO> {
+public class SendNotification implements FullEntityPIIDTO<SendNotificationNoPII, SendNotificationPIIDTO> {
 
   private String sendNotificationId;
   private Long organizationId;
