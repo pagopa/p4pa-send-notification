@@ -29,7 +29,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 
@@ -139,12 +138,12 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
-  public void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, MultipartFile legalFactFile) {
+  public void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
     if (notification.getLegalFacts()!=null && notification.getLegalFacts().stream().anyMatch(fact -> fact.getFileName().equals(fileName)))
       throw new FileAlreadyExistsException("[LEGAL_FACT_ALREADY_EXISTS] Legal-fact having "+fileName+" fileName already exists");
 
-    String url = fileStorerService.saveToSharedFolder(notification.getOrganizationId(), sendNotificationId, legalFactFile, fileName);
+    String url = fileStorerService.saveToSharedFolder(notification.getOrganizationId(), sendNotificationId, inputStream, fileName);
 
     sendNotificationNoPIIRepository.addLegalFact(sendNotificationId, LegalFactDTO.builder()
       .fileName(fileName)

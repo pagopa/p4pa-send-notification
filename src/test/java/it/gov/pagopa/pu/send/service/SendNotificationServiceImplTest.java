@@ -372,7 +372,7 @@ class SendNotificationServiceImplTest {
     String notificationId = "123";
     LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
     String fileName = "test.pdf";
-    MultipartFile mockFile = new MockMultipartFile("file", "content".getBytes());
+    InputStream inputStreamMock = Mockito.mock(InputStream.class);
     String expectedUrl = "test.pdf";
 
     SendNotificationNoPII notification = new SendNotificationNoPII();
@@ -381,16 +381,16 @@ class SendNotificationServiceImplTest {
     notification.setLegalFacts(new ArrayList<>());
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
-    Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, mockFile, fileName))
+    Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
       .thenReturn(expectedUrl);
 
     // When
     Assertions.assertDoesNotThrow(() ->
-      sendNotificationService.uploadSendLegalFact(notificationId, category, fileName, mockFile)
+      sendNotificationService.uploadSendLegalFact(notificationId, category, fileName, inputStreamMock)
     );
 
     // Then
-    Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, mockFile, fileName);
+    Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
     Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
       fact.getFileName().equals(fileName) &&
         fact.getUrl().equals(expectedUrl) &&
@@ -404,7 +404,7 @@ class SendNotificationServiceImplTest {
     String notificationId = "123";
     LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
     String fileName = "test.pdf";
-    MultipartFile mockFile = new MockMultipartFile("file", "content".getBytes());
+    InputStream inputStreamMock = Mockito.mock(InputStream.class);
     String expectedUrl = "test.pdf";
 
     SendNotificationNoPII notification = new SendNotificationNoPII();
@@ -412,16 +412,16 @@ class SendNotificationServiceImplTest {
     notification.setOrganizationId(1L);
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
-    Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, mockFile, fileName))
+    Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
       .thenReturn(expectedUrl);
 
     // When
     Assertions.assertDoesNotThrow(() ->
-      sendNotificationService.uploadSendLegalFact(notificationId, category, fileName, mockFile)
+      sendNotificationService.uploadSendLegalFact(notificationId, category, fileName, inputStreamMock)
     );
 
     // Then
-    Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, mockFile, fileName);
+    Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
     Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
       fact.getFileName().equals(fileName) &&
         fact.getUrl().equals(expectedUrl) &&
@@ -435,7 +435,7 @@ class SendNotificationServiceImplTest {
     String id = "123";
     String fileName = "file.pdf";
     LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
-    MultipartFile mockFile = new MockMultipartFile(fileName, "content".getBytes());
+    InputStream inputStreamMock = Mockito.mock(InputStream.class);
 
     LegalFactDTO existingFact = LegalFactDTO.builder()
       .category(category)
@@ -448,7 +448,7 @@ class SendNotificationServiceImplTest {
 
     // When & Then
     FileAlreadyExistsException exception = Assertions.assertThrows(FileAlreadyExistsException.class, () ->
-      sendNotificationService.uploadSendLegalFact(id, category, fileName, mockFile)
+      sendNotificationService.uploadSendLegalFact(id, category, fileName, inputStreamMock)
     );
 
     Assertions.assertTrue(exception.getMessage().contains("[LEGAL_FACT_ALREADY_EXISTS]"));

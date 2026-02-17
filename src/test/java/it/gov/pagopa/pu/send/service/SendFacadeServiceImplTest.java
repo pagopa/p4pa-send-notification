@@ -70,6 +70,8 @@ class SendFacadeServiceImplTest {
   private SendStreamService sendStreamServiceMock;
   @Mock
   private WorkflowService workflowService;
+  @Mock
+  private SendNotificationService sendNotificationServiceMock;
 
   @InjectMocks
   private SendFacadeServiceImpl sendService;

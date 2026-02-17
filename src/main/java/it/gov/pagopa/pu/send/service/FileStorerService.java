@@ -39,9 +39,9 @@ public class FileStorerService {
     return Path.of(sharedFolder, String.valueOf(organizationId), sendFilePath, sendNotificationId);
   }
 
-  public String saveToSharedFolder(Long organizationId, String sendNotificationId, MultipartFile file, String fileName) {
-    if (file == null) {
-      throw new UploadFileException("File is mandatory");
+  public String saveToSharedFolder(Long organizationId, String sendNotificationId, InputStream inputStream, String fileName) {
+    if (inputStream == null) {
+      throw new UploadFileException("InputStream is mandatory");
     }
 
     FileUtils.validateFilename(fileName);
@@ -50,7 +50,7 @@ public class FileStorerService {
     Path relativeSendPath =  buildRelativeSendPath(organizationId, sendNotificationId);
     Path absolutePath = concatenatePaths(relativeSendPath.toString(), fileName);
     try {
-      AESUtils.encryptAndSave(fileEncryptPassword, file.getInputStream(), absolutePath.getParent(), absolutePath.getFileName().toString());
+      AESUtils.encryptAndSave(fileEncryptPassword, inputStream, absolutePath.getParent(), absolutePath.getFileName().toString());
     } catch (Exception e) {
       throw new UploadFileException("Error uploading file to shared folder %s".formatted(absolutePath));
     }
