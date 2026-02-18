@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.send.config.BaseEntityListener;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -10,14 +11,12 @@ import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
-
-import java.time.OffsetDateTime;
-
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationNoPIIRepositoryExt {
@@ -40,9 +39,13 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     this.mongoTemplate = mongoTemplate;
   }
 
+  private UpdateResult updateFirst(Query query, Update update) {
+    return mongoTemplate.updateFirst(query, BaseEntityListener.setTechFieldsOnDocumentUpdate(update), SendNotificationNoPII.class);
+  }
+
   @Override
   public UpdateResult updateFilePreloadInformation(String sendNotificationId, PreLoadResponseDTO preloadResponse) {
-    return mongoTemplate.updateFirst(
+    return updateFirst(
       Query.query(Criteria
         .where(Fields.sendNotificationId).is(sendNotificationId)
         .and(FIELD_DOCUMENT_ID).is(preloadResponse.getPreloadIdx())
@@ -51,52 +54,52 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
         .set(FIELD_DOCUMENT_KEY, preloadResponse.getKey())
         .set(FIELD_DOCUMENT_SECRET, preloadResponse.getSecret())
         .set(FIELD_DOCUMENT_HTTPMETHOD, preloadResponse.getHttpMethod())
-        .set(FIELD_DOCUMENT_URL, preloadResponse.getUrl()),
-      SendNotificationNoPII.class);
+        .set(FIELD_DOCUMENT_URL, preloadResponse.getUrl())
+      );
   }
 
   @Override
   public UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus) {
-    return mongoTemplate.updateFirst(
+    return updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
-      new Update().set(Fields.status, newStatus),
-      SendNotificationNoPII.class);
+      new Update().set(Fields.status, newStatus)
+    );
   }
 
   @Override
   public UpdateResult updateNotificationRequestId(String sendNotificationId, String notificationRequestId) {
-    return mongoTemplate.updateFirst(
+    return updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
-      new Update().set(Fields.notificationRequestId, notificationRequestId),
-      SendNotificationNoPII.class);
+      new Update().set(Fields.notificationRequestId, notificationRequestId)
+    );
   }
 
   @Override
   public UpdateResult updateFileStatus(String sendNotificationId, String fileName, FileStatus newStatus) {
-    return mongoTemplate.updateFirst(
+    return updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
         .and(FIELD_DOCUMENT_ID).is(fileName)),
-      new Update().set(FIELD_DOCUMENT_STATUS, newStatus),
-      SendNotificationNoPII.class);
+      new Update().set(FIELD_DOCUMENT_STATUS, newStatus)
+    );
   }
 
   @Override
   public UpdateResult updateFileVersionId(String sendNotificationId, String fileName, String versionId) {
-    return mongoTemplate.updateFirst(
+    return updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
         .and(FIELD_DOCUMENT_ID).is(fileName)),
-      new Update().set(FIELD_DOCUMENT_VERSIONID, versionId),
-      SendNotificationNoPII.class);
+      new Update().set(FIELD_DOCUMENT_VERSIONID, versionId)
+    );
   }
 
   @Override
   public UpdateResult updateNotificationIun(String sendNotificationId, String iun) {
-    return mongoTemplate.updateFirst(
+    return updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
       new Update()
         .set(Fields.iun, iun)
-        .set(Fields.status, NotificationStatus.ACCEPTED),
-      SendNotificationNoPII.class);
+        .set(Fields.status, NotificationStatus.ACCEPTED)
+    );
   }
 
   @Override
@@ -112,7 +115,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     update.set(FIELD_FILTERED_NOTIFICATION_DATE, notificationDate.toString());
     update.filterArray("elem.payment.pagoPa.noticeCode", nav);
 
-    return mongoTemplate.updateFirst(query, update, SendNotificationNoPII.class);
+    return updateFirst(query, update);
   }
 
   @Override
@@ -148,6 +151,6 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     Query query = Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
     Update update = new Update().push(Fields.legalFacts, legalFact);
 
-    return mongoTemplate.updateFirst(query, update, SendNotificationNoPII.class);
+    return updateFirst(query, update);
   }
 }

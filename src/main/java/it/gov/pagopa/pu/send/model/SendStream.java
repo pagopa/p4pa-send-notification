@@ -3,13 +3,12 @@ package it.gov.pagopa.pu.send.model;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.io.Serializable;
 
 @Data
 @Document("send_stream")
@@ -17,7 +16,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @SuperBuilder
 @FieldNameConstants
-public class SendStream implements Serializable {
+@EqualsAndHashCode(callSuper = false)
+public class SendStream extends BaseEntity {
   @Id
   private String streamId;
   @NotNull

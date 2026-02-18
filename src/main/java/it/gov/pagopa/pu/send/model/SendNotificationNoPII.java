@@ -1,15 +1,15 @@
 package it.gov.pagopa.pu.send.model;
 
 import it.gov.pagopa.pu.common.pii.model.NoPIIEntity;
-import it.gov.pagopa.pu.send.dto.*;
+import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
 import lombok.AllArgsConstructor;
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
@@ -24,7 +24,8 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @FieldNameConstants
-public class SendNotificationNoPII implements Serializable, NoPIIEntity<SendNotificationPIIDTO> {
+@EqualsAndHashCode(callSuper = false)
+public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<SendNotificationPIIDTO> {
   @Id
   private String sendNotificationId;
   private Long organizationId;

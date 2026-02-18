@@ -31,12 +31,12 @@ public class SendLegalFactMapper {
       return null;
     }
     return LegalFactIdDTO.builder()
-        .key(this.mapLegalFactIdKey(legalFactIdSendDto.getKey()))
+        .key(this.polishLegalFactIdKey(legalFactIdSendDto.getKey()))
         .category(legalFactIdSendDto.getCategory())
         .build();
   }
 
-  private String mapLegalFactIdKey(String legalFactIdKey) {
+  public String polishLegalFactIdKey(String legalFactIdKey) {
     return Optional.ofNullable(legalFactIdKey)
       .map(key -> key.replace(LEGAL_FACT_ID_PREFIX, ""))
       .orElse(null);

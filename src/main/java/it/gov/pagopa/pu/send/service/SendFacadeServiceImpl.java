@@ -22,15 +22,20 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendStreamRepository;
+import it.gov.pagopa.pu.send.util.HttpUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +43,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class SendFacadeServiceImpl implements SendFacadeService {
+
   private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
   private final SendStreamRepository sendStreamRepository;
   private final SendService sendService;
@@ -48,6 +54,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendStreamMapper sendStreamMapper;
   private final SendStreamService sendStreamService;
   private final WorkflowService workflowService;
+  private final SendNotificationService sendNotificationService;
+
+  private final CloseableHttpClient httpClient;
 
   public SendFacadeServiceImpl(
     SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
@@ -59,7 +68,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendLegalFactMapper sendLegalFactMapper,
     SendStreamMapper sendStreamMapper,
     SendStreamService sendStreamService,
-    WorkflowService workflowService) {
+    WorkflowService workflowService,
+    SendNotificationService sendNotificationService,
+    CloseableHttpClient httpClient) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendStreamRepository = sendStreamRepository;
     this.sendService = sendService;
@@ -70,6 +81,8 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     this.sendStreamMapper = sendStreamMapper;
     this.sendStreamService = sendStreamService;
     this.workflowService = workflowService;
+    this.sendNotificationService = sendNotificationService;
+    this.httpClient = httpClient;
   }
 
   @Transactional
@@ -249,19 +262,26 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId, String legalFactId,
+  public LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId,
+                                                                        String legalFactId,
                                                                         String accessToken) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
+    return this.retrieveLegalFactDownloadMetadata(sendNotificationDTOMapper.apply(notification), legalFactId, accessToken);
+  }
+
+  private LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(SendNotificationDTO sendNotification,
+                                                                         String legalFactId,
+                                                                        String accessToken) {
     // Validate status
-    if(!NotificationStatus.ACCEPTED.equals(notification.getStatus())) {
-      throw new InvalidStatusException(NotificationStatus.ACCEPTED, notification.getStatus());
+    if(!NotificationStatus.ACCEPTED.equals(sendNotification.getStatus())) {
+      throw new InvalidStatusException(NotificationStatus.ACCEPTED, sendNotification.getStatus());
     }
 
     LegalFactDownloadMetadataResponseDTO legalFactDownloadMetadata = sendService.getLegalFactDownloadMetadata(
-      notification.getIun(),
+      sendNotification.getIun(),
       legalFactId,
-      notification.getOrganizationId(),
+      sendNotification.getOrganizationId(),
       accessToken
     );
 
@@ -292,6 +312,34 @@ public class SendFacadeServiceImpl implements SendFacadeService {
         streamMetadataResponseV25DTO.getStreamId().toString(),
         accessToken
       );
+    }
+  }
+
+  @Override
+  public void downloadAndArchiveSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String legalFactId, String accessToken) throws IOException {
+    SendNotificationDTO sendNotificationDTO = sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId);
+    if(sendNotificationDTO == null) {
+      String formattedErrorMessage = "[NOTIFICATION_NOT_FOUND] Error in fetching SEND notification by notificationRequestId %s".formatted(notificationRequestId);
+      throw new SendNotificationNotFoundException(formattedErrorMessage);
+    }
+    String sendNotificationId = sendNotificationDTO.getSendNotificationId();
+    String polishedLegalFactId = sendLegalFactMapper.polishLegalFactIdKey(legalFactId);
+    LegalFactDownloadMetadataDTO legalFactDownloadMetadataDTO =
+      this.retrieveLegalFactDownloadMetadata(
+        sendNotificationDTO,
+        polishedLegalFactId,
+        accessToken
+      );
+    if(legalFactDownloadMetadataDTO == null || legalFactDownloadMetadataDTO.getUrl() == null) {
+      String formattedErrorMessage = "[LEGAL_FACT_URL_NOT_FOUND] Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s"
+        .formatted(sendNotificationId, category.getValue(), polishedLegalFactId);
+      throw new NotFoundException(formattedErrorMessage);
+    }
+    String preSignedUrl = legalFactDownloadMetadataDTO.getUrl();
+
+    byte[] bytes = HttpUtils.downloadFromPreSignedUrl(URI.create(preSignedUrl), httpClient);
+    try(ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
+      sendNotificationService.uploadSendLegalFact(sendNotificationId, category, polishedLegalFactId, inputStream);
     }
   }
 

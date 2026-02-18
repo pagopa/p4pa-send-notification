@@ -239,14 +239,15 @@ paths:
           description: Notification not found
         '500':
           description: Internal server error
+  /notification-request/{notificationRequestId}/legal-facts:
     post:
       tags:
-        - Notification
-      summary: uploadSendLegalFact
+        - Send
+      summary: downloadAndArchiveSendLegalFact
       description: Service to store a legal fact
-      operationId: uploadSendLegalFact
+      operationId: downloadAndArchiveSendLegalFact
       parameters:
-        - name: sendNotificationId
+        - name: notificationRequestId
           in: path
           required: true
           schema:
@@ -256,20 +257,11 @@ paths:
           required: true
           schema:
             type: 'LegalFactCategoryDTO'
-      requestBody:
-        content:
-          'multipart/form-data':
-            schema:
-              required:
-                - fileName
-                - legalFactFile
-              type: object
-              properties:
-                fileName:
-                  type: string
-                legalFactFile:
-                  type: string
-                  format: binary
+        - name: fileName
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK

@@ -60,7 +60,7 @@ class SendStreamMapperTest {
       sendStreamMapper.mapToSendStream(streamMetadataResponse, ORGANIZATION_ID);
     //Then
     Assertions.assertEquals(expectedResponse, actualResponse);
-    TestUtils.checkNotNullFields(actualResponse, "lastEventId");
+    TestUtils.checkNotNullFields(actualResponse, "lastEventId", "creationDate", "updateDate", "updateOperatorExternalId", "updateTraceId");
   }
 
   @Test
