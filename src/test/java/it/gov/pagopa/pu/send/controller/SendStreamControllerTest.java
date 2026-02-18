@@ -43,11 +43,11 @@ class SendStreamControllerTest {
     String streamId = "STREAMID";
     List<ProgressResponseElementV25DTO> expectedResult = List.of();
 
-    Mockito.when(sendFacadeServiceMock.getStreamEvents(streamId, null, organizationId, accessToken))
+    Mockito.when(sendFacadeServiceMock.getStreamEvents(streamId, organizationId, accessToken))
       .thenReturn(expectedResult);
 
     ResponseEntity<List<ProgressResponseElementV25DTO>> response = sendStreamController
-      .getStreamEvents(organizationId, streamId, null);
+      .getStreamEvents(organizationId, streamId);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -68,5 +68,22 @@ class SendStreamControllerTest {
     Assertions.assertNotNull(actualResponse);
     Assertions.assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
     Assertions.assertSame(expectedResult, actualResponse.getBody());
+  }
+
+  @Test
+  void givenValidInputWhenUpdateStreamLastEventIdThenOk(){
+    //GIVEN
+    String streamId = "streamId";
+    String lastEventId = "lastEventId";
+
+    Mockito.doNothing().when(sendFacadeServiceMock)
+      .updateStreamLastEventId(streamId, lastEventId);
+
+    //WHEN
+    ResponseEntity<Void> actualResponse = sendStreamController.updateStreamLastEventId(streamId, lastEventId);
+
+    //THEN
+    Assertions.assertNotNull(actualResponse);
+    Assertions.assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
   }
 }
