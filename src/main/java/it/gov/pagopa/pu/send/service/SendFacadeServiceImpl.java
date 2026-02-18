@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -217,8 +218,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId,
-                                                             Long organizationId, String accessToken) {
+  public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, Long organizationId, String accessToken) {
     if (StringUtils.isBlank(streamId)) {
       List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
       if (streams.isEmpty())
@@ -226,8 +226,13 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
       streamId = String.valueOf(streams.getLast().getStreamId());
     }
+    SendStreamDTO stream = this.getStream(streamId, accessToken); //for fetching lastEventId from cache
+    return sendStreamService.getStreamEvents(streamId, stream.getLastEventId(), organizationId, accessToken);
+  }
+
+  @Override
+  public void updateStreamLastEventId(String streamId, String lastEventId) {
     sendStreamRepository.updateLastEventId(streamId, lastEventId);
-    return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
   }
 
   @Override
@@ -243,6 +248,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private boolean cachedStreamDoesExistOnSend(String streamId, Long organizationId, String accessToken) {
     return sendStreamService.getStreams(organizationId, accessToken).stream()
       .map(StreamListElementDTO::getStreamId)
+      .filter(Objects::nonNull)
       .anyMatch(s -> s.toString().equals(streamId));
   }
 

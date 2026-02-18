@@ -623,19 +623,31 @@ class SendFacadeServiceImplTest {
   @Test
   void givenValidParamsWhenGetStreamEventsThenReturnEvents() {
     String accessToken = "ACCESSTOKEN";
-    String streamId = "streamId";
+    UUID streamId = UUID.randomUUID();
     String lastEventId = "lastEventId";
     Long organizationId = 1L;
 
     ProgressResponseElementV25DTO sendStreamEvent = new ProgressResponseElementV25DTO();
     List<ProgressResponseElementV25DTO> expectedEvents = List.of(sendStreamEvent);
 
-    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId, lastEventId, organizationId, accessToken))
-      .thenReturn(expectedEvents);
-    Mockito.when(sendStreamRepositoryMock.updateLastEventId(streamId, lastEventId))
-      .thenReturn(UpdateResult.unacknowledged()); //only for stubbing, not used in getStreamEvents method
+    SendStream sendStreamMock = new SendStream();
+    sendStreamMock.setOrganizationId(organizationId);
+    SendStreamDTO sendStreamDTOMock = new SendStreamDTO();
+    sendStreamDTOMock.setLastEventId(lastEventId);
+    StreamListElementDTO streamListElementDTO = new StreamListElementDTO();
+    streamListElementDTO.setStreamId(streamId);
 
-    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+    Mockito.when(sendStreamRepositoryMock.findById(streamId.toString()))
+      .thenReturn(Optional.of(sendStreamMock));
+    Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStreamMock))
+      .thenReturn(sendStreamDTOMock);
+    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken))
+        .thenReturn(List.of(streamListElementDTO));
+
+    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId.toString(), lastEventId, organizationId, accessToken))
+      .thenReturn(expectedEvents);
+
+    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(streamId.toString(), organizationId, accessToken);
 
     assertNotNull(result);
     assertEquals(expectedEvents, result);
@@ -651,17 +663,32 @@ class SendFacadeServiceImplTest {
     StreamListElementDTO lastStream = new StreamListElementDTO();
     lastStream.setStreamId(streamId);
 
-    List<StreamListElementDTO> streams = List.of(new StreamListElementDTO(), lastStream);
+    List<StreamListElementDTO> streams = List.of(new StreamListElementDTO(), lastStream); //two elements, first has null id
     ProgressResponseElementV25DTO sendStreamEvent = new ProgressResponseElementV25DTO();
     List<ProgressResponseElementV25DTO> expectedEvents = List.of(sendStreamEvent);
+
+    SendStream sendStreamMock = new SendStream();
+    sendStreamMock.setOrganizationId(organizationId);
+    SendStreamDTO sendStreamDTOMock = new SendStreamDTO();
+    sendStreamDTOMock.setLastEventId(lastEventId);
+    StreamListElementDTO streamListElementDTO = new StreamListElementDTO();
+    streamListElementDTO.setStreamId(streamId);
+
+    Mockito.when(sendStreamRepositoryMock.findById(streamId.toString()))
+      .thenReturn(Optional.of(sendStreamMock));
+    Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStreamMock))
+      .thenReturn(sendStreamDTOMock);
+    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken))
+      .thenReturn(List.of(streamListElementDTO));
+
+    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId.toString(), lastEventId, organizationId, accessToken))
+      .thenReturn(expectedEvents);
 
     Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(streams);
     Mockito.when(sendStreamServiceMock.getStreamEvents(String.valueOf(streamId), lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
-    Mockito.when(sendStreamRepositoryMock.updateLastEventId(String.valueOf(streamId), lastEventId))
-      .thenReturn(UpdateResult.unacknowledged()); //only for stubbing, not used in getStreamEvents method
 
-    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(null, lastEventId, organizationId, accessToken);
+    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(null, organizationId, accessToken);
 
     assertNotNull(result);
     assertEquals(expectedEvents, result);
@@ -670,16 +697,33 @@ class SendFacadeServiceImplTest {
   @Test
   void givenEmptyStreamIdAndNoStreamsWhenGetStreamEventsThenThrowNotFoundException() {
     String accessToken = "ACCESSTOKEN";
-    String lastEventId = "LASTEVENTID";
     Long organizationId = 1L;
 
     Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(List.of());
 
     NotFoundException exception = assertThrows(NotFoundException.class, () ->
-      sendService.getStreamEvents(null, lastEventId, organizationId, accessToken)
+      sendService.getStreamEvents(null, organizationId, accessToken)
     );
 
     assertEquals("[STREAMS_NOT_FOUND] Streams not found for this organization: " + organizationId, exception.getMessage());
+  }
+
+  @Test
+  void givenValidRequestWhenUpdateStreamLastEventIdThenOk() {
+    //GIVEN
+    String streamId = "streamId";
+    String lastEventId = "lastEventId";
+
+    UpdateResult expectedResult = Mockito.mock(UpdateResult.class);
+    Mockito.when(sendStreamRepositoryMock.updateLastEventId(streamId, lastEventId))
+      .thenReturn(expectedResult);
+
+    //WHEN
+    sendService.updateStreamLastEventId(streamId, lastEventId);
+
+    //THEN
+    Mockito.verify(sendStreamRepositoryMock)
+      .updateLastEventId(streamId, lastEventId);
   }
 
   @Test

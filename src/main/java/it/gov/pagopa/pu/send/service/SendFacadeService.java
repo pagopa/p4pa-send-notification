@@ -23,11 +23,11 @@ public interface SendFacadeService {
    * Get Stream Events
    * If streamId in input is null, find last stream for this organization and take streamId
    * @param streamId stream identifier (optional)
-   * @param lastEventId (optional)
    * @return List&lt;ProgressResponseElementV25DTO&gt;
    * @throws NotFoundException if doesn't exist at leat one stream
    */
-  List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId, Long organizationId, String accessToken);
+  List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, Long organizationId, String accessToken);
+  void updateStreamLastEventId(String streamId, String lastEventId);
   SendStreamDTO getStream(String streamId, String accessToken);
   List<LegalFactListElementDTO> retrieveLegalFacts(String sendNotificationId, String accessToken);
   LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId, String legalFactId, String accessToken);

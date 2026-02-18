@@ -23,6 +23,118 @@
     "description" : "the Streams API"
   } ],
   "paths" : {
+    "/p4pasend/send/streams/{streamId}" : {
+      "get" : {
+        "tags" : [ "Streams" ],
+        "summary" : "retrieve stream by stream id",
+        "description" : "get stream by specifying stream id",
+        "operationId" : "getStream",
+        "parameters" : [ {
+          "name" : "streamId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Stream not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendStreamDTO"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Streams" ],
+        "summary" : "update stream LastEventId",
+        "description" : "update stream last event ID",
+        "operationId" : "updateStreamLastEventId",
+        "parameters" : [ {
+          "name" : "streamId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "lastEventId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Invalid request"
+          },
+          "403" : {
+            "description" : "Forbidden"
+          },
+          "404" : {
+            "description" : "Stream not found"
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
     "/p4pasend/notification/by-sendNotificationId-status" : {
       "put" : {
         "tags" : [ "Notification" ],
@@ -716,77 +828,6 @@
         } ]
       }
     },
-    "/p4pasend/send/streams" : {
-      "get" : {
-        "tags" : [ "Streams" ],
-        "summary" : "retrieve stream by stream id",
-        "description" : "get stream by specifying stream id",
-        "operationId" : "getStream",
-        "parameters" : [ {
-          "name" : "streamId",
-          "in" : "query",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendStreamDTO"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Invalid request",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendStreamDTO"
-                }
-              }
-            }
-          },
-          "403" : {
-            "description" : "Forbidden",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendStreamDTO"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Stream not found",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendStreamDTO"
-                }
-              }
-            }
-          },
-          "500" : {
-            "description" : "Internal server error",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendStreamDTO"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "BearerAuth" : [ ]
-        } ]
-      }
-    },
     "/p4pasend/send/streams/events" : {
       "get" : {
         "tags" : [ "Streams" ],
@@ -803,13 +844,6 @@
           }
         }, {
           "name" : "streamId",
-          "in" : "query",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "lastEventId",
           "in" : "query",
           "required" : false,
           "schema" : {
