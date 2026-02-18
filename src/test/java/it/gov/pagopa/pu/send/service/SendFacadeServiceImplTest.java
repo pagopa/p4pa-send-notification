@@ -1075,20 +1075,23 @@ class SendFacadeServiceImplTest {
     String accessToken = "accessToken";
     String notificationRequestId = "notificationRequestId";
     String sendNotificationId = "sendNotificationId";
+    String iun = "IUN";
+    long organizationId = 1L;
     LegalFactCategoryDTO category = LegalFactCategoryDTO.ANALOG_DELIVERY;
-    String legalFactId = LEGAL_FACT_ID_PREFIX + "sendLegalFact.pdf";
+    String polishedLegalFactId = "sendLegalFact.pdf";
+    String legalFactId = LEGAL_FACT_ID_PREFIX + polishedLegalFactId;
 
     SendNotificationDTO sendNotificationDTO = new SendNotificationDTO();
     sendNotificationDTO.setSendNotificationId(sendNotificationId);
     sendNotificationDTO.setStatus(NotificationStatus.COMPLETE);
-    sendNotificationDTO.setIun("IUN");
-    sendNotificationDTO.setOrganizationId(1L);
+    sendNotificationDTO.setIun(iun);
+    sendNotificationDTO.setOrganizationId(organizationId);
 
     Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
       .thenReturn(sendNotificationDTO);
 
     Mockito.when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
-      .thenReturn("sendLegalFact.pdf");
+      .thenReturn(polishedLegalFactId);
 
     //WHEN
     InvalidStatusException invalidStatusException = assertThrows(
@@ -1115,6 +1118,8 @@ class SendFacadeServiceImplTest {
     String accessToken = "accessToken";
     String notificationRequestId = "notificationRequestId";
     String sendNotificationId = "sendNotificationId";
+    String iun = "IUN";
+    long organizationId = 1L;
     LegalFactCategoryDTO category = LegalFactCategoryDTO.ANALOG_DELIVERY;
     String polishedLegalFactId = "sendLegalFact.pdf";
     String legalFactId = LEGAL_FACT_ID_PREFIX + polishedLegalFactId;
@@ -1122,8 +1127,8 @@ class SendFacadeServiceImplTest {
     SendNotificationDTO sendNotificationDTO = new SendNotificationDTO();
     sendNotificationDTO.setSendNotificationId(sendNotificationId);
     sendNotificationDTO.setStatus(NotificationStatus.ACCEPTED);
-    sendNotificationDTO.setIun("IUN");
-    sendNotificationDTO.setOrganizationId(1L);
+    sendNotificationDTO.setIun(iun);
+    sendNotificationDTO.setOrganizationId(organizationId);
 
     Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
       .thenReturn(sendNotificationDTO);
@@ -1131,9 +1136,9 @@ class SendFacadeServiceImplTest {
       .thenReturn(polishedLegalFactId);
     Mockito.when(
       sendServiceMock.getLegalFactDownloadMetadata(
-        "IUN",
+        iun,
         polishedLegalFactId,
-        1L,
+        organizationId,
         accessToken
       )
     ).thenReturn(null);
@@ -1165,8 +1170,11 @@ class SendFacadeServiceImplTest {
     String accessToken = "accessToken";
     String notificationRequestId = "notificationRequestId";
     String sendNotificationId = "sendNotificationId";
+    String iun = "IUN";
+    long organizationId = 1L;
     LegalFactCategoryDTO category = LegalFactCategoryDTO.ANALOG_DELIVERY;
-    String legalFactId = LEGAL_FACT_ID_PREFIX + "sendLegalFact.pdf";
+    String polishedLegalFactId = "sendLegalFact.pdf";
+    String legalFactId = LEGAL_FACT_ID_PREFIX + polishedLegalFactId;
 
     LegalFactDownloadMetadataResponseDTO legalFactDownloadMetadataResponseDTO =
       new LegalFactDownloadMetadataResponseDTO();
@@ -1176,17 +1184,17 @@ class SendFacadeServiceImplTest {
     SendNotificationDTO sendNotificationDTO = new SendNotificationDTO();
     sendNotificationDTO.setSendNotificationId(sendNotificationId);
     sendNotificationDTO.setStatus(NotificationStatus.ACCEPTED);
-    sendNotificationDTO.setIun("IUN");
-    sendNotificationDTO.setOrganizationId(1L);
+    sendNotificationDTO.setIun(iun);
+    sendNotificationDTO.setOrganizationId(organizationId);
 
     Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
       .thenReturn(sendNotificationDTO);
 
     Mockito.when(
       sendServiceMock.getLegalFactDownloadMetadata(
-        "IUN",
-        "sendLegalFact.pdf",
-        1L,
+        iun,
+        polishedLegalFactId,
+        organizationId,
         accessToken
       )
     ).thenReturn(legalFactDownloadMetadataResponseDTO);
@@ -1196,7 +1204,7 @@ class SendFacadeServiceImplTest {
       .thenReturn(legalFactDownloadMetadataDTO);
 
     Mockito.when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
-      .thenReturn("sendLegalFact.pdf");
+      .thenReturn(polishedLegalFactId);
 
     //WHEN
     NotFoundException notFoundException = assertThrows(
@@ -1212,7 +1220,7 @@ class SendFacadeServiceImplTest {
     //THEN
     Assertions.assertNotNull(notFoundException);
     Assertions.assertEquals(
-      "[LEGAL_FACT_URL_NOT_FOUND] Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s".formatted(sendNotificationId, category, "sendLegalFact.pdf"),
+      "[LEGAL_FACT_URL_NOT_FOUND] Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s".formatted(sendNotificationId, category, polishedLegalFactId),
       notFoundException.getMessage()
     );
   }
@@ -1223,8 +1231,12 @@ class SendFacadeServiceImplTest {
     String accessToken = "accessToken";
     String notificationRequestId = "notificationRequestId";
     String sendNotificationId = "sendNotificationId";
+    String iun = "IUN";
+    long organizationId = 1L;
     LegalFactCategoryDTO category = LegalFactCategoryDTO.ANALOG_DELIVERY;
-    String legalFactId = LEGAL_FACT_ID_PREFIX + "sendLegalFact.pdf";
+    String polishedLegalFactId = "sendLegalFact.pdf";
+    String legalFactId = LEGAL_FACT_ID_PREFIX + polishedLegalFactId;
+    byte[] testBytes = "test".getBytes();
 
     LegalFactDownloadMetadataResponseDTO legalFactDownloadMetadataResponseDTO =
       new LegalFactDownloadMetadataResponseDTO();
@@ -1234,17 +1246,17 @@ class SendFacadeServiceImplTest {
     SendNotificationDTO sendNotificationDTO = new SendNotificationDTO();
     sendNotificationDTO.setSendNotificationId(sendNotificationId);
     sendNotificationDTO.setStatus(NotificationStatus.ACCEPTED);
-    sendNotificationDTO.setIun("IUN");
-    sendNotificationDTO.setOrganizationId(1L);
+    sendNotificationDTO.setIun(iun);
+    sendNotificationDTO.setOrganizationId(organizationId);
 
     Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
       .thenReturn(sendNotificationDTO);
 
     Mockito.when(
       sendServiceMock.getLegalFactDownloadMetadata(
-        "IUN",
-        "sendLegalFact.pdf",
-        1L,
+        iun,
+        polishedLegalFactId,
+        organizationId,
         accessToken
       )
     ).thenReturn(legalFactDownloadMetadataResponseDTO);
@@ -1254,9 +1266,8 @@ class SendFacadeServiceImplTest {
       .thenReturn(legalFactDownloadMetadataDTO);
 
     Mockito.when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
-      .thenReturn("sendLegalFact.pdf");
+      .thenReturn(polishedLegalFactId);
 
-    byte[] testBytes = "test".getBytes();
     Mockito.when(
       httpClientMock.execute(
         Mockito.isA(HttpGet.class),
@@ -1269,7 +1280,7 @@ class SendFacadeServiceImplTest {
     Mockito.doNothing().when(sendNotificationServiceMock).uploadSendLegalFact(
       Mockito.eq(sendNotificationId),
       Mockito.eq(category),
-      Mockito.eq("sendLegalFact.pdf"),
+      Mockito.eq(polishedLegalFactId),
       inputStreamArgumentCaptor.capture()
     );
 
@@ -1285,12 +1296,12 @@ class SendFacadeServiceImplTest {
     Mockito.verify(sendNotificationServiceMock).uploadSendLegalFact(
       Mockito.eq(sendNotificationId),
       Mockito.eq(category),
-      Mockito.eq("sendLegalFact.pdf"),
+      Mockito.eq(polishedLegalFactId),
       inputStreamArgumentCaptor.capture()
     );
-    Assertions.assertEquals(
-      new String(new ByteArrayInputStream(testBytes).readAllBytes()),
-      new String(inputStreamArgumentCaptor.getValue().readAllBytes())
+    Assertions.assertArrayEquals(
+      new ByteArrayInputStream(testBytes).readAllBytes(),
+      inputStreamArgumentCaptor.getValue().readAllBytes()
     );
 
   }

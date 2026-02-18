@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.util;
 
 import it.gov.pagopa.pu.send.config.rest.HttpClientConfig;
+import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.ConnectionConfig;
@@ -52,7 +53,7 @@ public class HttpUtils {
             httpGet,
             response -> {
               if (response.getCode() >= 300) {
-                throw new RuntimeException("Unexpected response status: " + response.getCode());
+                throw new HttpResponseException(response.getCode(), "Unexpected response status: " + response.getCode());
               }
               return response.getEntity().getContent().readAllBytes();
             }
