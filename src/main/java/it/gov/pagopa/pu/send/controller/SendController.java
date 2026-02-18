@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
@@ -9,9 +10,12 @@ import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpServerErrorException;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -80,6 +84,20 @@ public class SendController implements SendApi {
     log.info("retrieve legal fact download metadata for sendNotificationId {} and legalFactId {} from SEND", sendNotificationId, legalFactId);
     LegalFactDownloadMetadataDTO response = sendFacadeService.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, SecurityUtils.getAccessToken());
     return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> downloadAndArchiveSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String fileName) {
+    log.info("Upload legal-fact having category {} for notificationRequestId {}", category, notificationRequestId);
+    try {
+      sendFacadeService.downloadAndArchiveSendLegalFact(notificationRequestId, category, fileName, SecurityUtils.getAccessToken());
+    } catch (IOException e) {
+      throw new HttpServerErrorException(
+        HttpStatusCode.valueOf(500),
+        e.getMessage()
+      );
+    }
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
 }

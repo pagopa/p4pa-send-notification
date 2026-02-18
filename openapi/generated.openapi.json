@@ -341,72 +341,14 @@
         } ]
       }
     },
-    "/p4pasend/notification/{sendNotificationId}/legal-facts" : {
-      "get" : {
-        "tags" : [ "Notification" ],
-        "summary" : "get legal-facts",
-        "description" : "Service retrieve legal facts",
-        "operationId" : "getLegalFacts",
-        "parameters" : [ {
-          "name" : "sendNotificationId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/LegalFactDTO"
-                  }
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Notification not found",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/LegalFactDTO"
-                  }
-                }
-              }
-            }
-          },
-          "500" : {
-            "description" : "Internal server error",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/LegalFactDTO"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "BearerAuth" : [ ]
-        } ]
-      },
+    "/p4pasend/notification-request/{notificationRequestId}/legal-facts" : {
       "post" : {
-        "tags" : [ "Notification" ],
-        "summary" : "uploadSendLegalFact",
+        "tags" : [ "Send" ],
+        "summary" : "downloadAndArchiveSendLegalFact",
         "description" : "Service to store a legal fact",
-        "operationId" : "uploadSendLegalFact",
+        "operationId" : "downloadAndArchiveSendLegalFact",
         "parameters" : [ {
-          "name" : "sendNotificationId",
+          "name" : "notificationRequestId",
           "in" : "path",
           "required" : true,
           "schema" : {
@@ -427,22 +369,6 @@
             "type" : "string"
           }
         } ],
-        "requestBody" : {
-          "content" : {
-            "multipart/form-data" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "legalFactFile" : {
-                    "type" : "string",
-                    "format" : "binary"
-                  }
-                },
-                "required" : [ "legalFactFile" ]
-              }
-            }
-          }
-        },
         "responses" : {
           "200" : {
             "description" : "OK"
@@ -1162,6 +1088,66 @@
           },
           "500" : {
             "description" : "Internal server error"
+          }
+        },
+        "security" : [ {
+          "BearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/p4pasend/notification/{sendNotificationId}/legal-facts" : {
+      "get" : {
+        "tags" : [ "Notification" ],
+        "summary" : "get legal-facts",
+        "description" : "Service retrieve legal facts",
+        "operationId" : "getLegalFacts",
+        "parameters" : [ {
+          "name" : "sendNotificationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Notification not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LegalFactDTO"
+                  }
+                }
+              }
+            }
           }
         },
         "security" : [ {

@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.controller;
 
+import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
@@ -17,7 +18,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpServerErrorException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -161,6 +164,62 @@ class SendControllerTest {
     Assertions.assertNotNull(actualResponse);
     Assertions.assertEquals(mockedResponse, actualResponse.getBody());
     Assertions.assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
+  }
+
+  @Test
+  void givenValidRequestWhenUploadLegalFactThenOk() throws IOException {
+    //Given
+    String notificationRequestId = "notificationRequestId";
+    String fileName = "test.txt";
+
+    Mockito.doNothing()
+      .when(sendFacadeServiceMock)
+      .downloadAndArchiveSendLegalFact(
+        notificationRequestId,
+        LegalFactCategoryDTO.SENDER_ACK,
+        fileName,
+        accessToken
+      );
+
+    // When
+    ResponseEntity<Void> response = sendController.downloadAndArchiveSendLegalFact(notificationRequestId, LegalFactCategoryDTO.SENDER_ACK, fileName);
+
+    //Then
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  @Test
+  void givenIOExceptionIsThrownWhenUploadLegalFactThenThrowHttpServerErrorException() throws IOException {
+    //Given
+    String notificationRequestId = "notificationRequestId";
+    String fileName = "test.txt";
+
+    Mockito.doThrow(new IOException("IO error message"))
+      .when(sendFacadeServiceMock)
+      .downloadAndArchiveSendLegalFact(
+        notificationRequestId,
+        LegalFactCategoryDTO.SENDER_ACK,
+        fileName,
+        accessToken
+      );
+
+    // When
+    HttpServerErrorException httpServerErrorException = Assertions.assertThrows(
+      HttpServerErrorException.class,
+      () -> sendController.downloadAndArchiveSendLegalFact(
+        notificationRequestId,
+        LegalFactCategoryDTO.SENDER_ACK,
+        fileName
+      )
+    );
+
+    //Then
+    Assertions.assertNotNull(httpServerErrorException);
+    Assertions.assertEquals(
+      "500 IO error message",
+      httpServerErrorException.getMessage()
+    );
   }
 
 }
