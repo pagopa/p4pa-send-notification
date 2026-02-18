@@ -50,8 +50,12 @@ public class HttpUtils {
           HttpGet httpGet = new HttpGet(preSignedURI);
           return httpClient.execute(
             httpGet,
-            response ->
-              response.getEntity().getContent().readAllBytes()
+            response -> {
+              if (response.getCode() >= 300) {
+                throw new RuntimeException("Unexpected response status: " + response.getCode());
+              }
+              return response.getEntity().getContent().readAllBytes();
+            }
           );
         } catch (Exception e) {
           String formattedErrorMessage = "Error in downloading file %s".formatted(preSignedURI.getPath());
