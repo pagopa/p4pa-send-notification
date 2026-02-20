@@ -67,7 +67,7 @@ class SendServiceTest {
     // Given
     long organizationId = 123L;
     String orgSendApiKey = "ORG_SEND_API_KEY";
-    NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
+    NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
     NewNotificationResponseDTO expectedResult = new NewNotificationResponseDTO();
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
@@ -89,7 +89,7 @@ class SendServiceTest {
     long organizationId = 123L;
     String orgSendApiKey = "ORG_SEND_API_KEY";
     String notificationRequestId = "NOTIFICATION_ID";
-    NewNotificationRequestStatusResponseV24DTO expectedResult = new NewNotificationRequestStatusResponseV24DTO();
+    NewNotificationRequestStatusResponseV25DTO expectedResult = new NewNotificationRequestStatusResponseV25DTO();
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
@@ -98,7 +98,7 @@ class SendServiceTest {
       .thenReturn(expectedResult);
 
     // When
-    NewNotificationRequestStatusResponseV24DTO result = service.notificationStatus(notificationRequestId, organizationId, accessToken);
+    NewNotificationRequestStatusResponseV25DTO result = service.notificationStatus(notificationRequestId, organizationId, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

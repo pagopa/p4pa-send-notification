@@ -28,12 +28,12 @@ public class SendServiceImpl implements SendService {
   }
 
   @Override
-  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, Long organizationId, String accessToken) {
-    return client.deliveryNotification(newNotificationRequestV24DTO, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
+  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV25DTO newNotificationRequestV25DTO, Long organizationId, String accessToken) {
+    return client.deliveryNotification(newNotificationRequestV25DTO, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
 
   @Override
-  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, Long organizationId, String accessToken) {
+  public NewNotificationRequestStatusResponseV25DTO notificationStatus(String notificationRequestId, Long organizationId, String accessToken) {
     return client.notificationStatus(notificationRequestId, getApiKeyFromOrganization(organizationId, accessToken), pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
 

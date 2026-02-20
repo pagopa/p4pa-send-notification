@@ -6,10 +6,8 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.pdnd.PdndService;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamListElementDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,8 +50,8 @@ class SendStreamServiceImplTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    StreamCreationRequestV25DTO request = new StreamCreationRequestV25DTO();
-    StreamMetadataResponseV25DTO expectedResult = new StreamMetadataResponseV25DTO();
+    StreamCreationRequestV28DTO request = new StreamCreationRequestV28DTO();
+    StreamMetadataResponseV28DTO expectedResult = new StreamMetadataResponseV28DTO();
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
@@ -61,7 +59,7 @@ class SendStreamServiceImplTest {
     Mockito.when(clientMock.createStream(request, orgSendApiKey, voucherToken)).thenReturn(expectedResult);
 
     //When
-    StreamMetadataResponseV25DTO result = service.createStream(request, organizationId, accessToken);
+    StreamMetadataResponseV28DTO result = service.createStream(request, organizationId, accessToken);
 
     //Then
     assertSame(expectedResult, result);
@@ -94,7 +92,7 @@ class SendStreamServiceImplTest {
     String orgSendApiKey = "ORG_SEND_API_KEY";
     String streamId = "streamId";
 
-    List<ProgressResponseElementV25DTO> expectedResult = List.of();
+    List<ProgressResponseElementV28DTO> expectedResult = List.of();
 
     Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
@@ -103,7 +101,7 @@ class SendStreamServiceImplTest {
       .thenReturn(expectedResult);
 
     //When
-    List<ProgressResponseElementV25DTO> result = service.getStreamEvents(streamId, null,organizationId, accessToken);
+    List<ProgressResponseElementV28DTO> result = service.getStreamEvents(streamId, null,organizationId, accessToken);
 
     //Then
     assertSame(expectedResult, result);

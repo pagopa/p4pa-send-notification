@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV28DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendStreamDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
@@ -41,12 +42,12 @@ class SendStreamControllerTest {
   void givenOrganizationIdAndStreamIdWhenGetStreamEventsThenOk(){
     Long organizationId = 1L;
     String streamId = "STREAMID";
-    List<ProgressResponseElementV25DTO> expectedResult = List.of();
+    List<ProgressResponseElementV28DTO> expectedResult = List.of();
 
     Mockito.when(sendFacadeServiceMock.getStreamEvents(streamId, organizationId, accessToken))
       .thenReturn(expectedResult);
 
-    ResponseEntity<List<ProgressResponseElementV25DTO>> response = sendStreamController
+    ResponseEntity<List<ProgressResponseElementV28DTO>> response = sendStreamController
       .getStreamEvents(organizationId, streamId);
 
     Assertions.assertNotNull(response);

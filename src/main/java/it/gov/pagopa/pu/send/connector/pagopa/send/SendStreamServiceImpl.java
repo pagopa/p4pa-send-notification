@@ -3,10 +3,8 @@ package it.gov.pagopa.pu.send.connector.pagopa.send;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.pdnd.PdndService;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamListElementDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +23,7 @@ public class SendStreamServiceImpl implements SendStreamService{
   }
 
   @Override
-  public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, Long organizationId, String accessToken) {
+  public StreamMetadataResponseV28DTO createStream(StreamCreationRequestV28DTO createStreamRequest, Long organizationId, String accessToken) {
     return client.createStream(createStreamRequest, getApiKeyFromOrganization(organizationId, accessToken),
       pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }
@@ -36,7 +34,7 @@ public class SendStreamServiceImpl implements SendStreamService{
   }
 
   @Override
-  public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId, Long organizationId, String accessToken) {
+  public List<ProgressResponseElementV28DTO> getStreamEvents(String streamId, String lastEventId, Long organizationId, String accessToken) {
     return client.getStreamEvents(streamId, lastEventId, getApiKeyFromOrganization(organizationId, accessToken),
         pdndService.resolvePdndAccessToken(organizationId, accessToken));
   }

@@ -98,12 +98,12 @@ class SendClientTest {
   @Test
   void givenValidRequestWhenDeliveryNotificationThenVerifyResponse(){
     // Given
-    NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
+    NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
 
     Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken))
       .thenReturn(newNotificationApiMock);
-    Mockito.when(newNotificationApiMock.sendNewNotificationV24(request))
+    Mockito.when(newNotificationApiMock.sendNewNotificationV25(request))
       .thenReturn(response);
 
     // When
@@ -117,15 +117,15 @@ class SendClientTest {
   void givenValidRequestWhenNotificationStatusThenVerifyResponse(){
     // Given
     String notificationRequestId = "REQUESTID";
-    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
 
     Mockito.when(apisHolder.getSenderReadB2BApiByApiKey(apiKey, voucherToken))
       .thenReturn(senderReadB2BApiMock);
-    Mockito.when(senderReadB2BApiMock.retrieveNotificationRequestStatusV24(notificationRequestId, null, null))
+    Mockito.when(senderReadB2BApiMock.retrieveNotificationRequestStatusV25(notificationRequestId, null, null))
       .thenReturn(response);
 
     // When
-    NewNotificationRequestStatusResponseV24DTO result = sendClient.notificationStatus(notificationRequestId, apiKey, voucherToken);
+    NewNotificationRequestStatusResponseV25DTO result = sendClient.notificationStatus(notificationRequestId, apiKey, voucherToken);
 
     // Then
     assertSame(response, result);
@@ -151,15 +151,15 @@ class SendClientTest {
   @Test
   void givenNewStreamWhenCreateStreamThenVerifyResponse() {
 
-    StreamCreationRequestV25DTO request = new StreamCreationRequestV25DTO();
-    StreamMetadataResponseV25DTO response = new StreamMetadataResponseV25DTO();
+    StreamCreationRequestV28DTO request = new StreamCreationRequestV28DTO();
+    StreamMetadataResponseV28DTO response = new StreamMetadataResponseV28DTO();
 
     Mockito.when(apisHolder.getStreamsApi(apiKey, voucherToken))
       .thenReturn(streamsApiMock);
-    Mockito.when(streamsApiMock.createEventStreamV25(request))
+    Mockito.when(streamsApiMock.createEventStreamV28(request))
       .thenReturn(response);
 
-    StreamMetadataResponseV25DTO result = sendClient.createStream(request, apiKey, voucherToken);
+    StreamMetadataResponseV28DTO result = sendClient.createStream(request, apiKey, voucherToken);
 
     assertSame(response, result);
   }
@@ -170,7 +170,7 @@ class SendClientTest {
 
     Mockito.when(apisHolder.getStreamsApi(apiKey, voucherToken))
       .thenReturn(streamsApiMock);
-    Mockito.when(streamsApiMock.listEventStreamsV25())
+    Mockito.when(streamsApiMock.listEventStreamsV28())
       .thenReturn(response);
 
     List<StreamListElementDTO> result = sendClient.getStreams(apiKey, voucherToken);
@@ -181,14 +181,14 @@ class SendClientTest {
   @Test
   void givenValidRequestWhenGetStreamEventsThenVerifyResponse() {
     UUID streamId = UUID.randomUUID();
-    List<ProgressResponseElementV25DTO> response = List.of();
+    List<ProgressResponseElementV28DTO> response = List.of();
 
     Mockito.when(apisHolder.getEventsApi(apiKey, voucherToken))
       .thenReturn(eventsApiMock);
-    Mockito.when(eventsApiMock.consumeEventStreamV25(streamId, null))
+    Mockito.when(eventsApiMock.consumeEventStreamV28(streamId, null))
       .thenReturn(response);
 
-    List<ProgressResponseElementV25DTO> result = sendClient.getStreamEvents(
+    List<ProgressResponseElementV28DTO> result = sendClient.getStreamEvents(
       String.valueOf(streamId), null, apiKey, voucherToken);
 
     assertSame(response, result);

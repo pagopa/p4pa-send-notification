@@ -858,7 +858,7 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                    "$ref" : "#/components/schemas/ProgressResponseElementV28DTO"
                   }
                 }
               }
@@ -871,7 +871,7 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                    "$ref" : "#/components/schemas/ProgressResponseElementV28DTO"
                   }
                 }
               }
@@ -884,7 +884,7 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                    "$ref" : "#/components/schemas/ProgressResponseElementV28DTO"
                   }
                 }
               }
@@ -897,7 +897,7 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                    "$ref" : "#/components/schemas/ProgressResponseElementV28DTO"
                   }
                 }
               }
@@ -910,7 +910,7 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/ProgressResponseElementV25DTO"
+                    "$ref" : "#/components/schemas/ProgressResponseElementV28DTO"
                   }
                 }
               }
@@ -1837,7 +1837,7 @@
         },
         "required" : [ "category", "key" ]
       },
-      "NotificationRefusedErrorV25DTO" : {
+      "NotificationRefusedErrorV27DTO" : {
         "type" : "object",
         "properties" : {
           "errorCode" : {
@@ -1849,12 +1849,16 @@
             "type" : "string",
             "maxLength" : 2048,
             "minLength" : 0
+          },
+          "recIndex" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
-      "NotificationStatusDTO" : {
+      "NotificationStatusV26DTO" : {
         "type" : "string",
-        "enum" : [ "IN_VALIDATION", "ACCEPTED", "REFUSED", "DELIVERING", "DELIVERED", "VIEWED", "EFFECTIVE_DATE", "PAID", "UNREACHABLE", "CANCELLED" ]
+        "enum" : [ "IN_VALIDATION", "ACCEPTED", "REFUSED", "DELIVERING", "DELIVERED", "VIEWED", "EFFECTIVE_DATE", "PAID", "UNREACHABLE", "CANCELLED", "RETURNED_TO_SENDER" ]
       },
       "PhysicalAddressDTO" : {
         "type" : "object",
@@ -1886,7 +1890,7 @@
         },
         "required" : [ "address", "municipality" ]
       },
-      "ProgressResponseElementV25DTO" : {
+      "ProgressResponseElementV28DTO" : {
         "type" : "object",
         "properties" : {
           "eventId" : {
@@ -1902,10 +1906,10 @@
             "pattern" : "^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$"
           },
           "newStatus" : {
-            "$ref" : "#/components/schemas/NotificationStatusDTO"
+            "$ref" : "#/components/schemas/NotificationStatusV26DTO"
           },
           "element" : {
-            "$ref" : "#/components/schemas/TimelineElementV25DTO"
+            "$ref" : "#/components/schemas/TimelineElementV27DTO"
           }
         },
         "required" : [ "element", "eventId" ]
@@ -1937,11 +1941,11 @@
         "type" : "string",
         "enum" : [ "AR_REGISTERED_LETTER", "REGISTERED_LETTER_890" ]
       },
-      "TimelineElementCategoryV23DTO" : {
+      "TimelineElementCategoryV27DTO" : {
         "type" : "string",
-        "enum" : [ "SENDER_ACK_CREATION_REQUEST", "VALIDATE_NORMALIZE_ADDRESSES_REQUEST", "NORMALIZED_ADDRESS", "REQUEST_ACCEPTED", "SEND_COURTESY_MESSAGE", "GET_ADDRESS", "PUBLIC_REGISTRY_CALL", "PUBLIC_REGISTRY_RESPONSE", "SCHEDULE_ANALOG_WORKFLOW", "SCHEDULE_DIGITAL_WORKFLOW", "PREPARE_DIGITAL_DOMICILE", "SEND_DIGITAL_DOMICILE", "SEND_DIGITAL_PROGRESS", "SEND_DIGITAL_FEEDBACK", "REFINEMENT", "SCHEDULE_REFINEMENT", "DIGITAL_DELIVERY_CREATION_REQUEST", "DIGITAL_SUCCESS_WORKFLOW", "DIGITAL_FAILURE_WORKFLOW", "ANALOG_SUCCESS_WORKFLOW", "ANALOG_FAILURE_WORKFLOW", "PREPARE_SIMPLE_REGISTERED_LETTER", "SEND_SIMPLE_REGISTERED_LETTER", "SEND_SIMPLE_REGISTERED_LETTER_PROGRESS", "NOTIFICATION_VIEWED_CREATION_REQUEST", "NOTIFICATION_VIEWED", "PREPARE_ANALOG_DOMICILE", "SEND_ANALOG_DOMICILE", "SEND_ANALOG_PROGRESS", "SEND_ANALOG_FEEDBACK", "PAYMENT", "COMPLETELY_UNREACHABLE", "COMPLETELY_UNREACHABLE_CREATION_REQUEST", "REQUEST_REFUSED", "AAR_CREATION_REQUEST", "AAR_GENERATION", "NOT_HANDLED", "PROBABLE_SCHEDULING_ANALOG_DATE", "NOTIFICATION_CANCELLATION_REQUEST", "NOTIFICATION_CANCELLED", "PREPARE_ANALOG_DOMICILE_FAILURE", "NOTIFICATION_RADD_RETRIEVED" ]
+        "enum" : [ "SENDER_ACK_CREATION_REQUEST", "VALIDATE_NORMALIZE_ADDRESSES_REQUEST", "NORMALIZED_ADDRESS", "REQUEST_ACCEPTED", "SEND_COURTESY_MESSAGE", "GET_ADDRESS", "PUBLIC_REGISTRY_CALL", "PUBLIC_REGISTRY_RESPONSE", "SCHEDULE_ANALOG_WORKFLOW", "SCHEDULE_DIGITAL_WORKFLOW", "PREPARE_DIGITAL_DOMICILE", "SEND_DIGITAL_DOMICILE", "SEND_DIGITAL_PROGRESS", "SEND_DIGITAL_FEEDBACK", "REFINEMENT", "SCHEDULE_REFINEMENT", "DIGITAL_DELIVERY_CREATION_REQUEST", "DIGITAL_SUCCESS_WORKFLOW", "DIGITAL_FAILURE_WORKFLOW", "ANALOG_SUCCESS_WORKFLOW", "ANALOG_FAILURE_WORKFLOW", "PREPARE_SIMPLE_REGISTERED_LETTER", "SEND_SIMPLE_REGISTERED_LETTER", "SEND_SIMPLE_REGISTERED_LETTER_PROGRESS", "NOTIFICATION_VIEWED_CREATION_REQUEST", "NOTIFICATION_VIEWED", "PREPARE_ANALOG_DOMICILE", "SEND_ANALOG_DOMICILE", "SEND_ANALOG_PROGRESS", "SEND_ANALOG_FEEDBACK", "PAYMENT", "COMPLETELY_UNREACHABLE", "COMPLETELY_UNREACHABLE_CREATION_REQUEST", "REQUEST_REFUSED", "AAR_CREATION_REQUEST", "AAR_GENERATION", "NOT_HANDLED", "PROBABLE_SCHEDULING_ANALOG_DATE", "NOTIFICATION_CANCELLATION_REQUEST", "NOTIFICATION_CANCELLED", "PREPARE_ANALOG_DOMICILE_FAILURE", "NOTIFICATION_RADD_RETRIEVED", "ANALOG_WORKFLOW_RECIPIENT_DECEASED", "PUBLIC_REGISTRY_VALIDATION_CALL", "PUBLIC_REGISTRY_VALIDATION_RESPONSE" ]
       },
-      "TimelineElementDetailsV25DTO" : {
+      "TimelineElementDetailsV27DTO" : {
         "type" : "object",
         "properties" : {
           "legalFactId" : {
@@ -1958,6 +1962,21 @@
           },
           "normalizedAddress" : {
             "$ref" : "#/components/schemas/PhysicalAddressDTO"
+          },
+          "notificationRequestId" : {
+            "type" : "string"
+          },
+          "paProtocolNumber" : {
+            "type" : "string",
+            "maxLength" : 256,
+            "minLength" : 0,
+            "pattern" : "^.*$"
+          },
+          "idempotenceToken" : {
+            "type" : "string",
+            "maxLength" : 256,
+            "minLength" : 0,
+            "pattern" : "^[ -~]*$"
           },
           "generatedAarUrl" : {
             "type" : "string",
@@ -2032,7 +2051,7 @@
           "refusalReasons" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/NotificationRefusedErrorV25DTO"
+              "$ref" : "#/components/schemas/NotificationRefusedErrorV27DTO"
             }
           },
           "schedulingDate" : {
@@ -2207,11 +2226,23 @@
             "type" : "string",
             "maxLength" : 10,
             "minLength" : 0
+          },
+          "recIndexes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "registry" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 0
           }
         },
-        "required" : [ "aarKey", "attemptDate", "cancellationRequestId", "contactPhase", "deliveryMode", "digitalAddress", "digitalAddressSource", "eventTimestamp", "generatedAarUrl", "isAvailable", "lastAttemptDate", "normalizedAddress", "notRefinedRecipientIndexes", "notificationCost", "notificationDate", "numberOfPages", "oldAddress", "paymentSourceChannel", "physicalAddress", "raddTransactionId", "raddType", "reason", "reasonCode", "recIndex", "recipientType", "responseStatus", "retryNumber", "schedulingAnalogDate", "sendDate", "sentAttemptMade", "serviceLevel" ]
+        "required" : [ "aarKey", "attemptDate", "cancellationRequestId", "contactPhase", "deliveryMode", "digitalAddress", "digitalAddressSource", "eventTimestamp", "generatedAarUrl", "isAvailable", "lastAttemptDate", "normalizedAddress", "notRefinedRecipientIndexes", "notificationCost", "notificationDate", "numberOfPages", "oldAddress", "paymentSourceChannel", "physicalAddress", "raddTransactionId", "raddType", "reason", "reasonCode", "recIndex", "recIndexes", "recipientType", "responseStatus", "retryNumber", "schedulingAnalogDate", "sendDate", "sentAttemptMade", "serviceLevel" ]
       },
-      "TimelineElementV25DTO" : {
+      "TimelineElementV27DTO" : {
         "type" : "object",
         "properties" : {
           "elementId" : {
@@ -2243,10 +2274,10 @@
             }
           },
           "category" : {
-            "$ref" : "#/components/schemas/TimelineElementCategoryV23DTO"
+            "$ref" : "#/components/schemas/TimelineElementCategoryV27DTO"
           },
           "details" : {
-            "$ref" : "#/components/schemas/TimelineElementDetailsV25DTO"
+            "$ref" : "#/components/schemas/TimelineElementDetailsV27DTO"
           }
         }
       },
