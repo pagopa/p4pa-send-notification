@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
 import it.gov.pagopa.pu.common.pii.citizen.repository.PersonalDataRepository;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
@@ -12,10 +13,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,9 +52,36 @@ public class PersonalDataService {
       .orElseThrow(() -> new NotFoundException("[PII_ENTITY_NOT_FOUND] PII Entity with id " + personalDataId + " not found"));
   }
 
+  /**
+   * It will inspect the cache in order to resolve the personalDataIds provided, returning the results and the missing ids
+   */
+  private <T> Pair<HashMap<Long, T>, Set<Long>> getAllThroughCache(Set<Long> personalDataIds, Class<T> classType) {
+    HashMap<Long, T> cacheHit = HashMap.newHashMap(personalDataIds.size());
+    Set<Long> missingIds = personalDataIds.stream()
+      .filter(pId -> {
+        T pii = piiCache.get(pId, classType);
+        if (pii != null) {
+          cacheHit.put(pId, pii);
+          return false;
+        } else {
+          return true;
+        }
+      })
+      .collect(Collectors.toSet());
+    return Pair.of(cacheHit, missingIds);
+  }
+
   public <T> Map<Long, T> getAll(Set<Long> personalDataIds, Class<T> classType) {
-    List<PersonalData> pData = repository.findAllById(personalDataIds);
-    return getAll(pData, personalDataIds, classType);
+    Pair<HashMap<Long, T>, Set<Long>> cacheHit2MissingIds = getAllThroughCache(personalDataIds, classType);
+    HashMap<Long, T> result = cacheHit2MissingIds.getLeft();
+    Set<Long> cacheMissIds = cacheHit2MissingIds.getRight();
+
+    if(result.size() != personalDataIds.size()) {
+      List<PersonalData> pData = repository.findAllById(cacheMissIds);
+      result.putAll(getAll(pData, cacheMissIds, classType));
+    }
+
+    return result;
   }
 
   protected <T> Map<Long, T> getAll(List<PersonalData> pData, Set<Long> personalDataIds, Class<T> classType) {
