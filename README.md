@@ -83,24 +83,30 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 #### 🔁 Integrations
 
 ##### 🗄️ Resources
-| ENV                                           | DESCRIPTION                                                                           | DEFAULT                                                       |
-|-----------------------------------------------|---------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| SHOW_SQL                                      | To print SQL statements                                                               | false                                                         |
-| CITIZENDB_URL                                 | Citizen PostgreSQL connection string (to use in order to customize the entire string) | jdbc:postgresql://${CITIZENDB_HOST}:${CITIZENDB_PORT}/citizen |
-| CITIZENDB_HOST                                | Citizen PostgreSQL Host                                                               | localhost                                                     |
-| CITIZENDB_PORT                                | Citizen PostgreSQL port                                                               | 5432                                                          |
-| CITIZENDB_NAME                                | Citizen PostgreSQL Database name                                                      | payhub                                                        |
-| CITIZENDB_USER                                | Citizen PostgreSQL username                                                           |                                                               |
-| CITIZENDB_PASSWORD                            | Citizen PostgreSQL password                                                           |                                                               |
-| MONGODB_URI                                   | Mongo connection string                                                               | mongodb://localhost:27017                                     |
-| MONGODB_DBNAME                                | Mongo db name                                                                         | payhub                                                        |
-| MONGODB_CONNECTIONPOOL_MAX_SIZE               | Mongo connection pool max size                                                        | 100                                                           |
-| MONGODB_CONNECTIONPOOL_MIN_SIZE               | Mongo connection pool max size                                                        | 0                                                             |
-| MONGODB_CONNECTIONPOOL_MAX_WAIT_MS            | Timeout milliseconds                                                                  | 120000                                                        |
-| MONGODB_CONNECTIONPOOL_MAX_CONNECTION_LIFE_MS | Connection lifetime (milliseconds)                                                    | 0                                                             |
-| MONGODB_CONNECTIONPOOL_MAX_CONNECTION_IDLE_MS | Connection idle lifetime (milliseconds)                                               | 120000                                                        |
-| MONGODB_CONNECTIONPOOL_MAX_CONNECTING         | Max parallel creating connections                                                     | 2                                                             |
-| SHARED_FOLDER_ROOT                            | Absolute path towards shared folder on file system                                    | /shared                                                       |
+| ENV                                              | DESCRIPTION                                                                           | DEFAULT                                                       |
+|--------------------------------------------------|---------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| SHOW_SQL                                         | To print SQL statements                                                               | false                                                         |
+| CITIZENDB_URL                                    | Citizen PostgreSQL connection string (to use in order to customize the entire string) | jdbc:postgresql://${CITIZENDB_HOST}:${CITIZENDB_PORT}/citizen |
+| CITIZENDB_HOST                                   | Citizen PostgreSQL Host                                                               | localhost                                                     |
+| CITIZENDB_PORT                                   | Citizen PostgreSQL port                                                               | 5432                                                          |
+| CITIZENDB_NAME                                   | Citizen PostgreSQL Database name                                                      | payhub                                                        |
+| CITIZENDB_USER                                   | Citizen PostgreSQL username                                                           |                                                               |
+| CITIZENDB_PASSWORD                               | Citizen PostgreSQL password                                                           |                                                               |
+| CITIZENDB_CONNECTION_IDLE_TIMEOUT_MILLISECONDS   | Citizen PostgreSQL connection idle timeout (milliseconds)                             | 600000                                                        |
+| CITIZENDB_CONNECTION_TIMEOUT_MILLISECONDS        | Citizen PostgreSQL connection timeout (milliseconds)                                  | 30000                                                         |
+| CITIZENDB_CONNECTION_KEEPALIVE_TIME_MILLISECONDS | Citizen PostgreSQL connection keepalive time (milliseconds)                           | 120000                                                        |
+| CITIZENDB_CONNECTION_MAX_LIFETIME_MILLISECONDS   | Citizen PostgreSQL connection max lifetime (milliseconds)                             | 1800000                                                       |
+| CITIZENDB_CONNECTION_MAX_POOL_SIZE               | Citizen PostgreSQL connection max pool size                                           | 10                                                            |
+| CITIZENDB_CONNECTION_MIN_IDLE                    | Citizen PostgreSQL connection min idle                                                | 10                                                            |
+| MONGODB_URI                                      | Mongo connection string                                                               | mongodb://localhost:27017                                     |
+| MONGODB_DBNAME                                   | Mongo db name                                                                         | payhub                                                        |
+| MONGODB_CONNECTIONPOOL_MAX_SIZE                  | Mongo connection pool max size                                                        | 100                                                           |
+| MONGODB_CONNECTIONPOOL_MIN_SIZE                  | Mongo connection pool max size                                                        | 0                                                             |
+| MONGODB_CONNECTIONPOOL_MAX_WAIT_MS               | Timeout milliseconds                                                                  | 120000                                                        |
+| MONGODB_CONNECTIONPOOL_MAX_CONNECTION_LIFE_MS    | Connection lifetime (milliseconds)                                                    | 0                                                             |
+| MONGODB_CONNECTIONPOOL_MAX_CONNECTION_IDLE_MS    | Connection idle lifetime (milliseconds)                                               | 120000                                                        |
+| MONGODB_CONNECTIONPOOL_MAX_CONNECTING            | Max parallel creating connections                                                     | 2                                                             |
+| SHARED_FOLDER_ROOT                               | Absolute path towards shared folder on file system                                    | /shared                                                       |
 
 ##### 📋 [Caching](https://pagopa.atlassian.net/wiki/spaces/SPAC/pages/1542128077/Caching)
 | ENV                           | DESCRIPTION                                | DEFAULT |
