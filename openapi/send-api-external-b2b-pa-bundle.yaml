@@ -575,6 +575,7 @@ servers:
     description: Ambiente di collaudo
 security:
   - ApiKeyAuth: []
+  - BearerAuth: []
 tags:
   - name: HealthCheck
     description: >-
@@ -10675,3 +10676,6 @@ components:
       type: apiKey
       in: header
       name: x-api-key
+    BearerAuth:
+      type: http
+      scheme: bearer
