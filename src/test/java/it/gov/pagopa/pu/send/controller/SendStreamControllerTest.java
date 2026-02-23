@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.send.controller;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV28DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendStreamDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
