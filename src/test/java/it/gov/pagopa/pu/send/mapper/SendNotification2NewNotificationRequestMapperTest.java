@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PhysicalCommunicationTypeEnum;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -38,7 +38,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
 
     //when
-    NewNotificationRequestV24DTO result = mapper.apply(noPII);
+    NewNotificationRequestV25DTO result = mapper.apply(noPII);
 
     //then
     TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate");
@@ -60,7 +60,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals(100, result.getPaFee());
     assertEquals(22, result.getVat());
     assertEquals("2025-12-31", result.getPaymentExpirationDate());
-    assertEquals(NewNotificationRequestV24DTO.PagoPaIntModeEnum.SYNC, result.getPagoPaIntMode());
+    assertEquals(NewNotificationRequestV25DTO.PagoPaIntModeEnum.SYNC, result.getPagoPaIntMode());
   }
 
   @Test
@@ -80,7 +80,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
 
     //when
-    NewNotificationRequestV24DTO result = mapper.apply(noPII);
+    NewNotificationRequestV25DTO result = mapper.apply(noPII);
 
     //then
     TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate", "pagoPaIntMode", "paFee", "vat");
@@ -118,7 +118,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
 
     //when
-    NewNotificationRequestV24DTO result = mapper.apply(noPII);
+    NewNotificationRequestV25DTO result = mapper.apply(noPII);
 
     //then
     TestUtils.checkNotNullFields(result, "_abstract", "cancelledIun", "group", "amount", "paymentExpirationDate", "pagoPaIntMode", "paFee", "vat");
@@ -137,8 +137,8 @@ class SendNotification2NewNotificationRequestMapperTest {
     assertEquals("010101P", result.getTaxonomyCode());
   }
 
-  private static void checkRecipient(NewNotificationRequestV24DTO result) {
-    NotificationRecipientV23DTO recipient = result.getRecipients().getFirst();
+  private static void checkRecipient(NewNotificationRequestV25DTO result) {
+    NotificationRecipientV24DTO recipient = result.getRecipients().getFirst();
     assertEquals("BNRMHL75C06G702B", recipient.getTaxId());
     assertEquals("ROSSI MARIO", recipient.getDenomination());
 
@@ -168,7 +168,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     }
   }
 
-  private static void checkDocuments(NewNotificationRequestV24DTO result) {
+  private static void checkDocuments(NewNotificationRequestV25DTO result) {
     NotificationDocumentDTO resultDocument = result.getDocuments().getFirst();
     assertEquals("sha256", resultDocument.getDigests().getSha256());
     assertEquals("application/pdf", resultDocument.getContentType());

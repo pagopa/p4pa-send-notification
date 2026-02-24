@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV28DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendStreamDTO;
 import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -13,13 +13,13 @@ class SendStreamMapperTest {
 
   public static final UUID STREAM_ID = UUID.randomUUID();
   public static final Long ORGANIZATION_ID = 1L;
-  public static final StreamMetadataResponseV25DTO.EventTypeEnum EVENT_TYPE_ENUM = StreamMetadataResponseV25DTO.EventTypeEnum.STATUS;
+  public static final StreamMetadataResponseV28DTO.EventTypeEnum EVENT_TYPE_ENUM = StreamMetadataResponseV28DTO.EventTypeEnum.STATUS;
   public static final String TITLE = "title";
   public static final String LAST_EVENT_ID = "lastEventId";
   private final SendStreamMapper sendStreamMapper = new SendStreamMapper();
 
   @Test
-  void testMapToStreamMetadataResponseV25DTO() {
+  void testMapToStreamMetadataResponseV28DTO() {
     //Given
     SendStream sendStream =
       SendStream.builder()
@@ -27,24 +27,24 @@ class SendStreamMapperTest {
         .title(TITLE)
         .eventType(EVENT_TYPE_ENUM.getValue())
         .build();
-    StreamMetadataResponseV25DTO expectedResponse =
-       new StreamMetadataResponseV25DTO();
+    StreamMetadataResponseV28DTO expectedResponse =
+       new StreamMetadataResponseV28DTO();
     expectedResponse.setStreamId(STREAM_ID);
     expectedResponse.setTitle(TITLE);
     expectedResponse.setEventType(EVENT_TYPE_ENUM);
     //When
-    StreamMetadataResponseV25DTO actualResponse =
-      sendStreamMapper.mapToStreamMetadataResponseV25DTO(sendStream);
+    StreamMetadataResponseV28DTO actualResponse =
+      sendStreamMapper.mapToStreamMetadataResponseV28DTO(sendStream);
     //Then
     Assertions.assertEquals(expectedResponse, actualResponse);
-    TestUtils.checkNotNullFields(actualResponse, "disabledDate", "activationDate", "version");
+    TestUtils.checkNotNullFields(actualResponse, "disabledDate", "activationDate", "version", "waitForAccepted");
   }
 
   @Test
   void testMapToSendStream() {
     //Given
-    StreamMetadataResponseV25DTO streamMetadataResponse =
-      new StreamMetadataResponseV25DTO();
+    StreamMetadataResponseV28DTO streamMetadataResponse =
+      new StreamMetadataResponseV28DTO();
     streamMetadataResponse.setStreamId(STREAM_ID);
     streamMetadataResponse.setTitle(TITLE);
     streamMetadataResponse.setEventType(EVENT_TYPE_ENUM);

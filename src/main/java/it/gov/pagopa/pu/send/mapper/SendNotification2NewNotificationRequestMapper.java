@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PagoPaIntModeEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO.PhysicalCommunicationTypeEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV23DTO.RecipientTypeEnum;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV25DTO.PagoPaIntModeEnum;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV24DTO.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipient;
 import it.gov.pagopa.pu.send.dto.SendNotification;
@@ -30,10 +30,10 @@ public class SendNotification2NewNotificationRequestMapper {
     this.sendNotificationPIIMapper = sendNotificationPIIMapper;
   }
 
-  public NewNotificationRequestV24DTO apply(SendNotificationNoPII sendNotificationNoPII) {
+  public NewNotificationRequestV25DTO apply(SendNotificationNoPII sendNotificationNoPII) {
     SendNotification sendNotification = sendNotificationPIIMapper.map(sendNotificationNoPII);
 
-    NewNotificationRequestV24DTO newNotification = new NewNotificationRequestV24DTO();
+    NewNotificationRequestV25DTO newNotification = new NewNotificationRequestV25DTO();
     newNotification.setIdempotenceToken(sendNotification.getSendNotificationId());
     newNotification.setPaProtocolNumber(sendNotification.getPaProtocolNumber());
     newNotification.setSubject("Notifica Piattaforma Unitaria");
@@ -68,10 +68,10 @@ public class SendNotification2NewNotificationRequestMapper {
     return newNotification;
   }
 
-  private List<NotificationRecipientV23DTO> setRecipients(SendNotification sendNotification) {
+  private List<NotificationRecipientV24DTO> setRecipients(SendNotification sendNotification) {
     return sendNotification.getPuRecipients().stream().map(
       puRecipient -> {
-        NotificationRecipientV23DTO notificationRecipient = new NotificationRecipientV23DTO();
+        NotificationRecipientV24DTO notificationRecipient = new NotificationRecipientV24DTO();
         notificationRecipient.setRecipientType(RecipientTypeEnum.valueOf(puRecipient.getRecipient().getRecipientType().getValue()));
         notificationRecipient.taxId(puRecipient.getRecipient().getTaxId());
         notificationRecipient.denomination(puRecipient.getRecipient().getDenomination());

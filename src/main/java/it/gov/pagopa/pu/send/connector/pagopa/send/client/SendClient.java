@@ -21,32 +21,32 @@ public class SendClient {
       .presignedUploadRequest(preLoadRequestDTO);
   }
 
-  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV24DTO newNotificationRequestV24DTO, String apiKey, String pdndAccessToken) {
+  public NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV25DTO newNotificationRequestV25DTO, String apiKey, String pdndAccessToken) {
     return apisHolder.getNewNotificationApiByApiKey(apiKey, pdndAccessToken)
-      .sendNewNotificationV24(newNotificationRequestV24DTO);
+      .sendNewNotificationV25(newNotificationRequestV25DTO);
   }
 
-  public NewNotificationRequestStatusResponseV24DTO notificationStatus(String notificationRequestId, String apiKey, String pdndAccessToken) {
+  public NewNotificationRequestStatusResponseV25DTO notificationStatus(String notificationRequestId, String apiKey, String pdndAccessToken) {
     return apisHolder.getSenderReadB2BApiByApiKey(apiKey, pdndAccessToken)
-      .retrieveNotificationRequestStatusV24(notificationRequestId, null, null);
+      .retrieveNotificationRequestStatusV25(notificationRequestId, null, null);
   }
 
   public NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, String apiKey, String pdndAccessToken) {
     return apisHolder.getNotificationPriceApi(apiKey, pdndAccessToken).retrieveNotificationPriceV23(paTaxId, noticeCode);
   }
 
-  public StreamMetadataResponseV25DTO createStream(StreamCreationRequestV25DTO createStreamRequest, String apikey, String pdndAccessToken){
+  public StreamMetadataResponseV28DTO createStream(StreamCreationRequestV28DTO createStreamRequest, String apikey, String pdndAccessToken){
     return apisHolder.getStreamsApi(apikey, pdndAccessToken)
-      .createEventStreamV25(createStreamRequest);
+      .createEventStreamV28(createStreamRequest);
   }
 
   public List<StreamListElementDTO> getStreams(String apikey, String pdndAccessToken){
-    return apisHolder.getStreamsApi(apikey, pdndAccessToken).listEventStreamsV25();
+    return apisHolder.getStreamsApi(apikey, pdndAccessToken).listEventStreamsV28();
   }
 
-  public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId, String apiKey, String pdndAccessToken){
+  public List<ProgressResponseElementV28DTO> getStreamEvents(String streamId, String lastEventId, String apiKey, String pdndAccessToken){
     return apisHolder.getEventsApi(apiKey, pdndAccessToken)
-      .consumeEventStreamV25(UUID.fromString(streamId), lastEventId);
+      .consumeEventStreamV28(UUID.fromString(streamId), lastEventId);
   }
 
   public List<LegalFactListElementV20DTO> getLegalFacts(String iun, String apiKey, String pdndAccessToken){

@@ -870,7 +870,7 @@ components:
     StreamEventsResponse:
       type: array
       items:
-        type: "ProgressResponseElementV25DTO"
+        type: "ProgressResponseElementV28DTO"
     LegalFactsDTO:
       description: legal fact list related to a SEND notification
       type: array

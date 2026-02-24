@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV25DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV28DTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
@@ -23,10 +23,10 @@ public interface SendFacadeService {
    * Get Stream Events
    * If streamId in input is null, find last stream for this organization and take streamId
    * @param streamId stream identifier (optional)
-   * @return List&lt;ProgressResponseElementV25DTO&gt;
+   * @return List&lt;ProgressResponseElementV28DTO&gt;
    * @throws NotFoundException if doesn't exist at leat one stream
    */
-  List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, Long organizationId, String accessToken);
+  List<ProgressResponseElementV28DTO> getStreamEvents(String streamId, Long organizationId, String accessToken);
   void updateStreamLastEventId(String streamId, String lastEventId);
   SendStreamDTO getStream(String streamId, String accessToken);
   List<LegalFactListElementDTO> retrieveLegalFacts(String sendNotificationId, String accessToken);
