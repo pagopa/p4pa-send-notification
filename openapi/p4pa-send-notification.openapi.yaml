@@ -469,10 +469,6 @@ paths:
           in: query
           schema:
             type: string
-        - name: lastEventId
-          in: query
-          schema:
-            type: string
       responses:
         '200':
           description: OK
@@ -488,7 +484,7 @@ paths:
           description: Streams not found
         '500':
           description: Internal server error
-  /send/streams:
+  /send/streams/{streamId}:
     get:
       tags:
         - Streams
@@ -497,7 +493,7 @@ paths:
       operationId: getStream
       parameters:
         - name: streamId
-          in: query
+          in: path
           required: true
           schema:
             type: string
@@ -508,6 +504,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SendStreamDTO'
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Stream not found
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - Streams
+      summary: update stream LastEventId
+      description: update stream last event ID
+      operationId: updateStreamLastEventId
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: lastEventId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
         '400':
           description: Invalid request
         '403':
@@ -846,7 +870,7 @@ components:
     StreamEventsResponse:
       type: array
       items:
-        type: "ProgressResponseElementV25DTO"
+        type: "ProgressResponseElementV28DTO"
     LegalFactsDTO:
       description: legal fact list related to a SEND notification
       type: array

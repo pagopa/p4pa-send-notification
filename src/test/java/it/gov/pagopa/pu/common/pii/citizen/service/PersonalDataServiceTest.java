@@ -134,16 +134,62 @@ class PersonalDataServiceTest {
     Set<Long> personalDataIds = Set.of(pId1, pId2);
     SendNotificationPIIDTO pii1 = podamFactory.manufacturePojo(CLASS_PII_DTO);
     SendNotificationPIIDTO pii2 = podamFactory.manufacturePojo(CLASS_PII_DTO);
+
+    Set<Long> cacheMissedPIds = Set.of(pId1);
     cache.put(pId2, pii2);
 
-    Mockito.when(repositoryMock.findAllById(personalDataIds)).thenReturn(List.of(
-      PersonalData.builder().id(pId1).data(new byte[0]).type(PERSONAL_DATA_TYPE.name()).build(),
-      PersonalData.builder().id(pId2).data(new byte[0]).type(PERSONAL_DATA_TYPE.name()).build()
+    Mockito.when(repositoryMock.findAllById(cacheMissedPIds)).thenReturn(List.of(
+      PersonalData.builder().id(pId1).data(new byte[0]).type(PERSONAL_DATA_TYPE.name()).build()
     ));
     Mockito.when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(pii1);
 
     // When
     Map<Long, SendNotificationPIIDTO> results = service.getAll(personalDataIds, CLASS_PII_DTO);
+
+    //Then
+    Assertions.assertTrue(EqualsBuilder.reflectionEquals(pii1, results.get(pId1), true, null, true));
+    Assertions.assertSame(pii2, results.get(pId2));
+  }
+
+  @Test
+  void givenCompleteCachedPDataIdsWhenGetAllThenOk() {
+    // Given
+    long pId1 = 1L;
+    long pId2 = 2L;
+    Set<Long> personalDataIds = Set.of(pId1, pId2);
+    SendNotificationPIIDTO pii1 = podamFactory.manufacturePojo(CLASS_PII_DTO);
+    SendNotificationPIIDTO pii2 = podamFactory.manufacturePojo(CLASS_PII_DTO);
+
+    cache.put(pId1, pii1);
+    cache.put(pId2, pii2);
+
+    // When
+    Map<Long, SendNotificationPIIDTO> results = service.getAll(personalDataIds, CLASS_PII_DTO);
+
+    //Then
+    Assertions.assertSame(pii1, results.get(pId1));
+    Assertions.assertSame(pii2, results.get(pId2));
+  }
+
+  @Test
+  void givenCachedPiiWhenGetAllProtectedThenOk() {
+    // Given
+    long pId1 = 1L;
+    long pId2 = 2L;
+    Set<Long> pDataIds = Set.of(pId1, pId2);
+    SendNotificationPIIDTO pii1 = podamFactory.manufacturePojo(CLASS_PII_DTO);
+    SendNotificationPIIDTO pii2 = podamFactory.manufacturePojo(CLASS_PII_DTO);
+    cache.put(pId2, pii2);
+
+    List<PersonalData> pData = List.of(
+      PersonalData.builder().id(pId1).data(new byte[0]).type(PERSONAL_DATA_TYPE.name()).build(),
+      PersonalData.builder().id(pId2).data(new byte[0]).type(PERSONAL_DATA_TYPE.name()).build()
+    );
+
+    Mockito.when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(pii1);
+
+    // When
+    Map<Long, SendNotificationPIIDTO> results = service.getAll(pData, pDataIds, CLASS_PII_DTO);
 
     //Then
     Assertions.assertTrue(EqualsBuilder.reflectionEquals(pii1, results.get(pId1), true, null, true));

@@ -3,7 +3,7 @@ package it.gov.pagopa.pu.send.service;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV25DTO.EventTypeEnum;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV28DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -181,7 +182,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if (!notification.getStatus().equals(NotificationStatus.COMPLETE) && !notification.getStatus().equals(NotificationStatus.ACCEPTED))
       NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
 
-    NewNotificationRequestStatusResponseV24DTO notificationStatus = sendService.notificationStatus(notification.getNotificationRequestId(), notification.getOrganizationId(), accessToken);
+    NewNotificationRequestStatusResponseV25DTO notificationStatus = sendService.notificationStatus(notification.getNotificationRequestId(), notification.getOrganizationId(), accessToken);
     if (notification.getIun() == null && notificationStatus != null && notificationStatus.getIun() != null) {
       sendNotificationNoPIIRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
       notification.setIun(notificationStatus.getIun());
@@ -191,7 +192,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     if (notificationStatus != null && notificationStatus.getErrors() != null && !notificationStatus.getErrors().isEmpty()) {
       sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
-        .map(ProblemErrorDTO::getDetail).toList());
+        .map(NotificationRequestRefusedProblemErrorDTO::getDetail).toList());
       sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
       sendNotificationDTO.setStatus(NotificationStatus.ERROR);
     }
@@ -217,8 +218,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public List<ProgressResponseElementV25DTO> getStreamEvents(String streamId, String lastEventId,
-                                                             Long organizationId, String accessToken) {
+  public List<ProgressResponseElementV28DTO> getStreamEvents(String streamId, Long organizationId, String accessToken) {
     if (StringUtils.isBlank(streamId)) {
       List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
       if (streams.isEmpty())
@@ -226,8 +226,13 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
       streamId = String.valueOf(streams.getLast().getStreamId());
     }
+    SendStreamDTO stream = this.getStream(streamId, accessToken); //for fetching lastEventId from cache
+    return sendStreamService.getStreamEvents(streamId, stream.getLastEventId(), organizationId, accessToken);
+  }
+
+  @Override
+  public void updateStreamLastEventId(String streamId, String lastEventId) {
     sendStreamRepository.updateLastEventId(streamId, lastEventId);
-    return sendStreamService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
   }
 
   @Override
@@ -243,6 +248,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private boolean cachedStreamDoesExistOnSend(String streamId, Long organizationId, String accessToken) {
     return sendStreamService.getStreams(organizationId, accessToken).stream()
       .map(StreamListElementDTO::getStreamId)
+      .filter(Objects::nonNull)
       .anyMatch(s -> s.toString().equals(streamId));
   }
 
@@ -299,17 +305,17 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   private void createStream(Long organizationId, String accessToken) {
-    StreamCreationRequestV25DTO request = new StreamCreationRequestV25DTO();
+    StreamCreationRequestV28DTO request = new StreamCreationRequestV28DTO();
     request.setTitle("SEND-STREAM_" + organizationId);
     request.setEventType(EventTypeEnum.STATUS);
 
     List<SendStream> sendStreamList = sendStreamRepository.findByOrganizationId(organizationId);
     if(sendStreamList.isEmpty()) {
-      StreamMetadataResponseV25DTO streamMetadataResponseV25DTO =
+      StreamMetadataResponseV28DTO streamMetadataResponseV28DTO =
         sendStreamService.createStream(request, organizationId, accessToken);
-      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV25DTO, organizationId));
+      sendStreamRepository.save(sendStreamMapper.mapToSendStream(streamMetadataResponseV28DTO, organizationId));
       workflowService.sendNotificationStreamConsume(
-        streamMetadataResponseV25DTO.getStreamId().toString(),
+        streamMetadataResponseV28DTO.getStreamId().toString(),
         accessToken
       );
     }

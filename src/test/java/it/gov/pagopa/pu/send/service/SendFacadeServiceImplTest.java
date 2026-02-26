@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV25DTO.EventTypeEnum;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV28DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -200,14 +200,14 @@ class SendFacadeServiceImplTest {
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
     response.setNotificationRequestId("NOTIFICATIONREQUESTID");
 
-    StreamCreationRequestV25DTO streamCreationRequestV25DTO = new StreamCreationRequestV25DTO();
-    streamCreationRequestV25DTO.setTitle(title);
-    streamCreationRequestV25DTO.setEventType(StreamCreationRequestV25DTO.EventTypeEnum.STATUS);
+    StreamCreationRequestV28DTO streamCreationRequestV28DTO = new StreamCreationRequestV28DTO();
+    streamCreationRequestV28DTO.setTitle(title);
+    streamCreationRequestV28DTO.setEventType(StreamCreationRequestV28DTO.EventTypeEnum.STATUS);
 
-    StreamMetadataResponseV25DTO streamMetadataResponseV25DTO = new StreamMetadataResponseV25DTO();
-    streamMetadataResponseV25DTO.setStreamId(sendStreamId);
-    streamMetadataResponseV25DTO.setTitle(title);
-    streamMetadataResponseV25DTO.setEventType(EventTypeEnum.STATUS);
+    StreamMetadataResponseV28DTO streamMetadataResponseV28DTO = new StreamMetadataResponseV28DTO();
+    streamMetadataResponseV28DTO.setStreamId(sendStreamId);
+    streamMetadataResponseV28DTO.setTitle(title);
+    streamMetadataResponseV28DTO.setEventType(EventTypeEnum.STATUS);
 
     SendStream sendStream = new SendStream();
     sendStream.setStreamId(sendStreamId.toString());
@@ -219,18 +219,18 @@ class SendFacadeServiceImplTest {
       .organizationId(orgId)
       .status(NotificationStatus.UPLOADED)
       .build();
-    NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
+    NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
 
     //STUBS (in order of code execution)
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendStreamRepositoryMock.findByOrganizationId(orgId))
       .thenReturn(Collections.emptyList());
-    Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV25DTO, orgId, accessToken))
-      .thenReturn(streamMetadataResponseV25DTO);
+    Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV28DTO, orgId, accessToken))
+      .thenReturn(streamMetadataResponseV28DTO);
     Mockito.when(
       sendStreamMapperMock.mapToSendStream(
-        streamMetadataResponseV25DTO,
+        streamMetadataResponseV28DTO,
         orgId
       )
     ).thenReturn(sendStream);
@@ -269,14 +269,14 @@ class SendFacadeServiceImplTest {
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
     response.setNotificationRequestId("NOTIFICATIONREQUESTID");
 
-    StreamCreationRequestV25DTO streamCreationRequestV25DTO = new StreamCreationRequestV25DTO();
-    streamCreationRequestV25DTO.setTitle(title);
-    streamCreationRequestV25DTO.setEventType(StreamCreationRequestV25DTO.EventTypeEnum.STATUS);
+    StreamCreationRequestV28DTO streamCreationRequestV28DTO = new StreamCreationRequestV28DTO();
+    streamCreationRequestV28DTO.setTitle(title);
+    streamCreationRequestV28DTO.setEventType(StreamCreationRequestV28DTO.EventTypeEnum.STATUS);
 
-    StreamMetadataResponseV25DTO streamMetadataResponseV25DTO = new StreamMetadataResponseV25DTO();
-    streamMetadataResponseV25DTO.setStreamId(sendStreamId);
-    streamMetadataResponseV25DTO.setTitle(title);
-    streamMetadataResponseV25DTO.setEventType(EventTypeEnum.STATUS);
+    StreamMetadataResponseV28DTO streamMetadataResponseV28DTO = new StreamMetadataResponseV28DTO();
+    streamMetadataResponseV28DTO.setStreamId(sendStreamId);
+    streamMetadataResponseV28DTO.setTitle(title);
+    streamMetadataResponseV28DTO.setEventType(EventTypeEnum.STATUS);
 
     SendStream sendStream = new SendStream();
     sendStream.setStreamId(sendStreamId.toString());
@@ -288,7 +288,7 @@ class SendFacadeServiceImplTest {
       .organizationId(orgId)
       .status(NotificationStatus.UPLOADED)
       .build();
-    NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
+    NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
 
     //STUBS (in order of code execution)
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
@@ -316,7 +316,7 @@ class SendFacadeServiceImplTest {
     String notificationRequestId = "REQUESTID";
     Long orgId = 1L;
 
-    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
     response.setIun("IUN");
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
@@ -351,7 +351,7 @@ class SendFacadeServiceImplTest {
     String notificationRequestId = "REQUESTID";
     Long orgId = 1L;
 
-    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
     response.setIun("IUN");
     response.setErrors(new ArrayList<>());
 
@@ -408,14 +408,14 @@ class SendFacadeServiceImplTest {
     String notificationRequestId = "REQUESTID";
     Long orgId = 1L;
 
-    ProblemErrorDTO error = new ProblemErrorDTO();
+    NotificationRequestRefusedProblemErrorDTO error = new NotificationRequestRefusedProblemErrorDTO();
     error.setCode("001");
     error.setDetail("ERROR");
     error.setElement("EL");
 
     UpdateResult updateResult = UpdateResult.acknowledged(1, 1L, null);
 
-    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
     response.setIun("IUN");
     response.setErrors(List.of(error));
 
@@ -539,7 +539,7 @@ class SendFacadeServiceImplTest {
     String sendNotificationId = "SENDNOTIFICATIONID";
     Long orgId = 1L;
 
-    NewNotificationRequestStatusResponseV24DTO response = new NewNotificationRequestStatusResponseV24DTO();
+    NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
     response.setIun("IUN");
     response.setErrors(null);
 
@@ -623,19 +623,31 @@ class SendFacadeServiceImplTest {
   @Test
   void givenValidParamsWhenGetStreamEventsThenReturnEvents() {
     String accessToken = "ACCESSTOKEN";
-    String streamId = "streamId";
+    UUID streamId = UUID.randomUUID();
     String lastEventId = "lastEventId";
     Long organizationId = 1L;
 
-    ProgressResponseElementV25DTO sendStreamEvent = new ProgressResponseElementV25DTO();
-    List<ProgressResponseElementV25DTO> expectedEvents = List.of(sendStreamEvent);
+    ProgressResponseElementV28DTO sendStreamEvent = new ProgressResponseElementV28DTO();
+    List<ProgressResponseElementV28DTO> expectedEvents = List.of(sendStreamEvent);
 
-    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId, lastEventId, organizationId, accessToken))
+    SendStream sendStreamMock = new SendStream();
+    sendStreamMock.setOrganizationId(organizationId);
+    SendStreamDTO sendStreamDTOMock = new SendStreamDTO();
+    sendStreamDTOMock.setLastEventId(lastEventId);
+    StreamListElementDTO streamListElementDTO = new StreamListElementDTO();
+    streamListElementDTO.setStreamId(streamId);
+
+    Mockito.when(sendStreamRepositoryMock.findById(streamId.toString()))
+      .thenReturn(Optional.of(sendStreamMock));
+    Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStreamMock))
+      .thenReturn(sendStreamDTOMock);
+    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken))
+        .thenReturn(List.of(streamListElementDTO));
+
+    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId.toString(), lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
-    Mockito.when(sendStreamRepositoryMock.updateLastEventId(streamId, lastEventId))
-      .thenReturn(UpdateResult.unacknowledged()); //only for stubbing, not used in getStreamEvents method
 
-    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(streamId, lastEventId, organizationId, accessToken);
+    List<ProgressResponseElementV28DTO> result = sendService.getStreamEvents(streamId.toString(), organizationId, accessToken);
 
     assertNotNull(result);
     assertEquals(expectedEvents, result);
@@ -651,17 +663,32 @@ class SendFacadeServiceImplTest {
     StreamListElementDTO lastStream = new StreamListElementDTO();
     lastStream.setStreamId(streamId);
 
-    List<StreamListElementDTO> streams = List.of(new StreamListElementDTO(), lastStream);
-    ProgressResponseElementV25DTO sendStreamEvent = new ProgressResponseElementV25DTO();
-    List<ProgressResponseElementV25DTO> expectedEvents = List.of(sendStreamEvent);
+    List<StreamListElementDTO> streams = List.of(new StreamListElementDTO(), lastStream); //two elements, first has null id
+    ProgressResponseElementV28DTO sendStreamEvent = new ProgressResponseElementV28DTO();
+    List<ProgressResponseElementV28DTO> expectedEvents = List.of(sendStreamEvent);
+
+    SendStream sendStreamMock = new SendStream();
+    sendStreamMock.setOrganizationId(organizationId);
+    SendStreamDTO sendStreamDTOMock = new SendStreamDTO();
+    sendStreamDTOMock.setLastEventId(lastEventId);
+    StreamListElementDTO streamListElementDTO = new StreamListElementDTO();
+    streamListElementDTO.setStreamId(streamId);
+
+    Mockito.when(sendStreamRepositoryMock.findById(streamId.toString()))
+      .thenReturn(Optional.of(sendStreamMock));
+    Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStreamMock))
+      .thenReturn(sendStreamDTOMock);
+    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken))
+      .thenReturn(List.of(streamListElementDTO));
+
+    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId.toString(), lastEventId, organizationId, accessToken))
+      .thenReturn(expectedEvents);
 
     Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(streams);
     Mockito.when(sendStreamServiceMock.getStreamEvents(String.valueOf(streamId), lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
-    Mockito.when(sendStreamRepositoryMock.updateLastEventId(String.valueOf(streamId), lastEventId))
-      .thenReturn(UpdateResult.unacknowledged()); //only for stubbing, not used in getStreamEvents method
 
-    List<ProgressResponseElementV25DTO> result = sendService.getStreamEvents(null, lastEventId, organizationId, accessToken);
+    List<ProgressResponseElementV28DTO> result = sendService.getStreamEvents(null, organizationId, accessToken);
 
     assertNotNull(result);
     assertEquals(expectedEvents, result);
@@ -670,16 +697,33 @@ class SendFacadeServiceImplTest {
   @Test
   void givenEmptyStreamIdAndNoStreamsWhenGetStreamEventsThenThrowNotFoundException() {
     String accessToken = "ACCESSTOKEN";
-    String lastEventId = "LASTEVENTID";
     Long organizationId = 1L;
 
     Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(List.of());
 
     NotFoundException exception = assertThrows(NotFoundException.class, () ->
-      sendService.getStreamEvents(null, lastEventId, organizationId, accessToken)
+      sendService.getStreamEvents(null, organizationId, accessToken)
     );
 
     assertEquals("[STREAMS_NOT_FOUND] Streams not found for this organization: " + organizationId, exception.getMessage());
+  }
+
+  @Test
+  void givenValidRequestWhenUpdateStreamLastEventIdThenOk() {
+    //GIVEN
+    String streamId = "streamId";
+    String lastEventId = "lastEventId";
+
+    UpdateResult expectedResult = Mockito.mock(UpdateResult.class);
+    Mockito.when(sendStreamRepositoryMock.updateLastEventId(streamId, lastEventId))
+      .thenReturn(expectedResult);
+
+    //WHEN
+    sendService.updateStreamLastEventId(streamId, lastEventId);
+
+    //THEN
+    Mockito.verify(sendStreamRepositoryMock)
+      .updateLastEventId(streamId, lastEventId);
   }
 
   @Test
@@ -774,14 +818,14 @@ class SendFacadeServiceImplTest {
     Long orgId = 1L;
     String title = "SEND-STREAM_" + orgId;
 
-    StreamCreationRequestV25DTO streamCreationRequestV25DTO = new StreamCreationRequestV25DTO();
-    streamCreationRequestV25DTO.setTitle(title);
-    streamCreationRequestV25DTO.setEventType(StreamCreationRequestV25DTO.EventTypeEnum.STATUS);
+    StreamCreationRequestV28DTO streamCreationRequestV28DTO = new StreamCreationRequestV28DTO();
+    streamCreationRequestV28DTO.setTitle(title);
+    streamCreationRequestV28DTO.setEventType(StreamCreationRequestV28DTO.EventTypeEnum.STATUS);
 
-    StreamMetadataResponseV25DTO streamMetadataResponseV25DTO = new StreamMetadataResponseV25DTO();
-    streamMetadataResponseV25DTO.setStreamId(sendStreamId);
-    streamMetadataResponseV25DTO.setTitle(title);
-    streamMetadataResponseV25DTO.setEventType(EventTypeEnum.STATUS);
+    StreamMetadataResponseV28DTO streamMetadataResponseV28DTO = new StreamMetadataResponseV28DTO();
+    streamMetadataResponseV28DTO.setStreamId(sendStreamId);
+    streamMetadataResponseV28DTO.setTitle(title);
+    streamMetadataResponseV28DTO.setEventType(EventTypeEnum.STATUS);
 
     SendStream sendStream = new SendStream();
     sendStream.setStreamId(sendStreamId.toString());
@@ -794,18 +838,18 @@ class SendFacadeServiceImplTest {
       .status(NotificationStatus.UPLOADED)
       .build();
 
-    NewNotificationRequestV24DTO request = new NewNotificationRequestV24DTO();
+    NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
 
     //STUBS (in order of code execution)
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     Mockito.when(sendStreamRepositoryMock.findByOrganizationId(orgId))
       .thenReturn(Collections.emptyList());
-    Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV25DTO, orgId, accessToken))
-      .thenReturn(streamMetadataResponseV25DTO);
+    Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV28DTO, orgId, accessToken))
+      .thenReturn(streamMetadataResponseV28DTO);
     Mockito.when(
       sendStreamMapperMock.mapToSendStream(
-        streamMetadataResponseV25DTO,
+        streamMetadataResponseV28DTO,
         orgId
       )
     ).thenReturn(sendStream);
