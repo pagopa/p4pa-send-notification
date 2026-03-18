@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
@@ -451,8 +451,13 @@ class SendFacadeServiceImplTest {
   }
 
   @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  void givenValidNotificationWhenRetrieveNotificationDateThenVerify(boolean isPagoPaNull) {
+  @CsvSource({
+    "true,  false", // PagoPa null test payment != null block)
+    "false, true",  // PagoPa !=null, but refinementDate NULL
+    "false, false"  // happy case: PagoPa and refinementDate not null
+  })
+  void givenValidNotificationWhenRetrieveNotificationDateThenVerify(
+    boolean isPagoPaNull, boolean isRefinementDateNull) {
     // Given
     String accessToken = "ACCESSTOKEN";
     String sendNotificationId = "SENDNOTIFICATIONID";
@@ -460,10 +465,12 @@ class SendFacadeServiceImplTest {
     String creditorTaxId = "PAXID";
     String noticeCode = "NOTICECODE";
 
-    OffsetDateTime viewDate = OffsetDateTime.now().minusDays(1);
-
     NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
-    response.setNotificationViewDate(viewDate);
+    if (!isRefinementDateNull) {
+      response.setRefinementDate(OffsetDateTime.now().minusDays(1));
+    } else {
+      response.setRefinementDate(null);
+    }
 
     Payment payment = new Payment(new PagoPa().creditorTaxId(creditorTaxId).noticeCode(noticeCode), null);
     if (isPagoPaNull) {
@@ -495,9 +502,12 @@ class SendFacadeServiceImplTest {
     // Then
     assertNotNull(result);
     assertEquals(expectedDTO, result);
-    if (!isPagoPaNull) {
-      Mockito.verify(sendNotificationNoPIIRepositoryMock)
-        .updateNotificationDate(sendNotificationId, puPayment.getNotificationDate(), puPayment.getPayment().getPagoPa().getNoticeCode());
+    if (!isPagoPaNull && !isRefinementDateNull) {
+      Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+        .updateNotificationDate(eq(sendNotificationId), any(), eq(noticeCode));
+    } else {
+      Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never())
+        .updateNotificationDate(any(), any(), any());
     }
     Mockito.verify(sendNotificationDTOMapperMock).apply(Mockito.any());
   }
