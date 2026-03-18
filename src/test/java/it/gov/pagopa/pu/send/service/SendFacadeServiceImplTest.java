@@ -463,7 +463,7 @@ class SendFacadeServiceImplTest {
     OffsetDateTime viewDate = OffsetDateTime.now().minusDays(1);
 
     NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
-    response.setNotificationViewDate(viewDate);
+    response.setRefinementDate(viewDate);
 
     Payment payment = new Payment(new PagoPa().creditorTaxId(creditorTaxId).noticeCode(noticeCode), null);
     if (isPagoPaNull) {
