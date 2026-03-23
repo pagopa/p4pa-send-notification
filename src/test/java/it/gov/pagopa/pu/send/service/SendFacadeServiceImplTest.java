@@ -317,6 +317,7 @@ class SendFacadeServiceImplTest {
     Long orgId = 1L;
 
     NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
+    response.setIun("IUN");
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
@@ -339,6 +340,8 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      .updateNotificationIun(sendNotificationId, response.getIun());
   }
 
   @Test
@@ -349,6 +352,7 @@ class SendFacadeServiceImplTest {
     Long orgId = 1L;
 
     NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
+    response.setIun("IUN");
     response.setErrors(new ArrayList<>());
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
@@ -372,8 +376,30 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      .updateNotificationIun(sendNotificationId, response.getIun());
   }
 
+  @Test
+  void givenValidNotificationInSendingWhenNotificationStatusThenVerify() {
+    String accessToken = "ACCESSTOKEN";
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String notificationRequestId = "REQUESTID";
+    Long orgId = 1L;
+
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId)
+      .organizationId(orgId)
+      .notificationRequestId(notificationRequestId)
+      .status(NotificationStatus.SENDING)
+      .build();
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+      .thenReturn(Optional.of(notification));
+
+    assertThrows(InvalidStatusException.class,
+      () -> sendService.notificationStatus(sendNotificationId, accessToken));
+  }
 
   @Test
   void givenValidNotificationWhenNotificationStatusThenErrors() {
@@ -390,6 +416,7 @@ class SendFacadeServiceImplTest {
     UpdateResult updateResult = UpdateResult.acknowledged(1, 1L, null);
 
     NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
+    response.setIun("IUN");
     response.setErrors(List.of(error));
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
@@ -417,6 +444,8 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      .updateNotificationIun(sendNotificationId, response.getIun());
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED);
   }
@@ -547,6 +576,7 @@ class SendFacadeServiceImplTest {
     assertNotNull(result);
     assertEquals(expectedDTO, result);
     Mockito.verify(sendNotificationDTOMapperMock).apply(notification);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationIun(sendNotificationId, "IUN");
   }
 
 

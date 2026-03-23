@@ -178,7 +178,16 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   public SendNotificationDTO notificationStatus(String sendNotificationId, String accessToken) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
+    // Validate status
+    if (!notification.getStatus().equals(NotificationStatus.IN_VALIDATION) && !notification.getStatus().equals(NotificationStatus.ACCEPTED))
+      NotificationUtils.validateStatus(NotificationStatus.IN_VALIDATION, notification.getStatus());
+
     NewNotificationRequestStatusResponseV25DTO notificationStatus = sendService.notificationStatus(notification.getNotificationRequestId(), notification.getOrganizationId(), accessToken);
+    if (notification.getIun() == null && notificationStatus != null && notificationStatus.getIun() != null) {
+      sendNotificationNoPIIRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
+      notification.setIun(notificationStatus.getIun());
+      notification.setStatus(NotificationStatus.ACCEPTED);
+    }
     SendNotificationDTO sendNotificationDTO = sendNotificationDTOMapper.apply(notification);
 
     if (notificationStatus != null && notificationStatus.getErrors() != null && !notificationStatus.getErrors().isEmpty()) {
