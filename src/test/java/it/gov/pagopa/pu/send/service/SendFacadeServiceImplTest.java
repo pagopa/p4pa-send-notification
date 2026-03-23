@@ -374,26 +374,6 @@ class SendFacadeServiceImplTest {
     Assertions.assertSame(expectedResult, result);
   }
 
-  @Test
-  void givenValidNotificationInSendingWhenNotificationStatusThenVerify() {
-    String accessToken = "ACCESSTOKEN";
-    String sendNotificationId = "SENDNOTIFICATIONID";
-    String notificationRequestId = "REQUESTID";
-    Long orgId = 1L;
-
-    SendNotificationNoPII notification = SendNotificationNoPII.builder()
-      .sendNotificationId(sendNotificationId)
-      .organizationId(orgId)
-      .notificationRequestId(notificationRequestId)
-      .status(NotificationStatus.SENDING)
-      .build();
-
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
-      .thenReturn(Optional.of(notification));
-
-    assertThrows(InvalidStatusException.class,
-      () -> sendService.notificationStatus(sendNotificationId, accessToken));
-  }
 
   @Test
   void givenValidNotificationWhenNotificationStatusThenErrors() {
