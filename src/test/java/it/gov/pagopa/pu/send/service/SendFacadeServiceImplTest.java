@@ -253,7 +253,7 @@ class SendFacadeServiceImplTest {
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
+      .updateNotificationStatus(sendNotificationId, NotificationStatus.IN_VALIDATION);
   }
 
   @Test
@@ -306,7 +306,7 @@ class SendFacadeServiceImplTest {
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
+      .updateNotificationStatus(sendNotificationId, NotificationStatus.IN_VALIDATION);
   }
 
   @Test
@@ -317,13 +317,12 @@ class SendFacadeServiceImplTest {
     Long orgId = 1L;
 
     NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
-    response.setIun("IUN");
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .notificationRequestId(notificationRequestId)
-      .status(NotificationStatus.COMPLETE)
+      .status(NotificationStatus.IN_VALIDATION)
       .build();
 
     SendNotificationDTO expectedResult = new SendNotificationDTO();
@@ -340,8 +339,6 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationIun(sendNotificationId, response.getIun());
   }
 
   @Test
@@ -352,14 +349,13 @@ class SendFacadeServiceImplTest {
     Long orgId = 1L;
 
     NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
-    response.setIun("IUN");
     response.setErrors(new ArrayList<>());
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .notificationRequestId(notificationRequestId)
-      .status(NotificationStatus.COMPLETE)
+      .status(NotificationStatus.IN_VALIDATION)
       .build();
 
     SendNotificationDTO expectedResult = new SendNotificationDTO();
@@ -376,8 +372,6 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationIun(sendNotificationId, response.getIun());
   }
 
   @Test
@@ -416,18 +410,17 @@ class SendFacadeServiceImplTest {
     UpdateResult updateResult = UpdateResult.acknowledged(1, 1L, null);
 
     NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
-    response.setIun("IUN");
     response.setErrors(List.of(error));
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .notificationRequestId(notificationRequestId)
-      .status(NotificationStatus.COMPLETE)
+      .status(NotificationStatus.IN_VALIDATION)
       .build();
 
     SendNotificationDTO expectedResult = new SendNotificationDTO();
-    expectedResult.setStatus(NotificationStatus.ERROR);
+    expectedResult.setStatus(NotificationStatus.REFUSED);
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
@@ -437,7 +430,7 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR))
+    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED))
       .thenReturn(updateResult);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -445,9 +438,7 @@ class SendFacadeServiceImplTest {
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationIun(sendNotificationId, response.getIun());
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
+      .updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED);
   }
 
   @ParameterizedTest
@@ -522,7 +513,7 @@ class SendFacadeServiceImplTest {
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .notificationRequestId("REQUESTID")
-      .status(NotificationStatus.COMPLETE)
+      .status(NotificationStatus.IN_VALIDATION)
       .build();
 
     SendNotificationDTO expectedDTO = new SendNotificationDTO();
@@ -557,7 +548,7 @@ class SendFacadeServiceImplTest {
       .sendNotificationId(sendNotificationId)
       .organizationId(orgId)
       .notificationRequestId("REQUESTID")
-      .status(NotificationStatus.COMPLETE)
+      .status(NotificationStatus.IN_VALIDATION)
       .build();
 
     SendNotificationDTO expectedDTO = new SendNotificationDTO();
@@ -576,7 +567,6 @@ class SendFacadeServiceImplTest {
     assertNotNull(result);
     assertEquals(expectedDTO, result);
     Mockito.verify(sendNotificationDTOMapperMock).apply(notification);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationIun(sendNotificationId, "IUN");
   }
 
 
@@ -881,7 +871,7 @@ class SendFacadeServiceImplTest {
 
     //THEN
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
+      .updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED);
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never())
       .updateNotificationRequestId(Mockito.anyString(), Mockito.anyString());
   }
@@ -968,7 +958,7 @@ class SendFacadeServiceImplTest {
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .iun(iun)
-      .status(NotificationStatus.COMPLETE)
+      .status(NotificationStatus.IN_VALIDATION)
       .build();
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
@@ -980,7 +970,7 @@ class SendFacadeServiceImplTest {
     );
 
     // THEN
-    assertEquals("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
+    assertEquals("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.IN_VALIDATION), exception.getMessage());
   }
 
   @Test
@@ -1066,12 +1056,12 @@ class SendFacadeServiceImplTest {
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
       .iun(iun)
-      .status(NotificationStatus.COMPLETE)
+      .status(NotificationStatus.IN_VALIDATION)
       .build();
     SendNotificationDTO notificationDTO = SendNotificationDTO.builder()
       .sendNotificationId(sendNotificationId)
       .iun(iun)
-      .status(NotificationStatus.COMPLETE)
+      .status(NotificationStatus.IN_VALIDATION)
       .build();
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
@@ -1086,7 +1076,7 @@ class SendFacadeServiceImplTest {
     );
 
     // THEN
-    assertEquals("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.COMPLETE), exception.getMessage());
+    assertEquals("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.IN_VALIDATION), exception.getMessage());
   }
 
   @Test
@@ -1137,7 +1127,7 @@ class SendFacadeServiceImplTest {
 
     SendNotificationDTO sendNotificationDTO = new SendNotificationDTO();
     sendNotificationDTO.setSendNotificationId(sendNotificationId);
-    sendNotificationDTO.setStatus(NotificationStatus.COMPLETE);
+    sendNotificationDTO.setStatus(NotificationStatus.IN_VALIDATION);
     sendNotificationDTO.setIun(iun);
     sendNotificationDTO.setOrganizationId(organizationId);
 
@@ -1161,7 +1151,7 @@ class SendFacadeServiceImplTest {
     //THEN
     Assertions.assertNotNull(invalidStatusException);
     Assertions.assertEquals(
-      "[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: ACCEPTED, Actual: COMPLETE",
+      "[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: ACCEPTED, Actual: IN_VALIDATION",
       invalidStatusException.getMessage()
     );
   }

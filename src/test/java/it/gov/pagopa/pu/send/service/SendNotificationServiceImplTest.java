@@ -345,7 +345,7 @@ class SendNotificationServiceImplTest {
   void whenUpdateNotificationStatus_thenInvokeRepositoryAndReturnResult() {
     // Given
     String sendNotificationId = "123";
-    NotificationStatus status = NotificationStatus.ERROR;
+    NotificationStatus status = NotificationStatus.REFUSED;
     UpdateResult expectedResult = UpdateResult.acknowledged(1, 1L, null);
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(sendNotificationId, status))

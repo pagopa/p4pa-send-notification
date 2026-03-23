@@ -7,7 +7,16 @@ public enum NotificationStatus {
   SENDING,
   REGISTERED,
   UPLOADED,
-  COMPLETE,
+  // Notification status
+  IN_VALIDATION,
   ACCEPTED,
-  ERROR
+  REFUSED,
+  DELIVERING,
+  DELIVERED,
+  VIEWED,
+  EFFECTIVE_DATE,
+  PAID,
+  UNREACHABLE,
+  CANCELLED,
+  RETURNED_TO_SENDER
 }

@@ -144,10 +144,10 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       NewNotificationResponseDTO responseDTO = sendService.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId(), accessToken);
       if (responseDTO != null) {
         sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
-        sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.COMPLETE);
+        sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.IN_VALIDATION);
       }
     }  catch (HttpClientErrorException.Conflict ex) {
-      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
+      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED);
       throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
     }
   }
@@ -179,22 +179,17 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
-    if (!notification.getStatus().equals(NotificationStatus.COMPLETE) && !notification.getStatus().equals(NotificationStatus.ACCEPTED))
-      NotificationUtils.validateStatus(NotificationStatus.COMPLETE, notification.getStatus());
+    if (!notification.getStatus().equals(NotificationStatus.IN_VALIDATION) && !notification.getStatus().equals(NotificationStatus.ACCEPTED))
+      NotificationUtils.validateStatus(NotificationStatus.IN_VALIDATION, notification.getStatus());
 
     NewNotificationRequestStatusResponseV25DTO notificationStatus = sendService.notificationStatus(notification.getNotificationRequestId(), notification.getOrganizationId(), accessToken);
-    if (notification.getIun() == null && notificationStatus != null && notificationStatus.getIun() != null) {
-      sendNotificationNoPIIRepository.updateNotificationIun(sendNotificationId, notificationStatus.getIun());
-      notification.setIun(notificationStatus.getIun());
-      notification.setStatus(NotificationStatus.ACCEPTED);
-    }
     SendNotificationDTO sendNotificationDTO = sendNotificationDTOMapper.apply(notification);
 
     if (notificationStatus != null && notificationStatus.getErrors() != null && !notificationStatus.getErrors().isEmpty()) {
       sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
         .map(NotificationRequestRefusedProblemErrorDTO::getDetail).toList());
-      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.ERROR);
-      sendNotificationDTO.setStatus(NotificationStatus.ERROR);
+      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED);
+      sendNotificationDTO.setStatus(NotificationStatus.REFUSED);
     }
 
     return sendNotificationDTO;
