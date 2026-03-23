@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult updateFilePreloadInformation(String sendNotificationId, PreLoadResponseDTO preLoad);
-  UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus);
+  UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus);
   UpdateResult updateNotificationRequestId(String sendNotificationId, String notificationRequestId);
   UpdateResult updateFileStatus(String sendNotificationId, String fileName, FileStatus newStatus);
   UpdateResult updateFileVersionId(String sendNotificationId, String fileName, String versionId);

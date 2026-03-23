@@ -133,8 +133,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
-  public UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus) {
-    return sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, newStatus);
+  public UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus) {
+    return sendNotificationNoPIIRepository.updateNotificationStatus(notificationRequestId, newStatus);
   }
 
   @Override
