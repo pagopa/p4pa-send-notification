@@ -103,7 +103,7 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals(new StartNotificationResponse("workflowId", "runId"), result);
 
     Mockito.verify(sendNotificationNoPIIRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatus(sendNotificationId, NotificationStatus.SENDING);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING);
     Mockito.verify(workflowServiceMock).sendNotificationProcess(sendNotificationId, null);
   }
 
@@ -344,15 +344,15 @@ class SendNotificationServiceImplTest {
   @Test
   void whenUpdateNotificationStatus_thenInvokeRepositoryAndReturnResult() {
     // Given
-    String sendNotificationId = "123";
+    String requestId = "REQUESTID";
     NotificationStatus status = NotificationStatus.REFUSED;
     UpdateResult expectedResult = UpdateResult.acknowledged(1, 1L, null);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(sendNotificationId, status))
+    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(requestId, status))
       .thenReturn(expectedResult);
 
     // When
-    UpdateResult result = sendNotificationService.updateNotificationStatus(sendNotificationId, status);
+    UpdateResult result = sendNotificationService.updateNotificationStatus(requestId, status);
 
     // Then
     Assertions.assertNotNull(result);
@@ -361,7 +361,7 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals(1, result.getModifiedCount());
     Assertions.assertSame(expectedResult, result);
 
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatus(sendNotificationId, status);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatus(requestId, status);
   }
 
   @Test
