@@ -108,7 +108,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     preLoadResponseDTO.forEach(response ->
       sendNotificationNoPIIRepository.updateFilePreloadInformation(sendNotificationId, response));
 
-    sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.REGISTERED);
+    sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REGISTERED);
   }
 
   @Transactional
@@ -127,7 +127,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
         sendNotificationNoPIIRepository.updateFileVersionId(sendNotificationId, doc.getFileName(), versionId.get());
       }
     }
-    sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.UPLOADED);
+    sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.UPLOADED);
   }
 
   @Transactional
@@ -144,10 +144,10 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       NewNotificationResponseDTO responseDTO = sendService.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId(), accessToken);
       if (responseDTO != null) {
         sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
-        sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.IN_VALIDATION);
+        sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
       }
     }  catch (HttpClientErrorException.Conflict ex) {
-      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED);
+      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
       throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
     }
   }
@@ -193,7 +193,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if (notificationStatus != null && notificationStatus.getErrors() != null && !notificationStatus.getErrors().isEmpty()) {
       sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
         .map(NotificationRequestRefusedProblemErrorDTO::getDetail).toList());
-      sendNotificationNoPIIRepository.updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED);
+      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
       sendNotificationDTO.setStatus(NotificationStatus.REFUSED);
     }
 

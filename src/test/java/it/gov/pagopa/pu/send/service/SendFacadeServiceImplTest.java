@@ -138,7 +138,7 @@ class SendFacadeServiceImplTest {
     sendService.preloadFiles(sendNotificationId, accessToken);
 
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1)).updateFilePreloadInformation(eq(sendNotificationId), any(PreLoadResponseDTO.class));
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1)).updateNotificationStatus(sendNotificationId, NotificationStatus.REGISTERED);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1)).updateNotificationStatusById(sendNotificationId, NotificationStatus.REGISTERED);
   }
 
   @Test
@@ -184,7 +184,7 @@ class SendFacadeServiceImplTest {
     sendService.uploadFiles(sendNotificationId);
     Mockito.verify(sendNotificationNoPIIRepositoryMock).updateFileVersionId(sendNotificationId, fileName, versionId);
     Mockito.verify(sendNotificationNoPIIRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.UPLOADED);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatus(sendNotificationId, NotificationStatus.UPLOADED);
+    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.UPLOADED);
   }
 
   @Test
@@ -253,7 +253,7 @@ class SendFacadeServiceImplTest {
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationStatus(sendNotificationId, NotificationStatus.IN_VALIDATION);
+      .updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
   }
 
   @Test
@@ -306,7 +306,7 @@ class SendFacadeServiceImplTest {
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationStatus(sendNotificationId, NotificationStatus.IN_VALIDATION);
+      .updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
   }
 
   @Test
@@ -437,7 +437,7 @@ class SendFacadeServiceImplTest {
     Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED))
+    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED))
       .thenReturn(updateResult);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -447,7 +447,7 @@ class SendFacadeServiceImplTest {
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED);
+      .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
   }
 
   @ParameterizedTest
@@ -881,7 +881,7 @@ class SendFacadeServiceImplTest {
 
     //THEN
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
-      .updateNotificationStatus(sendNotificationId, NotificationStatus.REFUSED);
+      .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never())
       .updateNotificationRequestId(Mockito.anyString(), Mockito.anyString());
   }

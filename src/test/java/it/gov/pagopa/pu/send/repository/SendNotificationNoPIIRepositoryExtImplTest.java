@@ -53,7 +53,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
 
   @Test
   void givenUpdateNotificationStatusThenVerify() {
-    String sendNotificationId = "SENDNOTIFICATIONID";
+    String requestNotificationId = "requestId";
     NotificationStatus newStatus = NotificationStatus.SENDING;
 
     Mockito.when(mongoTemplateMock.updateFirst(
@@ -62,7 +62,23 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       .thenReturn(updateResult);
     Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
 
-    UpdateResult result = repository.updateNotificationStatus(sendNotificationId, newStatus);
+    UpdateResult result = repository.updateNotificationStatus(requestNotificationId, newStatus);
+
+    assertEquals(1L, result.getModifiedCount());
+  }
+
+  @Test
+  void givenUpdateNotificationStatusByIdThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    NotificationStatus newStatus = NotificationStatus.SENDING;
+
+    Mockito.when(mongoTemplateMock.updateFirst(
+        Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+          SendNotificationNoPII.class)))
+      .thenReturn(updateResult);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.updateNotificationStatusById(sendNotificationId, newStatus);
 
     assertEquals(1L, result.getModifiedCount());
   }
