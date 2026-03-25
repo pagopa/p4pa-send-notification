@@ -97,7 +97,7 @@ public class SendNotification2NewNotificationRequestMapper {
 
         //payments domain to implements
         List<NotificationPaymentItemDTO> payments = getPayments(sendNotification, puRecipient);
-        notificationRecipient.setPayments(payments);
+        notificationRecipient.setPayments(payments.stream().filter(Objects::nonNull).toList());
         //end payments
 
         return notificationRecipient;
@@ -169,6 +169,7 @@ public class SendNotification2NewNotificationRequestMapper {
   private List<NotificationDocumentDTO> setDocuments(SendNotification sendNotification) {
     Set<String> attachmentFileNames = sendNotification.getPuRecipients().stream()
       .flatMap(r -> r.getPuPayments().stream())
+      .filter(Objects::nonNull)
       .flatMap(puPayment -> {
         Payment payment = puPayment.getPayment();
         return Stream.of(
