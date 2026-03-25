@@ -9,7 +9,7 @@ public class DebtPositionUtilsTest {
   public static final String SEGREGATION_CODE = "45";
 
   @Test
-  public void testExtractSegregationCodeFromNav() {
+  void testExtractSegregationCodeFromNav() {
     //WHEN
     String segregationCodeFromNav = DebtPositionUtils.extractSegregationCodeFromNav(NAV);
     //THEN
