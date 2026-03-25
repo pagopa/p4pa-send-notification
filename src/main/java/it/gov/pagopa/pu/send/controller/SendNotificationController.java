@@ -94,8 +94,8 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
-  public ResponseEntity<Void> updateNotificationStatus(Long sendNotificationId, String status) {
-    sendNotificationService.updateNotificationStatus(String.valueOf(sendNotificationId), NotificationStatus.valueOf(status));
+  public ResponseEntity<Void> updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus) {
+    sendNotificationService.updateNotificationStatus(notificationRequestId, newStatus);
     return ResponseEntity.ok().build();
   }
 

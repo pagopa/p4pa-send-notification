@@ -59,7 +59,15 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   @Override
-  public UpdateResult updateNotificationStatus(String sendNotificationId, NotificationStatus newStatus) {
+  public UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus) {
+    return updateFirst(
+      Query.query(Criteria.where(Fields.notificationRequestId).is(notificationRequestId)),
+      new Update().set(Fields.status, newStatus)
+    );
+  }
+
+  @Override
+  public UpdateResult updateNotificationStatusById(String sendNotificationId, NotificationStatus newStatus) {
     return updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
       new Update().set(Fields.status, newStatus)

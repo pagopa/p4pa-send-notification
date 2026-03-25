@@ -16,17 +16,17 @@ class NotificationUtilsTest {
 
   @Test
   void givenExpectedStateWhenValidateStatusThenNoExceptions() {
-    Assertions.assertDoesNotThrow(() -> NotificationUtils.validateStatus(NotificationStatus.COMPLETE, NotificationStatus.COMPLETE));
+    Assertions.assertDoesNotThrow(() -> NotificationUtils.validateStatus(NotificationStatus.IN_VALIDATION, NotificationStatus.IN_VALIDATION));
   }
 
   @Test
   void givenUnexpectedPreviousNotificationStateWhenValidateStatusThenNoExceptions() {
-    Assertions.assertThrows(InvalidStatusException.class, () -> NotificationUtils.validateStatus(NotificationStatus.COMPLETE, NotificationStatus.REGISTERED));
+    Assertions.assertThrows(InvalidStatusException.class, () -> NotificationUtils.validateStatus(NotificationStatus.IN_VALIDATION, NotificationStatus.REGISTERED));
   }
 
   @Test
   void givenUnexpectedNextNotificationStateWhenValidateStatusThenNoExceptions() {
-    Assertions.assertThrows(StatusAlreadyProcessedException.class, () -> NotificationUtils.validateStatus(NotificationStatus.COMPLETE, NotificationStatus.ACCEPTED));
+    Assertions.assertThrows(StatusAlreadyProcessedException.class, () -> NotificationUtils.validateStatus(NotificationStatus.IN_VALIDATION, NotificationStatus.ACCEPTED));
   }
 
   @Test

@@ -42,7 +42,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     sendNotificationNoPII.setSendNotificationId("12345");
     sendNotificationNoPII.setOrganizationId(1L);
     sendNotificationNoPII.setIun("IUN");
-    sendNotificationNoPII.setStatus(NotificationStatus.COMPLETE);
+    sendNotificationNoPII.setStatus(NotificationStatus.IN_VALIDATION);
     sendNotificationNoPII.setRecipients(List.of(recipient));
 
     // when
@@ -54,7 +54,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     assertEquals("12345", result.getSendNotificationId());
     assertEquals(1L, result.getOrganizationId());
     assertEquals("IUN", result.getIun());
-    assertEquals(NotificationStatus.COMPLETE, result.getStatus());
+    assertEquals(NotificationStatus.IN_VALIDATION, result.getStatus());
 
     List<SendNotificationPaymentsDTO> expectedPayments = List.of(
       new SendNotificationPaymentsDTO(3L, List.of("NOTICECODE1"), now),
