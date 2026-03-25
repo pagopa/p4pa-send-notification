@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 public class OrganizationApiClient {
@@ -34,6 +36,16 @@ public class OrganizationApiClient {
     } catch (HttpClientErrorException.NotFound e){
       log.info("Cannot find organization having organizationId {}", organizationId);
       return null;
+    }
+  }
+
+  public Optional<Organization> findByOrgFiscalCodeAndSegregationCode(String orgFiscalCode, String segregationCode, String accessToken) {
+    try{
+      return Optional.of(organizationApisHolder.getOrganizationSearchControllerApi(accessToken)
+        .crudOrganizationsFindByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode));
+    } catch (HttpClientErrorException.NotFound e){
+      log.info("Cannot find organization having orgFiscalCode {} and segregationCode {}", orgFiscalCode, segregationCode);
+      return Optional.empty();
     }
   }
 

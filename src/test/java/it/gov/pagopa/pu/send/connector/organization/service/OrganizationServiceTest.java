@@ -11,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 @ExtendWith(MockitoExtension.class)
 class OrganizationServiceTest {
 
@@ -62,4 +64,24 @@ class OrganizationServiceTest {
     // Then
     Assertions.assertSame(organization, result);
   }
+
+  @Test
+  void whenFindByOrgFiscalCodeAndSegregationCodeThenInvokeClient(){
+    // Given
+    String orgFiscalCode = "orgFiscalCode";
+    String segregationCode = "segregationCode";
+    String accessToken = "accessToken";
+    Organization organization = new Organization();
+
+    Mockito.when(organizationApiClientMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
+      .thenReturn(Optional.of(organization));
+
+    // When
+    Optional<Organization> result = service.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken);
+
+    // Then
+    Assertions.assertTrue(result.isPresent());
+    Assertions.assertSame(organization, result.get());
+  }
+
 }
