@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,7 +31,12 @@ class SendNotification2SendNotificationDTOMapperTest {
     PuPayment payment3 = new PuPayment(4L, new Payment(PagoPa.builder().noticeCode("NOTICECODE3").build(), F24Payment.builder().title("F24").build()), now);
 
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO();
-    recipient.setPuPayments(List.of(payment1, payment2, payment3));
+    List<PuPayment> puPaymentList = new ArrayList<>();
+    puPaymentList.add(payment1);
+    puPaymentList.add(payment2);
+    puPaymentList.add(payment3);
+    puPaymentList.add(null);
+    recipient.setPuPayments(puPaymentList);
 
     SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
     sendNotificationNoPII.setSendNotificationId("12345");
