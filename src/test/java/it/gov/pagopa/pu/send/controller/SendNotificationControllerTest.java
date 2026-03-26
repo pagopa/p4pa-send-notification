@@ -283,15 +283,14 @@ class SendNotificationControllerTest {
   @Test
   void whenUpdateNotificationStatusThenReturnOk() {
     // Given
-    Long sendNotificationId = 123L;
-    String status = "ERROR";
+    String notificationRequestId = "REQUESTID";
     UpdateResult updateResult = UpdateResult.acknowledged(1, 1L, null);
 
-    Mockito.when(sendNotificationServiceMock.updateNotificationStatus(String.valueOf(sendNotificationId), NotificationStatus.valueOf(status)))
+    Mockito.when(sendNotificationServiceMock.updateNotificationStatus(notificationRequestId, NotificationStatus.REFUSED))
       .thenReturn(updateResult);
 
     // When
-    ResponseEntity<Void> response = sendNotificationController.updateNotificationStatus(sendNotificationId, status);
+    ResponseEntity<Void> response = sendNotificationController.updateNotificationStatus(notificationRequestId, NotificationStatus.REFUSED);
 
     // Then
     Assertions.assertNotNull(response);
