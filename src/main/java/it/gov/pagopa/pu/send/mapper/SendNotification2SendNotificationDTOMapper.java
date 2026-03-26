@@ -29,11 +29,11 @@ public class SendNotification2SendNotificationDTOMapper {
   private static List<SendNotificationPaymentsDTO> buildPayments(SendNotificationNoPII sendNotificationNoPII) {
     return sendNotificationNoPII.getRecipients().stream()
       .flatMap(recipient -> recipient.getPuPayments().stream())
-      .filter(p -> p != null && p.getDebtPositionId() != null)
-      .collect(Collectors.groupingBy(PuPayment::getDebtPositionId))
+      .filter(Objects::nonNull)
+      .collect(Collectors.groupingBy(p -> Optional.ofNullable(p.getDebtPositionId())))
       .entrySet().stream()
       .map(entry -> new SendNotificationPaymentsDTO(
-        entry.getKey(),
+        entry.getKey().orElse(null),
         entry.getValue().stream()
           .map(p -> Optional.ofNullable(p.getPayment())
             .map(Payment::getPagoPa)

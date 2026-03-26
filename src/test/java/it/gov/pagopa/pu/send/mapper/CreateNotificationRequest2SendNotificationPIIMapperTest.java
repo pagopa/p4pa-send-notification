@@ -91,12 +91,14 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
     DebtPositionDTO debtPosition = new DebtPositionDTO();
     debtPosition.setDebtPositionId(3L);
+    Organization organization = new Organization();
+    organization.setOrganizationId(request.getOrganizationId());
 
-    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
+    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
       .thenReturn(debtPosition);
 
     Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
-      .thenReturn(Optional.of(new Organization()));
+      .thenReturn(Optional.of(organization));
 
     // When
     SendNotification result = mapper.mapToModel(request, accessToken);
@@ -112,7 +114,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
-    Assertions.assertEquals("TAXID", result.getSenderTaxId());
+    Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
     Assertions.assertEquals(99999999, result.getAmount());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
     Assertions.assertEquals(100, result.getPaFee());
@@ -161,7 +163,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
-    Assertions.assertEquals("TAXID", result.getSenderTaxId());
+    Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
     Assertions.assertEquals(99999999, result.getAmount());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
     Assertions.assertEquals(100, result.getPaFee());
@@ -205,6 +207,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
     DebtPositionDTO debtPosition = new DebtPositionDTO();
     debtPosition.setDebtPositionId(3L);
+    Organization organization = new Organization();
+    organization.setOrganizationId(request.getOrganizationId());
 
     if (paymentNull.equals("f24null")) {
       String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
@@ -212,10 +216,10 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
         .getPayments().getFirst().getPagoPa().getCreditorTaxId();
       String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
 
-      Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
+      Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
         .thenReturn(debtPosition);
       Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
-        .thenReturn(Optional.of(new Organization()));
+        .thenReturn(Optional.of(organization));
     }
 
     // When
@@ -236,7 +240,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
-    Assertions.assertEquals("TAXID", result.getSenderTaxId());
+    Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
     Assertions.assertEquals("ASYNC", result.getPagoPaIntMode());
   }
@@ -250,10 +254,13 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .getPayments().getFirst().getPagoPa().getCreditorTaxId();
     String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
 
-    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(request.getOrganizationId(), nav, accessToken))
+    Organization organization = new Organization();
+    organization.setOrganizationId(request.getOrganizationId());
+
+    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
       .thenReturn(null);
     Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
-      .thenReturn(Optional.of(new Organization()));
+      .thenReturn(Optional.of(organization));
 
     Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.mapToModel(request, accessToken));
   }
@@ -270,7 +277,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setNotificationFeePolicy(NotificationFeePolicyEnum.DELIVERY_MODE);
     request.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER);
     request.setSenderDenomination("SENDERDENOMINATION");
-    request.setSenderTaxId("TAXID");
+    request.setSenderTaxId("SENDERTAXID");
     request.setAmount(BigDecimal.valueOf(99999999));
     request.setTaxonomyCode("TAXONOMYCODE");
     request.setPaFee(100);
