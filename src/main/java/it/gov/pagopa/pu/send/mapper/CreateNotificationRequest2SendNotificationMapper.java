@@ -112,7 +112,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
           return new PuPayment(debtPosition.getDebtPositionId(), p, null);
         }
       }
-      return null;
+      return new PuPayment(null, p, null);
     }
     if (p.getF24() != null) {
       return new PuPayment(null, p, null);

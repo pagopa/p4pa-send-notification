@@ -141,6 +141,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .getPayments().getFirst().getPagoPa().getCreditorTaxId();
     String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
 
+    DebtPositionDTO debtPosition = new DebtPositionDTO();
+    debtPosition.setDebtPositionId(null);
+
     Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.empty());
 
@@ -153,7 +156,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
     Assertions.assertEquals("ROSSI MARIO", result.getPuRecipients().getFirst().getRecipient().getDenomination());
-    Assertions.assertNull(result.getPuRecipients().getFirst().getPuPayments().getFirst());
+    checkPayments(debtPosition, result);
     checkDocuments(result);
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
