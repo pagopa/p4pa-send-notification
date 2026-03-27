@@ -2,8 +2,10 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Broker;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
 import it.gov.pagopa.pu.send.connector.organization.service.BrokerService;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipient;
@@ -14,11 +16,13 @@ import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
+import it.gov.pagopa.pu.send.util.DebtPositionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -26,10 +30,16 @@ public class CreateNotificationRequest2SendNotificationMapper {
 
   private final DebtPositionService debtPositionService;
   private final BrokerService brokerService;
+  private final OrganizationService organizationService;
 
-  public CreateNotificationRequest2SendNotificationMapper(DebtPositionService debtPositionService, BrokerService brokerService) {
+  public CreateNotificationRequest2SendNotificationMapper(
+    DebtPositionService debtPositionService,
+    BrokerService brokerService,
+    OrganizationService organizationService
+  ) {
     this.debtPositionService = debtPositionService;
     this.brokerService = brokerService;
+    this.organizationService = organizationService;
   }
 
   public SendNotification mapToModel(CreateNotificationRequest request, String accessToken) {
@@ -45,7 +55,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
       sendNotification.setStatus(NotificationStatus.WAITING_FILE);
     }
 
-    sendNotification.setPuRecipients(setPuRecipients(request, accessToken, organizationId));
+    sendNotification.setPuRecipients(setPuRecipients(request, accessToken));
     sendNotification.setDocuments(setDocuments(request));
 
     sendNotification.setOrganizationId(organizationId);
@@ -76,11 +86,11 @@ public class CreateNotificationRequest2SendNotificationMapper {
     return sendNotification;
   }
 
-  private List<PuRecipient> setPuRecipients(CreateNotificationRequest request, String accessToken, Long organizationId) {
+  private List<PuRecipient> setPuRecipients(CreateNotificationRequest request, String accessToken) {
     return request.getRecipients().stream()
       .map(r -> {
         List<PuPayment> puPayments = r.getPayments().stream()
-          .map(p -> getPuPayment(accessToken, organizationId, p)).toList();
+          .map(p -> getPuPayment(accessToken, p)).toList();
         Recipient recipient = Recipient.builder()
           .recipientType(r.getRecipientType())
           .taxId(r.getTaxId())
@@ -92,20 +102,31 @@ public class CreateNotificationRequest2SendNotificationMapper {
       }).toList();
   }
 
-  private PuPayment getPuPayment(String accessToken, Long organizationId, Payment p) {
+  private PuPayment getPuPayment(String accessToken, Payment p) {
     if (p.getPagoPa() != null) {
+      String orgFiscalCode = p.getPagoPa().getCreditorTaxId();
       String nav = p.getPagoPa().getNoticeCode();
-      DebtPositionDTO debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
-      if (debtPosition == null) {
-        throw new UnknownDebtPositionException("[DEBT_POSITION_NOT_FOUND] Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
-      } else {
-        return new PuPayment(debtPosition.getDebtPositionId(), p, null);
-      }
+      String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
+      Optional<Organization> optionalOrganizationManagedByPU =
+        organizationService.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken);
+      return optionalOrganizationManagedByPU
+        .map(Organization::getOrganizationId)
+        .map(organizationId -> getPuPaymentWithDebtPositionId(p, nav, organizationId, accessToken))
+        .orElseGet(() -> new PuPayment(null, p, null));
     }
     if (p.getF24() != null) {
       return new PuPayment(null, p, null);
     }
     return null;
+  }
+
+  private PuPayment getPuPaymentWithDebtPositionId(Payment p, String nav, Long organizationId, String accessToken) {
+    DebtPositionDTO debtPosition = debtPositionService.findDebtPositionByInstallment(organizationId, nav, accessToken);
+    if (debtPosition == null) {
+      throw new UnknownDebtPositionException("[DEBT_POSITION_NOT_FOUND] Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
+    } else {
+      return new PuPayment(debtPosition.getDebtPositionId(), p, null);
+    }
   }
 
   private List<DocumentDTO> setDocuments(CreateNotificationRequest request) {

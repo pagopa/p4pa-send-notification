@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.connector.organization.client;
 
 import it.gov.pagopa.pu.organization.client.generated.OrganizationApi;
 import it.gov.pagopa.pu.organization.client.generated.OrganizationEntityControllerApi;
+import it.gov.pagopa.pu.organization.client.generated.OrganizationSearchControllerApi;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.send.connector.organization.config.OrganizationApisHolder;
@@ -15,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -27,6 +30,8 @@ class OrganizationApiClientTest {
   private OrganizationApi organizationApiMock;
   @Mock
   private OrganizationEntityControllerApi organizationEntityControllerApiMock;
+  @Mock
+  private OrganizationSearchControllerApi organizationSearchControllerApiMock;
 
   private OrganizationApiClient organizationApiClient;
 
@@ -108,5 +113,44 @@ class OrganizationApiClientTest {
 
     // Then
     Assertions.assertNull(result);
+  }
+
+  @Test
+  void whenFindByOrgFiscalCodeAndSegregationCodeThenInvokeWithAccessToken() {
+    // Given
+    String accessToken = "ACCESSTOKEN";
+    String orgFiscalCode = "00002";
+    String segregationCode = "01";
+    Organization expectedResult = new Organization();
+
+    Mockito.when(apisHolder.getOrganizationSearchControllerApi(accessToken))
+      .thenReturn(organizationSearchControllerApiMock);
+    Mockito.when(organizationSearchControllerApiMock.crudOrganizationsFindByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode))
+      .thenReturn(expectedResult);
+
+    // When
+    Optional<Organization> result = organizationApiClient.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken);
+
+    // Then
+    Assertions.assertTrue(result.isPresent());
+    Assertions.assertEquals(expectedResult, result.get());
+  }
+
+  @Test
+  void givenNotExistentOrganizationIdWhenFindByOrgFiscalCodeAndSegregationCodeThenEmpty() {
+    String accessToken = "ACCESSTOKEN";
+    String orgFiscalCode = "00002";
+    String segregationCode = "01";
+
+    Mockito.when(apisHolder.getOrganizationSearchControllerApi(accessToken))
+      .thenReturn(organizationSearchControllerApiMock);
+    Mockito.when(organizationSearchControllerApiMock.crudOrganizationsFindByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode))
+      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+
+    // When
+    Optional<Organization> result = organizationApiClient.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken);
+
+    // Then
+    Assertions.assertTrue(result.isEmpty());
   }
 }

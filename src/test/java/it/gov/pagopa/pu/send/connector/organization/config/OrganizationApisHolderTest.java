@@ -63,4 +63,14 @@ class OrganizationApisHolderTest extends BaseApiHolderTest {
       new ParameterizedTypeReference<>() {},
       apisHolder::unload);
   }
+
+  @Test
+  void whenGetOrganizationSearchControllerApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
+    assertAuthenticationShouldBeSetInThreadSafeMode(
+      token -> apisHolder.getOrganizationSearchControllerApi(token)
+        .crudOrganizationsFindByOrgFiscalCodeAndSegregationCode("orgFiscalCode", "segregationCode"),
+      new ParameterizedTypeReference<>() {},
+      apisHolder::unload);
+  }
+
 }

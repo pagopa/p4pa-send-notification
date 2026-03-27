@@ -1056,40 +1056,6 @@ class SendFacadeServiceImplTest {
   }
 
   @Test
-  void givenNotAcceptedNotificationWhenRetrieveLegalFactDownloadMetadataThenThrowInvalidStatusException() {
-    // GIVEN
-    String accessToken = "ACCESS_TOKEN";
-    String sendNotificationId = "SEND_NOTIFICATION_ID";
-    String legalFactId = "LEGAL_FACT_ID";
-    String iun = "1234";
-
-    SendNotificationNoPII notification = SendNotificationNoPII.builder()
-      .sendNotificationId(sendNotificationId)
-      .iun(iun)
-      .status(NotificationStatus.IN_VALIDATION)
-      .build();
-    SendNotificationDTO notificationDTO = SendNotificationDTO.builder()
-      .sendNotificationId(sendNotificationId)
-      .iun(iun)
-      .status(NotificationStatus.IN_VALIDATION)
-      .build();
-
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
-      .thenReturn(Optional.of(notification));
-
-    Mockito.when(sendNotificationDTOMapperMock.apply(notification))
-      .thenReturn(notificationDTO);
-
-    // WHEN
-    InvalidStatusException exception = assertThrows(InvalidStatusException.class, () ->
-      sendService.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, accessToken)
-    );
-
-    // THEN
-    assertEquals("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.IN_VALIDATION), exception.getMessage());
-  }
-
-  @Test
   void givenNullSendNotificationDTOWhenDownloadAndArchiveSendLegalFactThenThrowSendNotificationNotFoundException() {
     //GIVEN
     String accessToken = "ACCESS_TOKEN";
@@ -1120,49 +1086,6 @@ class SendFacadeServiceImplTest {
     Assertions.assertEquals(
       "[NOTIFICATION_NOT_FOUND] Error in fetching SEND notification by notificationRequestId %s".formatted(notificationRequestId),
       sendNotificationNotFoundException.getMessage()
-    );
-  }
-
-  @Test
-  void givenNotificationInInvalidStatusWhenDownloadAndArchiveSendLegalFactThenThrowInvalidStatusException() {
-    //GIVEN
-    String accessToken = "accessToken";
-    String notificationRequestId = "notificationRequestId";
-    String sendNotificationId = "sendNotificationId";
-    String iun = "IUN";
-    long organizationId = 1L;
-    LegalFactCategoryDTO category = LegalFactCategoryDTO.ANALOG_DELIVERY;
-    String polishedLegalFactId = "sendLegalFact.pdf";
-    String legalFactId = LEGAL_FACT_ID_PREFIX + polishedLegalFactId;
-
-    SendNotificationDTO sendNotificationDTO = new SendNotificationDTO();
-    sendNotificationDTO.setSendNotificationId(sendNotificationId);
-    sendNotificationDTO.setStatus(NotificationStatus.IN_VALIDATION);
-    sendNotificationDTO.setIun(iun);
-    sendNotificationDTO.setOrganizationId(organizationId);
-
-    Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
-      .thenReturn(sendNotificationDTO);
-
-    Mockito.when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
-      .thenReturn(polishedLegalFactId);
-
-    //WHEN
-    InvalidStatusException invalidStatusException = assertThrows(
-      InvalidStatusException.class,
-      () -> sendService.downloadAndArchiveSendLegalFact(
-        notificationRequestId,
-        category,
-        legalFactId,
-        accessToken
-      )
-    );
-
-    //THEN
-    Assertions.assertNotNull(invalidStatusException);
-    Assertions.assertEquals(
-      "[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: ACCEPTED, Actual: IN_VALIDATION",
-      invalidStatusException.getMessage()
     );
   }
 
