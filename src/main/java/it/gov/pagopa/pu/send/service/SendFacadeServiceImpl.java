@@ -279,11 +279,6 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(SendNotificationDTO sendNotification,
                                                                          String legalFactId,
                                                                         String accessToken) {
-    // Validate status
-    if(!NotificationStatus.ACCEPTED.equals(sendNotification.getStatus())) {
-      throw new InvalidStatusException(NotificationStatus.ACCEPTED, sendNotification.getStatus());
-    }
-
     LegalFactDownloadMetadataResponseDTO legalFactDownloadMetadata = sendService.getLegalFactDownloadMetadata(
       sendNotification.getIun(),
       legalFactId,
