@@ -65,7 +65,7 @@ val podamVersion = "8.0.2.RELEASE"
 
 // fix cve
 val jackson2CoreVersion = "2.21.1"
-val jackson3CoreVersion = "3.1.0"
+val jackson3CoreVersion = "3.1.1"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
