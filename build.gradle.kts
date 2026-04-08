@@ -7,7 +7,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
   java
-  id("org.springframework.boot") version "4.0.4"
+  id("org.springframework.boot") version "4.0.3"
   id("io.spring.dependency-management") version "1.1.7"
   jacoco
   id("org.sonarqube") version "7.2.3.7755"
@@ -65,7 +65,7 @@ val podamVersion = "8.0.2.RELEASE"
 
 // fix cve
 val jackson2CoreVersion = "2.21.1"
-val jackson3CoreVersion = "3.1.1"
+val jackson3CoreVersion = "3.1.0"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
