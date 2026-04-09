@@ -302,7 +302,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private void createStream(Long organizationId, String accessToken) {
     StreamCreationRequestV28DTO request = new StreamCreationRequestV28DTO();
     request.setTitle("SEND-STREAM_" + organizationId);
-    request.setEventType(EventTypeEnum.STATUS);
+    request.setEventType(EventTypeEnum.TIMELINE);
 
     List<SendStream> sendStreamList = sendStreamRepository.findByOrganizationId(organizationId);
     if(sendStreamList.isEmpty()) {

@@ -202,17 +202,17 @@ class SendFacadeServiceImplTest {
 
     StreamCreationRequestV28DTO streamCreationRequestV28DTO = new StreamCreationRequestV28DTO();
     streamCreationRequestV28DTO.setTitle(title);
-    streamCreationRequestV28DTO.setEventType(StreamCreationRequestV28DTO.EventTypeEnum.STATUS);
+    streamCreationRequestV28DTO.setEventType(StreamCreationRequestV28DTO.EventTypeEnum.TIMELINE);
 
     StreamMetadataResponseV28DTO streamMetadataResponseV28DTO = new StreamMetadataResponseV28DTO();
     streamMetadataResponseV28DTO.setStreamId(sendStreamId);
     streamMetadataResponseV28DTO.setTitle(title);
-    streamMetadataResponseV28DTO.setEventType(EventTypeEnum.STATUS);
+    streamMetadataResponseV28DTO.setEventType(EventTypeEnum.TIMELINE);
 
     SendStream sendStream = new SendStream();
     sendStream.setStreamId(sendStreamId.toString());
     sendStream.setTitle(title);
-    sendStream.setEventType(EventTypeEnum.STATUS.getValue());
+    sendStream.setEventType(EventTypeEnum.TIMELINE.getValue());
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
@@ -220,6 +220,9 @@ class SendFacadeServiceImplTest {
       .status(NotificationStatus.UPLOADED)
       .build();
     NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
+
+    ArgumentCaptor<StreamMetadataResponseV28DTO> streamMetadataResponseArgumentCaptor =
+      ArgumentCaptor.forClass(StreamMetadataResponseV28DTO.class);
 
     //STUBS (in order of code execution)
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
@@ -230,8 +233,8 @@ class SendFacadeServiceImplTest {
       .thenReturn(streamMetadataResponseV28DTO);
     Mockito.when(
       sendStreamMapperMock.mapToSendStream(
-        streamMetadataResponseV28DTO,
-        orgId
+        streamMetadataResponseArgumentCaptor.capture(),
+        Mockito.isA(Long.class)
       )
     ).thenReturn(sendStream);
     Mockito.when(sendStreamRepositoryMock.save(sendStream))
@@ -254,6 +257,7 @@ class SendFacadeServiceImplTest {
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
       .updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
+    Assertions.assertEquals(EventTypeEnum.TIMELINE, streamMetadataResponseArgumentCaptor.getValue().getEventType());
   }
 
   @Test
@@ -271,17 +275,17 @@ class SendFacadeServiceImplTest {
 
     StreamCreationRequestV28DTO streamCreationRequestV28DTO = new StreamCreationRequestV28DTO();
     streamCreationRequestV28DTO.setTitle(title);
-    streamCreationRequestV28DTO.setEventType(StreamCreationRequestV28DTO.EventTypeEnum.STATUS);
+    streamCreationRequestV28DTO.setEventType(StreamCreationRequestV28DTO.EventTypeEnum.TIMELINE);
 
     StreamMetadataResponseV28DTO streamMetadataResponseV28DTO = new StreamMetadataResponseV28DTO();
     streamMetadataResponseV28DTO.setStreamId(sendStreamId);
     streamMetadataResponseV28DTO.setTitle(title);
-    streamMetadataResponseV28DTO.setEventType(EventTypeEnum.STATUS);
+    streamMetadataResponseV28DTO.setEventType(EventTypeEnum.TIMELINE);
 
     SendStream sendStream = new SendStream();
     sendStream.setStreamId(sendStreamId.toString());
     sendStream.setTitle(title);
-    sendStream.setEventType(EventTypeEnum.STATUS.getValue());
+    sendStream.setEventType(EventTypeEnum.TIMELINE.getValue());
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
@@ -830,17 +834,17 @@ class SendFacadeServiceImplTest {
 
     StreamCreationRequestV28DTO streamCreationRequestV28DTO = new StreamCreationRequestV28DTO();
     streamCreationRequestV28DTO.setTitle(title);
-    streamCreationRequestV28DTO.setEventType(StreamCreationRequestV28DTO.EventTypeEnum.STATUS);
+    streamCreationRequestV28DTO.setEventType(StreamCreationRequestV28DTO.EventTypeEnum.TIMELINE);
 
     StreamMetadataResponseV28DTO streamMetadataResponseV28DTO = new StreamMetadataResponseV28DTO();
     streamMetadataResponseV28DTO.setStreamId(sendStreamId);
     streamMetadataResponseV28DTO.setTitle(title);
-    streamMetadataResponseV28DTO.setEventType(EventTypeEnum.STATUS);
+    streamMetadataResponseV28DTO.setEventType(EventTypeEnum.TIMELINE);
 
     SendStream sendStream = new SendStream();
     sendStream.setStreamId(sendStreamId.toString());
     sendStream.setTitle(title);
-    sendStream.setEventType(EventTypeEnum.STATUS.getValue());
+    sendStream.setEventType(EventTypeEnum.TIMELINE.getValue());
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
       .sendNotificationId(sendNotificationId)
@@ -849,6 +853,9 @@ class SendFacadeServiceImplTest {
       .build();
 
     NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
+
+    ArgumentCaptor<StreamMetadataResponseV28DTO> streamMetadataResponseArgumentCaptor =
+      ArgumentCaptor.forClass(StreamMetadataResponseV28DTO.class);
 
     //STUBS (in order of code execution)
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
@@ -859,8 +866,8 @@ class SendFacadeServiceImplTest {
       .thenReturn(streamMetadataResponseV28DTO);
     Mockito.when(
       sendStreamMapperMock.mapToSendStream(
-        streamMetadataResponseV28DTO,
-        orgId
+        streamMetadataResponseArgumentCaptor.capture(),
+        Mockito.isA(Long.class)
       )
     ).thenReturn(sendStream);
     Mockito.when(sendStreamRepositoryMock.save(sendStream))
@@ -884,6 +891,7 @@ class SendFacadeServiceImplTest {
       .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never())
       .updateNotificationRequestId(Mockito.anyString(), Mockito.anyString());
+    Assertions.assertEquals(EventTypeEnum.TIMELINE, streamMetadataResponseArgumentCaptor.getValue().getEventType());
   }
 
   @Test
