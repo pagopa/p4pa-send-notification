@@ -22,6 +22,7 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendStreamRepository;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.HttpUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -211,7 +212,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       .map(PuPayment::getPayment)
       .filter(pagoPa -> nav.equals(pagoPa.getPagoPa().getNoticeCode()))
       .findFirst()
-      .orElseThrow(() -> new NotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with nav: " + nav));
+      .orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_NOTIFICATION_NOT_FOUND, "Notification not found with nav: " + nav));
 
     return sendService.retrieveNotificationPrice(payment.getPagoPa().getCreditorTaxId(),
       payment.getPagoPa().getNoticeCode(), notification.getOrganizationId(), accessToken);
@@ -222,7 +223,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if (StringUtils.isBlank(streamId)) {
       List<StreamListElementDTO> streams = sendStreamService.getStreams(organizationId, accessToken);
       if (streams.isEmpty())
-        throw new NotFoundException("[STREAMS_NOT_FOUND] Streams not found for this organization: " + organizationId);
+        throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_STREAMS_NOT_FOUND, "Streams not found for this organization: " + organizationId);
 
       streamId = String.valueOf(streams.getLast().getStreamId());
     }
@@ -240,7 +241,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     Optional<SendStream> sendStream = sendStreamRepository.findById(streamId);
     if (sendStream.isEmpty() || !cachedStreamDoesExistOnSend(streamId, sendStream.get().getOrganizationId(), accessToken)) {
       sendStreamRepository.deleteById(streamId);
-      throw new NotFoundException(String.format("[STREAMS_NOT_FOUND] Send stream not found for streamId: %s", streamId));
+      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_STREAMS_NOT_FOUND, String.format("Send stream not found for streamId: %s", streamId));
     }
     return sendStreamMapper.mapToSendStreamDTO(sendStream.get());
   }
@@ -258,7 +259,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     // Validate status
     if(!NotificationStatus.ACCEPTED.equals(notification.getStatus())){
-      throw new InvalidStatusException(NotificationStatus.ACCEPTED, notification.getStatus());
+      throw new InvalidStatusException(ErrorCodeConstants.ERROR_CODE_INVALID_NOTIFICATION_STATUS, NotificationStatus.ACCEPTED, notification.getStatus());
     }
 
     return sendService.getLegalFacts(notification.getIun(), notification.getOrganizationId(), accessToken)
@@ -291,12 +292,12 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
   private SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
-      .orElseThrow(() -> new SendNotificationNotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with id: " + sendNotificationId));
+      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }
 
   private SendNotificationNoPII findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
     return sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
-      .orElseThrow(() -> new SendNotificationNotFoundException("[NOTIFICATION_NOT_FOUND] Notification not found with nav: " + nav));
+      .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with nav: " + nav));
   }
 
   private void createStream(Long organizationId, String accessToken) {
@@ -320,7 +321,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   public void downloadAndArchiveSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String legalFactId, String accessToken) throws IOException {
     SendNotificationDTO sendNotificationDTO = sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId);
     if(sendNotificationDTO == null) {
-      String formattedErrorMessage = "[NOTIFICATION_NOT_FOUND] Error in fetching SEND notification by notificationRequestId %s".formatted(notificationRequestId);
+      String formattedErrorMessage = "Error in fetching SEND notification by notificationRequestId %s".formatted(notificationRequestId);
       throw new SendNotificationNotFoundException(formattedErrorMessage);
     }
     String sendNotificationId = sendNotificationDTO.getSendNotificationId();
@@ -332,9 +333,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
         accessToken
       );
     if(legalFactDownloadMetadataDTO == null || legalFactDownloadMetadataDTO.getUrl() == null) {
-      String formattedErrorMessage = "[LEGAL_FACT_URL_NOT_FOUND] Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s"
+      String formattedErrorMessage = "Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s"
         .formatted(sendNotificationId, category.getValue(), polishedLegalFactId);
-      throw new NotFoundException(formattedErrorMessage);
+      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_LEGAL_FACT_URL_NOT_FOUND, formattedErrorMessage);
     }
     String preSignedUrl = legalFactDownloadMetadataDTO.getUrl();
 

@@ -3,10 +3,12 @@ package it.gov.pagopa.pu.send.service;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendUploadClient;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
+import org.springframework.stereotype.Service;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Optional;
-import org.springframework.stereotype.Service;
 
 @Service
 public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
@@ -29,7 +31,7 @@ public class SendUploadFacadeServiceImpl implements SendUploadFacadeService {
       byte[] fileBytes = inputStream.readAllBytes();
       return sendUploadClient.upload(documentDTO, fileBytes);
     } catch (Exception e) {
-      throw new UploadFileException(e.getMessage());
+      throw new UploadFileException(ErrorCodeConstants.ERROR_CODE_UPLOAD_ERROR, e.getMessage());
     }
   }
 }

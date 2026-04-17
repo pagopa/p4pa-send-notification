@@ -809,6 +809,7 @@ components:
       type: object
       required:
         - category
+        - code
         - message
       properties:
         category:
@@ -818,6 +819,9 @@ components:
             - SEND_NOTIFICATION_BAD_REQUEST
             - SEND_NOTIFICATION_GENERIC_ERROR
             - SEND_NOTIFICATION_ALREADY_PROCESSED
+            - SEND_NOTIFICATION_CONFLICT
+        code:
+          type: string
         message:
           type: string
         traceId:

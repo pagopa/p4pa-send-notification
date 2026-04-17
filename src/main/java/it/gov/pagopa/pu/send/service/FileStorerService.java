@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.util.AESUtils;
 import java.io.InputStream;
 import java.nio.file.Path;
 
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +41,7 @@ public class FileStorerService {
 
   public String saveToSharedFolder(Long organizationId, String sendNotificationId, InputStream inputStream, String fileName) {
     if (inputStream == null) {
-      throw new UploadFileException("InputStream is mandatory");
+      throw new UploadFileException(ErrorCodeConstants.ERROR_CODE_MANDATORY_FILE, "InputStream is mandatory");
     }
 
     FileUtils.validateFilename(fileName);
@@ -51,7 +52,7 @@ public class FileStorerService {
     try {
       AESUtils.encryptAndSave(fileEncryptPassword, inputStream, absolutePath.getParent(), absolutePath.getFileName().toString());
     } catch (Exception e) {
-      throw new UploadFileException("Error uploading file to shared folder %s".formatted(absolutePath));
+      throw new UploadFileException(ErrorCodeConstants.ERROR_CODE_UPLOAD_ERROR, "Error uploading file to shared folder %s".formatted(absolutePath));
     }
 
     return fileName;

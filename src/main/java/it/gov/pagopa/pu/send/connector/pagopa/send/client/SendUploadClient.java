@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApiClientConfig;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.http.*;
@@ -43,7 +44,7 @@ public class SendUploadClient {
     if(response.getStatusCode().is2xxSuccessful()) {
       return Optional.ofNullable(response.getHeaders().getFirst("x-amz-version-id"));
     } else {
-      throw new UploadFileException("[UPLOAD_ERROR] Something went wrong while uploading file to send: " + doc.getFileName() + ". " + response.getStatusCode());
+      throw new UploadFileException(ErrorCodeConstants.ERROR_CODE_UPLOAD_ERROR, "Something went wrong while uploading file to send: " + doc.getFileName() + ". " + response.getStatusCode());
     }
   }
 }

@@ -118,9 +118,10 @@ class SendNotificationServiceImplTest {
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
-    Exception exception = Assertions.assertThrows(SendNotificationFileNotFoundException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null));
+    SendNotificationFileNotFoundException exception = Assertions.assertThrows(SendNotificationFileNotFoundException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null));
 
-    Assertions.assertEquals("[FILE_NOT_FOUND] File not found with id: NOTEXISTS", exception.getMessage());
+    Assertions.assertEquals("FILE_NOT_FOUND",exception.getCode());
+    Assertions.assertEquals("File not found with id: NOTEXISTS", exception.getMessage());
   }
 
 
@@ -136,9 +137,10 @@ class SendNotificationServiceImplTest {
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
-    Exception exception = Assertions.assertThrows(InvalidSignatureException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null));
+    InvalidSignatureException exception = Assertions.assertThrows(InvalidSignatureException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null));
 
-    Assertions.assertEquals("[INVALID_SIGNATURE] File "+fileName+" has not a valid signature", exception.getMessage());
+    Assertions.assertEquals("INVALID_SIGNATURE",exception.getCode());
+    Assertions.assertEquals("File "+fileName+" has not a valid signature", exception.getMessage());
   }
 
 
@@ -449,7 +451,7 @@ class SendNotificationServiceImplTest {
       sendNotificationService.uploadSendLegalFact(id, category, fileName, inputStreamMock)
     );
 
-    Assertions.assertTrue(exception.getMessage().contains("[LEGAL_FACT_ALREADY_EXISTS]"));
+    Assertions.assertEquals("LEGAL_FACT_ALREADY_EXISTS", exception.getCode());
 
     Mockito.verifyNoInteractions(fileStorerServiceMock);
     Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never()).addLegalFact(any(), any());

@@ -130,7 +130,8 @@ class SendNotificationExceptionHandlerTest {
     performRequest(null, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Required request parameter 'data' for method parameter type String is not present"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_BAD_REQUEST] Required request parameter 'data' for method parameter type String is not present"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
 
   }
@@ -142,7 +143,8 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isInternalServerError())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_GENERIC_ERROR"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_GENERIC_ERROR"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_GENERIC_ERROR] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -154,7 +156,8 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isInternalServerError())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_GENERIC_ERROR"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_GENERIC_ERROR"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_GENERIC_ERROR] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -163,7 +166,8 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.parseMediaType("application/hal+json"))
       .andExpect(MockMvcResultMatchers.status().isNotAcceptable())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No acceptable representation"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_BAD_REQUEST] No acceptable representation"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -172,7 +176,8 @@ class SendNotificationExceptionHandlerTest {
     mockMvc.perform(MockMvcRequestBuilders.post("/NOTEXISTENTURL"))
       .andExpect(MockMvcResultMatchers.status().isNotFound())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_NOT_FOUND"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No static resource NOTEXISTENTURL for request '/NOTEXISTENTURL'."))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_NOT_FOUND"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_NOT_FOUND] No static resource NOTEXISTENTURL for request '/NOTEXISTENTURL'."))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -181,7 +186,19 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON, null)
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Required request body is missing"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_BAD_REQUEST] Required request body is missing"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
+  }
+
+  @Test
+  void handleMalformedBodyException() throws Exception {
+    performRequest(DATA, MediaType.APPLICATION_JSON,
+      "{\"")
+      .andExpect(MockMvcResultMatchers.status().isBadRequest())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_BAD_REQUEST] Cannot parse body. Unexpected end-of-input: was expecting closing '\"' for name"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -191,7 +208,8 @@ class SendNotificationExceptionHandlerTest {
       "{\"notRequiredField\":\"notRequired\",\"lowerCaseAlphabeticField\":\"ABC\"}")
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid request content. lowerCaseAlphabeticField: must match \"[a-z]+\"; requiredField: must not be null"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_BAD_REQUEST] Invalid request content. lowerCaseAlphabeticField: must match \"[a-z]+\"; requiredField: must not be null"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -201,7 +219,8 @@ class SendNotificationExceptionHandlerTest {
       "{\"notRequiredField\":\"notRequired\",\"dateTimeField\":\"2025-02-05\"}")
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Cannot parse body. dateTimeField: Text '2025-02-05' could not be parsed at index 10"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_BAD_REQUEST] Cannot parse body. dateTimeField: Text '2025-02-05' could not be parsed at index 10"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -213,7 +232,8 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isInternalServerError())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_GENERIC_ERROR"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("500 INTERNAL_SERVER_ERROR \"Error\""))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_GENERIC_ERROR"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_GENERIC_ERROR] 500 INTERNAL_SERVER_ERROR \"Error\""))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -227,7 +247,8 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid request content. fieldName: resolved message"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_BAD_REQUEST] Invalid request content. fieldName: resolved message"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -239,7 +260,8 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid request content. fieldName: resolved message"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_BAD_REQUEST] Invalid request content. fieldName: resolved message"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -251,18 +273,20 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isInternalServerError())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_GENERIC_ERROR"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("TransactionError"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("SEND_NOTIFICATION_GENERIC_ERROR"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[SEND_NOTIFICATION_GENERIC_ERROR] TransactionError"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
   @Test
   void handleInvalidStatusException() throws Exception {
-    doThrow(new InvalidStatusException(NotificationStatus.WAITING_FILE, NotificationStatus.SENDING)).when(testControllerSpy).testEndpoint(DATA, BODY);
+    doThrow(new InvalidStatusException("ERRORCODE", NotificationStatus.WAITING_FILE, NotificationStatus.SENDING)).when(testControllerSpy).testEndpoint(DATA, BODY);
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isConflict())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: WAITING_FILE, Actual: SENDING"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Notification status error: Expected: WAITING_FILE, Actual: SENDING"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -273,6 +297,7 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isAlreadyReported())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_ALREADY_PROCESSED"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("STATUS_ALREADY_PROCESSED"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[STATUS_ALREADY_PROCESSED] Expected status is WAITING_FILE, but it has already be processed: actual is SENDING"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
@@ -284,7 +309,8 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isNotFound())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("NOTIFICATION_NOT_FOUND"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[NOTIFICATION_NOT_FOUND] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -295,18 +321,20 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isNotFound())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("FILE_NOT_FOUND"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[FILE_NOT_FOUND] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
   @Test
   void handleNotFoundException() throws Exception {
-    doThrow(new NotFoundException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+    doThrow(new NotFoundException("ERRORCODE", "Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isNotFound())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -317,17 +345,19 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"));
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("INVALID_SIGNATURE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[INVALID_SIGNATURE] Error"));
   }
 
   @Test
   void handleUploadFileExceptionError() throws Exception {
-    doThrow(new UploadFileException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+    doThrow(new UploadFileException("ERRORCODE", "Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isInternalServerError())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_GENERIC_ERROR"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
@@ -338,18 +368,20 @@ class SendNotificationExceptionHandlerTest {
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isNotFound())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_NOT_FOUND"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("DEBT_POSITION_NOT_FOUND"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[DEBT_POSITION_NOT_FOUND] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 
   @Test
   void handleFileAlreadyExistsExceptionError() throws Exception {
-    doThrow(new FileAlreadyExistsException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+    doThrow(new FileAlreadyExistsException("ERRORCODE", "Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
 
     performRequest(DATA, MediaType.APPLICATION_JSON)
       .andExpect(MockMvcResultMatchers.status().isConflict())
       .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Error"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("ERRORCODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[ERRORCODE] Error"))
       .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
   }
 }

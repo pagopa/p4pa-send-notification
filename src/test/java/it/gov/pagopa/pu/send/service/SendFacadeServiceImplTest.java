@@ -147,9 +147,10 @@ class SendFacadeServiceImplTest {
     String sendNotificationId = "SENDNOTIFICATIONID";
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.empty());
 
-    Exception exception = assertThrows(SendNotificationNotFoundException.class, () -> sendService.preloadFiles(sendNotificationId, accessToken));
+    SendNotificationNotFoundException exception = assertThrows(SendNotificationNotFoundException.class, () -> sendService.preloadFiles(sendNotificationId, accessToken));
 
-    assertEquals("[NOTIFICATION_NOT_FOUND] Notification not found with id: " + sendNotificationId, exception.getMessage());
+    assertEquals("NOTIFICATION_NOT_FOUND", exception.getCode());
+    assertEquals("Notification not found with id: " + sendNotificationId, exception.getMessage());
   }
 
   @Test
@@ -719,7 +720,8 @@ class SendFacadeServiceImplTest {
       sendService.getStreamEvents(null, organizationId, accessToken)
     );
 
-    assertEquals("[STREAMS_NOT_FOUND] Streams not found for this organization: " + organizationId, exception.getMessage());
+    assertEquals("STREAMS_NOT_FOUND", exception.getCode());
+    assertEquals("Streams not found for this organization: " + organizationId, exception.getMessage());
   }
 
   @Test
@@ -781,7 +783,8 @@ class SendFacadeServiceImplTest {
       .when(sendStreamRepositoryMock)
       .deleteById(streamId);
 
-    String expectedErrorMessage = "[STREAMS_NOT_FOUND] Send stream not found for streamId: streamId";
+    String expectedErrorCode = "STREAMS_NOT_FOUND";
+    String expectedErrorMessage = "Send stream not found for streamId: streamId";
 
     //WHEN
     NotFoundException exception = assertThrows(
@@ -790,6 +793,7 @@ class SendFacadeServiceImplTest {
     );
 
     //THEN
+    Assertions.assertEquals(expectedErrorCode, exception.getCode());
     Assertions.assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
@@ -810,7 +814,8 @@ class SendFacadeServiceImplTest {
       .when(sendStreamRepositoryMock)
       .deleteById(streamId);
 
-    String expectedErrorMessage = "[STREAMS_NOT_FOUND] Send stream not found for streamId: streamId";
+    String expectedErrorCode = "STREAMS_NOT_FOUND";
+    String expectedErrorMessage = "Send stream not found for streamId: streamId";
 
     //WHEN
     NotFoundException exception = assertThrows(
@@ -819,6 +824,7 @@ class SendFacadeServiceImplTest {
     );
 
     //THEN
+    Assertions.assertEquals(expectedErrorCode, exception.getCode());
     Assertions.assertEquals(expectedErrorMessage, exception.getMessage());
   }
 
@@ -963,7 +969,8 @@ class SendFacadeServiceImplTest {
     );
 
     // THEN
-    assertEquals("[NOTIFICATION_NOT_FOUND] Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
+    assertEquals("NOTIFICATION_NOT_FOUND", exception.getCode());
+    assertEquals("Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
   }
 
   @Test
@@ -988,7 +995,8 @@ class SendFacadeServiceImplTest {
     );
 
     // THEN
-    assertEquals("[INVALID_NOTIFICATION_STATUS] Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.IN_VALIDATION), exception.getMessage());
+    assertEquals("INVALID_NOTIFICATION_STATUS", exception.getCode());
+    assertEquals("Notification status error: Expected: %s, Actual: %s".formatted(NotificationStatus.ACCEPTED, NotificationStatus.IN_VALIDATION), exception.getMessage());
   }
 
   @Test
@@ -1060,7 +1068,8 @@ class SendFacadeServiceImplTest {
     );
 
     // THEN
-    assertEquals("[NOTIFICATION_NOT_FOUND] Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
+    assertEquals("NOTIFICATION_NOT_FOUND", exception.getCode());
+    assertEquals("Notification not found with id: %s".formatted(sendNotificationId), exception.getMessage());
   }
 
   @Test
@@ -1091,8 +1100,9 @@ class SendFacadeServiceImplTest {
 
     //THEN
     Assertions.assertNotNull(sendNotificationNotFoundException);
+    Assertions.assertEquals("NOTIFICATION_NOT_FOUND", sendNotificationNotFoundException.getCode());
     Assertions.assertEquals(
-      "[NOTIFICATION_NOT_FOUND] Error in fetching SEND notification by notificationRequestId %s".formatted(notificationRequestId),
+      "Error in fetching SEND notification by notificationRequestId %s".formatted(notificationRequestId),
       sendNotificationNotFoundException.getMessage()
     );
   }
@@ -1142,7 +1152,9 @@ class SendFacadeServiceImplTest {
     //THEN
     Assertions.assertNotNull(notFoundException);
     Assertions.assertEquals(
-      "[LEGAL_FACT_URL_NOT_FOUND] Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s".formatted(sendNotificationId, category, polishedLegalFactId),
+      "LEGAL_FACT_URL_NOT_FOUND", notFoundException.getCode());
+    Assertions.assertEquals(
+      "Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s".formatted(sendNotificationId, category, polishedLegalFactId),
       notFoundException.getMessage()
     );
     Mockito.verify(sendLegalFactMapperMock)
@@ -1204,8 +1216,9 @@ class SendFacadeServiceImplTest {
 
     //THEN
     Assertions.assertNotNull(notFoundException);
+    Assertions.assertEquals("LEGAL_FACT_URL_NOT_FOUND", notFoundException.getCode());
     Assertions.assertEquals(
-      "[LEGAL_FACT_URL_NOT_FOUND] Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s".formatted(sendNotificationId, category, polishedLegalFactId),
+      "Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s".formatted(sendNotificationId, category, polishedLegalFactId),
       notFoundException.getMessage()
     );
   }
