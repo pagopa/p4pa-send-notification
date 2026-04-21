@@ -5,9 +5,10 @@ import it.gov.pagopa.pu.organization.dto.generated.BrokerConfiguration;
 import it.gov.pagopa.pu.send.connector.organization.service.BrokerConfigurationService;
 import it.gov.pagopa.pu.send.dto.generated.FileExpirationResponseDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
-import it.gov.pagopa.pu.send.exception.ExpirationConfigNotFoundException;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,7 @@ public class FileExpirationServiceImpl implements FileExpirationService {
 
     BrokerConfiguration brokerConfiguration = brokerConfigurationService.getBrokerConfigurationByOrganizationId(sendNotification.getOrganizationId(), accessToken);
     if(brokerConfiguration == null || brokerConfiguration.getLegalFactsExpirationDays()==null) {
-      throw new ExpirationConfigNotFoundException("legalFactsExpirationDays is not configured for the organization having organizationId "+sendNotification.getOrganizationId());
+      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,"legalFactsExpirationDays is not configured for the organization having organizationId "+sendNotification.getOrganizationId());
     }
     Long legalFactsExpirationDays = brokerConfiguration.getLegalFactsExpirationDays();
 
@@ -47,7 +48,6 @@ public class FileExpirationServiceImpl implements FileExpirationService {
         sendNotification,
         legalFact.getFileName(),
         legalFact.getDownloadDate().plusDays(legalFactsExpirationDays),
-        OffsetDateTime.now(),
         ()-> sendNotificationNoPIIRepository.updateLegalFactStatus(sendNotificationId, legalFact.getFileName(), FileStatus.EXPIRED)))
       .filter(Objects::nonNull)
       .max(Comparator.naturalOrder())
@@ -58,8 +58,8 @@ public class FileExpirationServiceImpl implements FileExpirationService {
       .build();
   }
 
-  private OffsetDateTime processFile(SendNotificationNoPII notification, String fileName, OffsetDateTime fileExpirationDateTime, OffsetDateTime scheduledDateTime, Supplier<UpdateResult> updateAction) {
-    if (scheduledDateTime.isAfter(fileExpirationDateTime)) {
+  private OffsetDateTime processFile(SendNotificationNoPII notification, String fileName, OffsetDateTime fileExpirationDateTime, Supplier<UpdateResult> updateAction) {
+    if (OffsetDateTime.now().isAfter(fileExpirationDateTime)) {
       deleteFileAndUpdate(notification.getSendNotificationId(), fileName, notification.getOrganizationId(), updateAction);
       return null;
     }

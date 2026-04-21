@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.send.connector.organization.service.BrokerConfigurationS
 import it.gov.pagopa.pu.send.dto.generated.FileExpirationResponseDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
-import it.gov.pagopa.pu.send.exception.ExpirationConfigNotFoundException;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
@@ -60,7 +60,7 @@ class FileExpirationServiceImplTest {
     Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(null);
 
-    ExpirationConfigNotFoundException expirationConfigNotFoundException = Assertions.assertThrows(ExpirationConfigNotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
+    NotFoundException expirationConfigNotFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
 
     Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,expirationConfigNotFoundException.getCode());
   }
@@ -83,7 +83,7 @@ class FileExpirationServiceImplTest {
     Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
-    ExpirationConfigNotFoundException expirationConfigNotFoundException = Assertions.assertThrows(ExpirationConfigNotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
+    NotFoundException expirationConfigNotFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
 
     Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,expirationConfigNotFoundException.getCode());
   }
