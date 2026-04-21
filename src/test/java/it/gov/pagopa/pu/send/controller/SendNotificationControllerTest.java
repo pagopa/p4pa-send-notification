@@ -4,8 +4,10 @@ import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
+import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.co.jemos.podam.api.PodamFactory;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -29,11 +32,14 @@ class SendNotificationControllerTest {
 
   @Mock
   private SendNotificationService sendNotificationServiceMock;
+  @Mock
+  private FileExpirationService fileExpirationServiceMock;
 
   @InjectMocks
   private SendNotificationController sendNotificationController;
 
   private final String accessToken = "ACCESSTOKEN";
+  private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   @BeforeEach
   void init(){
@@ -43,6 +49,7 @@ class SendNotificationControllerTest {
   @AfterEach
   void clearContext(){
     SecurityUtilsTest.clearSecurityContext();
+    Mockito.verifyNoMoreInteractions(sendNotificationServiceMock,fileExpirationServiceMock);
   }
 
   @Test
@@ -317,4 +324,16 @@ class SendNotificationControllerTest {
     Assertions.assertEquals(List.of(legalFactDTO), response.getBody());
   }
 
+  @Test
+  void whenDeleteExpiredLegalFactsThenOk(){
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    FileExpirationResponseDTO expectedResponse = podamFactory.manufacturePojo(FileExpirationResponseDTO.class);
+
+    Mockito.when(fileExpirationServiceMock.deleteExpiredLegalFacts(sendNotificationId, accessToken)).thenReturn(expectedResponse);
+
+    ResponseEntity<FileExpirationResponseDTO> response = sendNotificationController.deleteExpiredLegalFacts(sendNotificationId);
+
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertEquals(expectedResponse, response.getBody());
+  }
 }

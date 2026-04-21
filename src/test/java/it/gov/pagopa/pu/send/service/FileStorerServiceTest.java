@@ -1,17 +1,8 @@
 package it.gov.pagopa.pu.send.service;
 
-import static it.gov.pagopa.pu.send.service.SendNotificationServiceImpl.concatenatePaths;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-
+import it.gov.pagopa.pu.send.exception.DeleteFileException;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
 import it.gov.pagopa.pu.send.util.AESUtils;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.file.Path;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +14,18 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static it.gov.pagopa.pu.send.service.SendNotificationServiceImpl.concatenatePaths;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class FileStorerServiceTest {
@@ -157,4 +160,65 @@ class FileStorerServiceTest {
         concatenatePaths("", fileName));
   }
 
+  @Test
+  void givenValidFileWhenDeleteFromSharedFolderThenOK() {
+    Long organizationId = 1L;
+    String sendNotificationId = "SENDID";
+    String fileName = "filename";
+
+    Path expectedPath = Path.of(SHARED_FOLDER, String.valueOf(organizationId), SEND_FILE_PATH, sendNotificationId)
+      .resolve(fileName + AESUtils.CIPHER_EXTENSION);
+
+    try (MockedStatic<Files> filesMockedStatic = Mockito.mockStatic(Files.class)) {
+      filesMockedStatic.when(() -> Files.deleteIfExists(eq(expectedPath)))
+        .thenReturn(true);
+
+      Assertions.assertDoesNotThrow(() ->
+        fileStorerService.deleteFromSharedFolder(organizationId, sendNotificationId, fileName));
+
+      filesMockedStatic.verify(() -> Files.deleteIfExists(eq(expectedPath)));
+    }
+  }
+
+  @Test
+  void givenNonExistentFileWhenDeleteFromSharedFolderThenLogInfo() {
+    Long organizationId = 1L;
+    String sendNotificationId = "SENDID";
+    String fileName = "filename";
+
+    try (MockedStatic<Files> filesMockedStatic = Mockito.mockStatic(Files.class)) {
+      filesMockedStatic.when(() -> Files.deleteIfExists(any()))
+        .thenReturn(false);
+
+      Assertions.assertDoesNotThrow(() ->
+        fileStorerService.deleteFromSharedFolder(organizationId, sendNotificationId, fileName));
+    }
+  }
+
+  @Test
+  void givenIOExceptionWhenDeleteFromSharedFolderThenIllegalStateException() {
+    Long organizationId = 1L;
+    String sendNotificationId = "SENDID";
+    String fileName = "filename";
+
+    try (MockedStatic<Files> filesMockedStatic = Mockito.mockStatic(Files.class)) {
+      filesMockedStatic.when(() -> Files.deleteIfExists(any()))
+        .thenThrow(new IOException("disk error"));
+
+      Assertions.assertThrows(IllegalStateException.class, () ->
+        fileStorerService.deleteFromSharedFolder(organizationId, sendNotificationId, fileName));
+    }
+  }
+
+  @Test
+  void givenEmptyFilenameWhenDeleteFromSharedFolderThenDeleteFileException() {
+    Assertions.assertThrows(DeleteFileException.class, () ->
+      fileStorerService.deleteFromSharedFolder(1L, "SENDID", ""));
+  }
+
+  @Test
+  void givenNullFilenameWhenDeleteFromSharedFolderThenDeleteFileException() {
+    Assertions.assertThrows(DeleteFileException.class, () ->
+      fileStorerService.deleteFromSharedFolder(1L, "SENDID", null));
+  }
 }

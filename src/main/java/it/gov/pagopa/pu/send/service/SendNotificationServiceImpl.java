@@ -20,19 +20,20 @@ import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.InputStream;
-
+@Slf4j
 @Service
 public class SendNotificationServiceImpl implements SendNotificationService {
 
@@ -158,7 +159,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     return findSendNotification(sendNotificationId).getLegalFacts();
   }
 
-  private SendNotificationNoPII findSendNotification(String sendNotificationId) {
+  public SendNotificationNoPII findSendNotification(String sendNotificationId) {
     return sendNotificationNoPIIRepository.findById(sendNotificationId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }
@@ -240,5 +241,4 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       ));
     }
   }
-
 }

@@ -1,9 +1,6 @@
 package it.gov.pagopa.pu.send.connector.organization.config;
 
-import it.gov.pagopa.pu.organization.client.generated.BrokerSearchControllerApi;
-import it.gov.pagopa.pu.organization.client.generated.OrganizationApi;
-import it.gov.pagopa.pu.organization.client.generated.OrganizationEntityControllerApi;
-import it.gov.pagopa.pu.organization.client.generated.OrganizationSearchControllerApi;
+import it.gov.pagopa.pu.organization.client.generated.*;
 import it.gov.pagopa.pu.organization.generated.ApiClient;
 import it.gov.pagopa.pu.organization.generated.BaseApi;
 import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
@@ -19,6 +16,7 @@ public class OrganizationApisHolder {
   private final OrganizationEntityControllerApi organizationEntityControllerApi;
   private final BrokerSearchControllerApi brokerSearchControllerApi;
   private final OrganizationSearchControllerApi organizationSearchControllerApi;
+  private final BrokerConfigurationSearchControllerApi brokerConfigurationSearchControllerApi;
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
   public OrganizationApisHolder(OrganizationApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder) {
@@ -33,6 +31,7 @@ public class OrganizationApisHolder {
     this.organizationEntityControllerApi = new OrganizationEntityControllerApi(apiClient);
     this.brokerSearchControllerApi = new BrokerSearchControllerApi(apiClient);
     this.organizationSearchControllerApi = new OrganizationSearchControllerApi(apiClient);
+    this.brokerConfigurationSearchControllerApi = new BrokerConfigurationSearchControllerApi(apiClient);
   }
 
   @PreDestroy
@@ -54,6 +53,10 @@ public class OrganizationApisHolder {
 
   public  OrganizationSearchControllerApi getOrganizationSearchControllerApi(String accessToken) {
     return getApi(accessToken, organizationSearchControllerApi);
+  }
+
+  public  BrokerConfigurationSearchControllerApi getBrokerConfigurationSearchControllerApi(String accessToken) {
+    return getApi(accessToken, brokerConfigurationSearchControllerApi);
   }
 
   private ApiClient buildApiClient(RestTemplate restTemplate, OrganizationApiClientConfig clientConfig) {

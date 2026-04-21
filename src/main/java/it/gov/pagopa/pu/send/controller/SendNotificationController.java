@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.controller;
 import it.gov.pagopa.pu.send.controller.generated.NotificationApi;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +20,12 @@ import java.util.Optional;
 public class SendNotificationController implements NotificationApi {
 
   private final SendNotificationService sendNotificationService;
+  private final FileExpirationService fileExpirationService;
 
   public SendNotificationController(
-    SendNotificationService sendNotificationService) {
+    SendNotificationService sendNotificationService, FileExpirationService fileExpirationService) {
     this.sendNotificationService = sendNotificationService;
+    this.fileExpirationService = fileExpirationService;
   }
 
   @Override
@@ -95,8 +98,14 @@ public class SendNotificationController implements NotificationApi {
 
   @Override
   public ResponseEntity<Void> updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus) {
+    log.info("Updating status to {} for notification having notificationRequestId {}", newStatus, notificationRequestId);
     sendNotificationService.updateNotificationStatus(notificationRequestId, newStatus);
     return ResponseEntity.ok().build();
   }
 
+  @Override
+  public ResponseEntity<FileExpirationResponseDTO> deleteExpiredLegalFacts(String sendNotificationId) {
+    log.info("Deleting expired legal facts for send notification having sendNotificationId {}", sendNotificationId);
+    return ResponseEntity.ok(fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, SecurityUtils.getAccessToken()));
+  }
 }

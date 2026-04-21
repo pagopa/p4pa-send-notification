@@ -161,4 +161,17 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
     return updateFirst(query, update);
   }
+
+  @Override
+  public UpdateResult updateLegalFactStatus(String sendNotificationId, String fileName, FileStatus status) {
+    Query query = Query.query(
+      Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
+        .and(Fields.legalFacts + ".fileName").is(fileName)
+    );
+
+    Update update = new Update()
+      .set(Fields.legalFacts + ".$.status", status);
+
+    return updateFirst(query, update);
+  }
 }

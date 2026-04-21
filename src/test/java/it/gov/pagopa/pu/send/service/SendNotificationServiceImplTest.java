@@ -1,13 +1,13 @@
 package it.gov.pagopa.pu.send.service;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mockStatic;
-
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
-import it.gov.pagopa.pu.send.dto.*;
+import it.gov.pagopa.pu.send.dto.DocumentDTO;
+import it.gov.pagopa.pu.send.dto.PuPayment;
+import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
+import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
@@ -17,10 +17,8 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,14 +29,19 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mockStatic;
+
 @ExtendWith(MockitoExtension.class)
 class SendNotificationServiceImplTest {
-
   @Mock
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
   @Mock
@@ -493,5 +496,29 @@ class SendNotificationServiceImplTest {
 
     // When
     Assertions.assertDoesNotThrow(() -> sendNotificationService.getLegalFacts(notificationId));
+  }
+
+  @Test
+  void whenFindSendNotificationThenOk() {
+    String sendNotificationId = "123";
+    SendNotificationNoPII expectedResult = new SendNotificationNoPII();
+    expectedResult.setSendNotificationId(sendNotificationId);
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.of(expectedResult));
+
+    SendNotificationNoPII result = sendNotificationService.findSendNotification(sendNotificationId);
+
+    Assertions.assertEquals(expectedResult, result);
+  }
+
+  @Test
+  void givenNoNotificationWhenFindSendNotificationThen() {
+    String sendNotificationId = "123";
+
+    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.empty());
+
+    SendNotificationNotFoundException sendNotificationNotFoundException = Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotification(sendNotificationId));
+
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_NOTIFICATION_NOT_FOUND, sendNotificationNotFoundException.getCode());
   }
 }
