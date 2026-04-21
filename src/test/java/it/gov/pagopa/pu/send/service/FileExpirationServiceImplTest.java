@@ -46,7 +46,7 @@ class FileExpirationServiceImplTest {
   }
 
   @Test
-  void givenNullBrokerConfigurationWhenDeleteExpiredLegalFactsThenExpirationConfigNotFoundException() {
+  void givenNullBrokerConfigurationWhenDeleteExpiredLegalFactsThenNotFoundException() {
     String accessToken = "accessToken";
     String sendNotificationId = "sendNotificationId";
     long organizationId = 1L;
@@ -66,7 +66,7 @@ class FileExpirationServiceImplTest {
   }
 
   @Test
-  void givenBrokerConfigurationWithNullExpirationDaysWhenDeleteExpiredLegalFactsThenExpirationConfigNotFoundException() {
+  void givenBrokerConfigurationWithNullExpirationDaysWhenDeleteExpiredLegalFactsThenNotFoundException() {
     String accessToken = "accessToken";
     String sendNotificationId = "sendNotificationId";
     long organizationId = 1L;
