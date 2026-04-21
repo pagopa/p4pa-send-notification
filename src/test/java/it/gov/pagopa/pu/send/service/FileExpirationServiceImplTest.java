@@ -60,9 +60,9 @@ class FileExpirationServiceImplTest {
     Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(null);
 
-    NotFoundException expirationConfigNotFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
+    NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
 
-    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,expirationConfigNotFoundException.getCode());
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,notFoundException.getCode());
   }
 
   @Test
@@ -83,9 +83,9 @@ class FileExpirationServiceImplTest {
     Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
-    NotFoundException expirationConfigNotFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
+    NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
 
-    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,expirationConfigNotFoundException.getCode());
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,notFoundException.getCode());
   }
 
   @Test
