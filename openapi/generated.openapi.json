@@ -1197,14 +1197,6 @@
           "schema" : {
             "type" : "string"
           }
-        }, {
-          "name" : "scheduleDateTime",
-          "in" : "query",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "format" : "date-time"
-          }
         } ],
         "responses" : {
           "200" : {

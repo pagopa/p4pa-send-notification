@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.controller;
 import it.gov.pagopa.pu.send.controller.generated.NotificationApi;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +20,12 @@ import java.util.Optional;
 public class SendNotificationController implements NotificationApi {
 
   private final SendNotificationService sendNotificationService;
+  private final FileExpirationService fileExpirationService;
 
   public SendNotificationController(
-    SendNotificationService sendNotificationService) {
+    SendNotificationService sendNotificationService, FileExpirationService fileExpirationService) {
     this.sendNotificationService = sendNotificationService;
+    this.fileExpirationService = fileExpirationService;
   }
 
   @Override
@@ -102,8 +104,8 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
-  public ResponseEntity<FileExpirationResponseDTO> deleteExpiredLegalFacts(String sendNotificationId, OffsetDateTime scheduleDateTime) {
-    log.info("Deleting expired legal facts at {} for send notification having sendNotificationId {}", scheduleDateTime, sendNotificationId);
-    return ResponseEntity.ok(sendNotificationService.deleteExpiredLegalFacts(sendNotificationId, scheduleDateTime, SecurityUtils.getAccessToken()));
+  public ResponseEntity<FileExpirationResponseDTO> deleteExpiredLegalFacts(String sendNotificationId) {
+    log.info("Deleting expired legal facts for send notification having sendNotificationId {}", sendNotificationId);
+    return ResponseEntity.ok(fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, SecurityUtils.getAccessToken()));
   }
 }
