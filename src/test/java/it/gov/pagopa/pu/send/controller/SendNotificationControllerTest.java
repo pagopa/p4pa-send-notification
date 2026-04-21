@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
+import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.co.jemos.podam.api.PodamFactory;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -34,6 +37,7 @@ class SendNotificationControllerTest {
   private SendNotificationController sendNotificationController;
 
   private final String accessToken = "ACCESSTOKEN";
+  private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   @BeforeEach
   void init(){
@@ -317,4 +321,17 @@ class SendNotificationControllerTest {
     Assertions.assertEquals(List.of(legalFactDTO), response.getBody());
   }
 
+  @Test
+  void whenDeleteExpiredLegalFactsThenOk(){
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    OffsetDateTime scheduledDateTime = OffsetDateTime.now();
+    FileExpirationResponseDTO expectedResponse = podamFactory.manufacturePojo(FileExpirationResponseDTO.class);
+
+    Mockito.when(sendNotificationServiceMock.deleteExpiredLegalFacts(sendNotificationId, scheduledDateTime, accessToken)).thenReturn(expectedResponse);
+
+    ResponseEntity<FileExpirationResponseDTO> response = sendNotificationController.deleteExpiredLegalFacts(sendNotificationId, scheduledDateTime);
+
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertEquals(expectedResponse, response.getBody());
+  }
 }

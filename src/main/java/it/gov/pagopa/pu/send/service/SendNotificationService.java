@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 
 import java.io.InputStream;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface SendNotificationService {
@@ -19,4 +20,5 @@ public interface SendNotificationService {
   UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus);
   void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream);
   List<LegalFactDTO> getLegalFacts(String sendNotificationId);
+  FileExpirationResponseDTO deleteExpiredLegalFacts(String sendNotificationId, OffsetDateTime scheduleDateTime, String accessToken);
 }

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -95,8 +96,14 @@ public class SendNotificationController implements NotificationApi {
 
   @Override
   public ResponseEntity<Void> updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus) {
+    log.info("Updating status to {} for notification having notificationRequestId {}", newStatus, notificationRequestId);
     sendNotificationService.updateNotificationStatus(notificationRequestId, newStatus);
     return ResponseEntity.ok().build();
   }
 
+  @Override
+  public ResponseEntity<FileExpirationResponseDTO> deleteExpiredLegalFacts(String sendNotificationId, OffsetDateTime scheduleDateTime) {
+    log.info("Deleting expired legal facts at {} for send notification having sendNotificationId {}", scheduleDateTime, sendNotificationId);
+    return ResponseEntity.ok(sendNotificationService.deleteExpiredLegalFacts(sendNotificationId, scheduleDateTime, SecurityUtils.getAccessToken()));
+  }
 }

@@ -1,9 +1,9 @@
-import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
-import java.util.*
-import com.github.jk1.license.render.*
-import com.github.jk1.license.filter.*
+import com.github.jk1.license.filter.SpdxLicenseBundleNormalizer
+import com.github.jk1.license.render.XmlReportRenderer
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+import java.util.*
 
 plugins {
   java
@@ -192,7 +192,8 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
       "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus",
       "NotificationPriceResponseV23DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO",
       "ProgressResponseElementV28DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV28DTO",
-      "LegalFactCategoryDTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO"
+      "LegalFactCategoryDTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO",
+      "FileStatus" to "it.gov.pagopa.pu.send.enums.FileStatus"
     )
   )
   configOptions.set(

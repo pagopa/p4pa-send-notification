@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.organization.dto.generated.BrokerConfiguration;
+import it.gov.pagopa.pu.send.connector.organization.service.BrokerConfigurationService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
@@ -20,19 +22,24 @@ import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.OffsetDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 
+@Slf4j
 @Service
 public class SendNotificationServiceImpl implements SendNotificationService {
 
@@ -43,11 +50,12 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final String fileShareBaseUrl;
   private final FileStorerService fileStorerService;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
+  private final BrokerConfigurationService brokerConfigurationService;
 
   public SendNotificationServiceImpl(@Value("${fileshare-public-base-url}") String fileShareBaseUrl,
                                      SendNotificationPIIRepository sendNotificationPIIRepository,
                                      SendNotificationNoPIIRepository sendNotificationNoPIIRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
-                                     FileStorerService fileStorerService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
+                                     FileStorerService fileStorerService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper, BrokerConfigurationService brokerConfigurationService) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
@@ -55,6 +63,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.workflowService = workflowService;
     this.fileStorerService = fileStorerService;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
+    this.brokerConfigurationService = brokerConfigurationService;
   }
 
   @Transactional
@@ -241,4 +250,47 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     }
   }
 
+  @Override
+  public FileExpirationResponseDTO deleteExpiredLegalFacts(String sendNotificationId, OffsetDateTime scheduledDateTime, String accessToken) {
+    SendNotificationNoPII sendNotification = findSendNotification(sendNotificationId);
+
+    BrokerConfiguration brokerConfiguration = brokerConfigurationService.getBrokerConfigurationByOrganizationId(sendNotification.getOrganizationId(), accessToken);
+    if(brokerConfiguration == null || brokerConfiguration.getLegalFactsExpirationDays()==null) {
+      log.debug("legalFactsExpirationDays is not configured for the organization having organizationId {}", sendNotification.getOrganizationId());
+      return FileExpirationResponseDTO.builder().build();
+    }
+    Long legalFactsExpirationDays = brokerConfiguration.getLegalFactsExpirationDays();
+
+    OffsetDateTime nextFileExpirationDate = sendNotification.getLegalFacts().stream()
+      .filter(legalFact -> legalFact.getStatus() != FileStatus.EXPIRED && legalFact.getDownloadDate() != null)
+      .map(legalFact -> processFile(
+        sendNotification,
+        legalFact.getFileName(),
+        legalFact.getDownloadDate().plusDays(legalFactsExpirationDays),
+        scheduledDateTime,
+        ()-> sendNotificationNoPIIRepository.updateLegalFactStatus(sendNotificationId, legalFact.getFileName(), FileStatus.EXPIRED)))
+      .filter(Objects::nonNull)
+      .max(Comparator.naturalOrder())
+      .orElse(null);
+
+    return FileExpirationResponseDTO.builder()
+      .nextFileExpirationDate(nextFileExpirationDate)
+      .build();
+  }
+
+  private OffsetDateTime processFile(SendNotificationNoPII notification, String fileName, OffsetDateTime fileExpirationDateTime, OffsetDateTime scheduledDateTime, Supplier<UpdateResult> updateAction) {
+    if (scheduledDateTime.isAfter(fileExpirationDateTime)) {
+      deleteFileAndUpdate(notification.getSendNotificationId(), fileName, notification.getOrganizationId(), updateAction);
+      return null;
+    }
+    return fileExpirationDateTime;
+  }
+
+  private void deleteFileAndUpdate(String sendNotificationId, String fileName, Long organizationId, Supplier<UpdateResult> updateAction) {
+    fileStorerService.deleteFromSharedFolder(organizationId, sendNotificationId, fileName);
+    UpdateResult updateResult = updateAction.get();
+    if (updateResult.getModifiedCount() != 1L) {
+      throw new SendNotificationNotFoundException("Cannot update send notification file having sendNotificationId %s filename %s to status %s".formatted(sendNotificationId, fileName, FileStatus.EXPIRED));
+    }
+  }
 }
