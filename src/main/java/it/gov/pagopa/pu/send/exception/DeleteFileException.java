@@ -1,7 +1,10 @@
 package it.gov.pagopa.pu.send.exception;
 
-public class DeleteFileException extends RuntimeException {
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
+
+public class DeleteFileException extends BaseBusinessException {
+
   public DeleteFileException(String message) {
-    super(message);
+    super(ErrorCodeConstants.ERROR_CODE_DELETE_ERROR, message);
   }
 }

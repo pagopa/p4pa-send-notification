@@ -1,5 +1,5 @@
 package it.gov.pagopa.pu.send.exception;
 
-public class UploadFileException extends RuntimeException{
-  public UploadFileException(String message){ super(message);}
+public class UploadFileException extends BaseBusinessException{
+  public UploadFileException(String code, String message){ super(code, message);}
 }

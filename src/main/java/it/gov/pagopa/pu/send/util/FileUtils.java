@@ -29,7 +29,7 @@ public class FileUtils {
 
   public static void validateFilename(String filename) {
     if (Stream.of("..", "\\", "/").anyMatch(filename::contains)) {
-      throw new UploadFileException("Invalid filename");
+      throw new UploadFileException(ErrorCodeConstants.ERROR_CODE_INVALID_FILE_NAME, "Invalid filename");
     }
   }
 }

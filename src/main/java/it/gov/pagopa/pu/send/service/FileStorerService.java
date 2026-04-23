@@ -1,17 +1,23 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.exception.DeleteFileException;
 import it.gov.pagopa.pu.send.exception.UploadFileException;
 import it.gov.pagopa.pu.send.util.AESUtils;
-import java.io.InputStream;
-import java.nio.file.Path;
-
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.FileUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static it.gov.pagopa.pu.send.service.SendNotificationServiceImpl.concatenatePaths;
 
+@Slf4j
 @Service
 public class FileStorerService {
   private final String fileEncryptPassword;
@@ -40,7 +46,7 @@ public class FileStorerService {
 
   public String saveToSharedFolder(Long organizationId, String sendNotificationId, InputStream inputStream, String fileName) {
     if (inputStream == null) {
-      throw new UploadFileException("InputStream is mandatory");
+      throw new UploadFileException(ErrorCodeConstants.ERROR_CODE_MANDATORY_FILE, "InputStream is mandatory");
     }
 
     FileUtils.validateFilename(fileName);
@@ -51,9 +57,26 @@ public class FileStorerService {
     try {
       AESUtils.encryptAndSave(fileEncryptPassword, inputStream, absolutePath.getParent(), absolutePath.getFileName().toString());
     } catch (Exception e) {
-      throw new UploadFileException("Error uploading file to shared folder %s".formatted(absolutePath));
+      throw new UploadFileException(ErrorCodeConstants.ERROR_CODE_UPLOAD_ERROR, "Error uploading file to shared folder %s".formatted(absolutePath));
     }
 
     return fileName;
+  }
+
+  public void deleteFromSharedFolder(Long organizationId, String sendNotificationId, String fileName) {
+    if (StringUtils.isBlank(fileName)) {
+      throw new DeleteFileException("filename is mandatory");
+    }
+
+    Path sendPath = buildRelativeSendPath(organizationId, sendNotificationId);
+    Path filePath = sendPath.resolve(fileName + AESUtils.CIPHER_EXTENSION);
+    try {
+      if (!Files.deleteIfExists(filePath)) {
+        log.info("Send notification file {} does not exist", fileName);
+      }
+    } catch (IOException e) {
+      throw new IllegalStateException(
+        "Send notification file %s could not be deleted".formatted(fileName), e);
+    }
   }
 }

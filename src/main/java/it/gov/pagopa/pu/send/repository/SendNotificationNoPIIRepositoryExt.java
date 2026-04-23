@@ -23,4 +23,5 @@ public interface SendNotificationNoPIIRepositoryExt {
   Optional<SendNotificationNoPII> findByOrganizationIdAndNav(Long organizationId, String nav);
   Optional<SendNotificationNoPII> findByNotificationRequestId(String notificationRequestId);
   UpdateResult addLegalFact(String sendNotificationId, LegalFactDTO legalFact);
+  UpdateResult updateLegalFactStatus(String sendNotificationId, String fileName, FileStatus status);
 }

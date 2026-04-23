@@ -10,7 +10,7 @@ public class NotificationUtils {
   public static <T extends Enum<T>> void validateStatus(T expectedStatus, T actualStatus){
     if(!expectedStatus.equals(actualStatus)){
       if(expectedStatus.compareTo(actualStatus) > 0){
-        throw new InvalidStatusException(expectedStatus, actualStatus);
+        throw new InvalidStatusException(ErrorCodeConstants.ERROR_CODE_INVALID_NOTIFICATION_STATUS, expectedStatus, actualStatus);
       } else {
         throw new StatusAlreadyProcessedException(expectedStatus, actualStatus);
       }

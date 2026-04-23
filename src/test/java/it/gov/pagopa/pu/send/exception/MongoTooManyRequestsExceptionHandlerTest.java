@@ -123,7 +123,7 @@ class MongoTooManyRequestsExceptionHandlerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{\"requiredField\":\"data\"}"))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"DUMMY\"}", JsonCompareMode.LENIENT))
+                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"[SEND_NOTIFICATION_GENERIC_ERROR] DUMMY\"}", JsonCompareMode.LENIENT))
           .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
     }
 
