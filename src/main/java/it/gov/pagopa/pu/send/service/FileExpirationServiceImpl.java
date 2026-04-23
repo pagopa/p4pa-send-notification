@@ -73,4 +73,30 @@ public class FileExpirationServiceImpl implements FileExpirationService {
       log.debug("Cannot update send notification file having sendNotificationId {} filename {} to status {}",sendNotificationId, fileName, FileStatus.EXPIRED);
     }
   }
+
+  @Override
+  public FileExpirationResponseDTO deleteExpiredDocuments(String sendNotificationId, String accessToken) {
+    SendNotificationNoPII sendNotification = sendNotificationService.findSendNotification(sendNotificationId);
+
+    BrokerConfiguration brokerConfiguration = brokerConfigurationService.getBrokerConfigurationByOrganizationId(sendNotification.getOrganizationId(), accessToken);
+    if(brokerConfiguration == null || brokerConfiguration.getSendFilesExpirationDays()==null) {
+      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,"sendFilesExpirationDays is not configured for the organization having organizationId "+sendNotification.getOrganizationId());
+    }
+    Long sendFilesExpirationDays = brokerConfiguration.getSendFilesExpirationDays();
+
+    OffsetDateTime nextFileExpirationDate = sendNotification.getDocuments().stream()
+      .filter(document -> document.getStatus() != FileStatus.EXPIRED && document.getDownloadDate() != null)
+      .map(document -> processFile(
+        sendNotification,
+        sendNotificationId+"_"+document.getFileName(),
+        document.getDownloadDate().plusDays(sendFilesExpirationDays),
+        ()-> sendNotificationNoPIIRepository.updateFileStatus(sendNotificationId, document.getFileName(), FileStatus.EXPIRED)))
+      .filter(Objects::nonNull)
+      .max(Comparator.naturalOrder())
+      .orElse(null);
+
+    return FileExpirationResponseDTO.builder()
+      .nextFileExpirationDate(nextFileExpirationDate)
+      .build();
+  }
 }
