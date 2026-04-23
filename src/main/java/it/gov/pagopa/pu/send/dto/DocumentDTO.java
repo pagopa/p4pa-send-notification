@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -25,4 +26,5 @@ public class DocumentDTO implements Serializable {
   private String url;
   private String key;
   private String versionId;
+  private OffsetDateTime downloadDate;
 }

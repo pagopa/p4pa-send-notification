@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.service;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.organization.dto.generated.BrokerConfiguration;
 import it.gov.pagopa.pu.send.connector.organization.service.BrokerConfigurationService;
+import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.FileExpirationResponseDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
@@ -256,6 +257,218 @@ class FileExpirationServiceImplTest {
 
     FileExpirationResponseDTO result =
       fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(expectedNextFileExpirationDate, result.getNextFileExpirationDate());
+  }
+
+  @Test
+  void givenNullBrokerConfigurationWhenDeleteExpiredDocumentsThenNotFoundException() {
+    String accessToken = "accessToken";
+    String sendNotificationId = "sendNotificationId";
+    long organizationId = 1L;
+
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setSendNotificationId(sendNotificationId);
+    notification.setOrganizationId(organizationId);
+
+    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+      .thenReturn(notification);
+    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+      .thenReturn(null);
+
+    NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken));
+
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,notFoundException.getCode());
+  }
+
+  @Test
+  void givenBrokerConfigurationWithNullExpirationDaysWhenDeleteExpiredDocumentsThenNotFoundException() {
+    String accessToken = "accessToken";
+    String sendNotificationId = "sendNotificationId";
+    long organizationId = 1L;
+
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setSendNotificationId(sendNotificationId);
+    notification.setOrganizationId(organizationId);
+
+    BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
+    brokerConfiguration.setSendFilesExpirationDays(null);
+
+    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+      .thenReturn(notification);
+    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+      .thenReturn(brokerConfiguration);
+
+    NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken));
+
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND,notFoundException.getCode());
+  }
+
+  @Test
+  void givenLegalFactAlreadyExpiredWhenDeleteExpiredDocumentsThenSkipItAndReturnNullNextSchedule() {
+    String accessToken = "accessToken";
+    String sendNotificationId = "sendNotificationId";
+    long expirationDays = 30L;
+    long organizationId = 1L;
+
+    DocumentDTO expiredDocument = DocumentDTO.builder()
+      .fileName("already-expired.pdf")
+      .status(FileStatus.EXPIRED)
+      .downloadDate(OffsetDateTime.now().minusDays(60))
+      .build();
+
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setSendNotificationId(sendNotificationId);
+    notification.setOrganizationId(organizationId);
+    notification.setDocuments(List.of(expiredDocument));
+
+    BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
+    brokerConfiguration.setSendFilesExpirationDays(expirationDays);
+
+    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+      .thenReturn(notification);
+    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+      .thenReturn(brokerConfiguration);
+
+    FileExpirationResponseDTO result = fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertNull(result.getNextFileExpirationDate());
+  }
+
+  @Test
+  void givenLegalFactWithNullDownloadDateWhenDeleteExpiredDocumentsThenSkipItAndReturnNullNextSchedule() {
+    String accessToken = "accessToken";
+    String sendNotificationId = "sendNotificationId";
+    long expirationDays = 30L;
+    long organizationId = 1L;
+
+    DocumentDTO documentNoDownloadDate = DocumentDTO.builder()
+      .fileName("no-download.pdf")
+      .status(FileStatus.READY)
+      .downloadDate(null)
+      .build();
+
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setSendNotificationId(sendNotificationId);
+    notification.setOrganizationId(organizationId);
+    notification.setDocuments(List.of(documentNoDownloadDate));
+
+    BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
+    brokerConfiguration.setSendFilesExpirationDays(expirationDays);
+
+    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+      .thenReturn(notification);
+    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+      .thenReturn(brokerConfiguration);
+
+    FileExpirationResponseDTO result = fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertNull(result.getNextFileExpirationDate());
+  }
+
+  @Test
+  void givenNoExpiredDocumentWhenDeleteExpiredDocumentsThenReturnNextSchedule() {
+    String accessToken = "accessToken";
+    String sendNotificationId = "sendNotificationId";
+    long expirationDays = 30L;
+    long organizationId = 1L;
+
+    OffsetDateTime downloadDate1 = OffsetDateTime.now().minusDays(5);
+    OffsetDateTime downloadDate2 = OffsetDateTime.now().minusDays(2);
+    OffsetDateTime downloadDate3 = OffsetDateTime.now().minusDays(10);
+
+    OffsetDateTime expectedNextFileExpirationDate = downloadDate2.plusDays(expirationDays);
+
+    DocumentDTO document1 = DocumentDTO.builder()
+      .fileName("file1.pdf")
+      .status(FileStatus.READY)
+      .downloadDate(downloadDate1)
+      .build();
+
+    DocumentDTO document2 = DocumentDTO.builder()
+      .fileName("file2.pdf")
+      .status(FileStatus.READY)
+      .downloadDate(downloadDate2)
+      .build();
+
+    DocumentDTO document3 = DocumentDTO.builder()
+      .fileName("file3.pdf")
+      .status(FileStatus.READY)
+      .downloadDate(downloadDate3)
+      .build();
+
+    SendNotificationNoPII notification = new SendNotificationNoPII();
+    notification.setSendNotificationId(sendNotificationId);
+    notification.setOrganizationId(organizationId);
+    notification.setDocuments(List.of(document1, document2, document3));
+
+    BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
+    brokerConfiguration.setSendFilesExpirationDays(expirationDays);
+
+    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+      .thenReturn(notification);
+    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+      .thenReturn(brokerConfiguration);
+
+    FileExpirationResponseDTO result = fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(expectedNextFileExpirationDate, result.getNextFileExpirationDate());
+  }
+
+  @Test
+  void givenPartiallyExpiredDocumentsWhenDeleteExpiredDocumentsThenReturnMaxOfRemaining() {
+    String accessToken = "accessToken";
+    String sendNotificationId = "sendNotificationId";
+    long expirationDays = 30L;
+    long organizationId = 1L;
+
+    OffsetDateTime recentDownloadDate = OffsetDateTime.now().minusDays(5);
+    OffsetDateTime olderDownloadDate  = OffsetDateTime.now().minusDays(10);
+    OffsetDateTime expiredDownloadDate = OffsetDateTime.now().minusDays(60);
+
+    OffsetDateTime expectedNextFileExpirationDate = recentDownloadDate.plusDays(expirationDays);
+
+    DocumentDTO notExpiredDocument1 = DocumentDTO.builder()
+      .fileName("not-expired-1.pdf")
+      .status(FileStatus.READY)
+      .downloadDate(recentDownloadDate)
+      .build();
+
+    DocumentDTO notExpiredDocument2 = DocumentDTO.builder()
+      .fileName("not-expired-2.pdf")
+      .status(FileStatus.READY)
+      .downloadDate(olderDownloadDate)
+      .build();
+
+    String expiredFileName = "expired.pdf";
+    DocumentDTO expiredDocument = DocumentDTO.builder()
+      .fileName(expiredFileName)
+      .status(FileStatus.READY)
+      .downloadDate(expiredDownloadDate)
+      .build();
+
+    SendNotificationNoPII notification = podamFactory.manufacturePojo(SendNotificationNoPII.class);
+    notification.setSendNotificationId(sendNotificationId);
+    notification.setOrganizationId(organizationId);
+    notification.setDocuments(List.of(notExpiredDocument1, notExpiredDocument2, expiredDocument));
+
+    BrokerConfiguration brokerConfiguration = podamFactory.manufacturePojo(BrokerConfiguration.class);
+    brokerConfiguration.setSendFilesExpirationDays(expirationDays);
+    UpdateResult updateResult = UpdateResult.acknowledged(1, organizationId, null);
+
+    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+      .thenReturn(notification);
+    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+      .thenReturn(brokerConfiguration);
+    Mockito.when(sendNotificationNoPIIRepositoryMock.updateFileStatus(sendNotificationId, expiredFileName, FileStatus.EXPIRED))
+      .thenReturn(updateResult);
+    Mockito.doNothing().when(fileStorerServiceMock).deleteFromSharedFolder(organizationId,sendNotificationId,sendNotificationId+"_"+expiredFileName);
+
+    FileExpirationResponseDTO result = fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken);
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(expectedNextFileExpirationDate, result.getNextFileExpirationDate());

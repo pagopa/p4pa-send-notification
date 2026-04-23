@@ -336,4 +336,17 @@ class SendNotificationControllerTest {
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedResponse, response.getBody());
   }
+
+  @Test
+  void whenDeleteExpiredDocumentsThenOk(){
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    FileExpirationResponseDTO expectedResponse = podamFactory.manufacturePojo(FileExpirationResponseDTO.class);
+
+    Mockito.when(fileExpirationServiceMock.deleteExpiredDocuments(sendNotificationId, accessToken)).thenReturn(expectedResponse);
+
+    ResponseEntity<FileExpirationResponseDTO> response = sendNotificationController.deleteExpiredDocuments(sendNotificationId);
+
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertEquals(expectedResponse, response.getBody());
+  }
 }
