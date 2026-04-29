@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "rest.pagopa.pdnd")
+@ConfigurationProperties(prefix = "rest.pdnd-services")
 @SuperBuilder
 @NoArgsConstructor
 public class PagopaPdndApiClientConfig extends ApiClientConfig {

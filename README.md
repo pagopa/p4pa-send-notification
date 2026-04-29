@@ -2,7 +2,9 @@
 
 This application belong to the **outbound** tier of the **Piattaforma Unitaria** product.
 
-See [PU Microservice Architecture](https://pagopa.atlassian.net/wiki/spaces/SPAC/pages/1405845916/Architettura+microservizi) for more details.
+See [PU Microservice Architecture](https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/reference/technical-docs/Architettura_microservizi.pdf) for more details.
+
+See [p4pa-doc](https://github.com/pagopa/p4pa-doc) for further documentation.
 
 ## 🧱 Role
 
@@ -51,7 +53,13 @@ See [log configured pattern](/src/main/resources/logback-spring.xml).
 * [p4pa-organization](https://github.com/pagopa/p4pa-organization):
   * To obtain organizations' SEND api key;
 * [p4pa-workflow-hub](https://github.com/pagopa/p4pa-workflow-hub):
-  * To start SEND notification workflow.
+  * To start SEND notification workflow;
+* [p4pa-pdnd-services](https://github.com/pagopa/p4pa-pdnd-services):
+  * To retrieve PDND access token.
+
+## 🗃️ Entities handled
+* `send_notification`
+* `send_stream`
 
 ### 🌍 External
 * SEND - PagoPA's service to send legal communications towards citizen:
@@ -140,6 +148,10 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | DEBT_POSITION_MAX_ATTEMPTS          | DebtPositions API max attempts                  | 3       |
 | DEBT_POSITION_WAIT_TIME_MILLIS      | DebtPositions retry waiting time (milliseconds) | 500     |
 | DEBT_POSITION_PRINT_BODY_WHEN_ERROR | To print body when an error occurs              | true    |
+| PDND_BASE_URL                       | PdndServices microservice URL                   |         |
+| PDND_MAX_ATTEMPTS                   | PdndServices API max attempts                   | 3       |
+| PDND_WAIT_TIME_MILLIS               | PdndServices retry waiting time (milliseconds)  | 500     |
+| PDND_PRINT_BODY_WHEN_ERROR          | To print body when an error occurs              | true    |
 
 ##### 🌍 External services
 | ENV                              | DESCRIPTION                                                                                                                 | DEFAULT                                        |

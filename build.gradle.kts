@@ -248,7 +248,7 @@ tasks.register<GenerateTask>("openApiGenerateORGANIZATION") {
   description = "openapi"
 
   generatorName.set("java")
-  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-organization/refs/heads/$targetEnv/openapi/generated.openapi.json")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/$targetEnv/internal/p4pa-organization.generated.openapi.json")
   outputDir.set("$projectDir/build/generated")
   invokerPackage.set("it.gov.pagopa.pu.organization.generated")
   apiPackage.set("it.gov.pagopa.pu.organization.client.generated")
@@ -279,7 +279,7 @@ tasks.register<GenerateTask>("openApiGenerateWORKFLOWHUB") {
   description = "openapi"
 
   generatorName.set("java")
-  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-workflow-hub/refs/heads/$targetEnv/openapi/p4pa-workflow-hub.openapi.yaml")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/$targetEnv/internal/p4pa-workflow-hub.openapi.yaml")
   outputDir.set("$projectDir/build/generated")
   invokerPackage.set("it.gov.pagopa.pu.workflowhub.generated")
   apiPackage.set("it.gov.pagopa.pu.workflowhub.controller.generated")
@@ -321,7 +321,7 @@ tasks.register<GenerateTask>("openApiGenerateDEBTPOSITIONS") {
   description = "openapi"
 
   generatorName.set("java")
-  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-debt-positions/refs/heads/$targetEnv/openapi/generated.openapi.json")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/$targetEnv/internal/p4pa-debt-positions.generated.openapi.json")
   outputDir.set("$projectDir/build/generated")
   invokerPackage.set("it.gov.pagopa.pu.debtposition.generated")
   apiPackage.set("it.gov.pagopa.pu.debtposition.client.generated")
@@ -353,7 +353,7 @@ tasks.register<GenerateTask>("openApiGeneratePDND") {
   description = "openapi"
 
   generatorName.set("java")
-  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-pdnd-services/refs/heads/$targetEnv/openapi/generated.openapi.json")
+  remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/$targetEnv/internal/p4pa-pdnd-services.generated.openapi.json")
   outputDir.set("$projectDir/build/generated")
   invokerPackage.set("it.gov.pagopa.pu.pdnd.generated")
   apiPackage.set("it.gov.pagopa.pu.pdnd.client.generated")
