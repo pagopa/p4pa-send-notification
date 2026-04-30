@@ -1,18 +1,170 @@
+server:
+  http: "\${SERVER_PORT:8080}"
+
 spring:
-    application:
-      name: ${artifactId}
-      version: ${version}
-    jmx.enabled: true
+  application:
+    name: ${artifactId}
+    version: ${version}
+  jmx.enabled: true
+  threads:
+    virtual:
+      enabled: "\${VIRTUAL_THREADS_ENABLED:true}"
+  jpa:
+    show-sql: "\${SHOW_SQL:false}"
+    hibernate:
+      ddl-auto: none
+  datasource:
+    citizen:
+      jdbc-url: "\${CITIZENDB_URL:jdbc:postgresql://\${CITIZENDB_HOST:localhost}:\${CITIZENDB_PORT:5432}/citizen}"
+      username: "\${CITIZENDB_USER}"
+      password: "\${CITIZENDB_PASSWORD}"
+      driverClassName: org.postgresql.Driver
+      idle-timeout: "\${CITIZENDB_CONNECTION_IDLE_TIMEOUT_MILLISECONDS:600000}"
+      connection-timeout: "\${CITIZENDB_CONNECTION_TIMEOUT_MILLISECONDS:30000}"
+      keepalive-time: "\${CITIZENDB_CONNECTION_KEEPALIVE_TIME_MILLISECONDS:120000}"
+      max-lifetime: "\${CITIZENDB_CONNECTION_MAX_LIFETIME_MILLISECONDS:1800000}"
+      maximum-pool-size: "\${CITIZENDB_CONNECTION_MAX_POOL_SIZE:10}"
+      minimum-idle: "\${CITIZENDB_CONNECTION_MIN_IDLE:10}"
+  mongodb:
+    uri: "\${MONGODB_URI:mongodb://localhost:27017}"
+    database: "\${MONGODB_DBNAME:payhub}"
+    # custom configured properties
+    config:
+      connectionPool:
+        maxSize: "\${MONGODB_CONNECTIONPOOL_MAX_SIZE:100}"
+        minSize: "\${MONGODB_CONNECTIONPOOL_MIN_SIZE:0}"
+        maxWaitTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_WAIT_MS:120000}"
+        maxConnectionLifeTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_LIFE_MS:0}"
+        maxConnectionIdleTimeMS: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTION_IDLE_MS:120000}"
+        maxConnecting: "\${MONGODB_CONNECTIONPOOL_MAX_CONNECTING:2}"
+
 management:
-    endpoint:
-      health:
-        probes.enabled: true
-        group:
-          readiness.include: "*"
-          liveness.include: livenessState,diskSpace,ping
-    endpoints:
-      jmx:
-        exposure.include: "*"
-      web:
-        exposure.include: info, health
+  info:
+    build.enabled: true
+    java.enabled: true
+    git.enabled: true
+  otlp.metrics.export.enabled: "\${TRACING_EXPORT:false}"
+  tracing:
+    sampling.probability: "\${TRACING_SAMPLING_PROBABILITY:1.0}"
+    baggage.remote-fields:
+      - X-user-id
+  observations:
+    http.server:
+        filter.order: -100
+  endpoints:
+    jmx:
+      exposure.include: "*"
+    web:
+      exposure:
+        include: health, info, prometheus, metrics, caches
+      base-path: /actuator
+  endpoint:
+    health:
+      probes.enabled: true
+      logging.slow-indicator-threshold: "\${HEALTH_ACTUATOR_LOGGER_TIMEOUT_DURATION:PT1S}"
+      show-details: "\${HEALTH_ACTUATOR_SHOW_DETAILS:when-authorized}"
+      group:
+        readiness.include: "*"
+        liveness.include: livenessState,diskSpace,ping
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${artifactId}
+    export:
+      prometheus:
+        enabled: true
+        step: 1m
+        descriptions: true
+    enable:
+      jvm: true
+      process: true
+      system: true
+      http: true
+      logback: true
+
+logging:
+  level:
+    root: "\${LOG_LEVEL_ROOT:INFO}"
+    it.gov.pagopa: "\${LOG_LEVEL_PAGOPA:INFO}"
+    org.springframework: "\${LOG_LEVEL_SPRING:INFO}"
+    org.springframework.boot.availability: "\${LOG_LEVEL_SPRING_BOOT_AVAILABILITY:DEBUG}"
+    it.gov.pagopa.pu.send.exception.SendNotificationExceptionHandler: "\${LOGGING_LEVEL_API_REQUEST_EXCEPTION:INFO}"
+    org.springdoc.core.utils.SpringDocAnnotationsUtils: "\${LOG_LEVEL_SPRING_DOC:ERROR}"
+    PERFORMANCE_LOG: "\${LOG_LEVEL_PERFORMANCE_LOG:INFO}"
+    PERFORMANCE_LOG.API_REQUEST: "\${LOG_LEVEL_PERFORMANCE_LOG_API_REQUEST:\${logging.level.PERFORMANCE_LOG}}"
+    PERFORMANCE_LOG.REST_INVOKE: "\${LOG_LEVEL_PERFORMANCE_LOG_REST_INVOKE:\${logging.level.PERFORMANCE_LOG}}"
+
+data-cipher:
+  encrypt-psw: "\${DATA_CIPHER_ENCRYPT_PASSWORD:PWD}"
+  hash-pepper: "\${DATA_CIPHER_HASH_PEPPER:PEPPER}"
+
+springdoc:
+  api-docs.version: openapi_3_0
+  writer-with-default-pretty-printer: true
+
+jwt:
+  access-token:
+    public-key: "\${JWT_TOKEN_PUBLIC_KEY:-----BEGIN PUBLIC KEY-----
+                  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsyutJMN8Rc4gOpnjYpKO
+                  SFUoBo7eOMGThwpDaFDoHAbihwsYwIG3f5sbT1hhseSA31nqRZwiOJO7Sf55cI1Q
+                  1pA7hcUehYBb6M06kjV42D8dnOuJjR0oNgajgclkfTayvHy21BIYo34lzRvvCszW
+                  0u1yLxGFP0PROnFdY3rgUpXus0/du0Of5gEazmclYw+qsrju8iZM7932ZbqPUy5V
+                  ulWrE/iI7DYQT9tnJEaI5qtSY8KbneVL/RH9FabM97gT5ntmS27bwOjEaFYEU4R5
+                  DXyX8coB+giRmZ+nffi8kIqZrbptiLHXE/mg3VRdX7XFF6UNsDkobw3xMJcMErsi
+                  ewIDAQAB
+                  -----END PUBLIC KEY-----}"
+
+folders:
+  shared: "\${SHARED_FOLDER_ROOT:/shared}"
+  send-file-folder: "data/send"
+
+fileshare-public-base-url: "\${FILESHARE_PUBLIC_BASE_URL:}"
+
+rest:
+  defaults:
+    connection-pool:
+      size: "\${DEFAULT_REST_CONNECTION_POOL_SIZE:10}"
+      size-per-route: "\${DEFAULT_REST_CONNECTION_POOL_SIZE_PER_ROUTE:5}"
+      time-to-live-minutes: "\${DEFAULT_REST_CONNECTION_POOL_TIME_TO_LIVE_MINUTES:10}"
+    timeout:
+      connect-millis: "\${DEFAULT_REST_TIMEOUT_CONNECT_MILLIS:120000}"
+      read-millis: "\${DEFAULT_REST_TIMEOUT_READ_MILLIS:120000}"
+  organization:
+    base-url: "\${ORGANIZATION_BASE_URL:http://localhost:8081}"
+    max-attempts: "\${ORGANIZATION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${ORGANIZATION_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${ORGANIZATION_PRINT_BODY_WHEN_ERROR:true}"
+  workflow-hub:
+    base-url: "\${WORKFLOW_HUB_BASE_URL:http://localhost:8082}/workflowhub"
+    max-attempts: "\${WORKFLOW_HUB_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${WORKFLOW_HUB_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${WORKFLOW_HUB_PRINT_BODY_WHEN_ERROR:true}"
+  debt-positions:
+    base-url: "\${DEBT_POSITION_BASE_URL:}"
+    max-attempts: "\${DEBT_POSITION_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${DEBT_POSITION_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${DEBT_POSITION_PRINT_BODY_WHEN_ERROR:true}"
+  pdnd-services:
+    base-url: "\${PDND_BASE_URL:}"
+    max-attempts: "\${PDND_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+    wait-time-millis: "\${PDND_WAIT_TIME_MILLIS:500}"
+    print-body-when-error: "\${PDND_PRINT_BODY_WHEN_ERROR:true}"
+  pagopa:
+    send:
+      base-url: "\${SEND_BASE_URL:}"
+      max-attempts: "\${SEND_MAX_ATTEMPTS:3}" # It's counting also the first attempt
+      wait-time-millis: "\${SEND_WAIT_TIME_MILLIS:500}"
+      print-body-when-error: "\${SEND_PRINT_BODY_WHEN_ERROR:true}"
+
+
 app:
+  fileEncryptPassword: "\${FILE_ENCRYPT_PASSWORD:ENCR_PSW}"
+
+cache:
+  pii:
+    size: "\${CACHE_PII_SIZE:1000}"
+    expire-in: "\${CACHE_PII_MINUTES:60}"
+  pdndAccessToken:
+    size: "\${CACHE_PDNDACCESSTOKEN_SIZE:100}"
+    expire-in: "\${CACHE_PDNDACCESSTOKEN_MINUTES:10}"

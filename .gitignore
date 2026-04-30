@@ -1,6 +1,7 @@
 HELP.md
 !**/src/main/**/target/
 !**/src/test/**/target/
+dependency-licenses/*/*
 
 #**/src/main/resources/application-local*.properties
 
@@ -116,6 +117,7 @@ Desktop.ini
 
 # Test jUnit
 /output/
+/src/test/resources/secrets/*
 
 # Helm charts
 */helm/charts

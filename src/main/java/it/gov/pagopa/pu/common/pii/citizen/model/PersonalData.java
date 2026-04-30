@@ -1,0 +1,25 @@
+package it.gov.pagopa.pu.common.pii.citizen.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PersonalData {
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "personal_data_generator")
+  @SequenceGenerator(name = "personal_data_generator", sequenceName = "personal_data_id_seq", allocationSize = 1)
+  private Long id;
+  private String type;
+  private byte[] data;
+}

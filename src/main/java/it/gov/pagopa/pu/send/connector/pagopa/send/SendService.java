@@ -1,0 +1,14 @@
+package it.gov.pagopa.pu.send.connector.pagopa.send;
+
+import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+
+import java.util.List;
+
+public interface SendService {
+  List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, Long organizationId, String accessToken);
+  NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV25DTO newNotificationRequestV25DTO, Long organizationId, String accessToken);
+  NewNotificationRequestStatusResponseV25DTO notificationStatus(String notificationRequestId, Long organizationId, String accessToken);
+  NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, Long organizationId, String accessToken);
+  List<LegalFactListElementV20DTO> getLegalFacts(String iun, Long organizationId, String accessToken);
+  LegalFactDownloadMetadataResponseDTO getLegalFactDownloadMetadata(String iun, String legalFactId, Long organizationId, String accessToken);
+}
