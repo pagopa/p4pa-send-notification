@@ -15,6 +15,7 @@ import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.dto.generated.Recipient.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
 import it.gov.pagopa.pu.send.util.DebtPositionUtils;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -252,6 +253,31 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .thenReturn(Optional.of(organization));
 
     Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.mapToModel(request, accessToken));
+  }
+
+  @Test
+  void givenNoStationWhenMapToModelThenThrow() {
+    // Given
+    CreateNotificationRequest request = buildRequest();
+    String accessToken = "ACCESSTOKEN";
+
+    Mockito.when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
+      .thenReturn(Optional.empty());
+
+    String nav = request.getRecipients().getFirst()
+      .getPayments().getFirst().getPagoPa().getNoticeCode();
+    String orgFiscalCode = request.getRecipients().getFirst()
+      .getPayments().getFirst().getPagoPa().getCreditorTaxId();
+    String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
+
+    DebtPositionDTO debtPosition = new DebtPositionDTO();
+    debtPosition.setDebtPositionId(11L);
+
+    Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
+      .thenReturn(Optional.empty());
+
+
+    Assertions.assertThrows(NotFoundException.class, () -> mapper.mapToModel(request, accessToken));
   }
 
   private static CreateNotificationRequest buildRequest() {
