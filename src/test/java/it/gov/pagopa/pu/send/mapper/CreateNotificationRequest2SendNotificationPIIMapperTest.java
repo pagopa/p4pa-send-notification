@@ -270,9 +270,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .getPayments().getFirst().getPagoPa().getCreditorTaxId();
     String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
 
-    DebtPositionDTO debtPosition = new DebtPositionDTO();
-    debtPosition.setDebtPositionId(11L);
-
     Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.empty());
 
