@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.connector.organization.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.send.connector.organization.config.OrganizationApisHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,16 @@ public class OrganizationApiClient {
     } catch (HttpClientErrorException.NotFound e){
       log.info("Cannot find organization having orgFiscalCode {} and segregationCode {}", orgFiscalCode, segregationCode);
       return Optional.empty();
+    }
+  }
+
+  public OrganizationStationDTO findOrganizationStation(Long organizationId, String stationId, String accessToken) {
+    try{
+      return organizationApisHolder.getOrganizationApi(accessToken)
+        .getOrganizationStation(organizationId, stationId);
+    } catch (HttpClientErrorException.NotFound e){
+      log.info("Cannot find OrganizationStation having organizationId {} and StationId {}", organizationId, stationId);
+      return null;
     }
   }
 

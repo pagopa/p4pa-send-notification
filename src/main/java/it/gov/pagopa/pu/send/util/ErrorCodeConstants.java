@@ -23,4 +23,6 @@ public class ErrorCodeConstants {
   public static final String ERROR_CODE_LEGAL_FACT_URL_NOT_FOUND = "LEGAL_FACT_URL_NOT_FOUND";
   public static final String ERROR_CODE_LEGAL_FACT_ALREADY_EXISTS = "LEGAL_FACT_ALREADY_EXISTS";
 
+  public static final String ERROR_CODE_STATION_NOT_FOUND = "STATION_NOT_FOUND";
+
 }
