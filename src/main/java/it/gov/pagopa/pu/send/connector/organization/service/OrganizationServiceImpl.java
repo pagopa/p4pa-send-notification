@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.organization.service;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.send.connector.organization.client.OrganizationApiClient;
 import org.springframework.stereotype.Service;
 
@@ -28,5 +29,11 @@ public class OrganizationServiceImpl implements OrganizationService {
   @Override
   public Optional<Organization> findByOrgFiscalCodeAndSegregationCode(String orgFiscalCode, String segregationCode, String accessToken) {
     return organizationApiClient.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken);
+  }
+
+  @Override
+  public Optional<OrganizationStationDTO> findOrganizationStation(Long organizationId, String stationId, String accessToken) {
+    return Optional.ofNullable(
+      organizationApiClient.findOrganizationStation(organizationId, stationId, accessToken));
   }
 }

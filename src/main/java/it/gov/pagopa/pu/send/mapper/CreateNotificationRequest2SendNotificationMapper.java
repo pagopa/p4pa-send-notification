@@ -1,10 +1,10 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
+import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
-import it.gov.pagopa.pu.send.connector.organization.service.BrokerService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -15,30 +15,26 @@ import it.gov.pagopa.pu.send.dto.generated.Payment;
 import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
 import it.gov.pagopa.pu.send.util.DebtPositionUtils;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
 public class CreateNotificationRequest2SendNotificationMapper {
 
   private final DebtPositionService debtPositionService;
-  private final BrokerService brokerService;
   private final OrganizationService organizationService;
 
   public CreateNotificationRequest2SendNotificationMapper(
     DebtPositionService debtPositionService,
-    BrokerService brokerService,
     OrganizationService organizationService
   ) {
     this.debtPositionService = debtPositionService;
-    this.brokerService = brokerService;
     this.organizationService = organizationService;
   }
 
@@ -77,9 +73,14 @@ public class CreateNotificationRequest2SendNotificationMapper {
       sendNotification.setPaymentExpirationDate(request.getPaymentExpirationDate().toString());
     }
 
-    Broker broker = brokerService.getBrokerByOrganizationId(organizationId, accessToken);
+    PagoPaInteractionModel pagoPaInteractionModel = organizationService
+      .findOrganizationStation(organizationId, null, accessToken)
+      .map(OrganizationStationDTO::getPagoPaInteractionModel)
+      .orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_STATION_NOT_FOUND,
+      String.format("Cannot find a Station for organizationId %s",  organizationId)));
+
     sendNotification.setPagoPaIntMode(
-      broker.getPagoPaInteractionModel().getValue().contains("ASYNC")
+      pagoPaInteractionModel.getValue().contains("ASYNC")
       ? "ASYNC"
       : "SYNC");
 

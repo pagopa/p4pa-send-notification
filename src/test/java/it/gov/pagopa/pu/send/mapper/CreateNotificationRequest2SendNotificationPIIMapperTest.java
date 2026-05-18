@@ -1,11 +1,10 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.organization.dto.generated.Broker;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
-import it.gov.pagopa.pu.send.connector.organization.service.BrokerService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
@@ -16,6 +15,7 @@ import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.dto.generated.Recipient.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
 import it.gov.pagopa.pu.send.util.DebtPositionUtils;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -45,8 +45,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
   @Mock
   private DebtPositionService debtPositionServiceMock;
   @Mock
-  private BrokerService brokerServiceMock;
-  @Mock
   private OrganizationService organizationServiceMock;
 
   private CreateNotificationRequest2SendNotificationMapper mapper;
@@ -55,7 +53,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
   void init() {
     mapper = new CreateNotificationRequest2SendNotificationMapper(
       debtPositionServiceMock,
-      brokerServiceMock,
       organizationServiceMock
     );
   }
@@ -64,7 +61,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
   void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(
       debtPositionServiceMock,
-      brokerServiceMock,
       organizationServiceMock
     );
   }
@@ -75,13 +71,11 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     CreateNotificationRequest request = buildRequest();
     String accessToken = "ACCESSTOKEN";
 
-    Broker broker = Mockito.mock(Broker.class);
+    OrganizationStationDTO organizationStationDTO = new OrganizationStationDTO();
+    organizationStationDTO.setPagoPaInteractionModel(PagoPaInteractionModel.SYNC);
 
-    Mockito.when(broker.getPagoPaInteractionModel())
-      .thenReturn(PagoPaInteractionModel.SYNC);
-
-    Mockito.when(brokerServiceMock.getBrokerByOrganizationId(request.getOrganizationId(), accessToken))
-      .thenReturn(broker);
+    Mockito.when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
+      .thenReturn(Optional.of(organizationStationDTO));
 
     String nav = request.getRecipients().getFirst()
       .getPayments().getFirst().getPagoPa().getNoticeCode();
@@ -129,13 +123,11 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     CreateNotificationRequest request = buildRequest();
     String accessToken = "ACCESSTOKEN";
 
-    Broker broker = Mockito.mock(Broker.class);
+    OrganizationStationDTO organizationStationDTO = new OrganizationStationDTO();
+    organizationStationDTO.setPagoPaInteractionModel(PagoPaInteractionModel.SYNC);
 
-    Mockito.when(broker.getPagoPaInteractionModel())
-      .thenReturn(PagoPaInteractionModel.SYNC);
-
-    Mockito.when(brokerServiceMock.getBrokerByOrganizationId(request.getOrganizationId(), accessToken))
-      .thenReturn(broker);
+    Mockito.when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
+      .thenReturn(Optional.of(organizationStationDTO));
 
     String nav = request.getRecipients().getFirst()
       .getPayments().getFirst().getPagoPa().getNoticeCode();
@@ -196,13 +188,11 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
     String accessToken = "ACCESSTOKEN";
 
-    Broker broker = Mockito.mock(Broker.class);
+    OrganizationStationDTO organizationStationDTO = new OrganizationStationDTO();
+    organizationStationDTO.setPagoPaInteractionModel(PagoPaInteractionModel.ASYNC_GPD);
 
-    Mockito.when(broker.getPagoPaInteractionModel())
-      .thenReturn(PagoPaInteractionModel.ASYNC_GPD);
-
-    Mockito.when(brokerServiceMock.getBrokerByOrganizationId(request.getOrganizationId(), accessToken))
-      .thenReturn(broker);
+    Mockito.when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
+      .thenReturn(Optional.of(organizationStationDTO));
 
 
     DebtPositionDTO debtPosition = new DebtPositionDTO();
@@ -263,6 +253,28 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .thenReturn(Optional.of(organization));
 
     Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.mapToModel(request, accessToken));
+  }
+
+  @Test
+  void givenNoStationWhenMapToModelThenThrow() {
+    // Given
+    CreateNotificationRequest request = buildRequest();
+    String accessToken = "ACCESSTOKEN";
+
+    Mockito.when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
+      .thenReturn(Optional.empty());
+
+    String nav = request.getRecipients().getFirst()
+      .getPayments().getFirst().getPagoPa().getNoticeCode();
+    String orgFiscalCode = request.getRecipients().getFirst()
+      .getPayments().getFirst().getPagoPa().getCreditorTaxId();
+    String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
+
+    Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
+      .thenReturn(Optional.empty());
+
+
+    Assertions.assertThrows(NotFoundException.class, () -> mapper.mapToModel(request, accessToken));
   }
 
   private static CreateNotificationRequest buildRequest() {
