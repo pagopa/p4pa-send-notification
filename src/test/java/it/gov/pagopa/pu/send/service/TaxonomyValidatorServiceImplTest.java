@@ -56,7 +56,7 @@ class TaxonomyValidatorServiceImplTest {
     Long orgId = 1L;
     String accessToken = "ACCESSTOKEN";
 
-    Mockito.when(sendTaxonomyRepositoryMock.findByTaxonomyCode(taxonomyCode)).thenThrow(NotFoundException.class);
+    Mockito.when(sendTaxonomyRepositoryMock.findByTaxonomyCode(taxonomyCode)).thenReturn(null);
 
     assertThrows(NotFoundException.class, () -> service.validateTaxonomyCode(orgId, taxonomyCode, accessToken));
   }
@@ -70,7 +70,7 @@ class TaxonomyValidatorServiceImplTest {
     SendTaxonomy sendTaxonomy = new SendTaxonomy();
 
     Mockito.when(sendTaxonomyRepositoryMock.findByTaxonomyCode(taxonomyCode)).thenReturn(sendTaxonomy);
-    Mockito.when(organizationServiceMock.getOrganization(orgId, accessToken)).thenThrow(NotFoundException.class);
+    Mockito.when(organizationServiceMock.getOrganization(orgId, accessToken)).thenReturn(null);
 
     assertThrows(NotFoundException.class, () -> service.validateTaxonomyCode(orgId, taxonomyCode, accessToken));
   }
