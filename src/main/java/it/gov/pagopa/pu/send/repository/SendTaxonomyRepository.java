@@ -5,5 +5,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Service;
 
 @Service
-public interface SendTaxonomyRepository extends MongoRepository<SendTaxonomy, String>, SendTaxonomyRepositoryExt {
+public interface SendTaxonomyRepository extends MongoRepository<SendTaxonomy, String> {
+  SendTaxonomy findByTaxonomyCode(String taxonomyCode);
 }
