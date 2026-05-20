@@ -87,6 +87,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     assertEquals(noPii.getPaFee(), result.getPaFee());
     assertEquals(noPii.getVat(), result.getVat());
     assertEquals(noPii.getPagoPaIntMode(), result.getPagoPaIntMode());
+    assertSame(noPii.getCampaignId(), result.getCampaignId());
     assertSame(noPii, result.getNoPII());
   }
 
@@ -125,6 +126,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     noPii.setOrganizationId(2L);
     noPii.setPaProtocolNumber("PP001");
     noPii.setPersonalDataId(personalDataId);
+    noPii.setCampaignId("CAMPAIGN_ID123");
 
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO("HASHED_TAX_ID".getBytes(), List.of(buildPuPayment()));
     noPii.setRecipients(List.of(recipient));
