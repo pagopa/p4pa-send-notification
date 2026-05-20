@@ -44,11 +44,12 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final String fileShareBaseUrl;
   private final FileStorerService fileStorerService;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
+  private final TaxonomyValidatorService taxonomyValidatorService;
 
   public SendNotificationServiceImpl(@Value("${fileshare-public-base-url}") String fileShareBaseUrl,
                                      SendNotificationPIIRepository sendNotificationPIIRepository,
                                      SendNotificationNoPIIRepository sendNotificationNoPIIRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
-                                     FileStorerService fileStorerService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper) {
+                                     FileStorerService fileStorerService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper, TaxonomyValidatorService taxonomyValidatorService) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
@@ -56,11 +57,14 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.workflowService = workflowService;
     this.fileStorerService = fileStorerService;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
+    this.taxonomyValidatorService = taxonomyValidatorService;
   }
 
   @Transactional
   @Override
   public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, String accessToken) {
+    taxonomyValidatorService.validateTaxonomyCode(createNotificationRequest.getOrganizationId(), createNotificationRequest.getTaxonomyCode(), accessToken);
+
     SendNotification sendNotification = sendNotificationPIIRepository.save(mapper.mapToModel(createNotificationRequest, accessToken));
 
     return CreateNotificationResponse
