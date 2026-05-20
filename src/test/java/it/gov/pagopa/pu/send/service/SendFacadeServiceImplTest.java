@@ -678,7 +678,7 @@ class SendFacadeServiceImplTest {
     StreamListElementDTO lastStream = new StreamListElementDTO();
     lastStream.setStreamId(streamId);
 
-    List<StreamListElementDTO> streams = List.of(new StreamListElementDTO(), lastStream); //two elements, first has null id
+    List<StreamListElementDTO> streams = List.of(new StreamListElementDTO().streamId(UUID.randomUUID()), lastStream);
     ProgressResponseElementV28DTO sendStreamEvent = new ProgressResponseElementV28DTO();
     List<ProgressResponseElementV28DTO> expectedEvents = List.of(sendStreamEvent);
 
