@@ -46,19 +46,17 @@ import java.util.Optional;
 @Slf4j
 public class SendFacadeServiceImpl implements SendFacadeService {
 
-  private final SendService sendService;
-  private final WorkflowService workflowService;
-  private final SendUploadFacadeServiceImpl uploadService;
-  private final SendNotificationService sendNotificationService;
-  private final SendStreamService sendStreamService;
-
+  private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
   private final SendStreamRepository sendStreamRepository;
-
+  private final SendService sendService;
+  private final SendUploadFacadeServiceImpl uploadService;
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
-  private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
   private final SendLegalFactMapper sendLegalFactMapper;
   private final SendStreamMapper sendStreamMapper;
+  private final SendStreamService sendStreamService;
+  private final WorkflowService workflowService;
+  private final SendNotificationService sendNotificationService;
 
   private final CloseableHttpClient httpClient;
 
