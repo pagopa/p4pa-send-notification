@@ -46,17 +46,19 @@ import java.util.Optional;
 @Slf4j
 public class SendFacadeServiceImpl implements SendFacadeService {
 
-  private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
-  private final SendStreamRepository sendStreamRepository;
   private final SendService sendService;
+  private final WorkflowService workflowService;
   private final SendUploadFacadeServiceImpl uploadService;
+  private final SendNotificationService sendNotificationService;
+  private final SendStreamService sendStreamService;
+
+  private final SendStreamRepository sendStreamRepository;
+
   private final SendNotification2NewNotificationRequestMapper sendNotificationMapper;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
+  private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
   private final SendLegalFactMapper sendLegalFactMapper;
   private final SendStreamMapper sendStreamMapper;
-  private final SendStreamService sendStreamService;
-  private final WorkflowService workflowService;
-  private final SendNotificationService sendNotificationService;
 
   private final CloseableHttpClient httpClient;
 
@@ -249,7 +251,6 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private boolean cachedStreamDoesExistOnSend(String streamId, Long organizationId, String accessToken) {
     return sendStreamService.getStreams(organizationId, accessToken).stream()
       .map(StreamListElementDTO::getStreamId)
-      .filter(Objects::nonNull)
       .anyMatch(s -> s.toString().equals(streamId));
   }
 

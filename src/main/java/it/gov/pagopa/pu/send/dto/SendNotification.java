@@ -37,6 +37,7 @@ public class SendNotification implements FullEntityPIIDTO<SendNotificationNoPII,
   private int vat;
   private String pagoPaIntMode;
   private List<LegalFactDTO> legalFacts;
+  private String campaignId;
 
   @JsonIgnore
   private SendNotificationNoPII noPII;

@@ -1549,6 +1549,10 @@
             "type" : "integer",
             "format" : "int32",
             "nullable" : true
+          },
+          "campaignId" : {
+            "type" : "string",
+            "nullable" : true
           }
         },
         "nullable" : true
