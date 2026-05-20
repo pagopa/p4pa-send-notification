@@ -1487,7 +1487,7 @@
         }
       },
       "CreateNotificationRequest" : {
-        "required" : [ "notificationFeePolicy", "organizationId", "paProtocolNumber", "physicalCommunicationType", "recipients" ],
+        "required" : [ "campaignId", "notificationFeePolicy", "organizationId", "paProtocolNumber", "physicalCommunicationType", "recipients" ],
         "type" : "object",
         "properties" : {
           "organizationId" : {
@@ -1551,8 +1551,7 @@
             "nullable" : true
           },
           "campaignId" : {
-            "type" : "string",
-            "nullable" : true
+            "type" : "string"
           }
         },
         "nullable" : true

@@ -649,6 +649,7 @@ components:
         - recipients
         - notificationFeePolicy
         - physicalCommunicationType
+        - campaignId
       properties:
         organizationId:
           type: integer
