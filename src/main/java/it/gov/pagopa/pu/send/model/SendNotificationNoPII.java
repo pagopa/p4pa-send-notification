@@ -48,4 +48,6 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   private List<LegalFactDTO> legalFacts;
   @NotNull
   private Long personalDataId;
+  @NotNull
+  private String campaignId;
 }

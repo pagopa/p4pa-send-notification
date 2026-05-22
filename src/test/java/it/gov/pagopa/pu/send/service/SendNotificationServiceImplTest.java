@@ -53,6 +53,8 @@ class SendNotificationServiceImplTest {
   @Mock
   private FileStorerService fileStorerServiceMock;
   @Mock
+  private TaxonomyValidatorService taxonomyValidatorService;
+  @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
 
   @InjectMocks
@@ -62,6 +64,8 @@ class SendNotificationServiceImplTest {
   void givenCreateNotificationRequestWhenCreateSendNotificationThenReturnCreateNotificationResponse(){
     // Given
     CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    request.setTaxonomyCode("0101");
     SendNotification sendNotification = new SendNotification();
     sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
     sendNotification.setStatus(NotificationStatus.WAITING_FILE);
@@ -72,7 +76,7 @@ class SendNotificationServiceImplTest {
 
     Mockito.when(mapperMock.mapToModel(request, accessToken)).thenReturn(sendNotification);
     Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
-
+    Mockito.doNothing().when(taxonomyValidatorService).validateTaxonomyCode(request.getOrganizationId(), request.getTaxonomyCode(), accessToken);
 
     // When
     CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);

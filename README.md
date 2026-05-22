@@ -122,7 +122,9 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | CACHE_PII_SIZE                | PII cache size                             | 1000    |
 | CACHE_PII_MINUTES             | PII cache retention (minutes)              | 60      |
 | CACHE_PDNDACCESSTOKEN_SIZE    | PDND accessToken cache size                | 100     |
-| CACHE_PDNDACCESSTOKEN_MINUTES | PDND accessToken cache retention (minutes) | 10      |
+| CACHE_PDNDACCESSTOKEN_MINUTES | PDND accessToken cache retention (minutes) | 1       |
+| CACHE_ORGANIZATION_SIZE       | Organization cache size                    | 100     |
+| CACHE_ORGANIZATION_MINUTES    | Organization cache retention (minutes)     | 10      |
 
 ##### 🔗 REST
 | ENV                                               | DESCRIPTION                               | DEFAULT |

@@ -27,6 +27,8 @@ public class CacheConfig {
     private CacheConfigurationProperties pii;
     @NestedConfigurationProperty
     private CacheConfigurationProperties pdndAccessToken;
+    @NestedConfigurationProperty
+    private CacheConfigurationProperties organization;
 
     @Data
     @NoArgsConstructor
@@ -42,6 +44,7 @@ public class CacheConfig {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
         cacheManager.registerCustomCache(Fields.pii, buildCache(pii));
         cacheManager.registerCustomCache(Fields.pdndAccessToken, buildCache(pdndAccessToken));
+        cacheManager.registerCustomCache(Fields.organization, buildCache(organization));
         return cacheManager;
     }
 

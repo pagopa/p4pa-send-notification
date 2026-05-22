@@ -350,6 +350,17 @@ class SendNotificationExceptionHandlerTest {
   }
 
   @Test
+  void handleInvalidTaxonomyException() throws Exception {
+    doThrow(new InvalidTaxonomyException("Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
+
+    performRequest(DATA, MediaType.APPLICATION_JSON)
+      .andExpect(MockMvcResultMatchers.status().isBadRequest())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("SEND_NOTIFICATION_BAD_REQUEST"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("INVALID_TAXONOMY_CODE"))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("[INVALID_TAXONOMY_CODE] Error"));
+  }
+
+  @Test
   void handleUploadFileExceptionError() throws Exception {
     doThrow(new UploadFileException("ERRORCODE", "Error")).when(testControllerSpy).testEndpoint(DATA, BODY);
 

@@ -295,6 +295,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setPaFee(100);
     request.setVat(22);
     request.setPaymentExpirationDate(LocalDate.now());
+    request.setCampaignId("CAMPAIGN_ID123");
     return request;
   }
 

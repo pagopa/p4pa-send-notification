@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -249,7 +248,6 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private boolean cachedStreamDoesExistOnSend(String streamId, Long organizationId, String accessToken) {
     return sendStreamService.getStreams(organizationId, accessToken).stream()
       .map(StreamListElementDTO::getStreamId)
-      .filter(Objects::nonNull)
       .anyMatch(s -> s.toString().equals(streamId));
   }
 
