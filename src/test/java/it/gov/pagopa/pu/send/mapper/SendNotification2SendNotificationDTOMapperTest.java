@@ -133,6 +133,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     sendNotificationNoPII.setIun("IUN");
     sendNotificationNoPII.setStatus(NotificationStatus.IN_VALIDATION);
     sendNotificationNoPII.setRecipients(List.of(recipient));
+    sendNotificationNoPII.setCampaignId("CAMPAIGN_ID1");
     return sendNotificationNoPII;
   }
 
