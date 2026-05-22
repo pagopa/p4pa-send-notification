@@ -19,6 +19,7 @@ public class SendNotification2SendNotificationDTOMapper {
   public SendNotificationDTO apply(SendNotificationNoPII sendNotificationNoPII) {
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
     notificationDTO.setSendNotificationId(sendNotificationNoPII.getSendNotificationId());
+    notificationDTO.setCampaignId(sendNotificationNoPII.getCampaignId());
     notificationDTO.setOrganizationId(sendNotificationNoPII.getOrganizationId());
     notificationDTO.setIun(sendNotificationNoPII.getIun());
     notificationDTO.setStatus(sendNotificationNoPII.getStatus());
