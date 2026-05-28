@@ -25,6 +25,7 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DatabindException;
@@ -41,6 +42,11 @@ public class SendNotificationExceptionHandler {
   @ExceptionHandler({ValidationException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class, ConversionFailedException.class})
   public ResponseEntity<SendNotificationErrorDTO> handleViolationException(Exception ex, HttpServletRequest request) {
     return handleException(ex, request, HttpStatus.BAD_REQUEST, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_BAD_REQUEST);
+  }
+
+  @ExceptionHandler(HttpClientErrorException.TooManyRequests.class)
+  public ResponseEntity<SendNotificationErrorDTO> handleInvokedHttpClientTooManyRequestsError(Exception ex, HttpServletRequest request) {
+    return handleException(ex, request, HttpStatus.TOO_MANY_REQUESTS, SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_TOO_MANY_REQUESTS);
   }
 
   @ExceptionHandler({ServletException.class, ErrorResponseException.class})
@@ -174,6 +180,9 @@ public class SendNotificationExceptionHandler {
         }
         return Pair.of(SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_CONFLICT.name(),
           errorMsg) ;
+      }
+      case HttpClientErrorException.TooManyRequests tooManyRequestsException -> {
+        return Pair.of(SendNotificationErrorDTO.CategoryEnum.SEND_NOTIFICATION_TOO_MANY_REQUESTS.name(), tooManyRequestsException.getMessage());
       }
       case BaseBusinessException businessException -> {
         return Pair.of(businessException.getCode(), businessException.getMessage());
