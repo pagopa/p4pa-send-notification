@@ -82,10 +82,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     notification.getDocuments().stream()
       .filter(doc -> doc.getFileName().equals(loadFileRequest.getFileName()))
       .findFirst().ifPresentOrElse(
-        doc -> {
-            updateFileStatus(sendNotificationId, doc, loadFileRequest, notification.getOrganizationId());
-            sendNotificationNoPIIRepository.updateFileDownloadDate(sendNotificationId, doc.getFileName(), OffsetDateTime.now(Constants.ZONEID));
-          },
+        doc -> updateFileStatusAndDownloadDate(sendNotificationId, doc, loadFileRequest, notification.getOrganizationId()),
         () -> {
           throw new SendNotificationFileNotFoundException("File not found with id: " + loadFileRequest.getFileName());
         }
@@ -171,7 +168,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
 
-  private void updateFileStatus(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest, Long organizationId) {
+  private void updateFileStatusAndDownloadDate(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest, Long organizationId) {
     NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());
     try {
       String fileName = sendNotificationId +"_" + doc.getFileName();
@@ -181,7 +178,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     } catch (Exception e) {
       throw new InvalidSignatureException(e.getMessage());
     }
-    sendNotificationNoPIIRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.READY);
+    sendNotificationNoPIIRepository.updateFileStatusAndDownloadDate(sendNotificationId, doc.getFileName(), FileStatus.READY, OffsetDateTime.now(Constants.ZONEID));
   }
 
   /**

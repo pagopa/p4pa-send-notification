@@ -124,13 +124,12 @@ class SendNotificationServiceImplTest {
 
     try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
       offsetDateTimeMock.when(()->OffsetDateTime.now(Constants.ZONEID)).thenReturn(now);
-      Mockito.when(sendNotificationNoPIIRepositoryMock.updateFileDownloadDate(sendNotificationId,fileName, now)).thenReturn(null);
+      Mockito.when(sendNotificationNoPIIRepositoryMock.updateFileStatusAndDownloadDate(sendNotificationId,fileName, FileStatus.READY, now)).thenReturn(null);
 
       StartNotificationResponse result = sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null);
 
       Assertions.assertEquals(new StartNotificationResponse("workflowId", "runId"), result);
 
-      Mockito.verify(sendNotificationNoPIIRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
       Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING);
       Mockito.verify(workflowServiceMock).sendNotificationProcess(sendNotificationId, null);
     }

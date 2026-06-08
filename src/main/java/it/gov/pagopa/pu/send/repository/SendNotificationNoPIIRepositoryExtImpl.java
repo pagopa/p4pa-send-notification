@@ -93,11 +93,13 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   @Override
-  public UpdateResult updateFileDownloadDate(String sendNotificationId, String fileName, OffsetDateTime downloadDate) {
+  public UpdateResult updateFileStatusAndDownloadDate(String sendNotificationId, String fileName, FileStatus newStatus, OffsetDateTime downloadDate) {
     return updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
         .and(FIELD_DOCUMENT_ID).is(fileName)),
-      new Update().set(FIELD_DOCUMENT_DOWNLOAD_DATE, downloadDate)
+      new Update()
+        .set(FIELD_DOCUMENT_STATUS, newStatus)
+        .set(FIELD_DOCUMENT_DOWNLOAD_DATE, downloadDate)
     );
   }
 
