@@ -10,8 +10,8 @@ import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
@@ -35,7 +35,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
@@ -1275,7 +1278,7 @@ class SendFacadeServiceImplTest {
 
     ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
 
-    Mockito.doNothing().when(sendNotificationServiceMock).uploadSendLegalFact(
+    Mockito.doNothing().when(sendNotificationServiceMock).downloadSendLegalFact(
       Mockito.eq(sendNotificationId),
       Mockito.eq(category),
       Mockito.eq(polishedLegalFactId),
@@ -1291,7 +1294,7 @@ class SendFacadeServiceImplTest {
     );
 
     //THEN
-    Mockito.verify(sendNotificationServiceMock).uploadSendLegalFact(
+    Mockito.verify(sendNotificationServiceMock).downloadSendLegalFact(
       Mockito.eq(sendNotificationId),
       Mockito.eq(category),
       Mockito.eq(polishedLegalFactId),

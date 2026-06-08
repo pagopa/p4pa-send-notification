@@ -15,10 +15,7 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
-import it.gov.pagopa.pu.send.util.AESUtils;
-import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
-import it.gov.pagopa.pu.send.util.FileUtils;
-import it.gov.pagopa.pu.send.util.NotificationUtils;
+import it.gov.pagopa.pu.send.util.*;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +27,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -84,7 +82,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     notification.getDocuments().stream()
       .filter(doc -> doc.getFileName().equals(loadFileRequest.getFileName()))
       .findFirst().ifPresentOrElse(
-        doc -> updateFileStatus(sendNotificationId, doc, loadFileRequest, notification.getOrganizationId()),
+        doc -> updateFileStatusAndDownloadDate(sendNotificationId, doc, loadFileRequest, notification.getOrganizationId()),
         () -> {
           throw new SendNotificationFileNotFoundException("File not found with id: " + loadFileRequest.getFileName());
         }
@@ -144,7 +142,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
-  public void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream) {
+  public void downloadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
     if (notification.getLegalFacts()!=null && notification.getLegalFacts().stream().anyMatch(fact -> fact.getFileName().equals(fileName)))
       throw new FileAlreadyExistsException(ErrorCodeConstants.ERROR_CODE_LEGAL_FACT_ALREADY_EXISTS, "Legal-fact having "+fileName+" fileName already exists");
@@ -155,6 +153,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .fileName(fileName)
       .url(url)
       .category(category)
+      .downloadDate(OffsetDateTime.now(Constants.ZONEID))
       .build());
   }
 
@@ -169,7 +168,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
 
-  private void updateFileStatus(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest, Long organizationId) {
+  private void updateFileStatusAndDownloadDate(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest, Long organizationId) {
     NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());
     try {
       String fileName = sendNotificationId +"_" + doc.getFileName();
@@ -179,7 +178,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     } catch (Exception e) {
       throw new InvalidSignatureException(e.getMessage());
     }
-    sendNotificationNoPIIRepository.updateFileStatus(sendNotificationId, doc.getFileName(), FileStatus.READY);
+    sendNotificationNoPIIRepository.updateFileStatusAndDownloadDate(sendNotificationId, doc.getFileName(), FileStatus.READY, OffsetDateTime.now(Constants.ZONEID));
   }
 
   /**

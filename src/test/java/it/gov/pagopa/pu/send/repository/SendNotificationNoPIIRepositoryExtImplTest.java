@@ -230,4 +230,19 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     assertEquals(1L, result.getModifiedCount());
   }
 
+  @Test
+  void whenUpdateFileStatusAndDownloadDateThenOk() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    String fileName = "FILENAME";
+    OffsetDateTime now = OffsetDateTime.now();
+    FileStatus status = FileStatus.EXPIRED;
+
+    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+      SendNotificationNoPII.class))).thenReturn(updateResult);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.updateFileStatusAndDownloadDate(sendNotificationId, fileName, status, now);
+
+    assertEquals(1L, result.getModifiedCount());
+  }
 }
