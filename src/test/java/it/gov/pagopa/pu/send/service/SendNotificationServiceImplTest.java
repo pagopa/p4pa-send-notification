@@ -19,6 +19,7 @@ import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,12 +55,25 @@ class SendNotificationServiceImplTest {
   @Mock
   private FileStorerService fileStorerServiceMock;
   @Mock
-  private TaxonomyValidatorService taxonomyValidatorService;
+  private TaxonomyValidatorService taxonomyValidatorServiceMock;
   @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
+
+  @AfterEach
+  void verifyNoInteractions() {
+    Mockito.verifyNoMoreInteractions(
+      sendNotificationNoPIIRepositoryMock,
+      sendNotificationPIIRepositoryMock,
+      mapperMock,
+      workflowServiceMock,
+      fileStorerServiceMock,
+      taxonomyValidatorServiceMock,
+      sendNotificationDTOMapperMock
+      );
+  }
 
   @Test
   void givenCreateNotificationRequestWhenCreateSendNotificationThenReturnCreateNotificationResponse(){
@@ -76,7 +91,7 @@ class SendNotificationServiceImplTest {
 
     Mockito.when(mapperMock.mapToModel(request, accessToken)).thenReturn(sendNotification);
     Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
-    Mockito.doNothing().when(taxonomyValidatorService).validateTaxonomyCode(request.getOrganizationId(), request.getTaxonomyCode(), accessToken);
+    Mockito.doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(request.getOrganizationId(), request.getTaxonomyCode(), accessToken);
 
     // When
     CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
@@ -97,6 +112,7 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     WorkflowCreatedDTO workflow = new WorkflowCreatedDTO("workflowId", "runId");
     InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
+    OffsetDateTime now = OffsetDateTime.now();
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification))
@@ -105,13 +121,18 @@ class SendNotificationServiceImplTest {
     Mockito.when(workflowServiceMock.sendNotificationProcess(sendNotificationId, null))
         .thenReturn(workflow);
 
-    StartNotificationResponse result = sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null);
+    try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
+      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(now);
+      Mockito.when(sendNotificationNoPIIRepositoryMock.updateFileDownloadDate(sendNotificationId,fileName, now)).thenReturn(null);
 
-    Assertions.assertEquals(new StartNotificationResponse("workflowId", "runId"), result);
+      StartNotificationResponse result = sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null);
 
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING);
-    Mockito.verify(workflowServiceMock).sendNotificationProcess(sendNotificationId, null);
+      Assertions.assertEquals(new StartNotificationResponse("workflowId", "runId"), result);
+
+      Mockito.verify(sendNotificationNoPIIRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.READY);
+      Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING);
+      Mockito.verify(workflowServiceMock).sendNotificationProcess(sendNotificationId, null);
+    }
   }
 
   @Test
@@ -374,70 +395,79 @@ class SendNotificationServiceImplTest {
   }
 
   @Test
-  void givenNewFileWhenUploadSendLegalFactThenSaveFileAndInvokeRepository() {
+  void givenNewFileWhenDownloadSendLegalFactThenSaveFileAndInvokeRepository() {
     // Given
     String notificationId = "123";
     LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
     String fileName = "test.pdf";
     InputStream inputStreamMock = Mockito.mock(InputStream.class);
     String expectedUrl = "test.pdf";
+    OffsetDateTime now = OffsetDateTime.now();
 
     SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setSendNotificationId(notificationId);
     notification.setOrganizationId(1L);
     notification.setLegalFacts(new ArrayList<>());
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
-    Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
-      .thenReturn(expectedUrl);
+    try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
+      Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+      Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
+        .thenReturn(expectedUrl);
+      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(now);
 
-    // When
-    Assertions.assertDoesNotThrow(() ->
-      sendNotificationService.uploadSendLegalFact(notificationId, category, fileName, inputStreamMock)
-    );
+      // When
+      Assertions.assertDoesNotThrow(() ->
+        sendNotificationService.downloadSendLegalFact(notificationId, category, fileName, inputStreamMock)
+      );
 
-    // Then
-    Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
-      fact.getFileName().equals(fileName) &&
-        fact.getUrl().equals(expectedUrl) &&
-        fact.getCategory().equals(category)
-    ));
+      // Then
+      Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
+      Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
+        fact.getFileName().equals(fileName) &&
+          fact.getUrl().equals(expectedUrl) &&
+          fact.getCategory().equals(category)
+      ));
+    }
   }
 
   @Test
-  void givenNewFileWhenUploadSendLegalFactWithoutLegalFactThenSaveFileAndInvokeRepository() {
+  void givenNewFileWhenDownloadSendLegalFactWithoutLegalFactThenSaveFileAndInvokeRepository() {
     // Given
     String notificationId = "123";
     LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
     String fileName = "test.pdf";
     InputStream inputStreamMock = Mockito.mock(InputStream.class);
     String expectedUrl = "test.pdf";
+    OffsetDateTime now = OffsetDateTime.now();
 
     SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setSendNotificationId(notificationId);
     notification.setOrganizationId(1L);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
-    Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
-      .thenReturn(expectedUrl);
+    try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
+      Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+      Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
+        .thenReturn(expectedUrl);
+      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(now);
 
-    // When
-    Assertions.assertDoesNotThrow(() ->
-      sendNotificationService.uploadSendLegalFact(notificationId, category, fileName, inputStreamMock)
-    );
+      // When
+      Assertions.assertDoesNotThrow(() ->
+        sendNotificationService.downloadSendLegalFact(notificationId, category, fileName, inputStreamMock)
+      );
 
-    // Then
-    Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
-      fact.getFileName().equals(fileName) &&
-        fact.getUrl().equals(expectedUrl) &&
-        fact.getCategory().equals(category)
-    ));
+      // Then
+      Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
+      Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
+        fact.getFileName().equals(fileName) &&
+          fact.getUrl().equals(expectedUrl) &&
+          fact.getCategory().equals(category) &&
+          now.equals(fact.getDownloadDate())
+      ));
+    }
   }
 
   @Test
-  void givenExistingCategoryFileWhenUploadSendLegalFactThenThrowFileAlreadyExistsException() {
+  void givenExistingCategoryFileWhenDownloadSendLegalFactThenThrowFileAlreadyExistsException() {
     // Given
     String id = "123";
     String fileName = "file.pdf";
@@ -455,7 +485,7 @@ class SendNotificationServiceImplTest {
 
     // When & Then
     FileAlreadyExistsException exception = Assertions.assertThrows(FileAlreadyExistsException.class, () ->
-      sendNotificationService.uploadSendLegalFact(id, category, fileName, inputStreamMock)
+      sendNotificationService.downloadSendLegalFact(id, category, fileName, inputStreamMock)
     );
 
     Assertions.assertEquals("LEGAL_FACT_ALREADY_EXISTS", exception.getCode());

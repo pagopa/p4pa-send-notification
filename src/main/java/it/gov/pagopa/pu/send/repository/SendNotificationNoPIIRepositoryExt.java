@@ -16,6 +16,7 @@ public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult updateNotificationStatusById(String sendNotificationId, NotificationStatus newStatus);
   UpdateResult updateNotificationRequestId(String sendNotificationId, String notificationRequestId);
   UpdateResult updateFileStatus(String sendNotificationId, String fileName, FileStatus newStatus);
+  UpdateResult updateFileDownloadDate(String sendNotificationId, String fileName, OffsetDateTime downloadDate);
   UpdateResult updateFileVersionId(String sendNotificationId, String fileName, String versionId);
   UpdateResult updateNotificationIun(String sendNotificationId, String iun);
   UpdateResult updateNotificationDate(String sendNotificationId, OffsetDateTime notificationDate, String nav);

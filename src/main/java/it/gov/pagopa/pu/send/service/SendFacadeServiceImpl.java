@@ -7,8 +7,8 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
-import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
@@ -339,7 +339,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
 
     byte[] bytes = HttpUtils.downloadFromPreSignedUrl(URI.create(preSignedUrl), httpClient);
     try(ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
-      sendNotificationService.uploadSendLegalFact(sendNotificationId, category, polishedLegalFactId, inputStream);
+      sendNotificationService.downloadSendLegalFact(sendNotificationId, category, polishedLegalFactId, inputStream);
     }
   }
 

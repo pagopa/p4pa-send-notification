@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -84,7 +85,10 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     notification.getDocuments().stream()
       .filter(doc -> doc.getFileName().equals(loadFileRequest.getFileName()))
       .findFirst().ifPresentOrElse(
-        doc -> updateFileStatus(sendNotificationId, doc, loadFileRequest, notification.getOrganizationId()),
+        doc -> {
+            updateFileStatus(sendNotificationId, doc, loadFileRequest, notification.getOrganizationId());
+            sendNotificationNoPIIRepository.updateFileDownloadDate(sendNotificationId, doc.getFileName(), OffsetDateTime.now());
+          },
         () -> {
           throw new SendNotificationFileNotFoundException("File not found with id: " + loadFileRequest.getFileName());
         }
@@ -144,7 +148,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
-  public void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream) {
+  public void downloadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
     if (notification.getLegalFacts()!=null && notification.getLegalFacts().stream().anyMatch(fact -> fact.getFileName().equals(fileName)))
       throw new FileAlreadyExistsException(ErrorCodeConstants.ERROR_CODE_LEGAL_FACT_ALREADY_EXISTS, "Legal-fact having "+fileName+" fileName already exists");
@@ -155,6 +159,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .fileName(fileName)
       .url(url)
       .category(category)
+      .downloadDate(OffsetDateTime.now())
       .build());
   }
 
