@@ -15,10 +15,7 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
-import it.gov.pagopa.pu.send.util.AESUtils;
-import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
-import it.gov.pagopa.pu.send.util.FileUtils;
-import it.gov.pagopa.pu.send.util.NotificationUtils;
+import it.gov.pagopa.pu.send.util.*;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,7 +84,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .findFirst().ifPresentOrElse(
         doc -> {
             updateFileStatus(sendNotificationId, doc, loadFileRequest, notification.getOrganizationId());
-            sendNotificationNoPIIRepository.updateFileDownloadDate(sendNotificationId, doc.getFileName(), OffsetDateTime.now());
+            sendNotificationNoPIIRepository.updateFileDownloadDate(sendNotificationId, doc.getFileName(), OffsetDateTime.now(Constants.ZONEID));
           },
         () -> {
           throw new SendNotificationFileNotFoundException("File not found with id: " + loadFileRequest.getFileName());
@@ -159,7 +156,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .fileName(fileName)
       .url(url)
       .category(category)
-      .downloadDate(OffsetDateTime.now())
+      .downloadDate(OffsetDateTime.now(Constants.ZONEID))
       .build());
   }
 

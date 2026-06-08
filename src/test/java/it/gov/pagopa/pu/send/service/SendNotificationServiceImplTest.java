@@ -17,6 +17,7 @@ import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
+import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import org.junit.jupiter.api.AfterEach;
@@ -122,7 +123,7 @@ class SendNotificationServiceImplTest {
         .thenReturn(workflow);
 
     try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
-      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(now);
+      offsetDateTimeMock.when(()->OffsetDateTime.now(Constants.ZONEID)).thenReturn(now);
       Mockito.when(sendNotificationNoPIIRepositoryMock.updateFileDownloadDate(sendNotificationId,fileName, now)).thenReturn(null);
 
       StartNotificationResponse result = sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null);
@@ -413,7 +414,7 @@ class SendNotificationServiceImplTest {
       Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
       Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
         .thenReturn(expectedUrl);
-      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(now);
+      offsetDateTimeMock.when(()->OffsetDateTime.now(Constants.ZONEID)).thenReturn(now);
 
       // When
       Assertions.assertDoesNotThrow(() ->
@@ -448,7 +449,7 @@ class SendNotificationServiceImplTest {
       Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
       Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
         .thenReturn(expectedUrl);
-      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(now);
+      offsetDateTimeMock.when(()->OffsetDateTime.now(Constants.ZONEID)).thenReturn(now);
 
       // When
       Assertions.assertDoesNotThrow(() ->
