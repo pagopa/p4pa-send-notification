@@ -50,7 +50,7 @@ class OrganizationApiClientTest {
 
     Mockito.when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND))
+    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
       .thenReturn(apiKey);
 
     // When
@@ -68,7 +68,7 @@ class OrganizationApiClientTest {
 
     Mockito.when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND))
+    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
       .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
 
     // When
