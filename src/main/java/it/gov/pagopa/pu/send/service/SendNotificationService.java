@@ -18,7 +18,7 @@ public interface SendNotificationService {
   SendNotificationDTO findSendNotificationDTOByNotificationRequestId(String notificationRequestId);
   SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav);
   UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus);
-  void uploadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream);
+  void downloadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream);
   List<LegalFactDTO> getLegalFacts(String sendNotificationId);
   SendNotificationNoPII findSendNotification(String sendNotificationId);
 }

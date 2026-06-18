@@ -23,7 +23,7 @@ public class OrganizationApiClient {
   public String getOrganizationApiKey(Long organizationId, String accessToken) {
     try{
       return organizationApisHolder.getOrganizationApi(accessToken)
-        .getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND);
+        .getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null);
     } catch (HttpClientErrorException.NotFound e){
       log.info("Cannot find organization api key having organizationId {}", organizationId);
       return null;
