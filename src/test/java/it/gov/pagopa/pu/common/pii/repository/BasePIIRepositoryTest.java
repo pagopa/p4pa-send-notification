@@ -133,4 +133,31 @@ class BasePIIRepositoryTest {
     // Then
     assertNull(result);
   }
+
+  @Test
+  void givenNoPersonalDataIdWhenDeleteThenDeleteOnlyNoPII() {
+    //GIVEN
+    TestNoPIIEntity testNoPII = new TestNoPIIEntity(1L);
+    Mockito.doNothing().when(mockNoPIIRepository).delete(testNoPII);
+    //WHEN
+    repository.delete(testNoPII);
+    //THEN
+    Mockito.verify(mockNoPIIRepository).delete(testNoPII);
+    Mockito.verify(mockPersonalDataService, Mockito.times(0)).delete(1L);
+  }
+
+  @Test
+  void givenPersonalDataIdWhenDeleteThenDeleteAlsoPII() {
+    //GIVEN
+    TestNoPIIEntity testNoPII = new TestNoPIIEntity(1L);
+    testNoPII.setPersonalDataId(1L);
+    Mockito.doNothing().when(mockNoPIIRepository).delete(testNoPII);
+    Mockito.doNothing().when(mockPersonalDataService).delete(testNoPII.getPersonalDataId());
+    //WHEN
+    repository.delete(testNoPII);
+    //THEN
+    Mockito.verify(mockNoPIIRepository).delete(testNoPII);
+    Mockito.verify(mockPersonalDataService).delete(1L);
+  }
+
 }
