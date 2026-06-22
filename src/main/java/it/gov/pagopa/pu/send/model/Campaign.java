@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.model;
 
 import it.gov.pagopa.pu.send.dto.Counters;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,13 +24,16 @@ import java.time.LocalDate;
 public class Campaign extends BaseEntity {
   @Id
   private String campaignId;
-  @NotNull
+  @NotEmpty
   private String externalId;
   private String campaignName;
   @NotNull
   private Long organizationId;
   private String orgSubUnitCode;
-  private Counters counters;
+  @NotNull
+  private Counters counters = new Counters();
+  @NotNull
   private LocalDate startDate;
+  @NotNull
   private LocalDate endDate;
 }
