@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pdnd.config;
 
-import it.gov.pagopa.pu.pdnd.dto.generated.PdndServicesEnum;
+import it.gov.pagopa.pu.pdnd.dto.generated.PdndServiceType;
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ class PagopaPdndApisHolderTest extends BaseApiHolderTest {
   void whenGetPagopaPdndApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       token -> apisHolder.getP4paPdndApiByApiKey(token)
-        .getVoucherToken(PdndServicesEnum.SEND),
+        .getVoucherToken(PdndServiceType.SEND, 1L, "subUnitCode"),
       new ParameterizedTypeReference<>() {},
       apisHolder::unload);
   }
