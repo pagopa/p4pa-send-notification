@@ -3,10 +3,7 @@ package it.gov.pagopa.pu.send.model;
 import it.gov.pagopa.pu.send.dto.Counters;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
@@ -31,6 +28,7 @@ public class Campaign extends BaseEntity {
   private Long organizationId;
   private String orgSubUnitCode;
   @NotNull
+  @Builder.Default
   private Counters counters = new Counters();
   @NotNull
   private LocalDate startDate;
