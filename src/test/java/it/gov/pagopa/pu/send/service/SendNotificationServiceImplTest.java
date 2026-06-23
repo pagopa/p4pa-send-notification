@@ -216,8 +216,7 @@ class SendNotificationServiceImplTest {
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
     //Then
     sendNotificationService.deleteSendNotification(sendNotificationId);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).deleteById(sendNotificationId);
-
+    Mockito.verify(sendNotificationPIIRepositoryMock).delete(notification);
   }
 
   @Test
