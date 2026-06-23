@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
+import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
@@ -119,6 +120,82 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
   }
 
+  @Test
+  void givenNotExistingOrganizationWhenCreateSendNotificationThenThrowNotFoundException() {
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    String accessToken = "accessToken";
+
+    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+      .thenReturn(null);
+
+    NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () ->
+      sendNotificationService.createSendNotification(request, accessToken)
+    );
+
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_NOT_FOUND, exception.getCode());
+  }
+
+  @Test
+  void givenNotExistingSubUnitWhenCreateSendNotificationThenThrowNotFoundException() {
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    request.setTaxonomyCode("0101");
+    request.setSubUnitCode("SUB01");
+    String accessToken = "accessToken";
+    Organization org = new Organization();
+
+    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+      .thenReturn(org);
+
+    Mockito.doNothing().when(taxonomyValidatorServiceMock)
+      .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+
+    String expectedOrgSubUnitId = "1-SUB01";
+    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(expectedOrgSubUnitId, accessToken))
+      .thenReturn(null);
+
+    NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () ->
+      sendNotificationService.createSendNotification(request, accessToken)
+    );
+
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_ORG_SUB_UNIT_NOT_FOUND, exception.getCode());
+  }
+
+  @Test
+  void givenCreateNotificationRequestWithSubUnitWhenCreateSendNotificationThenReturnCreateNotificationResponse() {
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    request.setTaxonomyCode("0101");
+    request.setSubUnitCode("SUB01");
+    SendNotification sendNotification = new SendNotification();
+    sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
+    sendNotification.setStatus(NotificationStatus.WAITING_FILE);
+    String accessToken = "accessToken";
+    Organization org = new Organization();
+    OrgSubUnit subUnit = new OrgSubUnit();
+
+    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+      .thenReturn(org);
+    Mockito.doNothing().when(taxonomyValidatorServiceMock)
+      .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+
+    String expectedOrgSubUnitId = "1-SUB01";
+    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(expectedOrgSubUnitId, accessToken))
+      .thenReturn(subUnit);
+
+    Mockito.when(mapperMock.mapToModel(request, accessToken)).thenReturn(sendNotification);
+    Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
+      .thenReturn(sendNotification);
+    Mockito.doNothing().when(campaignServiceMock)
+      .createIfNotExists(request.getCampaignId(), null, request.getSubUnitCode(), sendNotification);
+
+    CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
+
+    Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
+  }
 
   @Test
   void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyAllFilesReady() {
