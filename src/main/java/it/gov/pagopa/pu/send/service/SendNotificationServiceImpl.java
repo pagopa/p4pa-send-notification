@@ -109,7 +109,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
     if (!notification.getStatus().equals(NotificationStatus.ACCEPTED)) {
       deleteSendNotificationFiles(notification);
-      sendNotificationNoPIIRepository.deleteById(sendNotificationId);
+      sendNotificationPIIRepository.delete(notification);
     }
     else
       throw new InvalidStatusException(ErrorCodeConstants.ERROR_CODE_INVALID_NOTIFICATION_STATUS, "Cannot delete notification with status complete");
