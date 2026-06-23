@@ -1,17 +1,18 @@
 package it.gov.pagopa.pu.send.connector.pdnd;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import it.gov.pagopa.pu.pdnd.dto.generated.PdndAuthData;
 import it.gov.pagopa.pu.send.connector.pdnd.client.PdndApiClient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PdndCacheServiceTest {
@@ -31,18 +32,25 @@ class PdndCacheServiceTest {
     authData.setAccessToken(ACCESS_TOKEN);
   }
 
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(pdndApiClientMock);
+  }
+
   @Test
   void whenGetPdndAccessTokenThenDelegatesToClient() {
-    when(pdndApiClientMock.getVoucherToken(ACCESS_TOKEN)).thenReturn(authData);
+    Long organizationId = 1L;
+    String subUnitCode = "subUnitCode";
 
-    PdndAuthData result = cacheService.getPdndAccessToken(ACCESS_TOKEN);
+    when(pdndApiClientMock.getVoucherToken(ACCESS_TOKEN, organizationId, subUnitCode)).thenReturn(authData);
+
+    PdndAuthData result = cacheService.getPdndAccessToken(ACCESS_TOKEN, organizationId, subUnitCode);
 
     assertEquals(ACCESS_TOKEN, result.getAccessToken());
-    verify(pdndApiClientMock, times(1)).getVoucherToken(ACCESS_TOKEN);
   }
 
   @Test
   void whenEvictPdndAccessTokenThenNoError() {
-    assertDoesNotThrow(() -> cacheService.evictPdndAccessToken(ACCESS_TOKEN));
+    assertDoesNotThrow(() -> cacheService.evictPdndAccessToken(ACCESS_TOKEN, 1L, "subUnitCode"));
   }
 }

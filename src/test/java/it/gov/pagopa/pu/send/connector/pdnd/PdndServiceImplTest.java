@@ -1,21 +1,23 @@
 package it.gov.pagopa.pu.send.connector.pdnd;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pdnd.dto.generated.PdndAuthData;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
-import java.time.OffsetDateTime;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PdndServiceImplTest {
@@ -38,23 +40,30 @@ class PdndServiceImplTest {
     pdndService = new PdndServiceImpl(pdndCacheServiceMock, organizationServiceMock);
   }
 
+  @AfterEach
+  void verifyNoMoreInteractions() {
+    Mockito.verifyNoMoreInteractions(pdndCacheServiceMock, organizationServiceMock);
+  }
+
   @Test
   void givenAccessTokenWhenResolvePdndAccessTokenThenIsValid() {
     // Given
     Long organizationId = 1L;
     Organization organization = new Organization();
     organization.setPdndEnabled(true);
-    pdndAuthData.setExpiration(OffsetDateTime.now().plusHours(1));
-    when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN)).thenReturn(pdndAuthData);
-    when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
+    OffsetDateTime offsetDateTime = OffsetDateTime.of(2026, 6, 19, 12, 0, 0, 0, ZoneOffset.UTC);
+    pdndAuthData.setExpiration(offsetDateTime.plusHours(1));
+    try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
+      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(offsetDateTime);
+      when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN, organizationId, null)).thenReturn(pdndAuthData);
+      when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
 
-    // When
-    String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
+      // When
+      String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
 
-    // Then
-    assertEquals(ACCESS_TOKEN, result);
-    verify(pdndCacheServiceMock, times(1)).getPdndAccessToken(ACCESS_TOKEN);
-    verify(pdndCacheServiceMock, never()).getPdndAccessToken(argThat(arg -> !arg.equals(ACCESS_TOKEN)));
+      // Then
+      assertEquals(ACCESS_TOKEN, result);
+    }
   }
 
   @Test
@@ -63,16 +72,21 @@ class PdndServiceImplTest {
     Long organizationId = 1L;
     Organization organization = new Organization();
     organization.setPdndEnabled(true);
-    pdndAuthData.setExpiration(OffsetDateTime.now().minusHours(1));
-    when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN)).thenReturn(pdndAuthData);
-    when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
+    OffsetDateTime offsetDateTime = OffsetDateTime.of(2026, 6, 19, 12, 0, 0, 0, ZoneOffset.UTC);
+    pdndAuthData.setExpiration(offsetDateTime.minusHours(1));
+    try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
+      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(offsetDateTime);
+      when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN, organizationId, null)).thenReturn(pdndAuthData);
+      doNothing().when(pdndCacheServiceMock).evictPdndAccessToken(ACCESS_TOKEN, organizationId, null);
+      when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
 
-    // When
-    String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
+      // When
+      String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
 
-    // Then
-    assertEquals(ACCESS_TOKEN, result);
-    verify(pdndCacheServiceMock, times(2)).getPdndAccessToken(ACCESS_TOKEN);
+      // Then
+      assertEquals(ACCESS_TOKEN, result);
+      verify(pdndCacheServiceMock, times(2)).getPdndAccessToken(ACCESS_TOKEN, organizationId, null);
+    }
   }
 
   @Test
@@ -88,6 +102,5 @@ class PdndServiceImplTest {
 
     // Then
     assertNull(result);
-    verify(pdndCacheServiceMock, never()).getPdndAccessToken(ACCESS_TOKEN);
   }
 }

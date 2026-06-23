@@ -21,6 +21,7 @@ See [Postman collection](/postman/P4PA-Send-E2E.postman_collection.json) and [Po
 * `GET /p4pasend/notification/{sendNotificationId}`: To get notification status.
 
 ### 📌 Common HTTP status returned:
+* `200`: Successful operation;
 * `401`: Invalid access token provided, thus a new login is required;
 * `403`: Trying to access a not authorized resource.
 

@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pdnd.client;
 
 import it.gov.pagopa.pu.pdnd.dto.generated.PdndAuthData;
-import it.gov.pagopa.pu.pdnd.dto.generated.PdndServicesEnum;
+import it.gov.pagopa.pu.pdnd.dto.generated.PdndServiceType;
 import it.gov.pagopa.pu.send.connector.pdnd.config.PagopaPdndApisHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,12 +17,12 @@ public class PdndApiClient {
     this.pdndApisHolder = pdndApisHolder;
   }
 
-  public PdndAuthData getVoucherToken(String accessToken) {
+  public PdndAuthData getVoucherToken(String accessToken, Long organizationId, String subUnitCode) {
     try{
       return pdndApisHolder.getP4paPdndApiByApiKey(accessToken)
-        .getVoucherToken(PdndServicesEnum.SEND);
+        .getVoucherToken(PdndServiceType.SEND, organizationId, subUnitCode);
     } catch (HttpClientErrorException.NotFound e){
-      log.info("Cannot find voucher token for SEND service");
+      log.info("Cannot find voucher token for service SEND organizationId {} and subUnitCode {} ", organizationId, subUnitCode);
       return null;
     }
   }
