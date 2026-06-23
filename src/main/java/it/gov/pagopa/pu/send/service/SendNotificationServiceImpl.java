@@ -95,7 +95,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       OrgSubUnit orgSubUnit = orgSubUnitService.getOrgSubUnitById(calculateOrgSubUnitId(organizationId, subUnitCode), accessToken);
       if (orgSubUnit == null) {
         throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORG_SUB_UNIT_NOT_FOUND,
-          String.format("Organization SubUnit having subUnitCode " + subUnitCode + " not found")
+          String.format("Organization SubUnit having subUnitCode %s not found", subUnitCode)
         );
       }
     }
