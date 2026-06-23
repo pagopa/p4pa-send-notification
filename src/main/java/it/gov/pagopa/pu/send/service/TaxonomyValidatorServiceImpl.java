@@ -14,25 +14,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaxonomyValidatorServiceImpl implements TaxonomyValidatorService {
   private final SendTaxonomyRepository sendTaxonomyRepository;
-  private final OrganizationService organizationService;
 
   public TaxonomyValidatorServiceImpl(SendTaxonomyRepository sendTaxonomyRepository, OrganizationService organizationService) {
     this.sendTaxonomyRepository = sendTaxonomyRepository;
-    this.organizationService = organizationService;
   }
 
   @Override
-  public void validateTaxonomyCode(Long organizationId, String taxonomyCode, String accessToken) {
+  public void validateTaxonomyCode(Organization org, String taxonomyCode, String accessToken) {
     SendTaxonomy sendTaxonomy = sendTaxonomyRepository.findByTaxonomyCode(taxonomyCode);
     if(sendTaxonomy==null) {
       throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_TAXONOMY_CODE_NOT_FOUND,
         String.format("Send Taxonomy having taxonomyCode %s not found", taxonomyCode));
-    }
-
-    Organization org = organizationService.getOrganization(organizationId, accessToken);
-    if(org == null) {
-      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_NOT_FOUND,
-        String.format("Organization having orgId %s not found", organizationId));
     }
 
     String orgTypeCode = org.getOrgTypeCode();

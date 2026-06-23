@@ -2,6 +2,9 @@ package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
@@ -59,6 +62,12 @@ class SendNotificationServiceImplTest {
   private TaxonomyValidatorService taxonomyValidatorServiceMock;
   @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
+  @Mock
+  private CampaignService campaignServiceMock;
+  @Mock
+  private OrganizationService organizationServiceMock;
+  @Mock
+  private OrgSubUnitService orgSubUnitServiceMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -72,8 +81,11 @@ class SendNotificationServiceImplTest {
       workflowServiceMock,
       fileStorerServiceMock,
       taxonomyValidatorServiceMock,
-      sendNotificationDTOMapperMock
-      );
+      sendNotificationDTOMapperMock,
+      campaignServiceMock,
+      organizationServiceMock,
+      orgSubUnitServiceMock
+    );
   }
 
   @Test
@@ -86,13 +98,17 @@ class SendNotificationServiceImplTest {
     sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
     sendNotification.setStatus(NotificationStatus.WAITING_FILE);
     String accessToken = "accessToken";
+    Organization org = new Organization();
 
     PersonalData personalData = new PersonalData();
     personalData.setId(1L);
 
     Mockito.when(mapperMock.mapToModel(request, accessToken)).thenReturn(sendNotification);
     Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
-    Mockito.doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(request.getOrganizationId(), request.getTaxonomyCode(), accessToken);
+    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
+    Mockito.doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+    // TODO: use right campaignName when task P4ADEV-4776 is completed
+    Mockito.doNothing().when(campaignServiceMock).createIfNotExists(request.getCampaignId(), null, null, sendNotification);
 
     // When
     CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);

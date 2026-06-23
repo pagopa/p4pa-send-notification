@@ -1552,6 +1552,10 @@
           },
           "campaignId" : {
             "type" : "string"
+          },
+          "subUnitCode" : {
+            "type" : "string",
+            "nullable" : true
           }
         },
         "nullable" : true

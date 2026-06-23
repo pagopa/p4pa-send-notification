@@ -1,6 +1,10 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
@@ -43,11 +47,23 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final FileStorerService fileStorerService;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
   private final TaxonomyValidatorService taxonomyValidatorService;
+  private final CampaignService campaignService;
+  private final OrganizationService organizationService;
+  private final OrgSubUnitService orgSubUnitService;
 
-  public SendNotificationServiceImpl(@Value("${fileshare-public-base-url}") String fileShareBaseUrl,
-                                     SendNotificationPIIRepository sendNotificationPIIRepository,
-                                     SendNotificationNoPIIRepository sendNotificationNoPIIRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
-                                     FileStorerService fileStorerService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper, TaxonomyValidatorService taxonomyValidatorService) {
+  public SendNotificationServiceImpl(
+    @Value("${fileshare-public-base-url}") String fileShareBaseUrl,
+    SendNotificationPIIRepository sendNotificationPIIRepository,
+    SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
+    CreateNotificationRequest2SendNotificationMapper mapper,
+    WorkflowService workflowService,
+    FileStorerService fileStorerService,
+    SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
+    TaxonomyValidatorService taxonomyValidatorService,
+    CampaignService campaignService,
+    OrganizationService organizationService,
+    OrgSubUnitService orgSubUnitService
+  ) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
@@ -56,14 +72,43 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.fileStorerService = fileStorerService;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
     this.taxonomyValidatorService = taxonomyValidatorService;
+    this.campaignService = campaignService;
+    this.organizationService = organizationService;
+    this.orgSubUnitService = orgSubUnitService;
   }
 
   @Transactional
   @Override
   public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, String accessToken) {
-    taxonomyValidatorService.validateTaxonomyCode(createNotificationRequest.getOrganizationId(), createNotificationRequest.getTaxonomyCode(), accessToken);
+    Long organizationId = createNotificationRequest.getOrganizationId();
+
+    Organization org = organizationService.getOrganization(organizationId, accessToken);
+    if(org == null) {
+      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_NOT_FOUND,
+        String.format("Organization having orgId %s not found", organizationId));
+    }
+
+    taxonomyValidatorService.validateTaxonomyCode(org, createNotificationRequest.getTaxonomyCode(), accessToken);
+
+    String subUnitCode = createNotificationRequest.getSubUnitCode();
+    if (subUnitCode != null) {
+      OrgSubUnit orgSubUnit = orgSubUnitService.getOrgSubUnitById(calculateOrgSubUnitId(organizationId, subUnitCode), accessToken);
+      if (orgSubUnit == null) {
+        throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORG_SUB_UNIT_NOT_FOUND,
+          String.format("Organization SubUnit having subUnitCode " + subUnitCode + " not found")
+        );
+      }
+    }
 
     SendNotification sendNotification = sendNotificationPIIRepository.save(mapper.mapToModel(createNotificationRequest, accessToken));
+
+    // TODO: use right campaignName when task P4ADEV-4776 is completed
+    campaignService.createIfNotExists(
+      createNotificationRequest.getCampaignId(),
+      null,
+      subUnitCode,
+      sendNotification
+    );
 
     return CreateNotificationResponse
       .builder()
@@ -71,6 +116,10 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .status(sendNotification.getStatus().name())
       .preloadUrl(fileShareBaseUrl+"/organization/"+ sendNotification.getOrganizationId()+"/send-files/"+ sendNotification.getSendNotificationId())
       .build();
+  }
+
+  private String calculateOrgSubUnitId(Long organizationId, String subUnitCode) {
+    return organizationId + "-" + subUnitCode;
   }
 
   @Transactional

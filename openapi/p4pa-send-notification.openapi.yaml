@@ -691,6 +691,8 @@ components:
           maximum: 100
         campaignId:
           type: string
+        subUnitCode:
+          type: string
     Recipient:
       type: object
       required:
