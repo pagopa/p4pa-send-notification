@@ -27,6 +27,7 @@ import static it.gov.pagopa.pu.send.util.faker.PuPaymentFaker.buildPuPayment;
 import static it.gov.pagopa.pu.send.util.faker.PuRecipientFaker.buildPuRecipient;
 import static it.gov.pagopa.pu.send.util.faker.SendNotificationFaker.buildSendNotification;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
@@ -88,6 +89,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     assertEquals(noPii.getVat(), result.getVat());
     assertEquals(noPii.getPagoPaIntMode(), result.getPagoPaIntMode());
     assertSame(noPii.getCampaignId(), result.getCampaignId());
+    assertSame(noPii.getOrgSubUnitCode(), result.getOrgSubUnitCode());
     assertSame(noPii, result.getNoPII());
   }
 

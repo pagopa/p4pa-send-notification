@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Optional;
@@ -63,12 +64,15 @@ class CampaignServiceImplTest {
     sendNotification.setOrgSubUnitCode("orgSubUnitCode");
     sendNotification.setNoPII(sendNotificationNoPII);
 
+    LocalDate creationDate = sendNotification.getNoPII().getCreationDate().toLocalDate();
+
     Campaign expectedCampaign = Campaign.builder()
       .externalCampaignId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(sendNotification.getOrganizationId())
       .orgSubUnitCode(sendNotification.getOrgSubUnitCode())
-      .startDate(sendNotification.getNoPII().getCreationDate().toLocalDate())
+      .startDate(creationDate)
+      .endDate(creationDate)
       .build();
 
     when(campaignRepositoryMock.findByExternalCampaignIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, sendNotification.getOrganizationId(), sendNotification.getOrgSubUnitCode())).thenReturn(Optional.empty());

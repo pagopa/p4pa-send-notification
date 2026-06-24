@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Slf4j
@@ -29,15 +30,18 @@ public class CampaignServiceImpl implements CampaignService {
       return existingCampaign.get();
     }
 
+    LocalDate creationDate = sendNotification.getNoPII().getCreationDate().toLocalDate();
+
     Campaign newCampaign = Campaign.builder()
       .externalCampaignId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(organizationId)
       .orgSubUnitCode(orgSubUnitCode)
-      .startDate(sendNotification.getNoPII().getCreationDate().toLocalDate())
+      .startDate(creationDate)
+      .endDate(creationDate)
       .build();
 
-    // TODO: handle end date and counter in P4ADEV-4790
+    // TODO: handle counter in P4ADEV-4790
 
     return campaignRepository.save(newCampaign);
   }
