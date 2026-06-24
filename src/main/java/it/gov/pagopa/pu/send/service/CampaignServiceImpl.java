@@ -19,7 +19,7 @@ public class CampaignServiceImpl implements CampaignService {
 
   @Override
   public Campaign createIfNotExists(String externalCampaignId, String campaignName, SendNotification sendNotification) {
-    Optional<Campaign> existingCampaign = campaignRepository.findByExternalId(externalCampaignId);
+    Optional<Campaign> existingCampaign = campaignRepository.findByExternalCampaignId(externalCampaignId);
     if (existingCampaign.isPresent()) {
       return existingCampaign.get();
     }

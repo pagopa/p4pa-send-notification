@@ -40,7 +40,7 @@ class CampaignServiceImplTest {
 
     Campaign existingCampaign = Campaign.builder().externalCampaignId(externalCampaignId).build();
 
-    when(campaignRepositoryMock.findByExternalId(externalCampaignId)).thenReturn(Optional.of(existingCampaign));
+    when(campaignRepositoryMock.findByExternalCampaignId(externalCampaignId)).thenReturn(Optional.of(existingCampaign));
 
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, sendNotification);
 
@@ -68,7 +68,7 @@ class CampaignServiceImplTest {
       .startDate(sendNotification.getNoPII().getCreationDate().toLocalDate())
       .build();
 
-    when(campaignRepositoryMock.findByExternalId(externalCampaignId)).thenReturn(Optional.empty());
+    when(campaignRepositoryMock.findByExternalCampaignId(externalCampaignId)).thenReturn(Optional.empty());
     when(campaignRepositoryMock.save(expectedCampaign)).thenReturn(expectedCampaign);
 
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, sendNotification);
