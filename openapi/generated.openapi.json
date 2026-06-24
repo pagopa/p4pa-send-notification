@@ -1487,7 +1487,7 @@
         }
       },
       "CreateNotificationRequest" : {
-        "required" : [ "campaignId", "notificationFeePolicy", "organizationId", "paProtocolNumber", "physicalCommunicationType", "recipients" ],
+        "required" : [ "externalCampaignId", "notificationFeePolicy", "organizationId", "paProtocolNumber", "physicalCommunicationType", "recipients" ],
         "type" : "object",
         "properties" : {
           "organizationId" : {
@@ -1550,7 +1550,7 @@
             "format" : "int32",
             "nullable" : true
           },
-          "campaignId" : {
+          "externalCampaignId" : {
             "type" : "string"
           },
           "subUnitCode" : {
