@@ -204,8 +204,6 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   public NotificationPriceResponseV23DTO retrieveNotificationPrice(Long organizationId, String nav, String accessToken) {
     SendNotificationNoPII notification = findSendNotificationByOrgIdAndNav(organizationId, nav);
 
-    // Validate status
-    NotificationUtils.validateStatus(NotificationStatus.ACCEPTED, notification.getStatus());
     Payment payment = notification.getRecipients().stream()
       .flatMap(recipient -> recipient.getPuPayments().stream())
       .map(PuPayment::getPayment)
