@@ -84,7 +84,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
       ? "ASYNC"
       : "SYNC");
 
-    sendNotification.setCampaignId(request.getCampaignId());
+    sendNotification.setOrgSubUnitCode(request.getSubUnitCode());
 
     return sendNotification;
   }

@@ -22,7 +22,7 @@ public class Campaign extends BaseEntity {
   @Id
   private String campaignId;
   @NotEmpty
-  private String externalId;
+  private String externalCampaignId;
   private String campaignName;
   @NotNull
   private Long organizationId;

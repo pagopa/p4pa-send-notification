@@ -13,7 +13,7 @@ public class OrgSubUnitServiceImpl implements OrgSubUnitService {
   }
 
   @Override
-  public OrgSubUnit getOrgSubUnitById(String orgSubUnitId, String accessToken) {
-    return orgSubUnitApiClient.getOrgSubUnitById(orgSubUnitId, accessToken);
+  public OrgSubUnit getOrgSubUnitById(Long organizationId, String orgSubUnitCode, String accessToken) {
+    return orgSubUnitApiClient.getOrgSubUnitById(organizationId, orgSubUnitCode, accessToken);
   }
 }

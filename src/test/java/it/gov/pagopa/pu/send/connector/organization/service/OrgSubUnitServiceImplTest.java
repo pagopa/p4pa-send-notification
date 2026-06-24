@@ -36,14 +36,15 @@ class OrgSubUnitServiceImplTest {
 
   @Test
   void whenGetOrgSubUnitByIdThenInvokeClient() {
-    String orgSubUnitId = "orgSubUnitId";
+    Long organizationId = 1L;
+    String orgSubUnitCode = "01";
     String accessToken = "accessToken";
     OrgSubUnit expectedResult = podamFactory.manufacturePojo(OrgSubUnit.class);
 
-    when(orgSubUnitApiClientMock.getOrgSubUnitById(orgSubUnitId, accessToken))
+    when(orgSubUnitApiClientMock.getOrgSubUnitById(organizationId, orgSubUnitCode, accessToken))
       .thenReturn(expectedResult);
 
-    OrgSubUnit result = service.getOrgSubUnitById(orgSubUnitId, accessToken);
+    OrgSubUnit result = service.getOrgSubUnitById(organizationId, orgSubUnitCode, accessToken);
 
     assertSame(expectedResult, result);
   }

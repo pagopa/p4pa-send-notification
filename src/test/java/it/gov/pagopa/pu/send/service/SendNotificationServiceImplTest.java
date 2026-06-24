@@ -18,6 +18,7 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
@@ -95,12 +96,15 @@ class SendNotificationServiceImplTest {
     CreateNotificationRequest request = new CreateNotificationRequest();
     request.setOrganizationId(1L);
     request.setTaxonomyCode("0101");
+    request.setExternalCampaignId("externalCampaignId");
+
     SendNotification sendNotification = new SendNotification();
     sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
     sendNotification.setStatus(NotificationStatus.WAITING_FILE);
     String accessToken = "accessToken";
     Organization org = new Organization();
 
+    Campaign campaign = new Campaign();
     PersonalData personalData = new PersonalData();
     personalData.setId(1L);
 
@@ -109,13 +113,13 @@ class SendNotificationServiceImplTest {
     Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
     Mockito.doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
     // TODO: use right campaignName when task P4ADEV-4776 is completed
-    Mockito.doNothing().when(campaignServiceMock).createIfNotExists(request.getCampaignId(), null, null, sendNotification);
+    Mockito.when(campaignServiceMock.createIfNotExists(request.getExternalCampaignId(), null, sendNotification)).thenReturn(campaign);
 
     // When
     CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
 
     // Then
-    Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
+    Mockito.verify(sendNotificationPIIRepositoryMock, Mockito.times(2)).save(sendNotification);
     Assertions.assertNotNull(response);
     Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
   }
@@ -151,8 +155,7 @@ class SendNotificationServiceImplTest {
     Mockito.doNothing().when(taxonomyValidatorServiceMock)
       .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
 
-    String expectedOrgSubUnitId = "1-SUB01";
-    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(expectedOrgSubUnitId, accessToken))
+    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
       .thenReturn(null);
 
     NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () ->
@@ -168,31 +171,32 @@ class SendNotificationServiceImplTest {
     request.setOrganizationId(1L);
     request.setTaxonomyCode("0101");
     request.setSubUnitCode("SUB01");
+    request.setExternalCampaignId("externalCampaignId");
+
     SendNotification sendNotification = new SendNotification();
     sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
     sendNotification.setStatus(NotificationStatus.WAITING_FILE);
     String accessToken = "accessToken";
     Organization org = new Organization();
     OrgSubUnit subUnit = new OrgSubUnit();
+    Campaign campaign = new Campaign();
 
     Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
       .thenReturn(org);
     Mockito.doNothing().when(taxonomyValidatorServiceMock)
       .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
 
-    String expectedOrgSubUnitId = "1-SUB01";
-    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(expectedOrgSubUnitId, accessToken))
+    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
       .thenReturn(subUnit);
 
     Mockito.when(mapperMock.mapToModel(request, accessToken)).thenReturn(sendNotification);
     Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
       .thenReturn(sendNotification);
-    Mockito.doNothing().when(campaignServiceMock)
-      .createIfNotExists(request.getCampaignId(), null, request.getSubUnitCode(), sendNotification);
+    Mockito.when(campaignServiceMock.createIfNotExists(request.getExternalCampaignId(), null, sendNotification)).thenReturn(campaign);
 
     CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
 
-    Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
+    Mockito.verify(sendNotificationPIIRepositoryMock, Mockito.times(2)).save(sendNotification);
     Assertions.assertNotNull(response);
     Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
   }

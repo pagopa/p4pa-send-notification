@@ -98,7 +98,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     SendNotification result = mapper.mapToModel(request, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts");
+    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts", "campaignId");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -145,7 +145,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     SendNotification result = mapper.mapToModel(request, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts");
+    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts", "campaignId");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -217,7 +217,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
     // Then
     TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun",
-      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate", "legalFacts");
+      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate", "legalFacts", "campaignId");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -295,7 +295,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setPaFee(100);
     request.setVat(22);
     request.setPaymentExpirationDate(LocalDate.now());
-    request.setCampaignId("CAMPAIGN_ID123");
+    request.setExternalCampaignId("CAMPAIGN_ID123");
+    request.setSubUnitCode("sub01");
     return request;
   }
 

@@ -127,6 +127,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     noPii.setPaProtocolNumber("PP001");
     noPii.setPersonalDataId(personalDataId);
     noPii.setCampaignId("CAMPAIGN_ID123");
+    noPii.setOrgSubUnitCode("sub01");
 
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO("HASHED_TAX_ID".getBytes(), List.of(buildPuPayment()));
     noPii.setRecipients(List.of(recipient));

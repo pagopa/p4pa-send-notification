@@ -40,31 +40,33 @@ class OrgSubUnitApiClientTest {
 
   @Test
   void whenGetOrgSubUnitByIdThenInvokeWithAccessToken() {
-    String orgSubUnitId = "orgSubUnitId";
+    Long organizationId = 1L;
+    String orgSubUnitCode = "01";
     String accessToken = "accessToken";
     OrgSubUnit expectedResult = new OrgSubUnit();
 
     Mockito.when(organizationApisHolder.getOrgSubUnitEntityControllerApi(accessToken))
       .thenReturn(orgSubUnitEntityControllerApiMock);
-    Mockito.when(orgSubUnitEntityControllerApiMock.crudGetOrgsubunit(orgSubUnitId))
+    Mockito.when(orgSubUnitEntityControllerApiMock.crudGetOrgsubunit(organizationId + "-" + orgSubUnitCode))
       .thenReturn(expectedResult);
 
-    OrgSubUnit result = orgSubUnitApiClient.getOrgSubUnitById(orgSubUnitId, accessToken);
+    OrgSubUnit result = orgSubUnitApiClient.getOrgSubUnitById(organizationId, orgSubUnitCode, accessToken);
 
     assertSame(expectedResult, result);
   }
 
   @Test
   void givenNotExistentOrgSubUnitIdWhenGetOrgSubUnitByIdThenReturnNull() {
-    String orgSubUnitId = "orgSubUnitId";
+    Long organizationId = 1L;
+    String orgSubUnitCode = "01";
     String accessToken = "accessToken";
 
     Mockito.when(organizationApisHolder.getOrgSubUnitEntityControllerApi(accessToken))
       .thenReturn(orgSubUnitEntityControllerApiMock);
-    Mockito.when(orgSubUnitEntityControllerApiMock.crudGetOrgsubunit(orgSubUnitId))
+    Mockito.when(orgSubUnitEntityControllerApiMock.crudGetOrgsubunit(organizationId + "-" + orgSubUnitCode))
       .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
 
-    OrgSubUnit result = orgSubUnitApiClient.getOrgSubUnitById(orgSubUnitId, accessToken);
+    OrgSubUnit result = orgSubUnitApiClient.getOrgSubUnitById(organizationId, orgSubUnitCode, accessToken);
 
     assertNull(result);
   }

@@ -16,6 +16,7 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
@@ -92,7 +93,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
     String subUnitCode = createNotificationRequest.getSubUnitCode();
     if (subUnitCode != null) {
-      OrgSubUnit orgSubUnit = orgSubUnitService.getOrgSubUnitById(calculateOrgSubUnitId(organizationId, subUnitCode), accessToken);
+      OrgSubUnit orgSubUnit = orgSubUnitService.getOrgSubUnitById(organizationId, subUnitCode, accessToken);
       if (orgSubUnit == null) {
         throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORG_SUB_UNIT_NOT_FOUND,
           String.format("Organization SubUnit having subUnitCode %s not found", subUnitCode)
@@ -103,12 +104,14 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     SendNotification sendNotification = sendNotificationPIIRepository.save(mapper.mapToModel(createNotificationRequest, accessToken));
 
     // TODO: use right campaignName when task P4ADEV-4776 is completed
-    campaignService.createIfNotExists(
-      createNotificationRequest.getCampaignId(),
+    Campaign campaign = campaignService.createIfNotExists(
+      createNotificationRequest.getExternalCampaignId(),
       null,
-      subUnitCode,
       sendNotification
     );
+
+    sendNotification.setCampaignId(campaign.getCampaignId());
+    sendNotification = sendNotificationPIIRepository.save(sendNotification);
 
     return CreateNotificationResponse
       .builder()
@@ -116,10 +119,6 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .status(sendNotification.getStatus().name())
       .preloadUrl(fileShareBaseUrl+"/organization/"+ sendNotification.getOrganizationId()+"/send-files/"+ sendNotification.getSendNotificationId())
       .build();
-  }
-
-  private String calculateOrgSubUnitId(Long organizationId, String subUnitCode) {
-    return organizationId + "-" + subUnitCode;
   }
 
   @Transactional

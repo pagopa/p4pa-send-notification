@@ -47,6 +47,7 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
       puRecipient -> new PuRecipientNoPIIDTO(dataCipherService.hash(puRecipient.getRecipient().getTaxId()), puRecipient.getPuPayments())).toList();
     noPII.setRecipients(recipients);
     noPII.setCampaignId(fullDTO.getCampaignId());
+    noPII.setOrgSubUnitCode(fullDTO.getOrgSubUnitCode());
 
     return noPII;
   }
@@ -87,6 +88,7 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
     sendNotification.setPagoPaIntMode(noPii.getPagoPaIntMode());
     sendNotification.setLegalFacts(noPii.getLegalFacts());
     sendNotification.setCampaignId(noPii.getCampaignId());
+    sendNotification.setOrgSubUnitCode(noPii.getOrgSubUnitCode());
     sendNotification.setNoPII(noPii);
 
     return sendNotification;

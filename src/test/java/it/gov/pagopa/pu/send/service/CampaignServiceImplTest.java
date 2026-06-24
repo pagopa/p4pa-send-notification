@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,25 +34,24 @@ class CampaignServiceImplTest {
 
   @Test
   void givenExistingCampaignWhenCreateIfNotExistsThenDoNothing() {
-    String campaignId = "campaignId";
+    String externalCampaignId = "externalCampaignId";
     String campaignName = "campaignName";
-    String subUnitCode = "subUnitCode";
     SendNotification sendNotification = new SendNotification();
 
-    Campaign existingCampaign = Campaign.builder().externalId(campaignId).build();
+    Campaign existingCampaign = Campaign.builder().externalCampaignId(externalCampaignId).build();
 
-    when(campaignRepositoryMock.findByExternalId(campaignId)).thenReturn(Optional.of(existingCampaign));
+    when(campaignRepositoryMock.findByExternalId(externalCampaignId)).thenReturn(Optional.of(existingCampaign));
 
-    campaignService.createIfNotExists(campaignId, campaignName, subUnitCode, sendNotification);
+    Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, sendNotification);
 
-    verify(campaignRepositoryMock, times(0)).save(any(Campaign.class));
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(existingCampaign, result);
   }
 
   @Test
   void givenNotExistingCampaignWhenCreateIfNotExistsThenSaveNewCampaign() {
-    String campaignId = "campaignId";
+    String externalCampaignId = "externalCampaignId";
     String campaignName = "campaignName";
-    String subUnitCode = "subUnitCode";
 
     SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
     sendNotificationNoPII.setCreationDate(LocalDateTime.of(2026, Month.JUNE, 18, 12, 0));
@@ -60,18 +60,20 @@ class CampaignServiceImplTest {
     sendNotification.setOrganizationId(1L);
     sendNotification.setNoPII(sendNotificationNoPII);
 
-    when(campaignRepositoryMock.findByExternalId(campaignId)).thenReturn(Optional.empty());
-
     Campaign expectedCampaign = Campaign.builder()
-      .externalId(campaignId)
+      .externalCampaignId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(sendNotification.getOrganizationId())
-      .orgSubUnitCode(subUnitCode)
+      .orgSubUnitCode(sendNotification.getOrgSubUnitCode())
       .startDate(sendNotification.getNoPII().getCreationDate().toLocalDate())
       .build();
 
-    campaignService.createIfNotExists(campaignId, campaignName, subUnitCode, sendNotification);
+    when(campaignRepositoryMock.findByExternalId(externalCampaignId)).thenReturn(Optional.empty());
+    when(campaignRepositoryMock.save(expectedCampaign)).thenReturn(expectedCampaign);
 
-    verify(campaignRepositoryMock).save(expectedCampaign);
+    Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, sendNotification);
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(expectedCampaign, result);
   }
 }

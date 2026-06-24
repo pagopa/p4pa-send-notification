@@ -15,7 +15,9 @@ public class OrgSubUnitApiClient {
     this.organizationApisHolder = organizationApisHolder;
   }
 
-  public OrgSubUnit getOrgSubUnitById(String orgSubUnitId, String accessToken) {
+  public OrgSubUnit getOrgSubUnitById(Long organizationId, String orgSubUnitCode, String accessToken) {
+   String orgSubUnitId = calculateOrgSubUnitId(organizationId, orgSubUnitCode);
+
     try {
       return organizationApisHolder.getOrgSubUnitEntityControllerApi(accessToken)
         .crudGetOrgsubunit(orgSubUnitId);
@@ -23,5 +25,9 @@ public class OrgSubUnitApiClient {
       log.warn("SubUnit with id {} not found", orgSubUnitId);
       return null;
     }
+  }
+
+  private String calculateOrgSubUnitId(Long organizationId, String subUnitCode) {
+    return organizationId + "-" + subUnitCode;
   }
 }
