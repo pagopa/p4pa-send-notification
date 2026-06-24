@@ -19,7 +19,12 @@ public class CampaignServiceImpl implements CampaignService {
 
   @Override
   public Campaign createIfNotExists(String externalCampaignId, String campaignName, SendNotification sendNotification) {
-    Optional<Campaign> existingCampaign = campaignRepository.findByExternalCampaignId(externalCampaignId);
+    Long organizationId = sendNotification.getOrganizationId();
+    String orgSubUnitCode = sendNotification.getOrgSubUnitCode();
+
+    Optional<Campaign> existingCampaign = campaignRepository
+      .findByExternalCampaignIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, organizationId, orgSubUnitCode);
+
     if (existingCampaign.isPresent()) {
       return existingCampaign.get();
     }
@@ -27,8 +32,8 @@ public class CampaignServiceImpl implements CampaignService {
     Campaign newCampaign = Campaign.builder()
       .externalCampaignId(externalCampaignId)
       .campaignName(campaignName)
-      .organizationId(sendNotification.getOrganizationId())
-      .orgSubUnitCode(sendNotification.getOrgSubUnitCode())
+      .organizationId(organizationId)
+      .orgSubUnitCode(orgSubUnitCode)
       .startDate(sendNotification.getNoPII().getCreationDate().toLocalDate())
       .build();
 

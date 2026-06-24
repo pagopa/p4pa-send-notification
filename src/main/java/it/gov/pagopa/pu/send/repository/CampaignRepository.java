@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface CampaignRepository extends MongoRepository<Campaign, String> {
-  Optional<Campaign> findByExternalCampaignId(String externalId);
+  Optional<Campaign> findByExternalCampaignIdAndOrganizationIdAndOrgSubUnitCode(String externalCampaignId, Long organizationId, String orgSubUnitCode);
 }

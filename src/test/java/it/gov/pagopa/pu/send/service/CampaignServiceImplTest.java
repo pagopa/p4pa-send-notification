@@ -37,10 +37,12 @@ class CampaignServiceImplTest {
     String externalCampaignId = "externalCampaignId";
     String campaignName = "campaignName";
     SendNotification sendNotification = new SendNotification();
+    sendNotification.setOrganizationId(1L);
+    sendNotification.setOrgSubUnitCode("orgSubUnitCode");
 
     Campaign existingCampaign = Campaign.builder().externalCampaignId(externalCampaignId).build();
 
-    when(campaignRepositoryMock.findByExternalCampaignId(externalCampaignId)).thenReturn(Optional.of(existingCampaign));
+    when(campaignRepositoryMock.findByExternalCampaignIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, sendNotification.getOrganizationId(), sendNotification.getOrgSubUnitCode())).thenReturn(Optional.of(existingCampaign));
 
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, sendNotification);
 
@@ -58,6 +60,7 @@ class CampaignServiceImplTest {
 
     SendNotification sendNotification = new SendNotification();
     sendNotification.setOrganizationId(1L);
+    sendNotification.setOrgSubUnitCode("orgSubUnitCode");
     sendNotification.setNoPII(sendNotificationNoPII);
 
     Campaign expectedCampaign = Campaign.builder()
@@ -68,7 +71,7 @@ class CampaignServiceImplTest {
       .startDate(sendNotification.getNoPII().getCreationDate().toLocalDate())
       .build();
 
-    when(campaignRepositoryMock.findByExternalCampaignId(externalCampaignId)).thenReturn(Optional.empty());
+    when(campaignRepositoryMock.findByExternalCampaignIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, sendNotification.getOrganizationId(), sendNotification.getOrgSubUnitCode())).thenReturn(Optional.empty());
     when(campaignRepositoryMock.save(expectedCampaign)).thenReturn(expectedCampaign);
 
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, sendNotification);
