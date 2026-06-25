@@ -26,6 +26,7 @@ public class CampaignController implements CampaignApi {
 
   @Override
   public ResponseEntity<Void> alignCampaign(String campaignId) {
+    log.info("align campaign with id {}", campaignId);
     // TODO: P4ADEV-4792
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
