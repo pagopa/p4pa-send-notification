@@ -37,6 +37,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static it.gov.pagopa.pu.send.util.Constants.ZONEID;
+
 @Slf4j
 @Service
 public class SendNotificationServiceImpl implements SendNotificationService {
@@ -107,7 +109,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       createNotificationRequest.getExternalCampaignId(),
       null,
       createNotificationRequest,
-      LocalDate.now()
+      LocalDate.now(ZONEID)
     );
 
     SendNotification sendNotification = sendNotificationPIIRepository.save(
@@ -202,7 +204,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .fileName(fileName)
       .url(url)
       .category(category)
-      .downloadDate(OffsetDateTime.now(Constants.ZONEID))
+      .downloadDate(OffsetDateTime.now(ZONEID))
       .build());
   }
 
@@ -227,7 +229,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     } catch (Exception e) {
       throw new InvalidSignatureException(e.getMessage());
     }
-    sendNotificationNoPIIRepository.updateFileStatusAndDownloadDate(sendNotificationId, doc.getFileName(), FileStatus.READY, OffsetDateTime.now(Constants.ZONEID));
+    sendNotificationNoPIIRepository.updateFileStatusAndDownloadDate(sendNotificationId, doc.getFileName(), FileStatus.READY, OffsetDateTime.now(ZONEID));
   }
 
   /**

@@ -41,6 +41,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +112,7 @@ class SendNotificationServiceImplTest {
     PersonalData personalData = new PersonalData();
     personalData.setId(1L);
 
-    LocalDate expectedDate = LocalDate.of(2026, 6, 21);
+    LocalDate expectedDate = LocalDate.of(2026, Month.JUNE, 21);
 
     Mockito.when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
     Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
@@ -120,7 +121,7 @@ class SendNotificationServiceImplTest {
     Mockito.when(campaignServiceMock.createIfNotExists(request.getExternalCampaignId(), null, request, expectedDate)).thenReturn(campaign);
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
-      localDateMock.when(LocalDate::now).thenReturn(expectedDate);
+      localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
 
       CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
 
@@ -188,7 +189,7 @@ class SendNotificationServiceImplTest {
     Campaign campaign = new Campaign();
     campaign.setCampaignId("campaignId");
 
-    LocalDate expectedDate = LocalDate.of(2026, 6, 21);
+    LocalDate expectedDate = LocalDate.of(2026, Month.JUNE, 21);
 
     Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
       .thenReturn(org);
@@ -204,7 +205,7 @@ class SendNotificationServiceImplTest {
     Mockito.when(campaignServiceMock.createIfNotExists(request.getExternalCampaignId(), null, request, expectedDate)).thenReturn(campaign);
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
-      localDateMock.when(LocalDate::now).thenReturn(expectedDate);
+      localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
 
       CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
 
