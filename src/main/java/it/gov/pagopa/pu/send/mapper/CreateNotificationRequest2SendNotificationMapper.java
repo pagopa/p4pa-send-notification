@@ -38,7 +38,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
     this.organizationService = organizationService;
   }
 
-  public SendNotification mapToModel(CreateNotificationRequest request, String accessToken) {
+  public SendNotification mapToModel(CreateNotificationRequest request, String campaignId, String accessToken) {
     Long organizationId = request.getOrganizationId();
 
     SendNotification sendNotification = new SendNotification();
@@ -85,6 +85,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
       : "SYNC");
 
     sendNotification.setOrgSubUnitCode(request.getSubUnitCode());
+    sendNotification.setCampaignId(campaignId);
 
     return sendNotification;
   }

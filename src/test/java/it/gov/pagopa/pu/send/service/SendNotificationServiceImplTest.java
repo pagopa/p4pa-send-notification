@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,23 +106,28 @@ class SendNotificationServiceImplTest {
     Organization org = new Organization();
 
     Campaign campaign = new Campaign();
+    campaign.setCampaignId("campaignId");
+
     PersonalData personalData = new PersonalData();
     personalData.setId(1L);
 
-    Mockito.when(mapperMock.mapToModel(request, accessToken)).thenReturn(sendNotification);
+    LocalDate expectedDate = LocalDate.of(2026, 6, 21);
+
+    Mockito.when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
     Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
     Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
     Mockito.doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
-    // TODO: use right campaignName when task P4ADEV-4776 is completed
-    Mockito.when(campaignServiceMock.createIfNotExists(request.getExternalCampaignId(), null, sendNotification)).thenReturn(campaign);
+    Mockito.when(campaignServiceMock.createIfNotExists(request.getExternalCampaignId(), null, request, expectedDate)).thenReturn(campaign);
 
-    // When
-    CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
+    try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
+      localDateMock.when(LocalDate::now).thenReturn(expectedDate);
 
-    // Then
-    Mockito.verify(sendNotificationPIIRepositoryMock, Mockito.times(2)).save(sendNotification);
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
+      CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
+
+      Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
+      Assertions.assertNotNull(response);
+      Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
+    }
   }
 
   @Test
@@ -180,6 +186,9 @@ class SendNotificationServiceImplTest {
     Organization org = new Organization();
     OrgSubUnit subUnit = new OrgSubUnit();
     Campaign campaign = new Campaign();
+    campaign.setCampaignId("campaignId");
+
+    LocalDate expectedDate = LocalDate.of(2026, 6, 21);
 
     Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
       .thenReturn(org);
@@ -189,16 +198,20 @@ class SendNotificationServiceImplTest {
     Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
       .thenReturn(subUnit);
 
-    Mockito.when(mapperMock.mapToModel(request, accessToken)).thenReturn(sendNotification);
+    Mockito.when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
     Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
       .thenReturn(sendNotification);
-    Mockito.when(campaignServiceMock.createIfNotExists(request.getExternalCampaignId(), null, sendNotification)).thenReturn(campaign);
+    Mockito.when(campaignServiceMock.createIfNotExists(request.getExternalCampaignId(), null, request, expectedDate)).thenReturn(campaign);
 
-    CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
+    try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
+      localDateMock.when(LocalDate::now).thenReturn(expectedDate);
 
-    Mockito.verify(sendNotificationPIIRepositoryMock, Mockito.times(2)).save(sendNotification);
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
+      CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
+
+      Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
+      Assertions.assertNotNull(response);
+      Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
+    }
   }
 
   @Test

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.send.dto.SendNotification;
+import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +19,9 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
-  public Campaign createIfNotExists(String externalCampaignId, String campaignName, SendNotification sendNotification) {
-    Long organizationId = sendNotification.getOrganizationId();
-    String orgSubUnitCode = sendNotification.getOrgSubUnitCode();
+  public Campaign createIfNotExists(String externalCampaignId, String campaignName, CreateNotificationRequest sendNotificationReq, LocalDate sendNotificationCreationDate) {
+    Long organizationId = sendNotificationReq.getOrganizationId();
+    String orgSubUnitCode = sendNotificationReq.getSubUnitCode();
 
     Optional<Campaign> existingCampaign = campaignRepository
       .findByExternalIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, organizationId, orgSubUnitCode);
@@ -30,15 +30,13 @@ public class CampaignServiceImpl implements CampaignService {
       return existingCampaign.get();
     }
 
-    LocalDate creationDate = sendNotification.getNoPII().getCreationDate().toLocalDate();
-
     Campaign newCampaign = Campaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(organizationId)
       .orgSubUnitCode(orgSubUnitCode)
-      .startDate(creationDate)
-      .endDate(creationDate)
+      .startDate(sendNotificationCreationDate)
+      .endDate(sendNotificationCreationDate)
       .build();
 
     // TODO: handle counter in P4ADEV-4790

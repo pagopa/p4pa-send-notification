@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -101,17 +102,17 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       }
     }
 
-    SendNotification sendNotification = sendNotificationPIIRepository.save(mapper.mapToModel(createNotificationRequest, accessToken));
-
     // TODO: use right campaignName when task P4ADEV-4776 is completed
     Campaign campaign = campaignService.createIfNotExists(
       createNotificationRequest.getExternalCampaignId(),
       null,
-      sendNotification
+      createNotificationRequest,
+      LocalDate.now()
     );
 
-    sendNotification.setCampaignId(campaign.getCampaignId());
-    sendNotification = sendNotificationPIIRepository.save(sendNotification);
+    SendNotification sendNotification = sendNotificationPIIRepository.save(
+      mapper.mapToModel(createNotificationRequest, campaign.getCampaignId(), accessToken)
+    );
 
     return CreateNotificationResponse
       .builder()
