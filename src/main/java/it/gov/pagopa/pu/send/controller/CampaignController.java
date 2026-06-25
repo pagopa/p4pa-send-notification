@@ -23,4 +23,10 @@ public class CampaignController implements CampaignApi {
     log.info("retrieve all campaign ids");
     return new ResponseEntity<>(campaignService.fetchAllIds(), HttpStatus.OK);
   }
+
+  @Override
+  public ResponseEntity<Void> alignCampaign(String campaignId) {
+    // TODO: P4ADEV-4792
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 }
