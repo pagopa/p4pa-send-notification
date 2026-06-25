@@ -20,6 +20,7 @@ public class CampaignController implements CampaignApi {
 
   @Override
   public ResponseEntity<List<String>> fetchAllCampaignIds() {
+    log.info("retrieve all campaign ids");
     return new ResponseEntity<>(campaignService.fetchAllIds(), HttpStatus.OK);
   }
 }
