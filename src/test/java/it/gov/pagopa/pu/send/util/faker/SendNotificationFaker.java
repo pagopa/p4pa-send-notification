@@ -40,6 +40,7 @@ public class SendNotificationFaker {
         .category(LegalFactCategoryDTO.ANALOG_DELIVERY)
         .build()))
       .campaignId("CAMPAIGN_ID123")
+      .orgSubUnitCode("sub01")
       .build();
   }
 }

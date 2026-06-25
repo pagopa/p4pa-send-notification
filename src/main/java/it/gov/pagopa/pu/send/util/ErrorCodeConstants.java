@@ -5,6 +5,7 @@ public class ErrorCodeConstants {
 
   public static final String ERROR_CODE_FILE_NOT_FOUND = "FILE_NOT_FOUND";
   public static final String ERROR_CODE_ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND";
+  public static final String ERROR_CODE_ORG_SUB_UNIT_NOT_FOUND = "ORG_SUB_UNIT_NOT_FOUND";
   public static final String ERROR_CODE_NOTIFICATION_NOT_FOUND = "NOTIFICATION_NOT_FOUND";
   public static final String ERROR_CODE_DEBT_POSITION_NOT_FOUND = "DEBT_POSITION_NOT_FOUND";
   public static final String ERROR_CODE_STREAMS_NOT_FOUND = "STREAMS_NOT_FOUND";
