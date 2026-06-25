@@ -24,7 +24,7 @@ public class CampaignServiceImpl implements CampaignService {
     String orgSubUnitCode = sendNotification.getOrgSubUnitCode();
 
     Optional<Campaign> existingCampaign = campaignRepository
-      .findByExternalCampaignIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, organizationId, orgSubUnitCode);
+      .findByExternalIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, organizationId, orgSubUnitCode);
 
     if (existingCampaign.isPresent()) {
       return existingCampaign.get();
