@@ -41,7 +41,7 @@ class CampaignServiceImplTest {
     sendNotification.setOrganizationId(1L);
     sendNotification.setOrgSubUnitCode("orgSubUnitCode");
 
-    Campaign existingCampaign = Campaign.builder().externalCampaignId(externalCampaignId).build();
+    Campaign existingCampaign = Campaign.builder().externalId(externalCampaignId).build();
 
     when(campaignRepositoryMock.findByExternalCampaignIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, sendNotification.getOrganizationId(), sendNotification.getOrgSubUnitCode())).thenReturn(Optional.of(existingCampaign));
 
@@ -67,7 +67,7 @@ class CampaignServiceImplTest {
     LocalDate creationDate = sendNotification.getNoPII().getCreationDate().toLocalDate();
 
     Campaign expectedCampaign = Campaign.builder()
-      .externalCampaignId(externalCampaignId)
+      .externalId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(sendNotification.getOrganizationId())
       .orgSubUnitCode(sendNotification.getOrgSubUnitCode())

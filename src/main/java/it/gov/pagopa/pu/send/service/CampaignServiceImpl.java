@@ -33,7 +33,7 @@ public class CampaignServiceImpl implements CampaignService {
     LocalDate creationDate = sendNotification.getNoPII().getCreationDate().toLocalDate();
 
     Campaign newCampaign = Campaign.builder()
-      .externalCampaignId(externalCampaignId)
+      .externalId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(organizationId)
       .orgSubUnitCode(orgSubUnitCode)
