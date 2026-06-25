@@ -2,7 +2,9 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.model.Campaign;
+import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
+import it.gov.pagopa.pu.send.repository.view.CampaignIdViewRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -22,13 +25,15 @@ import static org.mockito.Mockito.*;
 class CampaignServiceImplTest {
   @Mock
   private CampaignRepository campaignRepositoryMock;
+  @Mock
+  private CampaignIdViewRepository campaignIdViewRepositoryMock;
 
   @InjectMocks
   private CampaignServiceImpl campaignService;
 
   @AfterEach
   void verifyNoMoreInteractions() {
-    Mockito.verifyNoMoreInteractions(campaignRepositoryMock);
+    Mockito.verifyNoMoreInteractions(campaignRepositoryMock, campaignIdViewRepositoryMock);
   }
 
   @Test
@@ -82,5 +87,18 @@ class CampaignServiceImplTest {
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(expectedCampaign, result);
+  }
+
+  @Test
+  void whenFetchAllIdsThenReturnListOfStringIds() {
+    CampaignIdView campaignIdView = new CampaignIdView();
+    campaignIdView.setCampaignId("campaignId");
+
+    when(campaignIdViewRepositoryMock.findAll()).thenReturn(List.of(campaignIdView));
+
+    List<String> result = campaignService.fetchAllIds();
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(List.of("campaignId"), result);
   }
 }
