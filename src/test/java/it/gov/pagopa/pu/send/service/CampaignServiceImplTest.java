@@ -4,7 +4,6 @@ import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
-import it.gov.pagopa.pu.send.repository.view.CampaignIdViewRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,15 +24,13 @@ import static org.mockito.Mockito.*;
 class CampaignServiceImplTest {
   @Mock
   private CampaignRepository campaignRepositoryMock;
-  @Mock
-  private CampaignIdViewRepository campaignIdViewRepositoryMock;
 
   @InjectMocks
   private CampaignServiceImpl campaignService;
 
   @AfterEach
   void verifyNoMoreInteractions() {
-    Mockito.verifyNoMoreInteractions(campaignRepositoryMock, campaignIdViewRepositoryMock);
+    Mockito.verifyNoMoreInteractions(campaignRepositoryMock);
   }
 
   @Test
@@ -94,7 +91,7 @@ class CampaignServiceImplTest {
     CampaignIdView campaignIdView = new CampaignIdView();
     campaignIdView.setCampaignId("campaignId");
 
-    when(campaignIdViewRepositoryMock.findAll()).thenReturn(List.of(campaignIdView));
+    when(campaignRepositoryMock.findAllCampaignIdsBy()).thenReturn(List.of(campaignIdView));
 
     List<String> result = campaignService.fetchAllIds();
 

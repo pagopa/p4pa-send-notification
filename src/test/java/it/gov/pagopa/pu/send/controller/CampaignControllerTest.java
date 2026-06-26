@@ -41,4 +41,15 @@ class CampaignControllerTest {
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedIds, response.getBody());
   }
+
+  @Test
+  void whenAlignCampaignCountersThenOk() {
+    String campaignId = "campaignId";
+
+    ResponseEntity<Void> response = campaignController.alignCampaign(campaignId);
+
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    Assertions.assertNull(response.getBody());
+  }
 }
