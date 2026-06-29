@@ -14,10 +14,10 @@ import java.io.Serializable;
 @Builder
 @FieldNameConstants
 public class Counters implements Serializable {
-private Long total = 0L;
-private Long accepted = 0L;
-private Long delivered = 0L;
-private Long digitalCompleted = 0L;
-private Long analogicCompleted = 0L;
-private Long completion = 0L;
+  private Long total = 0L;
+  private Long accepted = 0L;
+  private Long delivered = 0L;
+  private Long digitalCompleted = 0L;
+  private Long analogicCompleted = 0L;
+  private Long completion = 0L;
 }

@@ -43,8 +43,10 @@ class CampaignControllerTest {
   }
 
   @Test
-  void whenAlignCampaignCountersThenOk() {
+  void whenAlignCampaignThenOk() {
     String campaignId = "campaignId";
+
+    Mockito.doNothing().when(campaignServiceMock).alignCampaign(campaignId);
 
     ResponseEntity<Void> response = campaignController.alignCampaign(campaignId);
 

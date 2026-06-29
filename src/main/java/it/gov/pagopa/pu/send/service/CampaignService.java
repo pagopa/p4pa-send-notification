@@ -10,4 +10,6 @@ public interface CampaignService {
   Campaign createIfNotExists(String externalCampaignId, String campaignName, CreateNotificationRequest sendNotificationReq, LocalDate sendNotificationCreationDate);
 
   List<String> fetchAllIds();
+
+  void alignCampaign(String campaignId);
 }

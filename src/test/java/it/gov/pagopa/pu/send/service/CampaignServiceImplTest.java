@@ -1,9 +1,13 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
+import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,13 +28,15 @@ import static org.mockito.Mockito.*;
 class CampaignServiceImplTest {
   @Mock
   private CampaignRepository campaignRepositoryMock;
+  @Mock
+  private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
 
   @InjectMocks
   private CampaignServiceImpl campaignService;
 
   @AfterEach
   void verifyNoMoreInteractions() {
-    Mockito.verifyNoMoreInteractions(campaignRepositoryMock);
+    Mockito.verifyNoMoreInteractions(campaignRepositoryMock, sendNotificationNoPIIRepositoryMock);
   }
 
   @Test
@@ -97,5 +103,35 @@ class CampaignServiceImplTest {
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(List.of("campaignId"), result);
+  }
+
+  @Test
+  void givenExistingCampaignWhenAlignCampaignThenUpdateCountersAndSave() {
+    String campaignId = "campaignId";
+    Campaign campaign = Campaign.builder().build();
+    Counters mockCounters = new Counters();
+
+    when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.of(campaign));
+    when(sendNotificationNoPIIRepositoryMock.calculateCampaignCounters(campaignId)).thenReturn(mockCounters);
+    when(campaignRepositoryMock.save(campaign)).thenReturn(campaign);
+
+    campaignService.alignCampaign(campaignId);
+
+    Assertions.assertEquals(mockCounters, campaign.getCounters());
+  }
+
+  @Test
+  void givenNotExistingCampaignWhenAlignCampaignThenThrowNotFoundException() {
+    String campaignId = "campaignId";
+
+    when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.empty());
+
+    NotFoundException exception = Assertions.assertThrows(
+      NotFoundException.class,
+      () -> campaignService.alignCampaign(campaignId)
+    );
+
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, exception.getCode());
+    Assertions.assertEquals(String.format("Campaign having id %s not found", campaignId), exception.getMessage());
   }
 }

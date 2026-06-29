@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.config.BaseEntityListener;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
+import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
@@ -12,6 +13,8 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -185,5 +188,21 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
       .set(Fields.legalFacts + ".$.status", status);
 
     return updateFirst(query, update);
+  }
+
+  @Override
+  public Counters calculateCampaignCounters(String campaignId) {
+    Aggregation aggregation = Aggregation.newAggregation(
+      Aggregation.match(Criteria.where(Fields.campaignId).is(campaignId)),
+      Aggregation.group()
+        .count().as("total")
+      // TODO: add missing logic for other fields
+    );
+
+    AggregationResults<Counters> results = mongoTemplate.aggregate(aggregation, SendNotificationNoPII.class, Counters.class);
+
+    Counters counters = results.getUniqueMappedResult();
+
+    return counters != null ? counters : new Counters();
   }
 }

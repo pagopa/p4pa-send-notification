@@ -11,6 +11,7 @@ public class ErrorCodeConstants {
   public static final String ERROR_CODE_STREAMS_NOT_FOUND = "STREAMS_NOT_FOUND";
   public static final String ERROR_CODE_EXPIRATION_CONFIG_NOT_FOUND = "EXPIRATION_CONFIG_NOT_FOUND";
   public static final String ERROR_CODE_TAXONOMY_CODE_NOT_FOUND = "TAXONOMY_CODE_NOT_FOUND";
+  public static final String ERROR_CODE_CAMPAIGN_NOT_FOUND = "CAMPAIGN_NOT_FOUND";
 
   public static final String ERROR_CODE_UPLOAD_ERROR = "UPLOAD_ERROR";
   public static final String ERROR_CODE_DELETE_ERROR = "DELETE_ERROR";
