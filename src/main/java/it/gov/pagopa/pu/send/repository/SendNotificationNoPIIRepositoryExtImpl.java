@@ -15,6 +15,7 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -195,8 +196,15 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     Aggregation aggregation = Aggregation.newAggregation(
       Aggregation.match(Criteria.where(Fields.campaignId).is(campaignId)),
       Aggregation.group()
-        .count().as("total")
-      // TODO: add missing logic for other fields
+        .count().as(Counters.Fields.total)
+        .sum(buildStatusCondition(NotificationStatus.ACCEPTED)).as(Counters.Fields.accepted)
+        .sum(buildStatusCondition(NotificationStatus.DELIVERED)).as(Counters.Fields.delivered)
+        .sum(buildStatusCondition(NotificationStatus.VIEWED)).as(Counters.Fields.digitalCompleted)
+        .sum(buildStatusCondition(
+          NotificationStatus.EFFECTIVE_DATE,
+          NotificationStatus.RETURNED_TO_SENDER)
+        ).as(Counters.Fields.analogicCompleted)
+        .sum(buildStatusCondition(NotificationStatus.PAID)).as(Counters.Fields.completion)
     );
 
     AggregationResults<Counters> results = mongoTemplate.aggregate(aggregation, SendNotificationNoPII.class, Counters.class);
@@ -204,5 +212,10 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     Counters counters = results.getUniqueMappedResult();
 
     return counters != null ? counters : new Counters();
+  }
+
+  private ConditionalOperators.Cond buildStatusCondition(NotificationStatus... statuses) {
+    return ConditionalOperators.when(Criteria.where(Fields.status).in(statuses))
+      .then(1).otherwise(0);
   }
 }
