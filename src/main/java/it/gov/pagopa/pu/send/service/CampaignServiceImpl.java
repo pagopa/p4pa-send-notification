@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
@@ -32,6 +33,9 @@ public class CampaignServiceImpl implements CampaignService {
       return existingCampaign.get();
     }
 
+    Counters counters = new Counters();
+    counters.setTotal(1L);
+
     Campaign newCampaign = Campaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
@@ -39,9 +43,8 @@ public class CampaignServiceImpl implements CampaignService {
       .orgSubUnitCode(orgSubUnitCode)
       .startDate(sendNotificationCreationDate)
       .endDate(sendNotificationCreationDate)
+      .counters(counters)
       .build();
-
-    // TODO: handle counter in P4ADEV-4790
 
     return campaignRepository.save(newCampaign);
   }
