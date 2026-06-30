@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
@@ -65,6 +66,9 @@ class CampaignServiceImplTest {
     request.setOrganizationId(1L);
     request.setSubUnitCode("orgSubUnitCode");
 
+    Counters counters = new Counters();
+    counters.setTotal(1L);
+
     Campaign expectedCampaign = Campaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
@@ -72,6 +76,7 @@ class CampaignServiceImplTest {
       .orgSubUnitCode(request.getSubUnitCode())
       .startDate(creationDate)
       .endDate(creationDate)
+      .counters(counters)
       .build();
 
     when(campaignRepositoryMock.findByExternalIdAndOrganizationIdAndOrgSubUnitCode(
