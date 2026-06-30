@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.config.BaseEntityListener;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -12,6 +13,7 @@ import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
+import it.gov.pagopa.pu.send.util.CampaignUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -22,6 +24,7 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.Set;
 
 public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationNoPIIRepositoryExt {
 
@@ -197,14 +200,11 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
       Aggregation.match(Criteria.where(Fields.campaignId).is(campaignId)),
       Aggregation.group()
         .count().as(Counters.Fields.total)
-        .sum(buildStatusCondition(NotificationStatus.ACCEPTED)).as(Counters.Fields.accepted)
-        .sum(buildStatusCondition(NotificationStatus.DELIVERED)).as(Counters.Fields.delivered)
-        .sum(buildStatusCondition(NotificationStatus.VIEWED)).as(Counters.Fields.digitalCompleted)
-        .sum(buildStatusCondition(
-          NotificationStatus.EFFECTIVE_DATE,
-          NotificationStatus.RETURNED_TO_SENDER)
-        ).as(Counters.Fields.analogicCompleted)
-        .sum(buildStatusCondition(NotificationStatus.PAID)).as(Counters.Fields.completion)
+        .sum(buildStatusCondition(Counters.Fields.accepted)).as(Counters.Fields.accepted)
+        .sum(buildStatusCondition(Counters.Fields.delivered)).as(Counters.Fields.delivered)
+        .sum(buildStatusCondition(Counters.Fields.digitalCompleted)).as(Counters.Fields.digitalCompleted)
+        .sum(buildStatusCondition(Counters.Fields.analogicCompleted)).as(Counters.Fields.analogicCompleted)
+        .sum(buildStatusCondition(Counters.Fields.completion)).as(Counters.Fields.completion)
     );
 
     AggregationResults<Counters> results = mongoTemplate.aggregate(aggregation, SendNotificationNoPII.class, Counters.class);
@@ -214,8 +214,11 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     return counters != null ? counters : new Counters();
   }
 
-  private ConditionalOperators.Cond buildStatusCondition(NotificationStatus... statuses) {
-    return ConditionalOperators.when(Criteria.where(Fields.status).in(statuses))
+  private ConditionalOperators.Cond buildStatusCondition(String counterName) {
+    Set<TimelineElementCategoryV27DTO> streamEventStatuses =
+      CampaignUtils.getStreamEventStatusesForCounter(counterName);
+
+    return ConditionalOperators.when(Criteria.where(Fields.streamEventStatus).in(streamEventStatuses))
       .then(1).otherwise(0);
   }
 }
