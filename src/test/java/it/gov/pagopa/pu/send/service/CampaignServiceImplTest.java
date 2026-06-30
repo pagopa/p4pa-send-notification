@@ -71,6 +71,9 @@ class CampaignServiceImplTest {
     request.setOrganizationId(1L);
     request.setSubUnitCode("orgSubUnitCode");
 
+    Counters counters = new Counters();
+    counters.setTotal(1L);
+
     Campaign expectedCampaign = Campaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
@@ -78,6 +81,7 @@ class CampaignServiceImplTest {
       .orgSubUnitCode(request.getSubUnitCode())
       .startDate(creationDate)
       .endDate(creationDate)
+      .counters(counters)
       .build();
 
     when(campaignRepositoryMock.findByExternalIdAndOrganizationIdAndOrgSubUnitCode(

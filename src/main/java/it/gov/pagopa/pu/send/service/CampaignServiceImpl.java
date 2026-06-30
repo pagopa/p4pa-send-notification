@@ -38,6 +38,9 @@ public class CampaignServiceImpl implements CampaignService {
       return existingCampaign.get();
     }
 
+    Counters counters = new Counters();
+    counters.setTotal(1L);
+
     Campaign newCampaign = Campaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
@@ -45,9 +48,8 @@ public class CampaignServiceImpl implements CampaignService {
       .orgSubUnitCode(orgSubUnitCode)
       .startDate(sendNotificationCreationDate)
       .endDate(sendNotificationCreationDate)
+      .counters(counters)
       .build();
-
-    // TODO: handle counter in P4ADEV-4790
 
     return campaignRepository.save(newCampaign);
   }
