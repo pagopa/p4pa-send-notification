@@ -2,9 +2,12 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
+import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +19,11 @@ import java.util.Optional;
 @Service
 public class CampaignServiceImpl implements CampaignService {
   private final CampaignRepository campaignRepository;
+  private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
 
-  public CampaignServiceImpl(CampaignRepository campaignRepository) {
+  public CampaignServiceImpl(CampaignRepository campaignRepository, SendNotificationNoPIIRepository sendNotificationNoPIIRepository) {
     this.campaignRepository = campaignRepository;
+    this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
   }
 
   @Override
@@ -54,5 +59,20 @@ public class CampaignServiceImpl implements CampaignService {
     List<CampaignIdView> campaigns = campaignRepository.findAllCampaignIdsBy();
 
     return campaigns.stream().map(CampaignIdView::getCampaignId).toList();
+  }
+
+  @Override
+  public void alignCampaign(String campaignId) {
+    Campaign campaign = campaignRepository.findById(campaignId)
+      .orElseThrow(() -> new NotFoundException(
+        ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND,
+        String.format("Campaign having id %s not found", campaignId)
+      ));
+
+    Counters counters = sendNotificationNoPIIRepository.calculateCampaignCounters(campaignId);
+
+    campaign.setCounters(counters);
+
+    campaignRepository.save(campaign);
   }
 }

@@ -3,20 +3,26 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import org.bson.Document;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -216,7 +222,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   }
 
   @Test
-  void givenUpdateLEgalFactStatusThenVerify() {
+  void givenUpdateLegalFactStatusThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
     String filename = "fileName";
     FileStatus status = FileStatus.EXPIRED;
@@ -244,5 +250,49 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     UpdateResult result = repository.updateFileStatusAndDownloadDate(sendNotificationId, fileName, status, now);
 
     assertEquals(1L, result.getModifiedCount());
+  }
+
+  @Test
+  void givenCampaignIdWhenCalculateCampaignCountersThenReturnExpectedCounters() {
+    String campaignId = "campaignId";
+    Counters exRes = new Counters();
+
+    AggregationResults<Counters> aggregationResults = new AggregationResults<>(
+      List.of(exRes),
+      new Document()
+    );
+
+    Mockito.when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(SendNotificationNoPII.class),
+      Mockito.eq(Counters.class)
+    )).thenReturn(aggregationResults);
+
+    Counters res = repository.calculateCampaignCounters(campaignId);
+
+    assertEquals(exRes, res);
+  }
+
+  @Test
+  void givenCampaignIdWithNoResultsWhenCalculateCampaignCountersThenReturnCountersWithZeroValues() {
+    String campaignId = "campaignId";
+
+    AggregationResults<Counters> aggregationResults = new AggregationResults<>(Collections.emptyList(), new Document());
+
+    Mockito.when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(SendNotificationNoPII.class),
+      Mockito.eq(Counters.class)
+    )).thenReturn(aggregationResults);
+
+    Counters res = repository.calculateCampaignCounters(campaignId);
+
+    assertNotNull(res);
+    assertEquals(0L, res.getTotal());
+    assertEquals(0L, res.getAccepted());
+    assertEquals(0L, res.getDelivered());
+    assertEquals(0L, res.getDigitalCompleted());
+    assertEquals(0L, res.getAnalogicCompleted());
+    assertEquals(0L, res.getCompletion());
   }
 }

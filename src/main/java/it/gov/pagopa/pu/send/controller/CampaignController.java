@@ -21,13 +21,16 @@ public class CampaignController implements CampaignApi {
   @Override
   public ResponseEntity<List<String>> fetchAllCampaignIds() {
     log.info("retrieve all campaign ids");
+
     return new ResponseEntity<>(campaignService.fetchAllIds(), HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> alignCampaign(String campaignId) {
     log.info("align campaign with id {}", campaignId);
-    // TODO: P4ADEV-4792
+
+    campaignService.alignCampaign(campaignId);
+
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

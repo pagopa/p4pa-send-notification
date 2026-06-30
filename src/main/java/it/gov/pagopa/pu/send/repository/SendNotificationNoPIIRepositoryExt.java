@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
+import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
@@ -25,4 +26,5 @@ public interface SendNotificationNoPIIRepositoryExt {
   Optional<SendNotificationNoPII> findByNotificationRequestId(String notificationRequestId);
   UpdateResult addLegalFact(String sendNotificationId, LegalFactDTO legalFact);
   UpdateResult updateLegalFactStatus(String sendNotificationId, String fileName, FileStatus status);
+  Counters calculateCampaignCounters(String campaignId);
 }

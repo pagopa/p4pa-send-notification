@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.model;
 
 import it.gov.pagopa.pu.common.pii.model.NoPIIEntity;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
@@ -51,4 +52,5 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   @NotNull
   private String campaignId;
   private String orgSubUnitCode;
+  private TimelineElementCategoryV27DTO streamEventStatus;
 }
