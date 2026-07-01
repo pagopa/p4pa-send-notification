@@ -20,7 +20,10 @@ import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
-import it.gov.pagopa.pu.send.util.*;
+import it.gov.pagopa.pu.send.util.AESUtils;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
+import it.gov.pagopa.pu.send.util.FileUtils;
+import it.gov.pagopa.pu.send.util.NotificationUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +35,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -51,9 +53,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final FileStorerService fileStorerService;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
   private final TaxonomyValidatorService taxonomyValidatorService;
-  private final CampaignService campaignService;
   private final OrganizationService organizationService;
   private final OrgSubUnitService orgSubUnitService;
+  private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
 
   public SendNotificationServiceImpl(
     @Value("${fileshare-public-base-url}") String fileShareBaseUrl,
@@ -64,9 +66,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     FileStorerService fileStorerService,
     SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
     TaxonomyValidatorService taxonomyValidatorService,
-    CampaignService campaignService,
     OrganizationService organizationService,
-    OrgSubUnitService orgSubUnitService
+    OrgSubUnitService orgSubUnitService,
+    SendNotificationStatusHandlerService sendNotificationStatusHandlerService
   ) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
@@ -76,9 +78,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.fileStorerService = fileStorerService;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
     this.taxonomyValidatorService = taxonomyValidatorService;
-    this.campaignService = campaignService;
     this.organizationService = organizationService;
     this.orgSubUnitService = orgSubUnitService;
+    this.sendNotificationStatusHandlerService = sendNotificationStatusHandlerService;
   }
 
   @Transactional
@@ -104,13 +106,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       }
     }
 
-    Campaign campaign = campaignService.createIfNotExists(
-      createNotificationRequest.getExternalCampaignId(),
-      createNotificationRequest.getCampaignName(),
-      createNotificationRequest,
-      LocalDate.now(ZONEID)
-    );
-
+    Campaign campaign = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
     SendNotification sendNotification = sendNotificationPIIRepository.save(
       mapper.mapToModel(createNotificationRequest, campaign.getCampaignId(), accessToken)
     );
@@ -160,6 +156,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     if (!notification.getStatus().equals(NotificationStatus.ACCEPTED)) {
       deleteSendNotificationFiles(notification);
       sendNotificationPIIRepository.delete(notification);
+      sendNotificationStatusHandlerService.handleDeletedSendNotification(notification.getCampaignId(), notification.getCreationDate().toLocalDate(),notification.getStreamEventStatus());
     }
     else
       throw new InvalidStatusException(ErrorCodeConstants.ERROR_CODE_INVALID_NOTIFICATION_STATUS, "Cannot delete notification with status complete");

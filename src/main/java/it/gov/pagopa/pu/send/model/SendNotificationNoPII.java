@@ -30,10 +30,14 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   @Id
   private String sendNotificationId;
   private Long organizationId;
+  private String orgSubUnitCode;
+  @NotNull
+  private String campaignId;
   private String paProtocolNumber;
   private List<PuRecipientNoPIIDTO> recipients;
   private List<DocumentDTO> documents;
   private NotificationStatus status;
+  private TimelineElementCategoryV27DTO streamEventStatus;
   private String notificationRequestId;
   private String iun;
   private String notificationFeePolicy;
@@ -49,8 +53,4 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   private List<LegalFactDTO> legalFacts;
   @NotNull
   private Long personalDataId;
-  @NotNull
-  private String campaignId;
-  private String orgSubUnitCode;
-  private TimelineElementCategoryV27DTO streamEventStatus;
 }

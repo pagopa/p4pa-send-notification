@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CampaignRepository extends MongoRepository<Campaign, String> {
+public interface CampaignRepository extends MongoRepository<Campaign, String>, CampaignRepositoryExt {
   Optional<Campaign> findByExternalIdAndOrganizationIdAndOrgSubUnitCode(String externalId, Long organizationId, String orgSubUnitCode);
   List<CampaignIdView> findAllCampaignIdsBy();
 }
