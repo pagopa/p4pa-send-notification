@@ -59,8 +59,8 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
   }
 
   private NotificationStatusChangeDTO handleStatusChange(TimelineElementCategoryV27DTO oldStatus, TimelineElementCategoryV27DTO newStatus){
-    Set<String> oldCounters = CampaignUtils.COUNTERS_STATUS_RELATION_MAP.getOrDefault(oldStatus, new HashSet<>());
-    Set<String> newCounters = CampaignUtils.COUNTERS_STATUS_RELATION_MAP.getOrDefault(newStatus, new HashSet<>());
+    Set<String> oldCounters = CampaignUtils.COUNTERS_STATUS_RELATION_MAP.getOrDefault(oldStatus, Set.of());
+    Set<String> newCounters = CampaignUtils.COUNTERS_STATUS_RELATION_MAP.getOrDefault(newStatus, Set.of());
     return NotificationStatusChangeDTO.builder()
       .incrFields(newCounters.stream().filter(c -> !oldCounters.contains(c)).collect(Collectors.toSet()))
       .decrFields(oldCounters.stream().filter(c -> !newCounters.contains(c)).collect(Collectors.toSet()))
@@ -72,6 +72,7 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
   public void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, TimelineElementCategoryV27DTO currentStreamEventStatus) {
     Campaign campaign = campaignService.getCampaignById(campaignId);
     if(campaign.getCounters()!=null && Objects.equals(campaign.getCounters().getTotal(),1L)){
+      log.info("Deleting campaign having id {}", campaignId);
       campaignService.deleteCampaignById(campaignId);
       return;
     }
@@ -91,9 +92,11 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
 
     if(campaign.getStartDate().equals(notificationCreationDate)){
       SendNotificationNoPII sendNotification = sendNotificationNoPIIRepository.findTopByCampaignIdOrderByCreationDateAsc(campaignId);
+      log.info("Updating startDate of campaign having id {} to {}", campaignId, sendNotification.getCreationDate().toLocalDate());
       campaignService.updateStartDate(campaignId, sendNotification.getCreationDate().toLocalDate());
     }else if(campaign.getEndDate().equals(notificationCreationDate)){
       SendNotificationNoPII sendNotification = sendNotificationNoPIIRepository.findTopByCampaignIdOrderByCreationDateDesc(campaignId);
+      log.info("Updating endDate of campaign having id {} to {}", campaignId, sendNotification.getCreationDate().toLocalDate());
       campaignService.updateEndDate(campaignId, sendNotification.getCreationDate().toLocalDate());
     }
   }

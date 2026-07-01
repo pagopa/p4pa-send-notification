@@ -86,6 +86,7 @@ public class CampaignServiceImpl implements CampaignService {
       && CollectionUtils.isEmpty(notificationStatusChangeDTO.getDecrFields()))){
       return;
     }
+    log.info("Updating counters {} for campaign having id {}", notificationStatusChangeDTO, campaignId);
     campaignRepository.updateCampaignCounters(campaignId, notificationStatusChangeDTO);
   }
 
