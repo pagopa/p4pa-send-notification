@@ -104,10 +104,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       }
     }
 
-    // TODO: use right campaignName when task P4ADEV-4776 is completed
     Campaign campaign = campaignService.createIfNotExists(
       createNotificationRequest.getExternalCampaignId(),
-      null,
+      createNotificationRequest.getCampaignName(),
       createNotificationRequest,
       LocalDate.now(ZONEID)
     );
