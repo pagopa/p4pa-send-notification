@@ -54,7 +54,7 @@ public class CampaignServiceImpl implements CampaignService {
 
   @Override
   public List<String> fetchAllIds() {
-    List<CampaignIdView> campaigns = campaignRepository.findAllCampaignIdsBy();
+    List<CampaignIdView> campaigns = campaignRepository.findAllCampaignIdsByOrderByCampaignIdAsc();
 
     return campaigns.stream().map(CampaignIdView::getCampaignId).toList();
   }
