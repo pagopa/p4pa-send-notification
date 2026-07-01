@@ -34,11 +34,10 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
   @Transactional
   @Override
   public Campaign handleNewSendNotification(CreateNotificationRequest createNotificationRequest) {
-    // TODO: use right campaignName when task P4ADEV-4776 is completed
     LocalDate creationDate = LocalDate.now(ZONEID);
     Campaign campaign = campaignService.createIfNotExists(
       createNotificationRequest.getExternalCampaignId(),
-      null,
+      createNotificationRequest.getCampaignName(),
       createNotificationRequest,
       creationDate
     );

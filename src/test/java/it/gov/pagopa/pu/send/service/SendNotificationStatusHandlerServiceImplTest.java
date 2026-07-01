@@ -52,7 +52,7 @@ class SendNotificationStatusHandlerServiceImplTest {
       localDateMockedStatic.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(creationDate);
       Mockito.when(campaignServiceMock.createIfNotExists(
         createNotificationRequest.getExternalCampaignId(),
-        null,
+        createNotificationRequest.getCampaignName(),
         createNotificationRequest,
         creationDate
       )).thenReturn(campaign);
