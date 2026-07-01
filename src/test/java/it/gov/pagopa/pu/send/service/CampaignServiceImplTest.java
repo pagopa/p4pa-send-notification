@@ -103,7 +103,7 @@ class CampaignServiceImplTest {
     CampaignIdView campaignIdView = new CampaignIdView();
     campaignIdView.setCampaignId("campaignId");
 
-    when(campaignRepositoryMock.findAllCampaignIdsBy()).thenReturn(List.of(campaignIdView));
+    when(campaignRepositoryMock.findAllCampaignIdsByOrderByCampaignIdAsc()).thenReturn(List.of(campaignIdView));
 
     List<String> result = campaignService.fetchAllIds();
 
