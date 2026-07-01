@@ -23,6 +23,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -216,7 +217,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
   private ConditionalOperators.Cond buildStatusCondition(String counterName) {
     Set<TimelineElementCategoryV27DTO> streamEventStatuses =
-      CampaignUtils.getStreamEventStatusesForCounter(counterName);
+      CampaignUtils.INVERSE_COUNTERS_STATUS_RELATION_MAP.getOrDefault(counterName, Collections.emptySet());
 
     return ConditionalOperators.when(Criteria.where(Fields.streamEventStatus).in(streamEventStatuses))
       .then(1).otherwise(0);

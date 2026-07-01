@@ -20,10 +20,13 @@ public class CampaignUtils {
     TimelineElementCategoryV27DTO.SEND_DIGITAL_FEEDBACK, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompleted)
   );
 
-  public static Set<TimelineElementCategoryV27DTO> getStreamEventStatusesForCounter(String counterName) {
-    return COUNTERS_STATUS_RELATION_MAP.entrySet().stream()
-      .filter(entry -> entry.getValue().contains(counterName))
-      .map(Map.Entry::getKey)
-      .collect(Collectors.toSet());
-  }
+  public static final Map<String, Set<TimelineElementCategoryV27DTO>> INVERSE_COUNTERS_STATUS_RELATION_MAP =
+    COUNTERS_STATUS_RELATION_MAP.entrySet().stream()
+      .flatMap(entry -> entry.getValue().stream()
+        .map(counterName -> Map.entry(counterName, entry.getKey())))
+      .collect(Collectors.groupingBy(
+        Map.Entry::getKey,
+        Collectors.mapping(Map.Entry::getValue, Collectors.toSet())
+      )
+    );
 }
