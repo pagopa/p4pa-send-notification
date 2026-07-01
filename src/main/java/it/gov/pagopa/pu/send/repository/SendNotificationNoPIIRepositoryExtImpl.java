@@ -221,4 +221,12 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     return ConditionalOperators.when(Criteria.where(Fields.streamEventStatus).in(streamEventStatuses))
       .then(1).otherwise(0);
   }
+
+  @Override
+  public UpdateResult updateStreamEventStatusById(String sendNotificationId, TimelineElementCategoryV27DTO newStatus) {
+    return updateFirst(
+      Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
+      new Update().set(Fields.streamEventStatus, newStatus)
+    );
+  }
 }

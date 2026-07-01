@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.send.service;
 
+import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.dto.Counters;
+import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.model.Campaign;
@@ -8,6 +10,7 @@ import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
+import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,16 +19,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.co.jemos.podam.api.PodamFactory;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CampaignServiceImplTest {
+  public static final PodamFactory podamFactory = TestUtils.getPodamFactory();
   @Mock
   private CampaignRepository campaignRepositoryMock;
   @Mock
@@ -71,9 +77,6 @@ class CampaignServiceImplTest {
     request.setOrganizationId(1L);
     request.setSubUnitCode("orgSubUnitCode");
 
-    Counters counters = new Counters();
-    counters.setTotal(1L);
-
     Campaign expectedCampaign = Campaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
@@ -81,7 +84,6 @@ class CampaignServiceImplTest {
       .orgSubUnitCode(request.getSubUnitCode())
       .startDate(creationDate)
       .endDate(creationDate)
-      .counters(counters)
       .build();
 
     when(campaignRepositoryMock.findByExternalIdAndOrganizationIdAndOrgSubUnitCode(
@@ -137,5 +139,94 @@ class CampaignServiceImplTest {
 
     Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, exception.getCode());
     Assertions.assertEquals(String.format("Campaign having id %s not found", campaignId), exception.getMessage());
+  }
+
+  @Test
+  void whenIncrementTotalAndUpdateEndDateThenOk() {
+    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
+    LocalDate endDate = LocalDate.of(2026, Month.JUNE, 30);
+    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    when(campaignRepositoryMock.incrementTotalAndUpdateEndDate(campaign.getCampaignId(), endDate)).thenReturn(updateResult);
+
+    Assertions.assertDoesNotThrow(()->campaignService.incrementTotalAndUpdateEndDate(campaign.getCampaignId(), endDate));
+  }
+
+  @Test
+  void whenHandleStatusChangeThenOk() {
+    String campaignId = "campaignId";
+    NotificationStatusChangeDTO notificationStatusChangeDTO = podamFactory.manufacturePojo(NotificationStatusChangeDTO.class);
+    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    when(campaignRepositoryMock.updateCampaignCounters(campaignId, notificationStatusChangeDTO)).thenReturn(updateResult);
+
+    Assertions.assertDoesNotThrow(()->campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO));
+  }
+
+  @Test
+  void givenEmptyFieldsListWhenHandleStatusChangeThenNull() {
+    String campaignId = "campaignId";
+    NotificationStatusChangeDTO notificationStatusChangeDTO = new NotificationStatusChangeDTO();
+
+    Assertions.assertDoesNotThrow(()->campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO));
+  }
+
+  @Test
+  void givenNoNotificationStatusChangeDTOWhenHandleStatusChangeThenNull() {
+    String campaignId = "campaignId";
+
+    Assertions.assertDoesNotThrow(()->campaignService.handleStatusChange(campaignId, null));
+  }
+
+  @Test
+  void whenGetCampaignByIdThenOk() {
+    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
+
+    when(campaignRepositoryMock.findById(campaign.getCampaignId())).thenReturn(Optional.of(campaign));
+
+    Campaign result = campaignService.getCampaignById(campaign.getCampaignId());
+
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(campaign, result);
+  }
+
+  @Test
+  void givenNoCampaignWhenGetCampaignByIdThenNotFoundException() {
+    String campaignId = "campaignId";
+    when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.empty());
+
+    NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> campaignService.getCampaignById(campaignId));
+
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, notFoundException.getCode());
+  }
+
+  @Test
+  void whenDeleteCampaignByIdThenNull() {
+    String campaignId = "campaignId";
+    doNothing().when(campaignRepositoryMock).deleteById(campaignId);
+
+    Assertions.assertDoesNotThrow(()->campaignService.deleteCampaignById(campaignId));
+  }
+
+  @Test
+  void whenUpdateStartDateThenNull() {
+    String campaignId = "campaignId";
+    LocalDate startDate = LocalDate.of(2026, Month.JUNE, 30);
+    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    when(campaignRepositoryMock.updateStartDate(campaignId, startDate)).thenReturn(updateResult);
+
+    Assertions.assertDoesNotThrow(()->campaignService.updateStartDate(campaignId, startDate));
+  }
+
+  @Test
+  void whenUpdateEndDateThenNull() {
+    String campaignId = "campaignId";
+    LocalDate endDate = LocalDate.of(2026, Month.JUNE, 30);
+    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    when(campaignRepositoryMock.updateEndDate(campaignId, endDate)).thenReturn(updateResult);
+
+    Assertions.assertDoesNotThrow(()->campaignService.updateEndDate(campaignId, endDate));
   }
 }

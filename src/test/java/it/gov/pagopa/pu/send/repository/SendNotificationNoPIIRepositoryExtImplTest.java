@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
@@ -21,6 +22,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -150,7 +152,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   @Test
   void givenUpdateNotificationDateThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
-    OffsetDateTime now = OffsetDateTime.now();
+    OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0,ZoneOffset.UTC);
 
     Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(updateResult);
@@ -240,7 +242,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   void whenUpdateFileStatusAndDownloadDateThenOk() {
     String sendNotificationId = "SENDNOTIFICATIONID";
     String fileName = "FILENAME";
-    OffsetDateTime now = OffsetDateTime.now();
+    OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0,ZoneOffset.UTC);
     FileStatus status = FileStatus.EXPIRED;
 
     Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
@@ -248,6 +250,22 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateFileStatusAndDownloadDate(sendNotificationId, fileName, status, now);
+
+    assertEquals(1L, result.getModifiedCount());
+  }
+
+  @Test
+  void givenUpdateStreamEventStatusByIdThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.REQUEST_ACCEPTED;
+
+    Mockito.when(mongoTemplateMock.updateFirst(
+        Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+          SendNotificationNoPII.class)))
+      .thenReturn(updateResult);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.updateStreamEventStatusById(sendNotificationId, newStatus);
 
     assertEquals(1L, result.getModifiedCount());
   }
