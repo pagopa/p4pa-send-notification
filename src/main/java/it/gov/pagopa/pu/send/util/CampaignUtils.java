@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class CampaignUtils {
   private CampaignUtils() {}
 
-  public static final Map<TimelineElementCategoryV27DTO, Set<String>> COUNTERS_STATUS_RELATION_MAP = Map.of(
+  public static final Map<TimelineElementCategoryV27DTO, Set<String>> TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS = Map.of(
     TimelineElementCategoryV27DTO.REQUEST_ACCEPTED, Set.of(Counters.Fields.accepted),
     TimelineElementCategoryV27DTO.DIGITAL_SUCCESS_WORKFLOW, Set.of(Counters.Fields.accepted, Counters.Fields.delivered),
     TimelineElementCategoryV27DTO.ANALOG_SUCCESS_WORKFLOW, Set.of(Counters.Fields.accepted, Counters.Fields.delivered),
@@ -21,9 +21,9 @@ public class CampaignUtils {
     TimelineElementCategoryV27DTO.SEND_DIGITAL_FEEDBACK, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompleted)
   );
 
-  public static final Map<String, Set<TimelineElementCategoryV27DTO>> INVERSE_COUNTERS_STATUS_RELATION_MAP =
+  public static final Map<String, Set<TimelineElementCategoryV27DTO>> COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES =
     Collections.unmodifiableMap(
-      COUNTERS_STATUS_RELATION_MAP.entrySet().stream()
+      TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.entrySet().stream()
         .flatMap(entry -> entry.getValue().stream()
           .map(counterName -> Map.entry(counterName, entry.getKey())))
         .collect(Collectors.groupingBy(

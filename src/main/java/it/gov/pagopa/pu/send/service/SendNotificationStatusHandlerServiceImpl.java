@@ -58,8 +58,8 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
   }
 
   private NotificationStatusChangeDTO handleStatusChange(TimelineElementCategoryV27DTO oldStatus, TimelineElementCategoryV27DTO newStatus){
-    Set<String> oldCounters = CampaignUtils.COUNTERS_STATUS_RELATION_MAP.getOrDefault(oldStatus, Set.of());
-    Set<String> newCounters = CampaignUtils.COUNTERS_STATUS_RELATION_MAP.getOrDefault(newStatus, Set.of());
+    Set<String> oldCounters = CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(oldStatus, Set.of());
+    Set<String> newCounters = CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(newStatus, Set.of());
     return NotificationStatusChangeDTO.builder()
       .incrFields(newCounters.stream().filter(c -> !oldCounters.contains(c)).collect(Collectors.toSet()))
       .decrFields(oldCounters.stream().filter(c -> !newCounters.contains(c)).collect(Collectors.toSet()))
@@ -81,7 +81,7 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
       activeCounters = new HashSet<>();
     }else {
       activeCounters = new HashSet<>(
-        CampaignUtils.COUNTERS_STATUS_RELATION_MAP.getOrDefault(currentStreamEventStatus, new HashSet<>())
+        CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(currentStreamEventStatus, new HashSet<>())
       );
     }
     activeCounters.add(Counters.Fields.total);

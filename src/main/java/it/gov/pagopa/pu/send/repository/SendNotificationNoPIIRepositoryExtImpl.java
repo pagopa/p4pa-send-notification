@@ -217,7 +217,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
   private ConditionalOperators.Cond buildStatusCondition(String counterName) {
     Set<TimelineElementCategoryV27DTO> streamEventStatuses =
-      CampaignUtils.INVERSE_COUNTERS_STATUS_RELATION_MAP.getOrDefault(counterName, Collections.emptySet());
+      CampaignUtils.COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES.getOrDefault(counterName, Collections.emptySet());
 
     return ConditionalOperators.when(Criteria.where(Fields.streamEventStatus).in(streamEventStatuses))
       .then(1).otherwise(0);
