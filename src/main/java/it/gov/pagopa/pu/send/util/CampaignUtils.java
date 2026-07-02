@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.util;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,12 +22,13 @@ public class CampaignUtils {
   );
 
   public static final Map<String, Set<TimelineElementCategoryV27DTO>> INVERSE_COUNTERS_STATUS_RELATION_MAP =
-    COUNTERS_STATUS_RELATION_MAP.entrySet().stream()
-      .flatMap(entry -> entry.getValue().stream()
-        .map(counterName -> Map.entry(counterName, entry.getKey())))
-      .collect(Collectors.groupingBy(
-        Map.Entry::getKey,
-        Collectors.mapping(Map.Entry::getValue, Collectors.toSet())
-      )
+    Collections.unmodifiableMap(
+      COUNTERS_STATUS_RELATION_MAP.entrySet().stream()
+        .flatMap(entry -> entry.getValue().stream()
+          .map(counterName -> Map.entry(counterName, entry.getKey())))
+        .collect(Collectors.groupingBy(
+          Map.Entry::getKey,
+          Collectors.mapping(Map.Entry::getValue, Collectors.toSet())
+        ))
     );
 }
