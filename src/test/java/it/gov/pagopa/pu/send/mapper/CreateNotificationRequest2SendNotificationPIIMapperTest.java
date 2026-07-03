@@ -95,10 +95,10 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .thenReturn(Optional.of(organization));
 
     // When
-    SendNotification result = mapper.mapToModel(request, accessToken);
+    SendNotification result = mapper.mapToModel(request, null, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts");
+    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts", "campaignId");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -142,10 +142,10 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .thenReturn(Optional.empty());
 
     // When
-    SendNotification result = mapper.mapToModel(request, accessToken);
+    SendNotification result = mapper.mapToModel(request, null, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts");
+    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts", "campaignId");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -213,11 +213,11 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     }
 
     // When
-    SendNotification result = mapper.mapToModel(request, accessToken);
+    SendNotification result = mapper.mapToModel(request, null, accessToken);
 
     // Then
     TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun",
-      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate", "legalFacts");
+      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate", "legalFacts", "campaignId");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -252,7 +252,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.of(organization));
 
-    Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.mapToModel(request, accessToken));
+    Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.mapToModel(request, null, accessToken));
   }
 
   @Test
@@ -274,7 +274,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .thenReturn(Optional.empty());
 
 
-    Assertions.assertThrows(NotFoundException.class, () -> mapper.mapToModel(request, accessToken));
+    Assertions.assertThrows(NotFoundException.class, () -> mapper.mapToModel(request, null, accessToken));
   }
 
   private static CreateNotificationRequest buildRequest() {
@@ -295,7 +295,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setPaFee(100);
     request.setVat(22);
     request.setPaymentExpirationDate(LocalDate.now());
-    request.setCampaignId("CAMPAIGN_ID123");
+    request.setExternalCampaignId("CAMPAIGN_ID123");
+    request.setSubUnitCode("sub01");
     return request;
   }
 

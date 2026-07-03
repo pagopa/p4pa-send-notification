@@ -1,6 +1,10 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
@@ -12,10 +16,14 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
-import it.gov.pagopa.pu.send.util.*;
+import it.gov.pagopa.pu.send.util.AESUtils;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
+import it.gov.pagopa.pu.send.util.FileUtils;
+import it.gov.pagopa.pu.send.util.NotificationUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +39,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static it.gov.pagopa.pu.send.util.Constants.ZONEID;
+
 @Slf4j
 @Service
 public class SendNotificationServiceImpl implements SendNotificationService {
@@ -43,11 +53,23 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final FileStorerService fileStorerService;
   private final SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper;
   private final TaxonomyValidatorService taxonomyValidatorService;
+  private final OrganizationService organizationService;
+  private final OrgSubUnitService orgSubUnitService;
+  private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
 
-  public SendNotificationServiceImpl(@Value("${fileshare-public-base-url}") String fileShareBaseUrl,
-                                     SendNotificationPIIRepository sendNotificationPIIRepository,
-                                     SendNotificationNoPIIRepository sendNotificationNoPIIRepository, CreateNotificationRequest2SendNotificationMapper mapper, WorkflowService workflowService,
-                                     FileStorerService fileStorerService, SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper, TaxonomyValidatorService taxonomyValidatorService) {
+  public SendNotificationServiceImpl(
+    @Value("${fileshare-public-base-url}") String fileShareBaseUrl,
+    SendNotificationPIIRepository sendNotificationPIIRepository,
+    SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
+    CreateNotificationRequest2SendNotificationMapper mapper,
+    WorkflowService workflowService,
+    FileStorerService fileStorerService,
+    SendNotification2SendNotificationDTOMapper sendNotificationDTOMapper,
+    TaxonomyValidatorService taxonomyValidatorService,
+    OrganizationService organizationService,
+    OrgSubUnitService orgSubUnitService,
+    SendNotificationStatusHandlerService sendNotificationStatusHandlerService
+  ) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
@@ -56,14 +78,38 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.fileStorerService = fileStorerService;
     this.sendNotificationDTOMapper = sendNotificationDTOMapper;
     this.taxonomyValidatorService = taxonomyValidatorService;
+    this.organizationService = organizationService;
+    this.orgSubUnitService = orgSubUnitService;
+    this.sendNotificationStatusHandlerService = sendNotificationStatusHandlerService;
   }
 
   @Transactional
   @Override
   public CreateNotificationResponse createSendNotification(CreateNotificationRequest createNotificationRequest, String accessToken) {
-    taxonomyValidatorService.validateTaxonomyCode(createNotificationRequest.getOrganizationId(), createNotificationRequest.getTaxonomyCode(), accessToken);
+    Long organizationId = createNotificationRequest.getOrganizationId();
 
-    SendNotification sendNotification = sendNotificationPIIRepository.save(mapper.mapToModel(createNotificationRequest, accessToken));
+    Organization org = organizationService.getOrganization(organizationId, accessToken);
+    if(org == null) {
+      throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_NOT_FOUND,
+        String.format("Organization having orgId %s not found", organizationId));
+    }
+
+    taxonomyValidatorService.validateTaxonomyCode(org, createNotificationRequest.getTaxonomyCode(), accessToken);
+
+    String subUnitCode = createNotificationRequest.getSubUnitCode();
+    if (subUnitCode != null) {
+      OrgSubUnit orgSubUnit = orgSubUnitService.getOrgSubUnitById(organizationId, subUnitCode, accessToken);
+      if (orgSubUnit == null) {
+        throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_ORG_SUB_UNIT_NOT_FOUND,
+          String.format("Organization SubUnit having subUnitCode %s not found", subUnitCode)
+        );
+      }
+    }
+
+    Campaign campaign = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
+    SendNotification sendNotification = sendNotificationPIIRepository.save(
+      mapper.mapToModel(createNotificationRequest, campaign.getCampaignId(), accessToken)
+    );
 
     return CreateNotificationResponse
       .builder()
@@ -110,6 +156,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     if (!notification.getStatus().equals(NotificationStatus.ACCEPTED)) {
       deleteSendNotificationFiles(notification);
       sendNotificationPIIRepository.delete(notification);
+      sendNotificationStatusHandlerService.handleDeletedSendNotification(notification.getCampaignId(), notification.getCreationDate().toLocalDate(),notification.getStreamEventStatus());
     }
     else
       throw new InvalidStatusException(ErrorCodeConstants.ERROR_CODE_INVALID_NOTIFICATION_STATUS, "Cannot delete notification with status complete");
@@ -153,7 +200,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .fileName(fileName)
       .url(url)
       .category(category)
-      .downloadDate(OffsetDateTime.now(Constants.ZONEID))
+      .downloadDate(OffsetDateTime.now(ZONEID))
       .build());
   }
 
@@ -178,7 +225,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     } catch (Exception e) {
       throw new InvalidSignatureException(e.getMessage());
     }
-    sendNotificationNoPIIRepository.updateFileStatusAndDownloadDate(sendNotificationId, doc.getFileName(), FileStatus.READY, OffsetDateTime.now(Constants.ZONEID));
+    sendNotificationNoPIIRepository.updateFileStatusAndDownloadDate(sendNotificationId, doc.getFileName(), FileStatus.READY, OffsetDateTime.now(ZONEID));
   }
 
   /**

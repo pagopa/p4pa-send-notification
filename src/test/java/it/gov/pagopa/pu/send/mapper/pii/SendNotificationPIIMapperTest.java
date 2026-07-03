@@ -27,6 +27,7 @@ import static it.gov.pagopa.pu.send.util.faker.PuPaymentFaker.buildPuPayment;
 import static it.gov.pagopa.pu.send.util.faker.PuRecipientFaker.buildPuRecipient;
 import static it.gov.pagopa.pu.send.util.faker.SendNotificationFaker.buildSendNotification;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
@@ -88,6 +89,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     assertEquals(noPii.getVat(), result.getVat());
     assertEquals(noPii.getPagoPaIntMode(), result.getPagoPaIntMode());
     assertSame(noPii.getCampaignId(), result.getCampaignId());
+    assertSame(noPii.getOrgSubUnitCode(), result.getOrgSubUnitCode());
     assertSame(noPii, result.getNoPII());
   }
 
@@ -102,7 +104,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
 
     SendNotificationNoPII result = mapper.extractNoPiiEntity(sendNotification);
 
-    TestUtils.checkNotNullFields(result, "personalDataId", "creationDate", "updateDate", "updateOperatorExternalId", "updateTraceId");
+    TestUtils.checkNotNullFields(result, "personalDataId", "creationDate", "updateDate", "updateOperatorExternalId", "updateTraceId", "streamEventStatus");
     assertNotNull(result);
     assertEquals(sendNotification.getSendNotificationId(), result.getSendNotificationId());
     assertEquals(expectedHash, result.getRecipients().getFirst().getFiscalCodeHash());
@@ -127,6 +129,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     noPii.setPaProtocolNumber("PP001");
     noPii.setPersonalDataId(personalDataId);
     noPii.setCampaignId("CAMPAIGN_ID123");
+    noPii.setOrgSubUnitCode("sub01");
 
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO("HASHED_TAX_ID".getBytes(), List.of(buildPuPayment()));
     noPii.setRecipients(List.of(recipient));

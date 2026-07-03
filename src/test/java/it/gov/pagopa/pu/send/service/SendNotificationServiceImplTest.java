@@ -2,7 +2,12 @@ package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
+import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
+import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
+import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -14,6 +19,7 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
@@ -35,7 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +65,12 @@ class SendNotificationServiceImplTest {
   private TaxonomyValidatorService taxonomyValidatorServiceMock;
   @Mock
   private SendNotification2SendNotificationDTOMapper sendNotificationDTOMapperMock;
+  @Mock
+  private OrganizationService organizationServiceMock;
+  @Mock
+  private OrgSubUnitService orgSubUnitServiceMock;
+  @Mock
+  private SendNotificationStatusHandlerService sendNotificationStatusHandlerServiceMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -72,8 +84,11 @@ class SendNotificationServiceImplTest {
       workflowServiceMock,
       fileStorerServiceMock,
       taxonomyValidatorServiceMock,
-      sendNotificationDTOMapperMock
-      );
+      sendNotificationDTOMapperMock,
+      organizationServiceMock,
+      orgSubUnitServiceMock,
+      sendNotificationStatusHandlerServiceMock
+    );
   }
 
   @Test
@@ -82,27 +97,122 @@ class SendNotificationServiceImplTest {
     CreateNotificationRequest request = new CreateNotificationRequest();
     request.setOrganizationId(1L);
     request.setTaxonomyCode("0101");
+    request.setExternalCampaignId("externalCampaignId");
+
     SendNotification sendNotification = new SendNotification();
     sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
     sendNotification.setStatus(NotificationStatus.WAITING_FILE);
     String accessToken = "accessToken";
+    Organization org = new Organization();
+
+    Campaign campaign = new Campaign();
+    campaign.setCampaignId("campaignId");
 
     PersonalData personalData = new PersonalData();
     personalData.setId(1L);
 
-    Mockito.when(mapperMock.mapToModel(request, accessToken)).thenReturn(sendNotification);
+    LocalDate expectedDate = LocalDate.of(2026, Month.JUNE, 21);
+
+    Mockito.when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
     Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
-    Mockito.doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(request.getOrganizationId(), request.getTaxonomyCode(), accessToken);
+    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
+    Mockito.doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+    Mockito.when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
 
-    // When
-    CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
+    try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
+      localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
 
-    // Then
-    Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
+      CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
+
+      Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
+      Assertions.assertNotNull(response);
+      Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
+    }
   }
 
+  @Test
+  void givenNotExistingOrganizationWhenCreateSendNotificationThenThrowNotFoundException() {
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    String accessToken = "accessToken";
+
+    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+      .thenReturn(null);
+
+    NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () ->
+      sendNotificationService.createSendNotification(request, accessToken)
+    );
+
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_ORGANIZATION_NOT_FOUND, exception.getCode());
+  }
+
+  @Test
+  void givenNotExistingSubUnitWhenCreateSendNotificationThenThrowNotFoundException() {
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    request.setTaxonomyCode("0101");
+    request.setSubUnitCode("SUB01");
+    String accessToken = "accessToken";
+    Organization org = new Organization();
+
+    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+      .thenReturn(org);
+
+    Mockito.doNothing().when(taxonomyValidatorServiceMock)
+      .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+
+    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+      .thenReturn(null);
+
+    NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () ->
+      sendNotificationService.createSendNotification(request, accessToken)
+    );
+
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_ORG_SUB_UNIT_NOT_FOUND, exception.getCode());
+  }
+
+  @Test
+  void givenCreateNotificationRequestWithSubUnitWhenCreateSendNotificationThenReturnCreateNotificationResponse() {
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    request.setTaxonomyCode("0101");
+    request.setSubUnitCode("SUB01");
+    request.setExternalCampaignId("externalCampaignId");
+
+    SendNotification sendNotification = new SendNotification();
+    sendNotification.setSendNotificationId("SENDNOTIFICATIONID");
+    sendNotification.setStatus(NotificationStatus.WAITING_FILE);
+    String accessToken = "accessToken";
+    Organization org = new Organization();
+    OrgSubUnit subUnit = new OrgSubUnit();
+    Campaign campaign = new Campaign();
+    campaign.setCampaignId("campaignId");
+
+    LocalDate expectedDate = LocalDate.of(2026, Month.JUNE, 21);
+
+    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+      .thenReturn(org);
+    Mockito.doNothing().when(taxonomyValidatorServiceMock)
+      .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+
+    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+      .thenReturn(subUnit);
+
+    Mockito.when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
+    Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
+      .thenReturn(sendNotification);
+    Mockito.when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
+
+    try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
+      localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
+
+      CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
+
+      Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
+      Assertions.assertNotNull(response);
+      Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
+    }
+  }
 
   @Test
   void givenStartNotificationRequestWhenStartSendNotificationThenReturnVerifyAllFilesReady() {
@@ -113,7 +223,7 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII updatedNotification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     WorkflowCreatedDTO workflow = new WorkflowCreatedDTO("workflowId", "runId");
     InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
-    OffsetDateTime now = OffsetDateTime.now();
+    OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0, ZoneOffset.UTC);
 
     Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification))
@@ -180,6 +290,8 @@ class SendNotificationServiceImplTest {
     Path relativePath = Path.of("1/sendNotificationId");
 
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    notification.setStreamEventStatus(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED);
+    notification.setCreationDate(LocalDateTime.of(2026,Month.JUNE,30,12,0));
     PuPayment puPayment = new PuPayment();
     Payment payment = new Payment();
     PagoPa pagoPa = new PagoPa();
@@ -198,6 +310,7 @@ class SendNotificationServiceImplTest {
       Optional.of(notification));
     Mockito.when(fileStorerServiceMock.buildRelativeSendPath(
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
+    Mockito.doNothing().when(sendNotificationStatusHandlerServiceMock).handleDeletedSendNotification(notification.getCampaignId(),notification.getCreationDate().toLocalDate(),notification.getStreamEventStatus());
     //Then
     sendNotificationService.deleteSendNotification(sendNotificationId);
     Mockito.verify(sendNotificationPIIRepositoryMock).delete(notification);
@@ -401,7 +514,7 @@ class SendNotificationServiceImplTest {
     String fileName = "test.pdf";
     InputStream inputStreamMock = Mockito.mock(InputStream.class);
     String expectedUrl = "test.pdf";
-    OffsetDateTime now = OffsetDateTime.now();
+    OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0,ZoneOffset.UTC);
 
     SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setSendNotificationId(notificationId);
@@ -437,7 +550,7 @@ class SendNotificationServiceImplTest {
     String fileName = "test.pdf";
     InputStream inputStreamMock = Mockito.mock(InputStream.class);
     String expectedUrl = "test.pdf";
-    OffsetDateTime now = OffsetDateTime.now();
+    OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0,ZoneOffset.UTC);
 
     SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setSendNotificationId(notificationId);

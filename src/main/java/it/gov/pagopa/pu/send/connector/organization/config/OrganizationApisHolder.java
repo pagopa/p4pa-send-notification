@@ -17,6 +17,8 @@ public class OrganizationApisHolder {
   private final BrokerSearchControllerApi brokerSearchControllerApi;
   private final OrganizationSearchControllerApi organizationSearchControllerApi;
   private final BrokerConfigurationSearchControllerApi brokerConfigurationSearchControllerApi;
+  private final OrgSubUnitEntityControllerApi orgSubUnitEntityControllerApi;
+
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
   public OrganizationApisHolder(OrganizationApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder) {
@@ -32,6 +34,7 @@ public class OrganizationApisHolder {
     this.brokerSearchControllerApi = new BrokerSearchControllerApi(apiClient);
     this.organizationSearchControllerApi = new OrganizationSearchControllerApi(apiClient);
     this.brokerConfigurationSearchControllerApi = new BrokerConfigurationSearchControllerApi(apiClient);
+    this.orgSubUnitEntityControllerApi = new OrgSubUnitEntityControllerApi(apiClient);
   }
 
   @PreDestroy
@@ -51,12 +54,16 @@ public class OrganizationApisHolder {
     return getApi(accessToken, brokerSearchControllerApi);
   }
 
-  public  OrganizationSearchControllerApi getOrganizationSearchControllerApi(String accessToken) {
+  public OrganizationSearchControllerApi getOrganizationSearchControllerApi(String accessToken) {
     return getApi(accessToken, organizationSearchControllerApi);
   }
 
-  public  BrokerConfigurationSearchControllerApi getBrokerConfigurationSearchControllerApi(String accessToken) {
+  public BrokerConfigurationSearchControllerApi getBrokerConfigurationSearchControllerApi(String accessToken) {
     return getApi(accessToken, brokerConfigurationSearchControllerApi);
+  }
+
+  public OrgSubUnitEntityControllerApi getOrgSubUnitEntityControllerApi(String accessToken) {
+    return getApi(accessToken, orgSubUnitEntityControllerApi);
   }
 
   private ApiClient buildApiClient(RestTemplate restTemplate, OrganizationApiClientConfig clientConfig) {
