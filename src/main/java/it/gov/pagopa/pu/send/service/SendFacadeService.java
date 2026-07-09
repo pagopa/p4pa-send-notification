@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.send.exception.NotFoundException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public interface SendFacadeService {
   void preloadFiles(String sendNotificationId, String accessToken);
@@ -32,4 +33,5 @@ public interface SendFacadeService {
   List<LegalFactListElementDTO> retrieveLegalFacts(String sendNotificationId, String accessToken);
   LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(String sendNotificationId, String legalFactId, String accessToken);
   void downloadAndArchiveSendLegalFact(String notificationRequestId, LegalFactCategoryDTO category, String legalFactId, String accessToken) throws IOException;
+  Map<String,String> notifySendNotificationTimelineCategory(Map<String, List<String>> notificationRequestIdToTimelineCatogoriesMap);
 }

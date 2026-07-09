@@ -633,6 +633,37 @@ paths:
           description: Legal facts not found
         '500':
           description: Internal server error
+  /send/notify-timeline-category:
+    put:
+      tags:
+        - Send
+      summary: notify last TimelineCategory for each notification
+      description: align lastEventOfInterest for each specified notification with last TimelineCategory of interest for campaign counters
+      operationId: notifySendNotificationTimelineCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotifySendNotificationTimelineCategoryRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotifySendNotificationTimelineCategoryResponse'
+        '202':
+          description: Accepted and waiting for all files
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '404':
+          description: Notification or File not found
+        '409':
+          description: Wrong notification status
+        '500':
+          description: Internal server error
   /campaigns/ids:
     get:
       tags:
@@ -1045,3 +1076,15 @@ components:
         nextFileExpirationDate:
           type: string
           format: date-time
+    NotifySendNotificationTimelineCategoryRequest:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/SendNotificationTimelineCategoryList"
+    SendNotificationTimelineCategoryList:
+      type: array
+      items:
+        type: string
+    NotifySendNotificationTimelineCategoryResponse:
+      type: object
+      additionalProperties:
+        type: string

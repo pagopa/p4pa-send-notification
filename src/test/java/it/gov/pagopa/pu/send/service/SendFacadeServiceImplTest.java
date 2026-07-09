@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
+import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
@@ -54,6 +55,8 @@ import static it.gov.pagopa.pu.send.util.Constants.LEGAL_FACT_ID_PREFIX;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendFacadeServiceImplTest {
@@ -81,6 +84,8 @@ class SendFacadeServiceImplTest {
   @Mock
   private SendNotificationService sendNotificationServiceMock;
   @Mock
+  private SendNotificationStatusHandlerService sendNotificationStatusHandlerServiceMock;
+  @Mock
   private CloseableHttpClient httpClientMock;
 
   @InjectMocks
@@ -97,7 +102,8 @@ class SendFacadeServiceImplTest {
       sendNotificationDTOMapperMock,
       sendLegalFactMapperMock,
       sendStreamMapperMock,
-      sendStreamServiceMock
+      sendStreamServiceMock,
+      sendNotificationStatusHandlerServiceMock
     );
   }
 
@@ -133,10 +139,10 @@ class SendFacadeServiceImplTest {
     preLoadResponse.setHttpMethod(HttpMethodEnum.POST);
     preLoadResponse.setUrl("http://example.com");
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
-    Mockito.when(sendServiceMock.preloadFiles(List.of(preLoadRequestDTO), notification.getOrganizationId(), accessToken)).thenReturn(List.of(preLoadResponse));
+    when(sendServiceMock.preloadFiles(List.of(preLoadRequestDTO), notification.getOrganizationId(), accessToken)).thenReturn(List.of(preLoadResponse));
 
     sendService.preloadFiles(sendNotificationId, accessToken);
 
@@ -148,7 +154,7 @@ class SendFacadeServiceImplTest {
   void givenNotExistsNotificationWhenPreloadFilesThenException() {
     String accessToken = "ACCESSTOKEN";
     String sendNotificationId = "SENDNOTIFICATIONID";
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.empty());
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.empty());
 
     SendNotificationNotFoundException exception = assertThrows(SendNotificationNotFoundException.class, () -> sendService.preloadFiles(sendNotificationId, accessToken));
 
@@ -181,9 +187,9 @@ class SendFacadeServiceImplTest {
       .documents(List.of(documentDTO))
       .build();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
-    Mockito.when(uploadServiceMock.uploadFile(organizationId, sendNotificationId, documentDTO)).thenReturn(Optional.of(versionId));
+    when(uploadServiceMock.uploadFile(organizationId, sendNotificationId, documentDTO)).thenReturn(Optional.of(versionId));
 
     sendService.uploadFiles(sendNotificationId);
     Mockito.verify(sendNotificationNoPIIRepositoryMock).updateFileVersionId(sendNotificationId, fileName, versionId);
@@ -229,29 +235,29 @@ class SendFacadeServiceImplTest {
       ArgumentCaptor.forClass(StreamMetadataResponseV28DTO.class);
 
     //STUBS (in order of code execution)
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendStreamRepositoryMock.findByOrganizationId(orgId))
+    when(sendStreamRepositoryMock.findByOrganizationId(orgId))
       .thenReturn(Collections.emptyList());
-    Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV28DTO, orgId, accessToken))
+    when(sendStreamServiceMock.createStream(streamCreationRequestV28DTO, orgId, accessToken))
       .thenReturn(streamMetadataResponseV28DTO);
-    Mockito.when(
+    when(
       sendStreamMapperMock.mapToSendStream(
         streamMetadataResponseArgumentCaptor.capture(),
         Mockito.isA(Long.class)
       )
     ).thenReturn(sendStream);
-    Mockito.when(sendStreamRepositoryMock.save(sendStream))
+    when(sendStreamRepositoryMock.save(sendStream))
       .thenReturn(sendStream);
-    Mockito.when(workflowService.sendNotificationStreamConsume(sendStreamId.toString(), accessToken))
+    when(workflowService.sendNotificationStreamConsume(sendStreamId.toString(), accessToken))
       .thenReturn(WorkflowCreatedDTO.builder()
         .workflowId("wfId")
         .runId("runID")
         .build()
       );
-    Mockito.when(sendNotificationMapperMock.apply(notification))
+    when(sendNotificationMapperMock.apply(notification))
       .thenReturn(request);
-    Mockito.when(sendServiceMock.deliveryNotification(request, orgId, accessToken)).thenReturn(response);
+    when(sendServiceMock.deliveryNotification(request, orgId, accessToken)).thenReturn(response);
 
     //WHEN
     sendService.deliveryNotification(sendNotificationId, accessToken);
@@ -299,13 +305,13 @@ class SendFacadeServiceImplTest {
     NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
 
     //STUBS (in order of code execution)
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendStreamRepositoryMock.findByOrganizationId(orgId))
+    when(sendStreamRepositoryMock.findByOrganizationId(orgId))
       .thenReturn(List.of(new SendStream()));
-    Mockito.when(sendNotificationMapperMock.apply(notification))
+    when(sendNotificationMapperMock.apply(notification))
       .thenReturn(request);
-    Mockito.when(sendServiceMock.deliveryNotification(request, orgId, accessToken)).thenReturn(response);
+    when(sendServiceMock.deliveryNotification(request, orgId, accessToken)).thenReturn(response);
 
     //WHEN
     sendService.deliveryNotification(sendNotificationId, accessToken);
@@ -336,12 +342,12 @@ class SendFacadeServiceImplTest {
 
     SendNotificationDTO expectedResult = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
-    Mockito.when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
+    when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
 
-    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -372,12 +378,12 @@ class SendFacadeServiceImplTest {
 
     SendNotificationDTO expectedResult = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
-    Mockito.when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
+    when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
 
-    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -402,7 +408,7 @@ class SendFacadeServiceImplTest {
       .status(NotificationStatus.SENDING)
       .build();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
     assertThrows(InvalidStatusException.class,
@@ -437,15 +443,15 @@ class SendFacadeServiceImplTest {
     SendNotificationDTO expectedResult = new SendNotificationDTO();
     expectedResult.setStatus(NotificationStatus.REFUSED);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
-    Mockito.when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
+    when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
 
-    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED))
+    when(sendNotificationNoPIIRepositoryMock.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED))
       .thenReturn(updateResult);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -495,13 +501,13 @@ class SendFacadeServiceImplTest {
 
     SendNotificationDTO expectedDTO = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
     if (!isPagoPaNull) {
-      Mockito.when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, noticeCode, orgId, accessToken))
+      when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, noticeCode, orgId, accessToken))
         .thenReturn(response);
     }
-    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.any()))
+    when(sendNotificationDTOMapperMock.apply(Mockito.any()))
       .thenReturn(expectedDTO);
 
     // When
@@ -535,13 +541,13 @@ class SendFacadeServiceImplTest {
 
     SendNotificationDTO expectedDTO = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
-    Mockito.when(sendServiceMock.notificationStatus("REQUESTID", orgId, accessToken))
+    when(sendServiceMock.notificationStatus("REQUESTID", orgId, accessToken))
       .thenReturn(null);
 
-    Mockito.when(sendNotificationDTOMapperMock.apply(notification))
+    when(sendNotificationDTOMapperMock.apply(notification))
       .thenReturn(expectedDTO);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -570,13 +576,13 @@ class SendFacadeServiceImplTest {
 
     SendNotificationDTO expectedDTO = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
-    Mockito.when(sendServiceMock.notificationStatus("REQUESTID", orgId, accessToken))
+    when(sendServiceMock.notificationStatus("REQUESTID", orgId, accessToken))
       .thenReturn(response);
 
-    Mockito.when(sendNotificationDTOMapperMock.apply(notification))
+    when(sendNotificationDTOMapperMock.apply(notification))
       .thenReturn(expectedDTO);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -609,9 +615,9 @@ class SendFacadeServiceImplTest {
 
     NotificationPriceResponseV23DTO expectedResponse = new NotificationPriceResponseV23DTO();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+    when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, nav, organizationId, accessToken))
+    when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, nav, organizationId, accessToken))
       .thenReturn(expectedResponse);
 
     NotificationPriceResponseV23DTO result = sendService.retrieveNotificationPrice(organizationId, nav, accessToken);
@@ -628,7 +634,7 @@ class SendFacadeServiceImplTest {
     Long organizationId = 123L;
     String nav = "123456789";
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+    when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
       .thenReturn(Optional.empty());
 
     // When Then
@@ -655,14 +661,14 @@ class SendFacadeServiceImplTest {
     StreamListElementDTO streamListElementDTO = new StreamListElementDTO();
     streamListElementDTO.setStreamId(streamId);
 
-    Mockito.when(sendStreamRepositoryMock.findById(streamId.toString()))
+    when(sendStreamRepositoryMock.findById(streamId.toString()))
       .thenReturn(Optional.of(sendStreamMock));
-    Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStreamMock))
+    when(sendStreamMapperMock.mapToSendStreamDTO(sendStreamMock))
       .thenReturn(sendStreamDTOMock);
-    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken))
+    when(sendStreamServiceMock.getStreams(organizationId, accessToken))
         .thenReturn(List.of(streamListElementDTO));
 
-    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId.toString(), lastEventId, organizationId, accessToken))
+    when(sendStreamServiceMock.getStreamEvents(streamId.toString(), lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
 
     List<ProgressResponseElementV28DTO> result = sendService.getStreamEvents(streamId.toString(), organizationId, accessToken);
@@ -692,18 +698,18 @@ class SendFacadeServiceImplTest {
     StreamListElementDTO streamListElementDTO = new StreamListElementDTO();
     streamListElementDTO.setStreamId(streamId);
 
-    Mockito.when(sendStreamRepositoryMock.findById(streamId.toString()))
+    when(sendStreamRepositoryMock.findById(streamId.toString()))
       .thenReturn(Optional.of(sendStreamMock));
-    Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStreamMock))
+    when(sendStreamMapperMock.mapToSendStreamDTO(sendStreamMock))
       .thenReturn(sendStreamDTOMock);
-    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken))
+    when(sendStreamServiceMock.getStreams(organizationId, accessToken))
       .thenReturn(List.of(streamListElementDTO));
 
-    Mockito.when(sendStreamServiceMock.getStreamEvents(streamId.toString(), lastEventId, organizationId, accessToken))
+    when(sendStreamServiceMock.getStreamEvents(streamId.toString(), lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
 
-    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(streams);
-    Mockito.when(sendStreamServiceMock.getStreamEvents(String.valueOf(streamId), lastEventId, organizationId, accessToken))
+    when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(streams);
+    when(sendStreamServiceMock.getStreamEvents(String.valueOf(streamId), lastEventId, organizationId, accessToken))
       .thenReturn(expectedEvents);
 
     List<ProgressResponseElementV28DTO> result = sendService.getStreamEvents(null, organizationId, accessToken);
@@ -717,7 +723,7 @@ class SendFacadeServiceImplTest {
     String accessToken = "ACCESSTOKEN";
     Long organizationId = 1L;
 
-    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(List.of());
+    when(sendStreamServiceMock.getStreams(organizationId, accessToken)).thenReturn(List.of());
 
     NotFoundException exception = assertThrows(NotFoundException.class, () ->
       sendService.getStreamEvents(null, organizationId, accessToken)
@@ -734,7 +740,7 @@ class SendFacadeServiceImplTest {
     String lastEventId = "lastEventId";
 
     UpdateResult expectedResult = Mockito.mock(UpdateResult.class);
-    Mockito.when(sendStreamRepositoryMock.updateLastEventId(streamId, lastEventId))
+    when(sendStreamRepositoryMock.updateLastEventId(streamId, lastEventId))
       .thenReturn(expectedResult);
 
     //WHEN
@@ -760,11 +766,11 @@ class SendFacadeServiceImplTest {
     StreamListElementDTO streamListElementDTO = new StreamListElementDTO();
     streamListElementDTO.setStreamId(UUID.fromString(streamId));
 
-    Mockito.when(sendStreamRepositoryMock.findById(streamId))
+    when(sendStreamRepositoryMock.findById(streamId))
       .thenReturn(Optional.of(sendStream));
-    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken))
+    when(sendStreamServiceMock.getStreams(organizationId, accessToken))
       .thenReturn(List.of(streamListElementDTO));
-    Mockito.when(sendStreamMapperMock.mapToSendStreamDTO(sendStream)).thenReturn(expectedResponse);
+    when(sendStreamMapperMock.mapToSendStreamDTO(sendStream)).thenReturn(expectedResponse);
 
     //WHEN
     SendStreamDTO actualResult = sendService.getStream(streamId, accessToken);
@@ -780,7 +786,7 @@ class SendFacadeServiceImplTest {
     String accessToken = "ACCESSTOKEN";
     String streamId = "streamId";
 
-    Mockito.when(sendStreamRepositoryMock.findById(streamId))
+    when(sendStreamRepositoryMock.findById(streamId))
       .thenReturn(Optional.empty());
     Mockito.doNothing()
       .when(sendStreamRepositoryMock)
@@ -809,9 +815,9 @@ class SendFacadeServiceImplTest {
     SendStream sendStream = new SendStream();
     sendStream.setOrganizationId(organizationId);
 
-    Mockito.when(sendStreamRepositoryMock.findById(streamId))
+    when(sendStreamRepositoryMock.findById(streamId))
       .thenReturn(Optional.of(sendStream));
-    Mockito.when(sendStreamServiceMock.getStreams(organizationId, accessToken))
+    when(sendStreamServiceMock.getStreams(organizationId, accessToken))
         .thenReturn(Collections.emptyList());
     Mockito.doNothing()
       .when(sendStreamRepositoryMock)
@@ -867,29 +873,29 @@ class SendFacadeServiceImplTest {
       ArgumentCaptor.forClass(StreamMetadataResponseV28DTO.class);
 
     //STUBS (in order of code execution)
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendStreamRepositoryMock.findByOrganizationId(orgId))
+    when(sendStreamRepositoryMock.findByOrganizationId(orgId))
       .thenReturn(Collections.emptyList());
-    Mockito.when(sendStreamServiceMock.createStream(streamCreationRequestV28DTO, orgId, accessToken))
+    when(sendStreamServiceMock.createStream(streamCreationRequestV28DTO, orgId, accessToken))
       .thenReturn(streamMetadataResponseV28DTO);
-    Mockito.when(
+    when(
       sendStreamMapperMock.mapToSendStream(
         streamMetadataResponseArgumentCaptor.capture(),
         Mockito.isA(Long.class)
       )
     ).thenReturn(sendStream);
-    Mockito.when(sendStreamRepositoryMock.save(sendStream))
+    when(sendStreamRepositoryMock.save(sendStream))
       .thenReturn(sendStream);
-    Mockito.when(workflowService.sendNotificationStreamConsume(sendStreamId.toString(), accessToken))
+    when(workflowService.sendNotificationStreamConsume(sendStreamId.toString(), accessToken))
       .thenReturn(WorkflowCreatedDTO.builder()
         .workflowId("wfId")
         .runId("runID")
         .build()
       );
-    Mockito.when(sendNotificationMapperMock.apply(notification))
+    when(sendNotificationMapperMock.apply(notification))
       .thenReturn(request);
-    Mockito.when(sendServiceMock.deliveryNotification(request, orgId, accessToken))
+    when(sendServiceMock.deliveryNotification(request, orgId, accessToken))
       .thenThrow(HttpClientErrorException.Conflict.class);
 
     //WHEN
@@ -943,11 +949,11 @@ class SendFacadeServiceImplTest {
     //Expected mapped LegalFact list
     List<LegalFactListElementDTO> expectedResponse = Collections.singletonList(legalFactListElementDTO);
 
-    Mockito.when(sendLegalFactMapperMock.mapLegalFactDTOFromSend(legalFactListElementV20DTO))
+    when(sendLegalFactMapperMock.mapLegalFactDTOFromSend(legalFactListElementV20DTO))
       .thenReturn(legalFactListElementDTO);
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendServiceMock.getLegalFacts(iun, organizationId, accessToken))
+    when(sendServiceMock.getLegalFacts(iun, organizationId, accessToken))
       .thenReturn(mockResultList);
 
     // WHEN
@@ -963,7 +969,7 @@ class SendFacadeServiceImplTest {
     String accessToken = "ACCESS_TOKEN";
     String sendNotificationId = "SEND_NOTIFICATION_ID";
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.empty());
 
     // WHEN
@@ -989,7 +995,7 @@ class SendFacadeServiceImplTest {
       .status(NotificationStatus.IN_VALIDATION)
       .build();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
 
     // WHEN
@@ -1039,13 +1045,13 @@ class SendFacadeServiceImplTest {
     mockedResponse.setContentLength(contentLength);
     mockedResponse.setUrl(url);
 
-    Mockito.when(sendLegalFactMapperMock.mapLegalFactDownloadMetadataFromSend(mockedResponse))
+    when(sendLegalFactMapperMock.mapLegalFactDownloadMetadataFromSend(mockedResponse))
       .thenReturn(expectedResult);
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendServiceMock.getLegalFactDownloadMetadata(iun, legalFactId, organizationId, accessToken))
+    when(sendServiceMock.getLegalFactDownloadMetadata(iun, legalFactId, organizationId, accessToken))
       .thenReturn(mockedResponse);
-    Mockito.when(sendNotificationDTOMapperMock.apply(notification))
+    when(sendNotificationDTOMapperMock.apply(notification))
       .thenReturn(notificationDTO);
 
     // WHEN
@@ -1062,7 +1068,7 @@ class SendFacadeServiceImplTest {
     String sendNotificationId = "SEND_NOTIFICATION_ID";
     String legalFactId = "LEGAL_FACT_ID";
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.empty());
 
     // WHEN
@@ -1087,7 +1093,7 @@ class SendFacadeServiceImplTest {
     SendNotificationDTO sendNotificationDTO = new SendNotificationDTO();
     sendNotificationDTO.setSendNotificationId(sendNotificationId);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
+    when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
       .thenReturn(null);
 
     //WHEN
@@ -1128,11 +1134,11 @@ class SendFacadeServiceImplTest {
     sendNotificationDTO.setIun(iun);
     sendNotificationDTO.setOrganizationId(organizationId);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
+    when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
       .thenReturn(sendNotificationDTO);
-    Mockito.when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
+    when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
       .thenReturn(polishedLegalFactId);
-    Mockito.when(
+    when(
       sendServiceMock.getLegalFactDownloadMetadata(
         iun,
         polishedLegalFactId,
@@ -1187,10 +1193,10 @@ class SendFacadeServiceImplTest {
     sendNotificationDTO.setIun(iun);
     sendNotificationDTO.setOrganizationId(organizationId);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
+    when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
       .thenReturn(sendNotificationDTO);
 
-    Mockito.when(
+    when(
       sendServiceMock.getLegalFactDownloadMetadata(
         iun,
         polishedLegalFactId,
@@ -1198,12 +1204,12 @@ class SendFacadeServiceImplTest {
         accessToken
       )
     ).thenReturn(legalFactDownloadMetadataResponseDTO);
-    Mockito.when(sendLegalFactMapperMock.mapLegalFactDownloadMetadataFromSend(
+    when(sendLegalFactMapperMock.mapLegalFactDownloadMetadataFromSend(
         legalFactDownloadMetadataResponseDTO
       ))
       .thenReturn(legalFactDownloadMetadataDTO);
 
-    Mockito.when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
+    when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
       .thenReturn(polishedLegalFactId);
 
     //WHEN
@@ -1250,10 +1256,10 @@ class SendFacadeServiceImplTest {
     sendNotificationDTO.setIun(iun);
     sendNotificationDTO.setOrganizationId(organizationId);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
+    when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
       .thenReturn(sendNotificationDTO);
 
-    Mockito.when(
+    when(
       sendServiceMock.getLegalFactDownloadMetadata(
         iun,
         polishedLegalFactId,
@@ -1261,15 +1267,15 @@ class SendFacadeServiceImplTest {
         accessToken
       )
     ).thenReturn(legalFactDownloadMetadataResponseDTO);
-    Mockito.when(sendLegalFactMapperMock.mapLegalFactDownloadMetadataFromSend(
+    when(sendLegalFactMapperMock.mapLegalFactDownloadMetadataFromSend(
         legalFactDownloadMetadataResponseDTO
       ))
       .thenReturn(legalFactDownloadMetadataDTO);
 
-    Mockito.when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
+    when(sendLegalFactMapperMock.polishLegalFactIdKey(legalFactId))
       .thenReturn(polishedLegalFactId);
 
-    Mockito.when(
+    when(
       httpClientMock.execute(
         Mockito.isA(HttpGet.class),
         Mockito.isA(HttpClientResponseHandler.class)
@@ -1307,4 +1313,54 @@ class SendFacadeServiceImplTest {
 
   }
 
+  @Test
+  void givenNotificationNotFoundWhenNotifySendNotificationTimelineCategoryThenSkip() {
+    //GIVEN
+    String notificationRequestId = "notificationRequestId1";
+    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+      .thenReturn(Optional.empty());
+
+    Map<String, List<String>> request = Map.of(
+      notificationRequestId, List.of("IN_VALIDATION", "REQUEST_ACCEPTED")
+    );
+
+    //WHEN
+    Map<String, String> stringStringMap = sendService.notifySendNotificationTimelineCategory(request);
+
+    //THEN
+    Assertions.assertTrue(stringStringMap.isEmpty());
+  }
+
+  @Test
+  void givenNotificationFoundWhenNotifySendNotificationTimelineCategoryThenSkip() {
+    //GIVEN
+    String notificationRequestId = "notificationRequestId1";
+    SendNotificationNoPII sendNotification = SendNotificationNoPII.builder()
+      .sendNotificationId("sendNotificationId1")
+      .campaignId("sendCampaignId1")
+      .streamEventStatus(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
+      .build();
+    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+      .thenReturn(Optional.of(sendNotification));
+    doNothing()
+      .when(sendNotificationStatusHandlerServiceMock)
+      .handleSendNotificationStatusUpdate(
+        sendNotification.getSendNotificationId(),
+        sendNotification.getCampaignId(),
+        sendNotification.getStreamEventStatus(),
+        TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS
+      );
+
+    Map<String, List<String>> request = Map.of(
+      notificationRequestId, List.of("wrong_IN_VALIDATION", "REQUEST_ACCEPTED", "SEND_DIGITAL_PROGRESS")
+    );
+
+    //WHEN
+    Map<String, String> actualResultMap = sendService.notifySendNotificationTimelineCategory(request);
+
+    //THEN
+    Assertions.assertFalse(actualResultMap.isEmpty());
+    Assertions.assertEquals(1, actualResultMap.size());
+    Assertions.assertEquals("SEND_DIGITAL_PROGRESS", actualResultMap.get(notificationRequestId));
+  }
 }

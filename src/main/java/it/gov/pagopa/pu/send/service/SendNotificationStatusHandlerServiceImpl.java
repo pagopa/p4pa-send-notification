@@ -58,8 +58,8 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
   }
 
   private NotificationStatusChangeDTO handleStatusChange(TimelineElementCategoryV27DTO oldStatus, TimelineElementCategoryV27DTO newStatus){
-    Set<String> oldCounters = CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(oldStatus, Set.of());
-    Set<String> newCounters = CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(newStatus, Set.of());
+    Set<String> oldCounters = (oldStatus != null) ? CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.get(oldStatus) : Set.of();
+    Set<String> newCounters = (newStatus != null) ? CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.get(newStatus) : Set.of();
     return NotificationStatusChangeDTO.builder()
       .incrFields(newCounters.stream().filter(c -> !oldCounters.contains(c)).collect(Collectors.toSet()))
       .decrFields(oldCounters.stream().filter(c -> !newCounters.contains(c)).collect(Collectors.toSet()))

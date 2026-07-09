@@ -17,6 +17,7 @@ import org.springframework.web.client.HttpServerErrorException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -98,6 +99,11 @@ public class SendController implements SendApi {
       );
     }
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Map<String,String>> notifySendNotificationTimelineCategory(Map<String, List<String>> notificationRequestIdToTimelineCatogoriesMap) {
+    return new ResponseEntity<>(sendFacadeService.notifySendNotificationTimelineCategory(notificationRequestIdToTimelineCatogoriesMap), HttpStatus.OK);
   }
 
 }

@@ -3,9 +3,7 @@ package it.gov.pagopa.pu.send.util;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CampaignUtils {
@@ -31,4 +29,13 @@ public class CampaignUtils {
           Collectors.mapping(Map.Entry::getValue, Collectors.toSet())
         ))
     );
+
+
+  private static final List<TimelineElementCategoryV27DTO> eventCategoryOrder =
+    TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.keySet()
+      .stream()
+      .toList();
+
+  public static final Comparator<TimelineElementCategoryV27DTO> eventCategoryComparator =
+    Comparator.comparingInt(CampaignUtils.eventCategoryOrder::indexOf);
 }

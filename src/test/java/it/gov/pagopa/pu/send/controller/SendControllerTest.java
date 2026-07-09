@@ -23,6 +23,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 class SendControllerTest {
@@ -222,4 +223,27 @@ class SendControllerTest {
     );
   }
 
+  @Test
+  void givenExpectedMapsWhenNotifySendNotificationTimelineCategoryThenOk() {
+    // GIVEN
+    Map<String, List<String>> request = Map.of(
+      "notificationRequestId1", List.of("IN_VALIDATION", "REQUEST_ACCEPTED"),
+      "notificationRequestId2", List.of("IN_VALIDATION", "REQUEST_ACCEPTED", "SEND_DIGITAL_PROGRESS")
+    );
+    Map<String, String> expectedResponse = Map.of(
+      "notificationRequestId1", "REQUEST_ACCEPTED",
+      "notificationRequestId2", "SEND_DIGITAL_PROGRESS"
+    );
+
+    Mockito.when(sendFacadeServiceMock.notifySendNotificationTimelineCategory(request))
+      .thenReturn(expectedResponse);
+
+    // WHEN
+    ResponseEntity<Map<String, String>> actualResponse = sendController.notifySendNotificationTimelineCategory(request);
+
+    // THEN
+    Assertions.assertNotNull(actualResponse);
+    Assertions.assertEquals(expectedResponse, actualResponse.getBody());
+    Assertions.assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
+  }
 }
