@@ -10,7 +10,6 @@ import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;

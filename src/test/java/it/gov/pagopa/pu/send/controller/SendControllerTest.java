@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class SendControllerTest {
 
@@ -83,7 +85,7 @@ class SendControllerTest {
   void givenSendNotificationIdWhenNotificationStatusRequestThenOk(){
     String sendNotificationId = "12345";
     SendNotificationDTO status = new SendNotificationDTO();
-    Mockito.when(sendFacadeServiceMock.notificationStatus(sendNotificationId, accessToken)).thenReturn(status);
+    when(sendFacadeServiceMock.notificationStatus(sendNotificationId, accessToken)).thenReturn(status);
 
     ResponseEntity<SendNotificationDTO> response = sendController.notificationStatus(sendNotificationId);
 
@@ -97,7 +99,7 @@ class SendControllerTest {
     String sendNotificationId = "12345";
 
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationDate(sendNotificationId, accessToken))
+    when(sendFacadeServiceMock.retrieveNotificationDate(sendNotificationId, accessToken))
       .thenReturn(notificationDTO);
 
     ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId);
@@ -108,7 +110,7 @@ class SendControllerTest {
   @Test
   void givenSendNotificationIdAndOrganizationIdWhenRetrieveNotificationDateThenNoContent() {
     String sendNotificationId = "12345";
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationDate(sendNotificationId, accessToken))
+    when(sendFacadeServiceMock.retrieveNotificationDate(sendNotificationId, accessToken))
       .thenReturn(null);
 
     ResponseEntity<SendNotificationDTO> response = sendController.retrieveNotificationDate(sendNotificationId);
@@ -120,7 +122,7 @@ class SendControllerTest {
     Long organizationId = 1L;
     String nav = "12345";
     NotificationPriceResponseV23DTO price = new NotificationPriceResponseV23DTO();
-    Mockito.when(sendFacadeServiceMock.retrieveNotificationPrice(organizationId, nav, accessToken))
+    when(sendFacadeServiceMock.retrieveNotificationPrice(organizationId, nav, accessToken))
       .thenReturn(price);
 
     ResponseEntity<NotificationPriceResponseV23DTO> response = sendController.retrieveNotificationPrice(organizationId, nav);
@@ -136,7 +138,7 @@ class SendControllerTest {
     String sendNotificationId = "12345";
 
     List<LegalFactListElementDTO> expectedLegalFacts = new ArrayList<>();
-    Mockito.when(sendFacadeServiceMock.retrieveLegalFacts(sendNotificationId, accessToken))
+    when(sendFacadeServiceMock.retrieveLegalFacts(sendNotificationId, accessToken))
       .thenReturn(expectedLegalFacts);
 
     // WHEN
@@ -155,7 +157,7 @@ class SendControllerTest {
     String legalFactId = "12345";
 
     LegalFactDownloadMetadataDTO mockedResponse = new LegalFactDownloadMetadataDTO();
-    Mockito.when(sendFacadeServiceMock.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, accessToken))
+    when(sendFacadeServiceMock.retrieveLegalFactDownloadMetadata(sendNotificationId, legalFactId, accessToken))
       .thenReturn(mockedResponse);
 
     // WHEN
@@ -235,7 +237,7 @@ class SendControllerTest {
       "notificationRequestId2", "SEND_DIGITAL_PROGRESS"
     );
 
-    Mockito.when(sendFacadeServiceMock.notifySendNotificationTimelineCategory(request))
+    when(sendFacadeServiceMock.notifySendNotificationTimelineCategory(request))
       .thenReturn(expectedResponse);
 
     // WHEN
