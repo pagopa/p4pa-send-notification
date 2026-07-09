@@ -1334,6 +1334,7 @@ class SendFacadeServiceImplTest {
   @Test
   void givenNotificationFoundWhenNotifySendNotificationTimelineCategoryThenSkip() {
     //GIVEN
+    TimelineElementCategoryV27DTO newTimelineCategory = TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS;
     String notificationRequestId = "notificationRequestId1";
     SendNotificationNoPII sendNotification = SendNotificationNoPII.builder()
       .sendNotificationId("sendNotificationId1")
@@ -1352,7 +1353,12 @@ class SendFacadeServiceImplTest {
       );
 
     Map<String, List<String>> request = Map.of(
-      notificationRequestId, List.of("wrong_IN_VALIDATION", "REQUEST_ACCEPTED", "SEND_DIGITAL_PROGRESS")
+      notificationRequestId,
+      List.of(
+        "wrong_IN_VALIDATION",
+        sendNotification.getStreamEventStatus().getValue(),
+        newTimelineCategory.getValue()
+      )
     );
 
     //WHEN

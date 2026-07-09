@@ -138,12 +138,12 @@
         } ]
       }
     },
-    "/p4pasend/send/last-event-of-interest" : {
+    "/p4pasend/send/notify-timeline-category" : {
       "put" : {
         "tags" : [ "Send" ],
-        "summary" : "update lastEventOfInterest for each notification",
-        "description" : "align lastEventOfInterest for each notification with last TimelineCategory of interest for campaign counters",
-        "operationId" : "updateLastEventOfInterest",
+        "summary" : "notify last TimelineCategory for each notification",
+        "description" : "align lastEventOfInterest for each specified notification with last TimelineCategory of interest for campaign counters",
+        "operationId" : "notifySendNotificationTimelineCategory",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -166,10 +166,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "string"
-                  }
+                  "type" : "string"
                 }
               }
             }
@@ -179,8 +176,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
+                  "type" : "object",
+                  "additionalProperties" : {
                     "type" : "string"
                   }
                 }
@@ -192,8 +189,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
+                  "type" : "object",
+                  "additionalProperties" : {
                     "type" : "string"
                   }
                 }
@@ -205,8 +202,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
+                  "type" : "object",
+                  "additionalProperties" : {
                     "type" : "string"
                   }
                 }
@@ -218,8 +215,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
+                  "type" : "object",
+                  "additionalProperties" : {
                     "type" : "string"
                   }
                 }
@@ -231,8 +228,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
+                  "type" : "object",
+                  "additionalProperties" : {
                     "type" : "string"
                   }
                 }
@@ -244,8 +241,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
+                  "type" : "object",
+                  "additionalProperties" : {
                     "type" : "string"
                   }
                 }

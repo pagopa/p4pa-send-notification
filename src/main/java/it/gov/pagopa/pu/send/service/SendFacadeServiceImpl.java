@@ -358,7 +358,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
         return e.getValue().stream()
           .map(v -> Utilities.safeEnumFromValue(TimelineElementCategoryV27DTO.class, v))
           .flatMap(Optional::stream)
-          .filter(CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS::containsKey)
+          .filter(CampaignUtils.ORDERED_TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS::containsKey)
           .max(CampaignUtils.eventCategoryComparator)
           .map(ec -> {
             sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(

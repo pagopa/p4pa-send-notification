@@ -118,6 +118,35 @@ class SendNotificationStatusHandlerServiceImplTest {
   }
 
   @Test
+  void givenNullOldStatusWhenHandleSendNotificationStatusUpdateThenIncrFieldsPopulated() {
+    String sendNotificationId = "sendNotificationId";
+    String campaignId = "campaignId";
+    TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.REQUEST_ACCEPTED;
+    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
+      .incrFields(Set.of(Counters.Fields.accepted))
+      .decrFields(Set.of())
+      .build();
+
+    Mockito.doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
+    Mockito.when(sendNotificationNoPIIRepositoryMock.updateStreamEventStatusById(sendNotificationId, newStatus))
+      .thenReturn(updateResult);
+
+    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
+      sendNotificationId, campaignId, null, newStatus));
+  }
+
+  @Test
+  void givenBothNullStatusesWhenHandleSendNotificationStatusUpdateThenNoUpdate() {
+    String sendNotificationId = "sendNotificationId";
+    String campaignId = "campaignId";
+
+    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
+      sendNotificationId, campaignId, null, null));
+  }
+
+  @Test
   void givenLastNotificationWhenHandleDeletedSendNotificationThenDeleteCampaign() {
     String campaignId = "campaignId";
     LocalDate notificationCreationDate = LocalDate.of(2026, Month.JUNE, 30);

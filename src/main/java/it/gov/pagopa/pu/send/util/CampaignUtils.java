@@ -5,23 +5,29 @@ import it.gov.pagopa.pu.send.dto.Counters;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CampaignUtils {
   private CampaignUtils() {}
 
-  public static final Map<TimelineElementCategoryV27DTO, Set<String>> TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS = Map.of(
-    TimelineElementCategoryV27DTO.REQUEST_ACCEPTED, Set.of(Counters.Fields.accepted),
-    TimelineElementCategoryV27DTO.DIGITAL_SUCCESS_WORKFLOW, Set.of(Counters.Fields.accepted, Counters.Fields.delivered),
-    TimelineElementCategoryV27DTO.ANALOG_SUCCESS_WORKFLOW, Set.of(Counters.Fields.accepted, Counters.Fields.delivered),
-    TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion),
-    TimelineElementCategoryV27DTO.SEND_ANALOG_FEEDBACK, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.analogicCompleted),
-    TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion),
-    TimelineElementCategoryV27DTO.SEND_DIGITAL_FEEDBACK, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompleted)
-  );
+  public static final Map<TimelineElementCategoryV27DTO, Set<String>> ORDERED_TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS = Stream.of(
+    Map.entry(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED, Set.of(Counters.Fields.accepted)),
+    Map.entry(TimelineElementCategoryV27DTO.DIGITAL_SUCCESS_WORKFLOW, Set.of(Counters.Fields.accepted, Counters.Fields.delivered)),
+    Map.entry(TimelineElementCategoryV27DTO.ANALOG_SUCCESS_WORKFLOW, Set.of(Counters.Fields.accepted, Counters.Fields.delivered)),
+    Map.entry(TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion)),
+    Map.entry(TimelineElementCategoryV27DTO.SEND_ANALOG_FEEDBACK, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.analogicCompleted)),
+    Map.entry(TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion)),
+    Map.entry(TimelineElementCategoryV27DTO.SEND_DIGITAL_FEEDBACK, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompleted))
+  ).collect(Collectors.toMap(
+    Map.Entry::getKey,
+    Map.Entry::getValue,
+    (a, b) -> a,
+    LinkedHashMap::new
+  ));
 
   public static final Map<String, Set<TimelineElementCategoryV27DTO>> COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES =
     Collections.unmodifiableMap(
-      TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.entrySet().stream()
+      ORDERED_TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.entrySet().stream()
         .flatMap(entry -> entry.getValue().stream()
           .map(counterName -> Map.entry(counterName, entry.getKey())))
         .collect(Collectors.groupingBy(
@@ -32,7 +38,7 @@ public class CampaignUtils {
 
 
   private static final List<TimelineElementCategoryV27DTO> eventCategoryOrder =
-    TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.keySet()
+    ORDERED_TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.keySet()
       .stream()
       .toList();
 
