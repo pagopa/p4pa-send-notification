@@ -37,11 +37,11 @@ public class CampaignUtils {
     );
 
 
-  private static final List<TimelineElementCategoryV27DTO> eventCategoryOrder =
+  private static final List<TimelineElementCategoryV27DTO> TIMELINE_CATEGORY_ORDER =
     ORDERED_TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.keySet()
       .stream()
       .toList();
 
-  public static final Comparator<TimelineElementCategoryV27DTO> eventCategoryComparator =
-    Comparator.comparingInt(CampaignUtils.eventCategoryOrder::indexOf);
+  public static final Comparator<TimelineElementCategoryV27DTO> TIMELINE_CATEGORY_COMPARATOR =
+    Comparator.comparingInt(CampaignUtils.TIMELINE_CATEGORY_ORDER::indexOf);
 }
