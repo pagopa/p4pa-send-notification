@@ -1333,8 +1333,9 @@ class SendFacadeServiceImplTest {
   void givenNoTimelineElementCategoryOfInterestWhenNotifySendNotificationTimelineCategoryThenSkip() {
     //GIVEN
     String notificationRequestId = "notificationRequestId1";
+    SendNotificationNoPII sendNotification = new SendNotificationNoPII();
     when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
-      .thenReturn(Optional.empty());
+      .thenReturn(Optional.of(sendNotification));
 
     Map<String, List<TimelineElementCategoryV27DTO>> request = Map.of(
       notificationRequestId, List.of(TimelineElementCategoryV27DTO.AAR_CREATION_REQUEST)
