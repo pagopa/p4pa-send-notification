@@ -142,7 +142,6 @@
       "put" : {
         "tags" : [ "Send" ],
         "summary" : "notify last TimelineCategory for each notification",
-        "description" : "notify last TimelineCategory of interest for each notification",
         "operationId" : "notifySendNotificationTimelineCategory",
         "requestBody" : {
           "content" : {

@@ -4,14 +4,12 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategor
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.CampaignUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @Slf4j
-@Lazy
 public class SendNotificationTimelineCategoryServiceImpl implements SendNotificationTimelineCategoryService {
 
   private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
