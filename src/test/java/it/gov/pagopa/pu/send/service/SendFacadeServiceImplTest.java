@@ -82,7 +82,7 @@ class SendFacadeServiceImplTest {
   @Mock
   private SendNotificationService sendNotificationServiceMock;
   @Mock
-  private SendNotificationStatusHandlerService sendNotificationStatusHandlerServiceMock;
+  private SendNotificationTimelineCategoryService sendNotificationTimelineCategoryServiceMock;
   @Mock
   private CloseableHttpClient httpClientMock;
 
@@ -101,7 +101,7 @@ class SendFacadeServiceImplTest {
       sendLegalFactMapperMock,
       sendStreamMapperMock,
       sendStreamServiceMock,
-      sendNotificationStatusHandlerServiceMock
+      sendNotificationTimelineCategoryServiceMock
     );
   }
 
@@ -1334,59 +1334,29 @@ class SendFacadeServiceImplTest {
     //GIVEN
     String notificationRequestId = "notificationRequestId1";
     SendNotificationNoPII sendNotification = new SendNotificationNoPII();
-    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
-      .thenReturn(Optional.of(sendNotification));
-
-    Map<String, List<TimelineElementCategoryV27DTO>> request = Map.of(
-      notificationRequestId, List.of(TimelineElementCategoryV27DTO.AAR_CREATION_REQUEST)
-    );
-
-    //WHEN
-    sendService.notifySendNotificationTimelineCategory(request);
-
-    //THEN
-    verify(sendNotificationNoPIIRepositoryMock).findByNotificationRequestId(notificationRequestId);
-  }
-
-  @Test
-  void givenNotificationFoundWhenNotifySendNotificationTimelineCategoryThenUpdate() {
-    //GIVEN
-    TimelineElementCategoryV27DTO newTimelineCategory = TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS;
-    String notificationRequestId = "notificationRequestId1";
-    SendNotificationNoPII sendNotification = SendNotificationNoPII.builder()
-      .sendNotificationId("sendNotificationId1")
-      .campaignId("sendCampaignId1")
-      .streamEventStatus(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
-      .build();
+    List<TimelineElementCategoryV27DTO> timelineElementCategories =
+      List.of(TimelineElementCategoryV27DTO.AAR_CREATION_REQUEST);
     when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
       .thenReturn(Optional.of(sendNotification));
     doNothing()
-      .when(sendNotificationStatusHandlerServiceMock)
-      .handleSendNotificationStatusUpdate(
-        sendNotification.getSendNotificationId(),
-        sendNotification.getCampaignId(),
-        sendNotification.getStreamEventStatus(),
-        TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS
+      .when(sendNotificationTimelineCategoryServiceMock)
+      .notifySendNotificationTimelineCategory(
+        sendNotification,
+        timelineElementCategories
       );
 
-    Map<String, List<TimelineElementCategoryV27DTO>> request = Map.of(
-      notificationRequestId,
-      List.of(
-        sendNotification.getStreamEventStatus(),
-        newTimelineCategory
-      )
-    );
+    Map<String, List<TimelineElementCategoryV27DTO>> request =
+      Map.of(notificationRequestId, timelineElementCategories);
 
     //WHEN
     sendService.notifySendNotificationTimelineCategory(request);
 
     //THEN
     verify(sendNotificationNoPIIRepositoryMock).findByNotificationRequestId(notificationRequestId);
-    verify(sendNotificationStatusHandlerServiceMock).handleSendNotificationStatusUpdate(
-      sendNotification.getSendNotificationId(),
-      sendNotification.getCampaignId(),
-      sendNotification.getStreamEventStatus(),
-      newTimelineCategory
+    verify(sendNotificationTimelineCategoryServiceMock).notifySendNotificationTimelineCategory(
+      sendNotification,
+      timelineElementCategories
     );
   }
+
 }

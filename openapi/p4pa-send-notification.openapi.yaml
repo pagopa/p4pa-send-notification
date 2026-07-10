@@ -638,11 +638,10 @@ paths:
       tags:
         - Send
       summary: notify last TimelineCategory for each notification
-      description: align lastEventOfInterest for each specified notification with last TimelineElementCategory of interest for campaign counters
+      description: notify last TimelineCategory of interest for each notification
       operationId: notifySendNotificationTimelineCategory
       requestBody:
         required: true
-        description: "Map with key SEND notificationRequestId and with value List of TimelineElementCategory"
         content:
           application/json:
             schema:
@@ -1069,10 +1068,9 @@ components:
           type: string
           format: date-time
     NotifySendNotificationTimelineCategoryRequest:
+      description: "A map having SEND notificationRequestId as key and a List of TimelineElementCategory as value"
       type: object
       additionalProperties:
-        $ref: "#/components/schemas/SendNotificationTimelineCategoryList"
-    SendNotificationTimelineCategoryList:
-      type: array
-      items:
-        type: 'TimelineElementCategory'
+        type: array
+        items:
+          type: 'TimelineElementCategory'

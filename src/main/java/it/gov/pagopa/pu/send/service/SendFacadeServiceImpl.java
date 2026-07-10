@@ -55,7 +55,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendStreamService sendStreamService;
   private final WorkflowService workflowService;
   private final SendNotificationService sendNotificationService;
-  private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
+  private final SendNotificationTimelineCategoryService sendNotificationTimelineCategoryService;
 
   private final CloseableHttpClient httpClient;
 
@@ -71,7 +71,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendStreamService sendStreamService,
     WorkflowService workflowService,
     SendNotificationService sendNotificationService,
-    SendNotificationStatusHandlerService sendNotificationStatusHandlerService,
+    SendNotificationTimelineCategoryService sendNotificationTimelineCategoryService,
     CloseableHttpClient httpClient) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendStreamRepository = sendStreamRepository;
@@ -84,7 +84,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     this.sendStreamService = sendStreamService;
     this.workflowService = workflowService;
     this.sendNotificationService = sendNotificationService;
-    this.sendNotificationStatusHandlerService = sendNotificationStatusHandlerService;
+    this.sendNotificationTimelineCategoryService = sendNotificationTimelineCategoryService;
     this.httpClient = httpClient;
   }
 
@@ -351,20 +351,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
         log.info("Send notification not found for notificationRequestId \"{}\", skipped updating lastEventOfInterest.", key);
         return;
       }
-      SendNotificationNoPII notification = optionalNotification.get();
-      List<TimelineElementCategoryV27DTO> timelineElementCategoriesOfInterest =
-        value.stream()
-          .filter(CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS::containsKey)
-          .toList();
-      if(timelineElementCategoriesOfInterest.isEmpty()) {
-        return;
-      }
-      sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-        notification.getSendNotificationId(),
-        notification.getCampaignId(),
-        notification.getStreamEventStatus(),
-        timelineElementCategoriesOfInterest.getLast()
-      );
+      sendNotificationTimelineCategoryService.notifySendNotificationTimelineCategory(optionalNotification.get(), value);
     });
   }
 
