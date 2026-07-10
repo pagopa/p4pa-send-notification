@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -228,24 +230,20 @@ class SendControllerTest {
   @Test
   void givenExpectedMapsWhenNotifySendNotificationTimelineCategoryThenOk() {
     // GIVEN
-    Map<String, List<String>> request = Map.of(
-      "notificationRequestId1", List.of("IN_VALIDATION", "REQUEST_ACCEPTED"),
-      "notificationRequestId2", List.of("IN_VALIDATION", "REQUEST_ACCEPTED", "SEND_DIGITAL_PROGRESS")
-    );
-    Map<String, String> expectedResponse = Map.of(
-      "notificationRequestId1", "REQUEST_ACCEPTED",
-      "notificationRequestId2", "SEND_DIGITAL_PROGRESS"
+    Map<String, List<TimelineElementCategoryV27DTO>> request = Map.of(
+      "notificationRequestId1", List.of(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED),
+      "notificationRequestId2", List.of(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED, TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS)
     );
 
-    when(sendFacadeServiceMock.notifySendNotificationTimelineCategory(request))
-      .thenReturn(expectedResponse);
+    doNothing()
+      .when(sendFacadeServiceMock)
+      .notifySendNotificationTimelineCategory(request);
 
     // WHEN
-    ResponseEntity<Map<String, String>> actualResponse = sendController.notifySendNotificationTimelineCategory(request);
+    ResponseEntity<Void> actualResponse = sendController.notifySendNotificationTimelineCategory(request);
 
     // THEN
     Assertions.assertNotNull(actualResponse);
-    Assertions.assertEquals(expectedResponse, actualResponse.getBody());
     Assertions.assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
   }
 }

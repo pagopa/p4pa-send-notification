@@ -39,7 +39,6 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -345,38 +344,28 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public Map<String,String> notifySendNotificationTimelineCategory(Map<String, List<String>> notificationRequestIdToTimelineCatogoriesMap) {
-    return notificationRequestIdToTimelineCatogoriesMap.entrySet()
-      .stream()
-      .map(e -> {
-        Optional<SendNotificationNoPII> optionalNotification = sendNotificationNoPIIRepository.findByNotificationRequestId(e.getKey());
-        if (optionalNotification.isEmpty()) {
-          log.info("Send notification not found for notificationRequestId \"{}\", skipped updating lastEventOfInterest.", e.getKey());
-          return Optional.<Map.Entry<String, String>>empty();
-        }
-        SendNotificationNoPII notification = optionalNotification.get();
-        return e.getValue().stream()
-          .map(v -> Utilities.safeEnumFromValue(TimelineElementCategoryV27DTO.class, v))
-          .flatMap(Optional::stream)
-          .filter(CampaignUtils.ORDERED_TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS::containsKey)
-          .max(CampaignUtils.TIMELINE_CATEGORY_COMPARATOR)
-          .map(ec -> {
-            sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-              notification.getSendNotificationId(),
-              notification.getCampaignId(),
-              notification.getStreamEventStatus(),
-              ec
-            );
-            return Map.entry(e.getKey(),ec.getValue());
-          });
-      })
-      .flatMap(Optional::stream)
-      .collect(
-        Collectors.toMap(
-          Map.Entry::getKey,
-          Map.Entry::getValue
-        )
+  public void notifySendNotificationTimelineCategory(Map<String, List<TimelineElementCategoryV27DTO>> notificationRequestIdToTimelineCatogoriesMap) {
+    notificationRequestIdToTimelineCatogoriesMap.forEach((key, value) -> {
+      Optional<SendNotificationNoPII> optionalNotification = sendNotificationNoPIIRepository.findByNotificationRequestId(key);
+      if (optionalNotification.isEmpty()) {
+        log.info("Send notification not found for notificationRequestId \"{}\", skipped updating lastEventOfInterest.", key);
+        return;
+      }
+      SendNotificationNoPII notification = optionalNotification.get();
+      List<TimelineElementCategoryV27DTO> timelineElementCategoriesOfInterest =
+        value.stream()
+          .filter(CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS::containsKey)
+          .toList();
+      if(timelineElementCategoriesOfInterest.isEmpty()) {
+        return;
+      }
+      sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
+        notification.getSendNotificationId(),
+        notification.getCampaignId(),
+        notification.getStreamEventStatus(),
+        timelineElementCategoriesOfInterest.getLast()
       );
+    });
   }
 
 }

@@ -54,8 +54,7 @@ import static it.gov.pagopa.pu.send.util.Constants.LEGAL_FACT_ID_PREFIX;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SendFacadeServiceImplTest {
@@ -1319,19 +1318,37 @@ class SendFacadeServiceImplTest {
     when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
       .thenReturn(Optional.empty());
 
-    Map<String, List<String>> request = Map.of(
-      notificationRequestId, List.of("IN_VALIDATION", "REQUEST_ACCEPTED")
+    Map<String, List<TimelineElementCategoryV27DTO>> request = Map.of(
+      notificationRequestId, List.of(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
     );
 
     //WHEN
-    Map<String, String> stringStringMap = sendService.notifySendNotificationTimelineCategory(request);
+    sendService.notifySendNotificationTimelineCategory(request);
 
     //THEN
-    Assertions.assertTrue(stringStringMap.isEmpty());
+    verify(sendNotificationNoPIIRepositoryMock).findByNotificationRequestId(notificationRequestId);
   }
 
   @Test
-  void givenNotificationFoundWhenNotifySendNotificationTimelineCategoryThenSkip() {
+  void givenNoTimelineElementCategoryOfInterestWhenNotifySendNotificationTimelineCategoryThenSkip() {
+    //GIVEN
+    String notificationRequestId = "notificationRequestId1";
+    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+      .thenReturn(Optional.empty());
+
+    Map<String, List<TimelineElementCategoryV27DTO>> request = Map.of(
+      notificationRequestId, List.of(TimelineElementCategoryV27DTO.AAR_CREATION_REQUEST)
+    );
+
+    //WHEN
+    sendService.notifySendNotificationTimelineCategory(request);
+
+    //THEN
+    verify(sendNotificationNoPIIRepositoryMock).findByNotificationRequestId(notificationRequestId);
+  }
+
+  @Test
+  void givenNotificationFoundWhenNotifySendNotificationTimelineCategoryThenUpdate() {
     //GIVEN
     TimelineElementCategoryV27DTO newTimelineCategory = TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS;
     String notificationRequestId = "notificationRequestId1";
@@ -1351,21 +1368,24 @@ class SendFacadeServiceImplTest {
         TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS
       );
 
-    Map<String, List<String>> request = Map.of(
+    Map<String, List<TimelineElementCategoryV27DTO>> request = Map.of(
       notificationRequestId,
       List.of(
-        "wrong_IN_VALIDATION",
-        sendNotification.getStreamEventStatus().getValue(),
-        newTimelineCategory.getValue()
+        sendNotification.getStreamEventStatus(),
+        newTimelineCategory
       )
     );
 
     //WHEN
-    Map<String, String> actualResultMap = sendService.notifySendNotificationTimelineCategory(request);
+    sendService.notifySendNotificationTimelineCategory(request);
 
     //THEN
-    Assertions.assertFalse(actualResultMap.isEmpty());
-    Assertions.assertEquals(1, actualResultMap.size());
-    Assertions.assertEquals("SEND_DIGITAL_PROGRESS", actualResultMap.get(notificationRequestId));
+    verify(sendNotificationNoPIIRepositoryMock).findByNotificationRequestId(notificationRequestId);
+    verify(sendNotificationStatusHandlerServiceMock).handleSendNotificationStatusUpdate(
+      sendNotification.getSendNotificationId(),
+      sendNotification.getCampaignId(),
+      sendNotification.getStreamEventStatus(),
+      newTimelineCategory
+    );
   }
 }

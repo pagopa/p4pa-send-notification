@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
@@ -102,8 +103,9 @@ public class SendController implements SendApi {
   }
 
   @Override
-  public ResponseEntity<Map<String,String>> notifySendNotificationTimelineCategory(Map<String, List<String>> notificationRequestIdToTimelineCatogoriesMap) {
-    return new ResponseEntity<>(sendFacadeService.notifySendNotificationTimelineCategory(notificationRequestIdToTimelineCatogoriesMap), HttpStatus.OK);
+  public ResponseEntity<Void> notifySendNotificationTimelineCategory(Map<String, List<TimelineElementCategoryV27DTO>> notificationRequestIdToTimelineCatogoriesMap) {
+    sendFacadeService.notifySendNotificationTimelineCategory(notificationRequestIdToTimelineCatogoriesMap);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
 }
