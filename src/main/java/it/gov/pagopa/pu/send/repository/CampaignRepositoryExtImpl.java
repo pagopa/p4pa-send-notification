@@ -6,12 +6,18 @@ import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.Campaign.Fields;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
   private final MongoTemplate mongoTemplate;
@@ -73,5 +79,30 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
       Query.query(Criteria.where(Fields.campaignId).is(campaignId)),
       new Update().set(field, date)
     );
+  }
+
+  @Override
+  public Page<Campaign> findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable) {
+    Query query = new Query();
+    query.addCriteria(Criteria
+      .where(Fields.organizationId).is(organizationId)
+      .and(Fields.startDate).lte(dateTo)
+      .and(Fields.endDate).gte(dateFrom));
+    if(StringUtils.isNotBlank(orgSubUnitCode)){
+      query.addCriteria(Criteria.where(Fields.orgSubUnitCode).is(orgSubUnitCode));
+    }else {
+      query.addCriteria(Criteria.where(Fields.orgSubUnitCode).is(null));
+    }
+    if(StringUtils.isNotBlank(campaignName)){
+      query.addCriteria(Criteria.where(Fields.campaignName).regex(Pattern.quote(campaignName), "i"));
+    }
+    if(StringUtils.isNotBlank(externalCampaignId)){
+      query.addCriteria(Criteria.where(Fields.externalId).is(externalCampaignId));
+    }
+
+    long count = mongoTemplate.count(query, Campaign.class);
+    query.with(pageable);
+    List<Campaign> campaigns = mongoTemplate.find(query, Campaign.class);
+    return new PageImpl<>(campaigns, pageable, count);
   }
 }
