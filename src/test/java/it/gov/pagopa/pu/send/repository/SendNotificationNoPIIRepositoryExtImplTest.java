@@ -249,7 +249,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       SendNotificationNoPII.class))).thenReturn(updateResult);
     Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
 
-    UpdateResult result = repository.updateFileStatusAndDownloadDate(sendNotificationId, fileName, status, now);
+    UpdateResult result = repository.updateFileStatusAndUploadDate(sendNotificationId, fileName, status, now);
 
     assertEquals(1L, result.getModifiedCount());
   }

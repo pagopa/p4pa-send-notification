@@ -225,7 +225,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     } catch (Exception e) {
       throw new InvalidSignatureException(e.getMessage());
     }
-    sendNotificationNoPIIRepository.updateFileStatusAndDownloadDate(sendNotificationId, doc.getFileName(), FileStatus.READY, OffsetDateTime.now(ZONEID));
+    sendNotificationNoPIIRepository.updateFileStatusAndUploadDate(sendNotificationId, doc.getFileName(), FileStatus.READY, OffsetDateTime.now(ZONEID));
   }
 
   /**

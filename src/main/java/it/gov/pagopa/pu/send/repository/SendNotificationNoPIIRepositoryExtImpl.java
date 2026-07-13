@@ -37,7 +37,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_DOCUMENT_SECRET = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.secret);
   public static final String FIELD_DOCUMENT_HTTPMETHOD = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.httpMethod);
   public static final String FIELD_DOCUMENT_STATUS = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.status);
-  public static final String FIELD_DOCUMENT_DOWNLOAD_DATE = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.downloadDate);
+  public static final String FIELD_DOCUMENT_UPLOAD_DATE = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.uploadDate);
   public static final String FIELD_DOCUMENT_VERSIONID = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.versionId);
   public static final String FIELD_PAYMENT_NOTICE_CODE = "%s.%s.%s.pagoPa.noticeCode".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.puPayments, PuPayment.Fields.payment);
   private static final String FIELD_FILTERED_NOTIFICATION_DATE = "recipients.$[].puPayments.$[elem].notificationDate";
@@ -101,13 +101,13 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   @Override
-  public UpdateResult updateFileStatusAndDownloadDate(String sendNotificationId, String fileName, FileStatus newStatus, OffsetDateTime downloadDate) {
+  public UpdateResult updateFileStatusAndUploadDate(String sendNotificationId, String fileName, FileStatus newStatus, OffsetDateTime uploadDate) {
     return updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)
         .and(FIELD_DOCUMENT_ID).is(fileName)),
       new Update()
         .set(FIELD_DOCUMENT_STATUS, newStatus)
-        .set(FIELD_DOCUMENT_DOWNLOAD_DATE, downloadDate)
+        .set(FIELD_DOCUMENT_UPLOAD_DATE, uploadDate)
     );
   }
 

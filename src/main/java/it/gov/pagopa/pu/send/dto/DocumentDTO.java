@@ -26,5 +26,5 @@ public class DocumentDTO implements Serializable {
   private String url;
   private String key;
   private String versionId;
-  private OffsetDateTime downloadDate;
+  private OffsetDateTime uploadDate;
 }
