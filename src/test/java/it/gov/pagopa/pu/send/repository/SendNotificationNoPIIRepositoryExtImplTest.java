@@ -255,7 +255,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   }
 
   @Test
-  void givenLastEventOfInterestByIdThenVerify() {
+  void whenUpdateLastEventOfInterestByIdThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
     TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.REQUEST_ACCEPTED;
 
