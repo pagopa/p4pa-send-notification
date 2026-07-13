@@ -22,9 +22,7 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendStreamRepository;
-import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
-import it.gov.pagopa.pu.send.util.HttpUtils;
-import it.gov.pagopa.pu.send.util.NotificationUtils;
+import it.gov.pagopa.pu.send.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -39,6 +37,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -56,6 +55,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendStreamService sendStreamService;
   private final WorkflowService workflowService;
   private final SendNotificationService sendNotificationService;
+  private final SendNotificationTimelineCategoryService sendNotificationTimelineCategoryService;
 
   private final CloseableHttpClient httpClient;
 
@@ -71,6 +71,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendStreamService sendStreamService,
     WorkflowService workflowService,
     SendNotificationService sendNotificationService,
+    SendNotificationTimelineCategoryService sendNotificationTimelineCategoryService,
     CloseableHttpClient httpClient) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendStreamRepository = sendStreamRepository;
@@ -83,6 +84,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     this.sendStreamService = sendStreamService;
     this.workflowService = workflowService;
     this.sendNotificationService = sendNotificationService;
+    this.sendNotificationTimelineCategoryService = sendNotificationTimelineCategoryService;
     this.httpClient = httpClient;
   }
 
@@ -339,6 +341,18 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     try(ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
       sendNotificationService.downloadSendLegalFact(sendNotificationId, category, polishedLegalFactId, inputStream);
     }
+  }
+
+  @Override
+  public void notifySendNotificationTimelineCategory(Map<String, List<TimelineElementCategoryV27DTO>> notificationRequestIdToTimelineCatogoriesMap) {
+    notificationRequestIdToTimelineCatogoriesMap.forEach((key, value) -> {
+      Optional<SendNotificationNoPII> optionalNotification = sendNotificationNoPIIRepository.findByNotificationRequestId(key);
+      if (optionalNotification.isEmpty()) {
+        log.info("Send notification not found for notificationRequestId \"{}\", skipped updating lastEventOfInterest.", key);
+        return;
+      }
+      sendNotificationTimelineCategoryService.notifySendNotificationTimelineCategory(optionalNotification.get(), value);
+    });
   }
 
 }
