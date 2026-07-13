@@ -36,7 +36,7 @@ class SendNotificationTimelineCategoryServiceImplTest {
     SendNotificationNoPII sendNotification = SendNotificationNoPII.builder()
       .sendNotificationId("sendNotificationId1")
       .campaignId("sendCampaignId1")
-      .streamEventStatus(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
+      .lastEventOfInterest(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
       .build();
     List<TimelineElementCategoryV27DTO> timelineElementCategories =
       List.of(
@@ -48,7 +48,7 @@ class SendNotificationTimelineCategoryServiceImplTest {
       .handleSendNotificationStatusUpdate(
         sendNotification.getSendNotificationId(),
         sendNotification.getCampaignId(),
-        sendNotification.getStreamEventStatus(),
+        sendNotification.getLastEventOfInterest(),
         timelineElementCategories.getLast()
       );
 
@@ -59,7 +59,7 @@ class SendNotificationTimelineCategoryServiceImplTest {
     verify(sendNotificationStatusHandlerServiceMock).handleSendNotificationStatusUpdate(
       sendNotification.getSendNotificationId(),
       sendNotification.getCampaignId(),
-      sendNotification.getStreamEventStatus(),
+      sendNotification.getLastEventOfInterest(),
       timelineElementCategories.getLast()
     );
   }
@@ -70,7 +70,7 @@ class SendNotificationTimelineCategoryServiceImplTest {
     SendNotificationNoPII sendNotification = SendNotificationNoPII.builder()
       .sendNotificationId("sendNotificationId1")
       .campaignId("sendCampaignId1")
-      .streamEventStatus(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
+      .lastEventOfInterest(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
       .build();
     List<TimelineElementCategoryV27DTO> timelineElementCategories =
       List.of(
@@ -86,7 +86,7 @@ class SendNotificationTimelineCategoryServiceImplTest {
       .handleSendNotificationStatusUpdate(
         eq(sendNotification.getSendNotificationId()),
         eq(sendNotification.getCampaignId()),
-        eq(sendNotification.getStreamEventStatus()),
+        eq(sendNotification.getLastEventOfInterest()),
         isA(TimelineElementCategoryV27DTO.class)
       );
   }

@@ -290,7 +290,7 @@ class SendNotificationServiceImplTest {
     Path relativePath = Path.of("1/sendNotificationId");
 
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
-    notification.setStreamEventStatus(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED);
+    notification.setLastEventOfInterest(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED);
     notification.setCreationDate(LocalDateTime.of(2026,Month.JUNE,30,12,0));
     PuPayment puPayment = new PuPayment();
     Payment payment = new Payment();
@@ -310,7 +310,7 @@ class SendNotificationServiceImplTest {
       Optional.of(notification));
     Mockito.when(fileStorerServiceMock.buildRelativeSendPath(
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
-    Mockito.doNothing().when(sendNotificationStatusHandlerServiceMock).handleDeletedSendNotification(notification.getCampaignId(),notification.getCreationDate().toLocalDate(),notification.getStreamEventStatus());
+    Mockito.doNothing().when(sendNotificationStatusHandlerServiceMock).handleDeletedSendNotification(notification.getCampaignId(),notification.getCreationDate().toLocalDate(),notification.getLastEventOfInterest());
     //Then
     sendNotificationService.deleteSendNotification(sendNotificationId);
     Mockito.verify(sendNotificationPIIRepositoryMock).delete(notification);

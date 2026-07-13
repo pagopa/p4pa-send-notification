@@ -31,7 +31,7 @@ public class SendNotificationTimelineCategoryServiceImpl implements SendNotifica
     sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
       notification.getSendNotificationId(),
       notification.getCampaignId(),
-      notification.getStreamEventStatus(),
+      notification.getLastEventOfInterest(),
       timelineElementCategoriesOfInterest.getLast()
     );
   }
