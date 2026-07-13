@@ -4,7 +4,9 @@ import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
@@ -19,6 +21,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import uk.co.jemos.podam.api.PodamFactory;
 
 import java.time.LocalDate;
@@ -36,13 +42,15 @@ class CampaignServiceImplTest {
   private CampaignRepository campaignRepositoryMock;
   @Mock
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
+  @Mock
+  private PagedCampaignMapper pagedCampaignMapperMock;
 
   @InjectMocks
   private CampaignServiceImpl campaignService;
 
   @AfterEach
   void verifyNoMoreInteractions() {
-    Mockito.verifyNoMoreInteractions(campaignRepositoryMock, sendNotificationNoPIIRepositoryMock);
+    Mockito.verifyNoMoreInteractions(campaignRepositoryMock, sendNotificationNoPIIRepositoryMock, pagedCampaignMapperMock);
   }
 
   @Test
@@ -228,5 +236,28 @@ class CampaignServiceImplTest {
     when(campaignRepositoryMock.updateEndDate(campaignId, endDate)).thenReturn(updateResult);
 
     Assertions.assertDoesNotThrow(()->campaignService.updateEndDate(campaignId, endDate));
+  }
+
+  @Test
+  void whenFindCampaignsByFiltersThenOk() {
+    Long organizationId = 1L;
+    LocalDate dateFrom = LocalDate.of(2026, Month.JULY, 1);
+    LocalDate dateTo = LocalDate.of(2026, Month.JULY, 31);
+    String orgSubUnitCode = "orgSubUnitCode";
+    String campaignName = "campaignName";
+    String externalCampaignId = "externalCampaignId";
+    Pageable pageable = PageRequest.of(0, 10);
+
+    List<Campaign> campaigns = podamFactory.manufacturePojo(List.class, Campaign.class);
+    Page<Campaign> campaignPage = new PageImpl<>(campaigns);
+    PagedCampaign expected = podamFactory.manufacturePojo(PagedCampaign.class);
+
+    when(campaignRepositoryMock.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable))
+      .thenReturn(campaignPage);
+    when(pagedCampaignMapperMock.mapToPagedCampaign(campaignPage)).thenReturn(expected);
+
+    PagedCampaign result = campaignService.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable);
+
+    Assertions.assertEquals(expected, result);
   }
 }

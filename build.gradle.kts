@@ -193,7 +193,8 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
       "ProgressResponseElementV28DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV28DTO",
       "LegalFactCategoryDTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO",
       "FileStatus" to "it.gov.pagopa.pu.send.enums.FileStatus",
-      "TimelineElementCategory" to "it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO"
+      "TimelineElementCategory" to "it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO",
+      "Campaign" to "it.gov.pagopa.pu.send.model.Campaign"
     )
   )
   configOptions.set(
