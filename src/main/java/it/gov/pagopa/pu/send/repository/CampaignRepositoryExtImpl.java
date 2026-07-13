@@ -90,6 +90,8 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
       .and(Fields.endDate).gte(dateFrom));
     if(StringUtils.isNotBlank(orgSubUnitCode)){
       query.addCriteria(Criteria.where(Fields.orgSubUnitCode).is(orgSubUnitCode));
+    }else {
+      query.addCriteria(Criteria.where(Fields.orgSubUnitCode).is(null));
     }
     if(StringUtils.isNotBlank(campaignName)){
       query.addCriteria(Criteria.where(Fields.campaignName).regex(Pattern.quote(campaignName), "i"));

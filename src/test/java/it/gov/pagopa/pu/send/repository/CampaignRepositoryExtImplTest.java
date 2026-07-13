@@ -99,7 +99,7 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
   }
 
   @Test
-  void givenAllFiltersWhenFindCampaignsByFiltersThenOk() {
+  void whenFindCampaignsByFiltersThenOk() {
     Long organizationId = 1L;
     LocalDate dateFrom = LocalDate.of(2026, Month.JULY, 1);
     LocalDate dateTo = LocalDate.of(2026, Month.JULY, 31);
