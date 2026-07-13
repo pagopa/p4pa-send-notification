@@ -216,18 +216,18 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   private ConditionalOperators.Cond buildStatusCondition(String counterName) {
-    Set<TimelineElementCategoryV27DTO> streamEventStatuses =
+    Set<TimelineElementCategoryV27DTO> latestEventsOfInterest =
       CampaignUtils.COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES.getOrDefault(counterName, Collections.emptySet());
 
-    return ConditionalOperators.when(Criteria.where(Fields.streamEventStatus).in(streamEventStatuses))
+    return ConditionalOperators.when(Criteria.where(Fields.lastEventOfInterest).in(latestEventsOfInterest))
       .then(1).otherwise(0);
   }
 
   @Override
-  public UpdateResult updateStreamEventStatusById(String sendNotificationId, TimelineElementCategoryV27DTO newStatus) {
+  public UpdateResult updateLastEventOfInterestById(String sendNotificationId, TimelineElementCategoryV27DTO newStatus) {
     return updateFirst(
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
-      new Update().set(Fields.streamEventStatus, newStatus)
+      new Update().set(Fields.lastEventOfInterest, newStatus)
     );
   }
 }

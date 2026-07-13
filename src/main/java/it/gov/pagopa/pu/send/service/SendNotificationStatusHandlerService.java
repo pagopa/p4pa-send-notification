@@ -9,5 +9,5 @@ import java.time.LocalDate;
 public interface SendNotificationStatusHandlerService {
   Campaign handleNewSendNotification(CreateNotificationRequest createNotificationRequest);
   void handleSendNotificationStatusUpdate(String sendNotificationId, String campaignId, TimelineElementCategoryV27DTO oldStatus, TimelineElementCategoryV27DTO newStatus);
-  void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, TimelineElementCategoryV27DTO currentStreamEventStatus);
+  void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, TimelineElementCategoryV27DTO currentLatestEventOfInterest);
 }
