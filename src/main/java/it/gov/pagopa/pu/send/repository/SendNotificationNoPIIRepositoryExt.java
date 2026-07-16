@@ -18,7 +18,7 @@ public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult updateNotificationStatusById(String sendNotificationId, NotificationStatus newStatus);
   UpdateResult updateNotificationRequestId(String sendNotificationId, String notificationRequestId);
   UpdateResult updateFileStatus(String sendNotificationId, String fileName, FileStatus newStatus);
-  UpdateResult updateFileStatusAndDownloadDate(String sendNotificationId, String fileName, FileStatus newStatus, OffsetDateTime downloadDate);
+  UpdateResult updateFileStatusAndUploadDate(String sendNotificationId, String fileName, FileStatus newStatus, OffsetDateTime uploadDate);
   UpdateResult updateFileVersionId(String sendNotificationId, String fileName, String versionId);
   UpdateResult updateNotificationIun(String sendNotificationId, String iun);
   UpdateResult updateNotificationDate(String sendNotificationId, OffsetDateTime notificationDate, String nav);
@@ -28,5 +28,5 @@ public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult addLegalFact(String sendNotificationId, LegalFactDTO legalFact);
   UpdateResult updateLegalFactStatus(String sendNotificationId, String fileName, FileStatus status);
   Counters calculateCampaignCounters(String campaignId);
-  UpdateResult updateStreamEventStatusById(String sendNotificationId, TimelineElementCategoryV27DTO newStatus);
+  UpdateResult updateLastEventOfInterestById(String sendNotificationId, TimelineElementCategoryV27DTO newStatus);
 }

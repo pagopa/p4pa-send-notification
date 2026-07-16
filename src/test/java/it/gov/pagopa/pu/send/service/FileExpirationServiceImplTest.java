@@ -315,7 +315,7 @@ class FileExpirationServiceImplTest {
     DocumentDTO expiredDocument = DocumentDTO.builder()
       .fileName("already-expired.pdf")
       .status(FileStatus.EXPIRED)
-      .downloadDate(OffsetDateTime.now().minusDays(60))
+      .uploadDate(OffsetDateTime.now().minusDays(60))
       .build();
 
     SendNotificationNoPII notification = new SendNotificationNoPII();
@@ -347,7 +347,7 @@ class FileExpirationServiceImplTest {
     DocumentDTO documentNoDownloadDate = DocumentDTO.builder()
       .fileName("no-download.pdf")
       .status(FileStatus.READY)
-      .downloadDate(null)
+      .uploadDate(null)
       .build();
 
     SendNotificationNoPII notification = new SendNotificationNoPII();
@@ -376,28 +376,28 @@ class FileExpirationServiceImplTest {
     long expirationDays = 30L;
     long organizationId = 1L;
 
-    OffsetDateTime downloadDate1 = OffsetDateTime.now().minusDays(5);
-    OffsetDateTime downloadDate2 = OffsetDateTime.now().minusDays(2);
-    OffsetDateTime downloadDate3 = OffsetDateTime.now().minusDays(10);
+    OffsetDateTime uploadDate1 = OffsetDateTime.now().minusDays(5);
+    OffsetDateTime uploadDate2 = OffsetDateTime.now().minusDays(2);
+    OffsetDateTime uploadDate3 = OffsetDateTime.now().minusDays(10);
 
-    OffsetDateTime expectedNextFileExpirationDate = downloadDate2.plusDays(expirationDays);
+    OffsetDateTime expectedNextFileExpirationDate = uploadDate2.plusDays(expirationDays);
 
     DocumentDTO document1 = DocumentDTO.builder()
       .fileName("file1.pdf")
       .status(FileStatus.READY)
-      .downloadDate(downloadDate1)
+      .uploadDate(uploadDate1)
       .build();
 
     DocumentDTO document2 = DocumentDTO.builder()
       .fileName("file2.pdf")
       .status(FileStatus.READY)
-      .downloadDate(downloadDate2)
+      .uploadDate(uploadDate2)
       .build();
 
     DocumentDTO document3 = DocumentDTO.builder()
       .fileName("file3.pdf")
       .status(FileStatus.READY)
-      .downloadDate(downloadDate3)
+      .uploadDate(uploadDate3)
       .build();
 
     SendNotificationNoPII notification = new SendNotificationNoPII();
@@ -426,29 +426,29 @@ class FileExpirationServiceImplTest {
     long expirationDays = 30L;
     long organizationId = 1L;
 
-    OffsetDateTime recentDownloadDate = OffsetDateTime.now().minusDays(5);
-    OffsetDateTime olderDownloadDate  = OffsetDateTime.now().minusDays(10);
-    OffsetDateTime expiredDownloadDate = OffsetDateTime.now().minusDays(60);
+    OffsetDateTime recentUploadDate = OffsetDateTime.now().minusDays(5);
+    OffsetDateTime olderUploadDate  = OffsetDateTime.now().minusDays(10);
+    OffsetDateTime expiredUploadDate = OffsetDateTime.now().minusDays(60);
 
-    OffsetDateTime expectedNextFileExpirationDate = recentDownloadDate.plusDays(expirationDays);
+    OffsetDateTime expectedNextFileExpirationDate = recentUploadDate.plusDays(expirationDays);
 
     DocumentDTO notExpiredDocument1 = DocumentDTO.builder()
       .fileName("not-expired-1.pdf")
       .status(FileStatus.READY)
-      .downloadDate(recentDownloadDate)
+      .uploadDate(recentUploadDate)
       .build();
 
     DocumentDTO notExpiredDocument2 = DocumentDTO.builder()
       .fileName("not-expired-2.pdf")
       .status(FileStatus.READY)
-      .downloadDate(olderDownloadDate)
+      .uploadDate(olderUploadDate)
       .build();
 
     String expiredFileName = "expired.pdf";
     DocumentDTO expiredDocument = DocumentDTO.builder()
       .fileName(expiredFileName)
       .status(FileStatus.READY)
-      .downloadDate(expiredDownloadDate)
+      .uploadDate(expiredUploadDate)
       .build();
 
     SendNotificationNoPII notification = podamFactory.manufacturePojo(SendNotificationNoPII.class);

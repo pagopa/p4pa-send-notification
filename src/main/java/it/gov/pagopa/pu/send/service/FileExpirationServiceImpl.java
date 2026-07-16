@@ -85,11 +85,11 @@ public class FileExpirationServiceImpl implements FileExpirationService {
     Long sendFilesExpirationDays = brokerConfiguration.getSendFilesExpirationDays();
 
     OffsetDateTime nextFileExpirationDate = sendNotification.getDocuments().stream()
-      .filter(document -> document.getStatus() != FileStatus.EXPIRED && document.getDownloadDate() != null)
+      .filter(document -> document.getStatus() != FileStatus.EXPIRED && document.getUploadDate() != null)
       .map(document -> processFile(
         sendNotification,
         sendNotificationId+"_"+document.getFileName(),
-        document.getDownloadDate().plusDays(sendFilesExpirationDays),
+        document.getUploadDate().plusDays(sendFilesExpirationDays),
         ()-> sendNotificationNoPIIRepository.updateFileStatus(sendNotificationId, document.getFileName(), FileStatus.EXPIRED)))
       .filter(Objects::nonNull)
       .max(Comparator.naturalOrder())

@@ -249,13 +249,13 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       SendNotificationNoPII.class))).thenReturn(updateResult);
     Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
 
-    UpdateResult result = repository.updateFileStatusAndDownloadDate(sendNotificationId, fileName, status, now);
+    UpdateResult result = repository.updateFileStatusAndUploadDate(sendNotificationId, fileName, status, now);
 
     assertEquals(1L, result.getModifiedCount());
   }
 
   @Test
-  void givenUpdateStreamEventStatusByIdThenVerify() {
+  void whenUpdateLastEventOfInterestByIdThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
     TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.REQUEST_ACCEPTED;
 
@@ -265,7 +265,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       .thenReturn(updateResult);
     Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
 
-    UpdateResult result = repository.updateStreamEventStatusById(sendNotificationId, newStatus);
+    UpdateResult result = repository.updateLastEventOfInterestById(sendNotificationId, newStatus);
 
     assertEquals(1L, result.getModifiedCount());
   }

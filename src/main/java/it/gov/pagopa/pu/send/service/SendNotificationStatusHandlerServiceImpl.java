@@ -54,11 +54,11 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
     }
     NotificationStatusChangeDTO notificationStatusChangeDTO = handleStatusChange(oldStatus, newStatus);
     campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO);
-    sendNotificationNoPIIRepository.updateStreamEventStatusById(sendNotificationId, newStatus);
+    sendNotificationNoPIIRepository.updateLastEventOfInterestById(sendNotificationId, newStatus);
   }
 
   private NotificationStatusChangeDTO handleStatusChange(TimelineElementCategoryV27DTO oldStatus, TimelineElementCategoryV27DTO newStatus){
-    Set<String> oldCounters = CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(oldStatus, Set.of());
+    Set<String> oldCounters = (oldStatus != null) ? CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.get(oldStatus) : Set.of();
     Set<String> newCounters = CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(newStatus, Set.of());
     return NotificationStatusChangeDTO.builder()
       .incrFields(newCounters.stream().filter(c -> !oldCounters.contains(c)).collect(Collectors.toSet()))
@@ -68,7 +68,7 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
 
   @Transactional
   @Override
-  public void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, TimelineElementCategoryV27DTO currentStreamEventStatus) {
+  public void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, TimelineElementCategoryV27DTO currentLastEventOfInterest) {
     Campaign campaign = campaignService.getCampaignById(campaignId);
     if(campaign.getCounters()!=null && Objects.equals(campaign.getCounters().getTotal(),1L)){
       log.info("Deleting campaign having id {}", campaignId);
@@ -77,11 +77,11 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
     }
 
     Set<String> activeCounters;
-    if(currentStreamEventStatus==null){
+    if(currentLastEventOfInterest==null){
       activeCounters = new HashSet<>();
     }else {
       activeCounters = new HashSet<>(
-        CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(currentStreamEventStatus, new HashSet<>())
+        CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(currentLastEventOfInterest, new HashSet<>())
       );
     }
     activeCounters.add(Counters.Fields.total);
