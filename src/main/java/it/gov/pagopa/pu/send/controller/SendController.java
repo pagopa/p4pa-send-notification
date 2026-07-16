@@ -104,6 +104,7 @@ public class SendController implements SendApi {
 
   @Override
   public ResponseEntity<Void> notifySendNotificationTimelineCategory(Map<String, List<TimelineElementCategoryV27DTO>> notificationRequestIdToTimelineCatogoriesMap) {
+    log.info("Notify SEND TimelineCategories for notification with following notificationRequestId: {}", notificationRequestIdToTimelineCatogoriesMap.keySet());
     sendFacadeService.notifySendNotificationTimelineCategory(notificationRequestIdToTimelineCatogoriesMap);
     return new ResponseEntity<>(HttpStatus.OK);
   }
