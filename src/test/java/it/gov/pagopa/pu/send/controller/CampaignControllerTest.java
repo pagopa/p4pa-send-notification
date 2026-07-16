@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.service.CampaignService;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -81,6 +82,20 @@ class CampaignControllerTest {
       .thenReturn(expectedResponse);
 
     ResponseEntity<PagedCampaign> response = campaignController.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable);
+
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertEquals(expectedResponse, response.getBody());
+  }
+
+  @Test
+  void whenGetCampaignThenOk() {
+    String campaignId = "campaignId";
+    Campaign expectedResponse = podamFactory.manufacturePojo(Campaign.class);
+
+    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(expectedResponse);
+
+    ResponseEntity<Campaign> response = campaignController.getCampaign(campaignId);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
