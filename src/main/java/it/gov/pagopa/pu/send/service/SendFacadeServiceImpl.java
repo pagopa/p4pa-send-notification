@@ -55,7 +55,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   private final SendStreamService sendStreamService;
   private final WorkflowService workflowService;
   private final SendNotificationService sendNotificationService;
-  private final SendNotificationTimelineCategoryService sendNotificationTimelineCategoryService;
+  private final SendNotificationStreamEventService sendNotificationStreamEventService;
 
   private final CloseableHttpClient httpClient;
 
@@ -71,8 +71,9 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendStreamService sendStreamService,
     WorkflowService workflowService,
     SendNotificationService sendNotificationService,
-    SendNotificationTimelineCategoryService sendNotificationTimelineCategoryService,
-    CloseableHttpClient httpClient) {
+    SendNotificationStreamEventService sendNotificationStreamEventService,
+    CloseableHttpClient httpClient
+  ) {
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendStreamRepository = sendStreamRepository;
     this.sendService = sendService;
@@ -84,7 +85,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     this.sendStreamService = sendStreamService;
     this.workflowService = workflowService;
     this.sendNotificationService = sendNotificationService;
-    this.sendNotificationTimelineCategoryService = sendNotificationTimelineCategoryService;
+    this.sendNotificationStreamEventService = sendNotificationStreamEventService;
     this.httpClient = httpClient;
   }
 
@@ -344,14 +345,14 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
-  public void notifySendNotificationTimelineCategory(Map<String, List<TimelineElementCategoryV27DTO>> notificationRequestIdToTimelineCatogoriesMap) {
-    notificationRequestIdToTimelineCatogoriesMap.forEach((key, value) -> {
+  public void notifySendNotificationStreamEvents( Map<String, List<StreamEventSummaryDTO>> notificationRequestIdToStreamEventsMap) {
+    notificationRequestIdToStreamEventsMap.forEach((key, value) -> {
       Optional<SendNotificationNoPII> optionalNotification = sendNotificationNoPIIRepository.findByNotificationRequestId(key);
       if (optionalNotification.isEmpty()) {
-        log.info("Send notification not found for notificationRequestId \"{}\", skipped updating lastEventOfInterest.", key);
+        log.info("Send notification not found for notificationRequestId \"{}\", skipped notify stream events", key);
         return;
       }
-      sendNotificationTimelineCategoryService.notifySendNotificationTimelineCategory(optionalNotification.get(), value);
+      sendNotificationStreamEventService.notifySendNotificationStreamEvents(optionalNotification.get(), value);
     });
   }
 

@@ -82,7 +82,7 @@ class SendFacadeServiceImplTest {
   @Mock
   private SendNotificationService sendNotificationServiceMock;
   @Mock
-  private SendNotificationTimelineCategoryService sendNotificationTimelineCategoryServiceMock;
+  private SendNotificationStreamEventService sendNotificationTimelineCategoryServiceMock;
   @Mock
   private CloseableHttpClient httpClientMock;
 
@@ -1312,50 +1312,54 @@ class SendFacadeServiceImplTest {
   }
 
   @Test
-  void givenNotificationNotFoundWhenNotifySendNotificationTimelineCategoryThenSkip() {
+  void givenNotificationNotFoundWhenNotifySendNotificationStreamEventsThenSkip() {
     //GIVEN
     String notificationRequestId = "notificationRequestId1";
     when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
       .thenReturn(Optional.empty());
 
-    Map<String, List<TimelineElementCategoryV27DTO>> request = Map.of(
-      notificationRequestId, List.of(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
+    Map<String, List<StreamEventSummaryDTO>> request = Map.of(
+      notificationRequestId,
+      List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
+      )
     );
 
     //WHEN
-    sendService.notifySendNotificationTimelineCategory(request);
+    sendService.notifySendNotificationStreamEvents(request);
 
     //THEN
     verify(sendNotificationNoPIIRepositoryMock).findByNotificationRequestId(notificationRequestId);
   }
 
   @Test
-  void givenNoTimelineElementCategoryOfInterestWhenNotifySendNotificationTimelineCategoryThenSkip() {
+  void givenValidRequestWhenNotifySendNotificationStreamEventsThenOk() {
     //GIVEN
     String notificationRequestId = "notificationRequestId1";
     SendNotificationNoPII sendNotification = new SendNotificationNoPII();
-    List<TimelineElementCategoryV27DTO> timelineElementCategories =
-      List.of(TimelineElementCategoryV27DTO.AAR_CREATION_REQUEST);
+    List<StreamEventSummaryDTO> streamEvents = List.of(
+      new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
+    );
     when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
       .thenReturn(Optional.of(sendNotification));
     doNothing()
       .when(sendNotificationTimelineCategoryServiceMock)
-      .notifySendNotificationTimelineCategory(
+      .notifySendNotificationStreamEvents(
         sendNotification,
-        timelineElementCategories
+        streamEvents
       );
 
-    Map<String, List<TimelineElementCategoryV27DTO>> request =
-      Map.of(notificationRequestId, timelineElementCategories);
+    Map<String, List<StreamEventSummaryDTO>> request =
+      Map.of(notificationRequestId, streamEvents);
 
     //WHEN
-    sendService.notifySendNotificationTimelineCategory(request);
+    sendService.notifySendNotificationStreamEvents(request);
 
     //THEN
     verify(sendNotificationNoPIIRepositoryMock).findByNotificationRequestId(notificationRequestId);
-    verify(sendNotificationTimelineCategoryServiceMock).notifySendNotificationTimelineCategory(
+    verify(sendNotificationTimelineCategoryServiceMock).notifySendNotificationStreamEvents(
       sendNotification,
-      timelineElementCategories
+      streamEvents
     );
   }
 
