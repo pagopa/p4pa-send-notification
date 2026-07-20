@@ -2,8 +2,11 @@ package it.gov.pagopa.pu.send.controller;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
+import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
@@ -34,6 +37,8 @@ class SendNotificationControllerTest {
   private SendNotificationService sendNotificationServiceMock;
   @Mock
   private FileExpirationService fileExpirationServiceMock;
+  @Mock
+  private SendNotificationPIIMapper sendNotificationPIIMapperMock;
 
   @InjectMocks
   private SendNotificationController sendNotificationController;
@@ -49,7 +54,7 @@ class SendNotificationControllerTest {
   @AfterEach
   void clearContext(){
     SecurityUtilsTest.clearSecurityContext();
-    Mockito.verifyNoMoreInteractions(sendNotificationServiceMock,fileExpirationServiceMock);
+    Mockito.verifyNoMoreInteractions(sendNotificationServiceMock,fileExpirationServiceMock, sendNotificationPIIMapperMock);
   }
 
   @Test
@@ -348,5 +353,26 @@ class SendNotificationControllerTest {
 
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedResponse, response.getBody());
+  }
+
+  @Test
+  void whenGetSendNotificationDetailsThenOk(){
+    //Given
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    SendNotification expectedResult = podamFactory.manufacturePojo(SendNotification.class);
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+
+    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+      .thenReturn(sendNotificationNoPII);
+
+    Mockito.when(sendNotificationPIIMapperMock.map(sendNotificationNoPII))
+      .thenReturn(expectedResult);
+
+    // When
+    //Then
+    ResponseEntity<SendNotification> response = sendNotificationController.getSendNotificationDetails(sendNotificationId);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
   }
 }
