@@ -36,7 +36,7 @@ class SendNotificationStreamEventServiceImplTest {
   }
 
   @Test
-  void givenTimelineElementCategoriesOfInterestWhenNotifySendNotificationStreamEventsThenUpdate() {
+  void givenTimelineElementCategoriesOfInterestWhenNotifySendNotificationStreamEventsThenUpdateLastEventOfInterestAndPushHistory() {
     //GIVEN
     SendNotificationNoPII sendNotification = SendNotificationNoPII.builder()
       .sendNotificationId("sendNotificationId1")
@@ -76,7 +76,7 @@ class SendNotificationStreamEventServiceImplTest {
   }
 
   @Test
-  void givenNoTimelineElementCategoriesOfInterestWhenNotifySendNotificationStreamEventsThenSkip() {
+  void givenNoTimelineElementCategoriesOfInterestWhenNotifySendNotificationStreamEventsThenSkipUpdateLastEventOfInterestAndPushHistory() {
     //GIVEN
     SendNotificationNoPII sendNotification = SendNotificationNoPII.builder()
       .sendNotificationId("sendNotificationId1")
@@ -89,6 +89,10 @@ class SendNotificationStreamEventServiceImplTest {
         new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.AAR_CREATION_REQUEST),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.AAR_GENERATION)
       );
+
+    doNothing()
+      .when(sendNotificationNoPIIRepositoryMock)
+      .pushStreamEventsHistory(sendNotification.getSendNotificationId(), streamEvents);
 
     //WHEN
     service.notifySendNotificationStreamEvents(sendNotification, streamEvents);

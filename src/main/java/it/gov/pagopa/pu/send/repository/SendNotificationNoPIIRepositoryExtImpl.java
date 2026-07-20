@@ -236,7 +236,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   @Override
   public void pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
     Query query = new Query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
-    Update update = new Update().push(Fields.streamEventsHistory).each(streamEvents);
+    Update update = new Update().push(Fields.history).each(streamEvents);
     updateFirst(query, update);
   }
 }

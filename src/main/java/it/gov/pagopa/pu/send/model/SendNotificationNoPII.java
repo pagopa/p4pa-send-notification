@@ -39,7 +39,7 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   private List<DocumentDTO> documents;
   private NotificationStatus status;
   private TimelineElementCategoryV27DTO lastEventOfInterest;
-  private List<StreamEventSummaryDTO> streamEventsHistory;
+  private List<StreamEventSummaryDTO> history;
   private String notificationRequestId;
   private String iun;
   private String notificationFeePolicy;

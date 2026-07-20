@@ -20,6 +20,8 @@ public class SendNotificationStreamEventServiceImpl implements SendNotificationS
 
   @Override
   public void notifySendNotificationStreamEvents(SendNotificationNoPII notification, List<StreamEventSummaryDTO> streamEvents) {
+    sendNotificationNoPIIRepository.pushStreamEventsHistory(notification.getSendNotificationId(), streamEvents);
+
     List<TimelineElementCategoryV27DTO> timelineElementCategoriesOfInterest =
       streamEvents.stream()
         .map(StreamEventSummaryDTO::getTimelineElementCategory)
@@ -28,8 +30,6 @@ public class SendNotificationStreamEventServiceImpl implements SendNotificationS
     if(timelineElementCategoriesOfInterest.isEmpty()) {
       return;
     }
-
-    sendNotificationNoPIIRepository.pushStreamEventsHistory(notification.getSendNotificationId(), streamEvents);
 
     sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
       notification.getSendNotificationId(),
