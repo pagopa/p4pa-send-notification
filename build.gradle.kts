@@ -194,7 +194,8 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
       "LegalFactCategoryDTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO",
       "FileStatus" to "it.gov.pagopa.pu.send.enums.FileStatus",
       "TimelineElementCategory" to "it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO",
-      "Campaign" to "it.gov.pagopa.pu.send.model.Campaign"
+      "Campaign" to "it.gov.pagopa.pu.send.model.Campaign",
+      "SendNotification" to "it.gov.pagopa.pu.send.dto.SendNotification"
     )
   )
   configOptions.set(

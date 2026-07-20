@@ -1,8 +1,10 @@
 package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.controller.generated.NotificationApi;
+import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
 import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
@@ -21,11 +23,13 @@ public class SendNotificationController implements NotificationApi {
 
   private final SendNotificationService sendNotificationService;
   private final FileExpirationService fileExpirationService;
+  private final SendNotificationPIIMapper notificatioMapper;
 
   public SendNotificationController(
-    SendNotificationService sendNotificationService, FileExpirationService fileExpirationService) {
+    SendNotificationService sendNotificationService, FileExpirationService fileExpirationService, SendNotificationPIIMapper notificatioMapper) {
     this.sendNotificationService = sendNotificationService;
     this.fileExpirationService = fileExpirationService;
+    this.notificatioMapper = notificatioMapper;
   }
 
   @Override
@@ -94,6 +98,12 @@ public class SendNotificationController implements NotificationApi {
   public ResponseEntity<SendNotificationDTO> getSendNotificationByNotificationRequestId(String notificationRequestId) {
     log.info("Retrieving send notification by notificationRequestId {}", notificationRequestId);
     return ResponseEntity.ok(sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId));
+  }
+
+  @Override
+  public ResponseEntity<SendNotification> getSendNotificationDetails(String sendNotificationId) {
+    log.info("Retrieving notification details by sendNotificationId {}", sendNotificationId);
+    return ResponseEntity.ok(notificatioMapper.map(sendNotificationService.findSendNotification(sendNotificationId)));
   }
 
   @Override
