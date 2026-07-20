@@ -2,8 +2,11 @@ package it.gov.pagopa.pu.send.controller;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
+import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
@@ -27,6 +30,8 @@ import uk.co.jemos.podam.api.PodamFactory;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class SendNotificationControllerTest {
 
@@ -34,6 +39,8 @@ class SendNotificationControllerTest {
   private SendNotificationService sendNotificationServiceMock;
   @Mock
   private FileExpirationService fileExpirationServiceMock;
+  @Mock
+  private SendNotificationPIIMapper sendNotificationPIIMapperMock;
 
   @InjectMocks
   private SendNotificationController sendNotificationController;
@@ -49,7 +56,7 @@ class SendNotificationControllerTest {
   @AfterEach
   void clearContext(){
     SecurityUtilsTest.clearSecurityContext();
-    Mockito.verifyNoMoreInteractions(sendNotificationServiceMock,fileExpirationServiceMock);
+    Mockito.verifyNoMoreInteractions(sendNotificationServiceMock,fileExpirationServiceMock, sendNotificationPIIMapperMock);
   }
 
   @Test
@@ -63,7 +70,7 @@ class SendNotificationControllerTest {
       .build();
 
     // When
-    Mockito.when(sendNotificationServiceMock.createSendNotification(request, accessToken)).thenReturn(expectedResponse);
+    when(sendNotificationServiceMock.createSendNotification(request, accessToken)).thenReturn(expectedResponse);
 
     // Then
     ResponseEntity<CreateNotificationResponse> response = sendNotificationController.createSendNotification(request);
@@ -82,7 +89,7 @@ class SendNotificationControllerTest {
 
     StartNotificationResponse expectedResponse = new StartNotificationResponse();
 
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, loadFileRequest, accessToken))
+    when(sendNotificationServiceMock.startSendNotification(sendNotificationId, loadFileRequest, accessToken))
       .thenReturn(expectedResponse);
 
     // When
@@ -103,7 +110,7 @@ class SendNotificationControllerTest {
       .digest("DIGEST")
       .build();
 
-    Mockito.when(sendNotificationServiceMock.startSendNotification(sendNotificationId, loadFileRequest, accessToken))
+    when(sendNotificationServiceMock.startSendNotification(sendNotificationId, loadFileRequest, accessToken))
       .thenReturn(null);
 
     // When
@@ -131,7 +138,7 @@ class SendNotificationControllerTest {
     String notificationRequestId = "NOTIFICATION_REQUEST_ID";
     SendNotificationDTO expectedResult = new SendNotificationDTO();
     // When
-    Mockito.when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
+    when(sendNotificationServiceMock.findSendNotificationDTOByNotificationRequestId(notificationRequestId))
       .thenReturn(expectedResult);
     //Then
     ResponseEntity<SendNotificationDTO> response = sendNotificationController.getSendNotificationByNotificationRequestId(notificationRequestId);
@@ -146,7 +153,7 @@ class SendNotificationControllerTest {
     String sendNotificationId = "SENDNOTIFICATIONID";
     SendNotificationDTO expectedResult = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationServiceMock.findSendNotificationDTO(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotificationDTO(sendNotificationId))
       .thenReturn(expectedResult);
 
     // When
@@ -164,7 +171,7 @@ class SendNotificationControllerTest {
     CreateNotificationResponse expectedResponse
   ) {
     // Given
-    Mockito.when(sendNotificationServiceMock.createSendNotification(request, accessToken))
+    when(sendNotificationServiceMock.createSendNotification(request, accessToken))
       .thenReturn(expectedResponse);
 
     // When
@@ -276,7 +283,7 @@ class SendNotificationControllerTest {
     String nav = "NAV";
     SendNotificationDTO expectedResult = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationServiceMock.findSendNotificationByOrgIdAndNav(organizationId, nav))
+    when(sendNotificationServiceMock.findSendNotificationByOrgIdAndNav(organizationId, nav))
       .thenReturn(expectedResult);
 
     // When
@@ -293,7 +300,7 @@ class SendNotificationControllerTest {
     String notificationRequestId = "REQUESTID";
     UpdateResult updateResult = UpdateResult.acknowledged(1, 1L, null);
 
-    Mockito.when(sendNotificationServiceMock.updateNotificationStatus(notificationRequestId, NotificationStatus.REFUSED))
+    when(sendNotificationServiceMock.updateNotificationStatus(notificationRequestId, NotificationStatus.REFUSED))
       .thenReturn(updateResult);
 
     // When
@@ -314,7 +321,7 @@ class SendNotificationControllerTest {
       .url("URL")
       .build();
 
-    Mockito.when(sendNotificationServiceMock.getLegalFacts(sendNotificationId)).thenReturn(List.of(legalFactDTO));
+    when(sendNotificationServiceMock.getLegalFacts(sendNotificationId)).thenReturn(List.of(legalFactDTO));
 
     // When
     ResponseEntity<List<LegalFactDTO>> response = sendNotificationController.getLegalFacts(sendNotificationId);
@@ -329,7 +336,7 @@ class SendNotificationControllerTest {
     String sendNotificationId = "SENDNOTIFICATIONID";
     FileExpirationResponseDTO expectedResponse = podamFactory.manufacturePojo(FileExpirationResponseDTO.class);
 
-    Mockito.when(fileExpirationServiceMock.deleteExpiredLegalFacts(sendNotificationId, accessToken)).thenReturn(expectedResponse);
+    when(fileExpirationServiceMock.deleteExpiredLegalFacts(sendNotificationId, accessToken)).thenReturn(expectedResponse);
 
     ResponseEntity<FileExpirationResponseDTO> response = sendNotificationController.deleteExpiredLegalFacts(sendNotificationId);
 
@@ -342,11 +349,32 @@ class SendNotificationControllerTest {
     String sendNotificationId = "SENDNOTIFICATIONID";
     FileExpirationResponseDTO expectedResponse = podamFactory.manufacturePojo(FileExpirationResponseDTO.class);
 
-    Mockito.when(fileExpirationServiceMock.deleteExpiredDocuments(sendNotificationId, accessToken)).thenReturn(expectedResponse);
+    when(fileExpirationServiceMock.deleteExpiredDocuments(sendNotificationId, accessToken)).thenReturn(expectedResponse);
 
     ResponseEntity<FileExpirationResponseDTO> response = sendNotificationController.deleteExpiredDocuments(sendNotificationId);
 
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedResponse, response.getBody());
+  }
+
+  @Test
+  void whenGetSendNotificationDetailsThenOk(){
+    //Given
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    SendNotification expectedResult = podamFactory.manufacturePojo(SendNotification.class);
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+      .thenReturn(sendNotificationNoPII);
+
+    when(sendNotificationPIIMapperMock.map(sendNotificationNoPII))
+      .thenReturn(expectedResult);
+
+    // When
+    //Then
+    ResponseEntity<SendNotification> response = sendNotificationController.getSendNotificationDetails(sendNotificationId);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
   }
 }
