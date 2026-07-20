@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.Htt
 import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
+import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -312,5 +313,20 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     assertEquals(0L, res.getDigitalCompleted());
     assertEquals(0L, res.getAnalogicCompleted());
     assertEquals(0L, res.getCompletion());
+  }
+
+  @Test
+  void givenStreamEventsWhenPushStreamEventsHistoryThenOk() {
+    String sendNotificationId = "sendNotificationId";
+    StreamEventSummaryDTO streamEvent = new StreamEventSummaryDTO();
+    List<StreamEventSummaryDTO> streamEvents = List.of(streamEvent);
+
+    Mockito.when(mongoTemplateMock.updateFirst(
+        Mockito.any(Query.class),
+        Mockito.any(Update.class),
+        Mockito.eq(SendNotificationNoPII.class)))
+      .thenReturn(updateResult);
+
+    assertDoesNotThrow(() -> repository.pushStreamEventsHistory(sendNotificationId, streamEvents));
   }
 }
