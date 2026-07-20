@@ -1300,12 +1300,12 @@
         } ]
       }
     },
-    "/p4pasend/notification/{sendNotificationId}/detail" : {
+    "/p4pasend/notification/{sendNotificationId}/details" : {
       "get" : {
         "tags" : [ "Notification" ],
-        "summary" : "get send notification detail",
-        "description" : "get send notification detail",
-        "operationId" : "getSendNotificationDetail",
+        "summary" : "get send notification details",
+        "description" : "get send notification details",
+        "operationId" : "getSendNotificationDetails",
         "parameters" : [ {
           "name" : "sendNotificationId",
           "in" : "path",
