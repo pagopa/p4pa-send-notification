@@ -9,6 +9,7 @@ import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
+import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -24,6 +25,7 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -229,5 +231,12 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
       Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
       new Update().set(Fields.lastEventOfInterest, newStatus)
     );
+  }
+
+  @Override
+  public void pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
+    Query query = new Query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
+    Update update = new Update().push(Fields.history).each(streamEvents);
+    updateFirst(query, update);
   }
 }

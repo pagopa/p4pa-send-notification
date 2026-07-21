@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.Htt
 import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
+import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest {
@@ -49,10 +51,10 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     preloadResponse.setHttpMethod(HttpMethodEnum.PUT);
     preloadResponse.setUrl("http://localhost");
 
-    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
         SendNotificationNoPII.class)))
       .thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateFilePreloadInformation(sendNotificationId, preloadResponse);
 
@@ -64,11 +66,11 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String requestNotificationId = "requestId";
     NotificationStatus newStatus = NotificationStatus.SENDING;
 
-    Mockito.when(mongoTemplateMock.updateFirst(
+    when(mongoTemplateMock.updateFirst(
       Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
           SendNotificationNoPII.class)))
       .thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateNotificationStatus(requestNotificationId, newStatus);
 
@@ -80,11 +82,11 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String sendNotificationId = "SENDNOTIFICATIONID";
     NotificationStatus newStatus = NotificationStatus.SENDING;
 
-    Mockito.when(mongoTemplateMock.updateFirst(
+    when(mongoTemplateMock.updateFirst(
         Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
           SendNotificationNoPII.class)))
       .thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateNotificationStatusById(sendNotificationId, newStatus);
 
@@ -97,9 +99,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String fileName = "FILENAME";
     FileStatus newStatus = FileStatus.UPLOADED;
 
-    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateFileStatus(sendNotificationId, fileName, newStatus);
 
@@ -112,9 +114,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String fileName = "FILENAME";
     String versionId = "VERSIONID";
 
-    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateFileVersionId(sendNotificationId, fileName, versionId);
 
@@ -126,9 +128,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String sendNotificationId = "SENDNOTIFICATIONID";
     String notificationRequestId = "VERSIONID";
 
-    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateNotificationRequestId(sendNotificationId,notificationRequestId);
 
@@ -140,9 +142,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String sendNotificationId = "SENDNOTIFICATIONID";
     String iun = "IUN";
 
-    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateNotificationIun(sendNotificationId,iun);
 
@@ -154,9 +156,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String sendNotificationId = "SENDNOTIFICATIONID";
     OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0,ZoneOffset.UTC);
 
-    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateNotificationDate(sendNotificationId,now,"nav");
 
@@ -172,7 +174,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     mockNotification.setSendNotificationId(sendNotificationId);
     mockNotification.setOrganizationId(organizationId);
 
-    Mockito.when(mongoTemplateMock.findOne(Mockito.any(Query.class), Mockito.eq(
+    when(mongoTemplateMock.findOne(Mockito.any(Query.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(mockNotification);
 
     Optional<SendNotificationNoPII> result = repository.findByIdAndOrganizationId(sendNotificationId, organizationId);
@@ -187,7 +189,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String sendNotificationId = "SENDNOTIFICATIONID";
     Long organizationId = 1L;
 
-    Mockito.when(mongoTemplateMock.findOne(Mockito.any(Query.class), Mockito.eq(
+    when(mongoTemplateMock.findOne(Mockito.any(Query.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(null);
 
     Optional<SendNotificationNoPII> result = repository.findByIdAndOrganizationId(sendNotificationId, organizationId);
@@ -200,7 +202,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String notificationRequestId = "NOTIFICATION_REQUEST_ID";
     SendNotificationNoPII expectedResult = new SendNotificationNoPII();
 
-    Mockito.when(mongoTemplateMock.findOne(Mockito.any(Query.class), Mockito.eq(
+    when(mongoTemplateMock.findOne(Mockito.any(Query.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(expectedResult);
 
     Optional<SendNotificationNoPII> actualResult = repository.findByNotificationRequestId(notificationRequestId);
@@ -214,9 +216,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String sendNotificationId = "SENDNOTIFICATIONID";
     LegalFactDTO fact = LegalFactDTO.builder().fileName("fileName").build();
 
-    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.addLegalFact(sendNotificationId, fact);
 
@@ -229,9 +231,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String filename = "fileName";
     FileStatus status = FileStatus.EXPIRED;
 
-    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateLegalFactStatus(sendNotificationId, filename, status);
 
@@ -245,9 +247,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0,ZoneOffset.UTC);
     FileStatus status = FileStatus.EXPIRED;
 
-    Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
       SendNotificationNoPII.class))).thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateFileStatusAndUploadDate(sendNotificationId, fileName, status, now);
 
@@ -259,11 +261,11 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     String sendNotificationId = "SENDNOTIFICATIONID";
     TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.REQUEST_ACCEPTED;
 
-    Mockito.when(mongoTemplateMock.updateFirst(
+    when(mongoTemplateMock.updateFirst(
         Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
           SendNotificationNoPII.class)))
       .thenReturn(updateResult);
-    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
 
     UpdateResult result = repository.updateLastEventOfInterestById(sendNotificationId, newStatus);
 
@@ -280,7 +282,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       new Document()
     );
 
-    Mockito.when(mongoTemplateMock.aggregate(
+    when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(SendNotificationNoPII.class),
       Mockito.eq(Counters.class)
@@ -297,7 +299,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
 
     AggregationResults<Counters> aggregationResults = new AggregationResults<>(Collections.emptyList(), new Document());
 
-    Mockito.when(mongoTemplateMock.aggregate(
+    when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(SendNotificationNoPII.class),
       Mockito.eq(Counters.class)
@@ -312,5 +314,20 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     assertEquals(0L, res.getDigitalCompleted());
     assertEquals(0L, res.getAnalogicCompleted());
     assertEquals(0L, res.getCompletion());
+  }
+
+  @Test
+  void givenStreamEventsWhenPushStreamEventsHistoryThenOk() {
+    String sendNotificationId = "sendNotificationId";
+    StreamEventSummaryDTO streamEvent = new StreamEventSummaryDTO();
+    List<StreamEventSummaryDTO> streamEvents = List.of(streamEvent);
+
+    when(mongoTemplateMock.updateFirst(
+        Mockito.any(Query.class),
+        Mockito.any(Update.class),
+        Mockito.eq(SendNotificationNoPII.class)))
+      .thenReturn(updateResult);
+
+    assertDoesNotThrow(() -> repository.pushStreamEventsHistory(sendNotificationId, streamEvents));
   }
 }

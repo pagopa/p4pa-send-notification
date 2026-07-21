@@ -2,11 +2,8 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.controller.generated.SendApi;
-import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
-import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
-import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -103,9 +100,11 @@ public class SendController implements SendApi {
   }
 
   @Override
-  public ResponseEntity<Void> notifySendNotificationTimelineCategory(Map<String, List<TimelineElementCategoryV27DTO>> notificationRequestIdToTimelineCatogoriesMap) {
-    log.info("Notify SEND TimelineCategories for notification with following notificationRequestId: {}", notificationRequestIdToTimelineCatogoriesMap.keySet());
-    sendFacadeService.notifySendNotificationTimelineCategory(notificationRequestIdToTimelineCatogoriesMap);
+  public ResponseEntity<Void> notifySendNotificationStreamEvents(
+    Map<String, List<StreamEventSummaryDTO>> notificationRequestIdToStreamEventsMap
+  ) {
+    log.info("Notify SEND stream events for notification with following notificationRequestId: {}", notificationRequestIdToStreamEventsMap.keySet());
+    sendFacadeService.notifySendNotificationStreamEvents(notificationRequestIdToStreamEventsMap);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
