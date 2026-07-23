@@ -1,11 +1,16 @@
 package it.gov.pagopa.pu.send.service;
 
+import io.micrometer.common.util.StringUtils;
+import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
+import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
+import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
+import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
@@ -26,11 +31,15 @@ public class CampaignServiceImpl implements CampaignService {
   private final CampaignRepository campaignRepository;
   private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
   private final PagedCampaignMapper pagedCampaignMapper;
+  private final PagedSendNotificationsMapper pagedSendNotificationsMapper;
+  private final DataCipherService dataCipherService;
 
-  public CampaignServiceImpl(CampaignRepository campaignRepository, SendNotificationNoPIIRepository sendNotificationNoPIIRepository, PagedCampaignMapper pagedCampaignMapper) {
+  public CampaignServiceImpl(CampaignRepository campaignRepository, SendNotificationNoPIIRepository sendNotificationNoPIIRepository, PagedCampaignMapper pagedCampaignMapper, PagedSendNotificationsMapper pagedSendNotificationsMapper, DataCipherService dataCipherService) {
     this.campaignRepository = campaignRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.pagedCampaignMapper = pagedCampaignMapper;
+    this.pagedSendNotificationsMapper = pagedSendNotificationsMapper;
+    this.dataCipherService = dataCipherService;
   }
 
   @Override
@@ -120,6 +129,16 @@ public class CampaignServiceImpl implements CampaignService {
   public PagedCampaign findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable) {
     return pagedCampaignMapper.mapToPagedCampaign(
       campaignRepository.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable)
+    );
+  }
+
+  @Override
+  public PagedSendNotifications getCampaignSendNotifications(SendNotificationFiltersDTO sendNotificationFiltersDTO, String fiscalCode, Pageable pageable) {
+    if(StringUtils.isNotBlank(fiscalCode)){
+      sendNotificationFiltersDTO.setFiscalCodeHash(dataCipherService.hash(fiscalCode));
+    }
+    return pagedSendNotificationsMapper.mapToPagedSendNotifications(
+      sendNotificationNoPIIRepository.findSendNotificationsByFilters(sendNotificationFiltersDTO, pageable)
     );
   }
 }

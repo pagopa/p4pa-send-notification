@@ -5,11 +5,13 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
+import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.util.TestUtils;
 import org.bson.Document;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,10 +19,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import uk.co.jemos.podam.api.PodamFactory;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -33,6 +39,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest {
+  private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   @Mock
   private UpdateResult updateResult;
@@ -329,5 +336,24 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       .thenReturn(updateResult);
 
     assertDoesNotThrow(() -> repository.pushStreamEventsHistory(sendNotificationId, streamEvents));
+  }
+
+  @Test
+  void whenFindCampaignsByFiltersThenOk() {
+    SendNotificationFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationFiltersDTO.class);
+
+    List<SendNotificationNoPII> notifications = podamFactory.manufacturePojo(List.class, SendNotificationNoPII.class);
+    Pageable pageable = PageRequest.of(0, notifications.size());
+    int totalElements = notifications.size() + 1;
+
+    when(mongoTemplateMock.count(Mockito.any(Query.class), Mockito.eq(SendNotificationNoPII.class))).thenReturn(Long.valueOf(totalElements));
+    when(mongoTemplateMock.find(Mockito.any(Query.class), Mockito.eq(SendNotificationNoPII.class))).thenReturn(notifications);
+
+    Page<SendNotificationNoPII> result = repository.findSendNotificationsByFilters(filters, pageable);
+
+    assertEquals(totalElements, result.getTotalElements());
+    assertEquals(notifications, result.getContent());
+    assertEquals(pageable.getOffset(), result.getNumber());
+    assertEquals(pageable.getPageSize(), result.getSize());
   }
 }

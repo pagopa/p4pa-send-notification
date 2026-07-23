@@ -196,7 +196,9 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
       "TimelineElementCategory" to "it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO",
       "Campaign" to "it.gov.pagopa.pu.send.model.Campaign",
       "SendNotification" to "it.gov.pagopa.pu.send.dto.SendNotification",
-      "NotificationStatusV26DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationStatusV26DTO"
+      "NotificationStatusV26DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationStatusV26DTO",
+      "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus",
+      "SendNotificationNoPII" to "it.gov.pagopa.pu.send.model.SendNotificationNoPII"
     )
   )
   configOptions.set(

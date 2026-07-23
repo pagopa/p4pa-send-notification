@@ -4,17 +4,20 @@ import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.config.BaseEntityListener;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
-import it.gov.pagopa.pu.send.dto.Counters;
-import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.PuPayment;
-import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
+import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.model.BaseEntity;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
 import it.gov.pagopa.pu.send.util.CampaignUtils;
+import it.gov.pagopa.pu.send.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -22,6 +25,7 @@ import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.util.CollectionUtils;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -42,6 +46,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_DOCUMENT_UPLOAD_DATE = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.uploadDate);
   public static final String FIELD_DOCUMENT_VERSIONID = FIELD_TEMPLATE.formatted(Fields.documents, DocumentDTO.Fields.versionId);
   public static final String FIELD_PAYMENT_NOTICE_CODE = "%s.%s.%s.pagoPa.noticeCode".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.puPayments, PuPayment.Fields.payment);
+  public static final String FIELD_RECIPIENT_FISCAL_CODE_HASH = "%s.%s".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.fiscalCodeHash);
   private static final String FIELD_FILTERED_NOTIFICATION_DATE = "recipients.$[].puPayments.$[elem].notificationDate";
 
   private final MongoTemplate mongoTemplate;
@@ -238,5 +243,33 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     Query query = new Query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
     Update update = new Update().push(Fields.history).each(streamEvents);
     updateFirst(query, update);
+  }
+
+
+  @Override
+  public Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable) {
+    Query query = new Query();
+    query.addCriteria(Criteria
+      .where(SendNotificationNoPII.Fields.organizationId).is(sendNotificationFiltersDTO.getOrganizationId())
+      .and(Fields.campaignId).is(sendNotificationFiltersDTO.getCampaignId()));
+    if(StringUtils.isNotBlank(sendNotificationFiltersDTO.getIun())){
+      query.addCriteria(Criteria.where(SendNotificationNoPII.Fields.iun).is(sendNotificationFiltersDTO.getIun()));
+    }
+    if(sendNotificationFiltersDTO.getDateFrom()!=null && sendNotificationFiltersDTO.getDateTo()!=null){
+      query.addCriteria(Criteria.where(BaseEntity.Fields.creationDate)
+        .gte(DateUtils.toLocalDateTime(sendNotificationFiltersDTO.getDateFrom()))
+        .lte(DateUtils.toLocalDateTime(sendNotificationFiltersDTO.getDateTo())));
+    }
+    if(!CollectionUtils.isEmpty(sendNotificationFiltersDTO.getStatuses())){
+      query.addCriteria(Criteria.where(Fields.status).in(sendNotificationFiltersDTO.getStatuses()));
+    }
+    if(sendNotificationFiltersDTO.getFiscalCodeHash() != null && sendNotificationFiltersDTO.getFiscalCodeHash().length > 0){
+      query.addCriteria(Criteria.where(FIELD_RECIPIENT_FISCAL_CODE_HASH).is(sendNotificationFiltersDTO.getFiscalCodeHash()));
+    }
+
+    long count = mongoTemplate.count(query, SendNotificationNoPII.class);
+    query.with(pageable);
+    List<SendNotificationNoPII> sendNotifications = mongoTemplate.find(query, SendNotificationNoPII.class);
+    return new PageImpl<>(sendNotifications, pageable, count);
   }
 }
