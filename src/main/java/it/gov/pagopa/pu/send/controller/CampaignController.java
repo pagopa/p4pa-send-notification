@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.send.controller.generated.CampaignApi;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
+import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.service.CampaignService;
@@ -54,6 +55,13 @@ public class CampaignController implements CampaignApi {
   public ResponseEntity<Campaign> getCampaign(String campaignId) {
     log.info("retrieve campaign having campaignId {}", campaignId);
     return ResponseEntity.ok(campaignService.getCampaignById(campaignId));
+  }
+
+  @Override
+  public ResponseEntity<Void> renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest) {
+    log.info("rename campaign request having campaignId {}", campaignId);
+    campaignService.renameCampaign(campaignId, renameCampaignRequest.getName());
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override

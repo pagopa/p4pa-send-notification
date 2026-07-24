@@ -313,4 +313,16 @@ class CampaignServiceImplTest {
     assertNotNull(result);
     assertEquals(expectedResult,result);
   }
+
+  @Test
+  void whenRenameCampaignNameThenOk() {
+    String campaignId = "campaignId";
+    String campaignName = "campaignName";
+
+    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    when(campaignRepositoryMock.updateCampaignName(campaignId, campaignName)).thenReturn(updateResult);
+
+    Assertions.assertDoesNotThrow(()->campaignService.renameCampaign(campaignId, campaignName));
+  }
 }

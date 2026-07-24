@@ -14,4 +14,5 @@ public interface CampaignRepositoryExt {
   UpdateResult updateStartDate(String campaignId, LocalDate startDate);
   UpdateResult updateEndDate(String campaignId, LocalDate endDate);
   Page<Campaign> findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable);
+  UpdateResult updateCampaignName(String campaignId, String name);
 }

@@ -141,4 +141,9 @@ public class CampaignServiceImpl implements CampaignService {
       sendNotificationNoPIIRepository.findSendNotificationsByFilters(sendNotificationFiltersDTO, pageable)
     );
   }
+
+  @Override
+  public void renameCampaign(String campaignId, String name) {
+    campaignRepository.updateCampaignName(campaignId, name);
+  }
 }
