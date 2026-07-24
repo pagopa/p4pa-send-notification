@@ -60,7 +60,7 @@ public class CampaignController implements CampaignApi {
   @Override
   public ResponseEntity<Void> renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest) {
     log.info("rename campaign request having campaignId {}", campaignId);
-    campaignService.renameCampaign(campaignId, renameCampaignRequest.getName());
+    campaignService.renameCampaign(campaignId, renameCampaignRequest);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

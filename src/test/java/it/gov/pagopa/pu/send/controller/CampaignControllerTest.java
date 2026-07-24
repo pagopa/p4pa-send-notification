@@ -73,11 +73,12 @@ class CampaignControllerTest {
   @Test
   void whenRenameCampaignThenOk() {
     String campaignId = "campaignId";
-    String name = "newName";
+    RenameCampaignRequest request = new RenameCampaignRequest();
+    request.setName("NAME");
 
-    Mockito.doNothing().when(campaignServiceMock).renameCampaign(campaignId, name);
+    Mockito.doNothing().when(campaignServiceMock).renameCampaign(campaignId, request);
 
-    ResponseEntity<Void> response = campaignController.renameCampaign(campaignId, new RenameCampaignRequest(name));
+    ResponseEntity<Void> response = campaignController.renameCampaign(campaignId, request);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
