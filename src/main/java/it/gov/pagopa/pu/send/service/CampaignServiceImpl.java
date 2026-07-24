@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
+import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
@@ -140,5 +141,10 @@ public class CampaignServiceImpl implements CampaignService {
     return pagedSendNotificationsMapper.mapToPagedSendNotifications(
       sendNotificationNoPIIRepository.findSendNotificationsByFilters(sendNotificationFiltersDTO, pageable)
     );
+  }
+
+  @Override
+  public void renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest) {
+    campaignRepository.updateCampaignName(campaignId, renameCampaignRequest.getName());
   }
 }

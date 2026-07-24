@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.controller;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
+import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.service.CampaignService;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -66,6 +67,21 @@ class CampaignControllerTest {
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    Assertions.assertNull(response.getBody());
+  }
+
+  @Test
+  void whenRenameCampaignThenOk() {
+    String campaignId = "campaignId";
+    RenameCampaignRequest request = new RenameCampaignRequest();
+    request.setName("NAME");
+
+    Mockito.doNothing().when(campaignServiceMock).renameCampaign(campaignId, request);
+
+    ResponseEntity<Void> response = campaignController.renameCampaign(campaignId, request);
+
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertNull(response.getBody());
   }
 

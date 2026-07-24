@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
+import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
@@ -312,5 +313,18 @@ class CampaignServiceImplTest {
 
     assertNotNull(result);
     assertEquals(expectedResult,result);
+  }
+
+  @Test
+  void whenRenameCampaignNameThenOk() {
+    String campaignId = "campaignId";
+    RenameCampaignRequest request = new RenameCampaignRequest();
+    request.setName("NAME");
+
+    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    when(campaignRepositoryMock.updateCampaignName(campaignId, request.getName())).thenReturn(updateResult);
+
+    Assertions.assertDoesNotThrow(()->campaignService.renameCampaign(campaignId, request));
   }
 }

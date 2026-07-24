@@ -105,4 +105,12 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
     List<Campaign> campaigns = mongoTemplate.find(query, Campaign.class);
     return new PageImpl<>(campaigns, pageable, count);
   }
+
+  @Override
+  public UpdateResult updateCampaignName(String campaignId, String name) {
+    return updateFirst(
+      Query.query(Criteria.where(Fields.campaignId).is(campaignId)),
+      new Update().set(Fields.campaignName, name)
+    );
+  }
 }
