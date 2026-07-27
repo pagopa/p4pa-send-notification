@@ -85,9 +85,11 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
   public Page<Campaign> findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable) {
     Query query = new Query();
     query.addCriteria(Criteria
-      .where(Fields.organizationId).is(organizationId)
-      .and(Fields.startDate).lte(dateTo)
-      .and(Fields.endDate).gte(dateFrom));
+      .where(Fields.organizationId).is(organizationId));
+    if(dateFrom!=null && dateTo!=null){
+      query.addCriteria(Criteria.where(Fields.startDate).lte(dateTo)
+        .and(Fields.endDate).gte(dateFrom));
+    }
     if(StringUtils.isNotBlank(orgSubUnitCode)){
       query.addCriteria(Criteria.where(Fields.orgSubUnitCode).is(orgSubUnitCode));
     }else {
