@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategor
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
+import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +39,7 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   private List<DocumentDTO> documents;
   private NotificationStatus status;
   private TimelineElementCategoryV27DTO lastEventOfInterest;
+  private List<StreamEventSummaryDTO> history;
   private String notificationRequestId;
   private String iun;
   private String notificationFeePolicy;

@@ -2,10 +2,9 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationStatusV26DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
-import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
-import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
-import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
 import org.junit.jupiter.api.AfterEach;
@@ -230,17 +229,20 @@ class SendControllerTest {
   @Test
   void givenExpectedMapsWhenNotifySendNotificationTimelineCategoryThenOk() {
     // GIVEN
-    Map<String, List<TimelineElementCategoryV27DTO>> request = Map.of(
-      "notificationRequestId1", List.of(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED),
-      "notificationRequestId2", List.of(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED, TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS)
+    StreamEventSummaryDTO ev1 = new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.REQUEST_ACCEPTED);
+    StreamEventSummaryDTO ev2 = new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS);
+
+    Map<String, List<StreamEventSummaryDTO>> request = Map.of(
+      "notificationRequestId1", List.of(ev1),
+      "notificationRequestId2", List.of(ev1,ev2)
     );
 
     doNothing()
       .when(sendFacadeServiceMock)
-      .notifySendNotificationTimelineCategory(request);
+      .notifySendNotificationStreamEvents(request);
 
     // WHEN
-    ResponseEntity<Void> actualResponse = sendController.notifySendNotificationTimelineCategory(request);
+    ResponseEntity<Void> actualResponse = sendController.notifySendNotificationStreamEvents(request);
 
     // THEN
     Assertions.assertNotNull(actualResponse);

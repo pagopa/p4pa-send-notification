@@ -1,13 +1,19 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
+import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
+import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
+import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
+import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
@@ -32,6 +38,8 @@ import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -44,13 +52,23 @@ class CampaignServiceImplTest {
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
   @Mock
   private PagedCampaignMapper pagedCampaignMapperMock;
+  @Mock
+  private PagedSendNotificationsMapper pagedSendNotificationsMapperMock;
+  @Mock
+  private DataCipherService dataCipherServiceMock;
 
   @InjectMocks
   private CampaignServiceImpl campaignService;
 
   @AfterEach
   void verifyNoMoreInteractions() {
-    Mockito.verifyNoMoreInteractions(campaignRepositoryMock, sendNotificationNoPIIRepositoryMock, pagedCampaignMapperMock);
+    Mockito.verifyNoMoreInteractions(
+      campaignRepositoryMock,
+      sendNotificationNoPIIRepositoryMock,
+      pagedCampaignMapperMock,
+      pagedSendNotificationsMapperMock,
+      dataCipherServiceMock
+    );
   }
 
   @Test
@@ -71,7 +89,7 @@ class CampaignServiceImplTest {
 
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
 
-    Assertions.assertNotNull(result);
+    assertNotNull(result);
     Assertions.assertEquals(existingCampaign, result);
   }
 
@@ -102,7 +120,7 @@ class CampaignServiceImplTest {
 
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
 
-    Assertions.assertNotNull(result);
+    assertNotNull(result);
     Assertions.assertEquals(expectedCampaign, result);
   }
 
@@ -115,7 +133,7 @@ class CampaignServiceImplTest {
 
     List<String> result = campaignService.fetchAllIds();
 
-    Assertions.assertNotNull(result);
+    assertNotNull(result);
     Assertions.assertEquals(List.of("campaignId"), result);
   }
 
@@ -194,7 +212,7 @@ class CampaignServiceImplTest {
 
     Campaign result = campaignService.getCampaignById(campaign.getCampaignId());
 
-    Assertions.assertNotNull(result);
+    assertNotNull(result);
     Assertions.assertEquals(campaign, result);
   }
 
@@ -259,5 +277,54 @@ class CampaignServiceImplTest {
     PagedCampaign result = campaignService.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable);
 
     Assertions.assertEquals(expected, result);
+  }
+
+  @Test
+  void whenGetCampaignSendNotificationsThenOk(){
+    SendNotificationFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationFiltersDTO.class);
+    String fiscalCode = "fiscalCode";
+    Pageable pageable = PageRequest.of(0, 10);
+    List<SendNotificationNoPII> notifications = podamFactory.manufacturePojo(List.class, SendNotificationNoPII.class);
+    Page<SendNotificationNoPII> notificationPage = new PageImpl<>(notifications);
+    PagedSendNotifications expectedResult = podamFactory.manufacturePojo(PagedSendNotifications.class);
+
+    when(dataCipherServiceMock.hash(fiscalCode)).thenReturn(filters.getFiscalCodeHash());
+    when(sendNotificationNoPIIRepositoryMock.findSendNotificationsByFilters(filters,pageable)).thenReturn(notificationPage);
+    when(pagedSendNotificationsMapperMock.mapToPagedSendNotifications(notificationPage)).thenReturn(expectedResult);
+
+    PagedSendNotifications result = campaignService.getCampaignSendNotifications(filters, fiscalCode, pageable);
+
+    assertNotNull(result);
+    assertEquals(expectedResult,result);
+  }
+
+  @Test
+  void givenNoFiscalCodewhenGetCampaignSendNotificationsThenOk(){
+    SendNotificationFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationFiltersDTO.class);
+    Pageable pageable = PageRequest.of(0, 10);
+    List<SendNotificationNoPII> notifications = podamFactory.manufacturePojo(List.class, SendNotificationNoPII.class);
+    Page<SendNotificationNoPII> notificationPage = new PageImpl<>(notifications);
+    PagedSendNotifications expectedResult = podamFactory.manufacturePojo(PagedSendNotifications.class);
+
+    when(sendNotificationNoPIIRepositoryMock.findSendNotificationsByFilters(filters,pageable)).thenReturn(notificationPage);
+    when(pagedSendNotificationsMapperMock.mapToPagedSendNotifications(notificationPage)).thenReturn(expectedResult);
+
+    PagedSendNotifications result = campaignService.getCampaignSendNotifications(filters, null, pageable);
+
+    assertNotNull(result);
+    assertEquals(expectedResult,result);
+  }
+
+  @Test
+  void whenRenameCampaignNameThenOk() {
+    String campaignId = "campaignId";
+    RenameCampaignRequest request = new RenameCampaignRequest();
+    request.setName("NAME");
+
+    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    when(campaignRepositoryMock.updateCampaignName(campaignId, request.getName())).thenReturn(updateResult);
+
+    Assertions.assertDoesNotThrow(()->campaignService.renameCampaign(campaignId, request));
   }
 }

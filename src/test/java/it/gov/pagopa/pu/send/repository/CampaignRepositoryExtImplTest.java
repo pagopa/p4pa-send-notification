@@ -97,6 +97,21 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     assertEquals(1L, result.getModifiedCount());
   }
+  @Test
+  void givenUpdateCampaignNameThenVerify() {
+    String campaignId = "campaignId";
+    String campaignName = "campaignName";
+
+    when(mongoTemplateMock.updateFirst(Mockito.any(Query.class),
+      Mockito.any(Update.class),
+      Mockito.eq(Campaign.class)))
+      .thenReturn(updateResult);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.updateCampaignName(campaignId, campaignName);
+
+    assertEquals(1L, result.getModifiedCount());
+  }
 
   @Test
   void whenFindCampaignsByFiltersThenOk() {
