@@ -2,13 +2,12 @@ package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationStatusV26DTO;
+import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
-import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
-import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
-import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
@@ -20,7 +19,6 @@ import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,11 +33,11 @@ import uk.co.jemos.podam.api.PodamFactory;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -90,7 +88,7 @@ class CampaignServiceImplTest {
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
 
     assertNotNull(result);
-    Assertions.assertEquals(existingCampaign, result);
+    assertEquals(existingCampaign, result);
   }
 
   @Test
@@ -121,7 +119,7 @@ class CampaignServiceImplTest {
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
 
     assertNotNull(result);
-    Assertions.assertEquals(expectedCampaign, result);
+    assertEquals(expectedCampaign, result);
   }
 
   @Test
@@ -134,7 +132,7 @@ class CampaignServiceImplTest {
     List<String> result = campaignService.fetchAllIds();
 
     assertNotNull(result);
-    Assertions.assertEquals(List.of("campaignId"), result);
+    assertEquals(List.of("campaignId"), result);
   }
 
   @Test
@@ -149,7 +147,7 @@ class CampaignServiceImplTest {
 
     campaignService.alignCampaign(campaignId);
 
-    Assertions.assertEquals(mockCounters, campaign.getCounters());
+    assertEquals(mockCounters, campaign.getCounters());
   }
 
   @Test
@@ -158,13 +156,13 @@ class CampaignServiceImplTest {
 
     when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.empty());
 
-    NotFoundException exception = Assertions.assertThrows(
+    NotFoundException exception = assertThrows(
       NotFoundException.class,
       () -> campaignService.alignCampaign(campaignId)
     );
 
-    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, exception.getCode());
-    Assertions.assertEquals(String.format("Campaign having id %s not found", campaignId), exception.getMessage());
+    assertEquals(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, exception.getCode());
+    assertEquals(String.format("Campaign having id %s not found", campaignId), exception.getMessage());
   }
 
   @Test
@@ -175,7 +173,7 @@ class CampaignServiceImplTest {
 
     when(campaignRepositoryMock.incrementTotalAndUpdateEndDate(campaign.getCampaignId(), endDate)).thenReturn(updateResult);
 
-    Assertions.assertDoesNotThrow(()->campaignService.incrementTotalAndUpdateEndDate(campaign.getCampaignId(), endDate));
+    assertDoesNotThrow(()->campaignService.incrementTotalAndUpdateEndDate(campaign.getCampaignId(), endDate));
   }
 
   @Test
@@ -186,7 +184,7 @@ class CampaignServiceImplTest {
 
     when(campaignRepositoryMock.updateCampaignCounters(campaignId, notificationStatusChangeDTO)).thenReturn(updateResult);
 
-    Assertions.assertDoesNotThrow(()->campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO));
+    assertDoesNotThrow(()->campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO));
   }
 
   @Test
@@ -194,14 +192,14 @@ class CampaignServiceImplTest {
     String campaignId = "campaignId";
     NotificationStatusChangeDTO notificationStatusChangeDTO = new NotificationStatusChangeDTO();
 
-    Assertions.assertDoesNotThrow(()->campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO));
+   assertDoesNotThrow(()->campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO));
   }
 
   @Test
   void givenNoNotificationStatusChangeDTOWhenHandleStatusChangeThenNull() {
     String campaignId = "campaignId";
 
-    Assertions.assertDoesNotThrow(()->campaignService.handleStatusChange(campaignId, null));
+    assertDoesNotThrow(()->campaignService.handleStatusChange(campaignId, null));
   }
 
   @Test
@@ -213,7 +211,7 @@ class CampaignServiceImplTest {
     Campaign result = campaignService.getCampaignById(campaign.getCampaignId());
 
     assertNotNull(result);
-    Assertions.assertEquals(campaign, result);
+    assertEquals(campaign, result);
   }
 
   @Test
@@ -221,9 +219,9 @@ class CampaignServiceImplTest {
     String campaignId = "campaignId";
     when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.empty());
 
-    NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> campaignService.getCampaignById(campaignId));
+    NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> campaignService.getCampaignById(campaignId));
 
-    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, notFoundException.getCode());
+    assertEquals(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, notFoundException.getCode());
   }
 
   @Test
@@ -231,7 +229,7 @@ class CampaignServiceImplTest {
     String campaignId = "campaignId";
     doNothing().when(campaignRepositoryMock).deleteById(campaignId);
 
-    Assertions.assertDoesNotThrow(()->campaignService.deleteCampaignById(campaignId));
+    assertDoesNotThrow(()->campaignService.deleteCampaignById(campaignId));
   }
 
   @Test
@@ -242,7 +240,7 @@ class CampaignServiceImplTest {
 
     when(campaignRepositoryMock.updateStartDate(campaignId, startDate)).thenReturn(updateResult);
 
-    Assertions.assertDoesNotThrow(()->campaignService.updateStartDate(campaignId, startDate));
+    assertDoesNotThrow(()->campaignService.updateStartDate(campaignId, startDate));
   }
 
   @Test
@@ -253,7 +251,7 @@ class CampaignServiceImplTest {
 
     when(campaignRepositoryMock.updateEndDate(campaignId, endDate)).thenReturn(updateResult);
 
-    Assertions.assertDoesNotThrow(()->campaignService.updateEndDate(campaignId, endDate));
+    assertDoesNotThrow(()->campaignService.updateEndDate(campaignId, endDate));
   }
 
   @Test
@@ -276,7 +274,7 @@ class CampaignServiceImplTest {
 
     PagedCampaign result = campaignService.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable);
 
-    Assertions.assertEquals(expected, result);
+    assertEquals(expected, result);
   }
 
   @Test
@@ -325,6 +323,66 @@ class CampaignServiceImplTest {
 
     when(campaignRepositoryMock.updateCampaignName(campaignId, request.getName())).thenReturn(updateResult);
 
-    Assertions.assertDoesNotThrow(()->campaignService.renameCampaign(campaignId, request));
+    assertDoesNotThrow(()->campaignService.renameCampaign(campaignId, request));
+  }
+
+  @Test
+  void givenNullHistoryWhenCalculateActiveCountersThenReturnEmptyList() {
+    List<String> result = campaignService.calculateActiveCounters(null);
+
+    assertEquals(Collections.emptyList(), result);
+  }
+
+  @Test
+  void givenEmptyHistoryWhenCalculateActiveCountersThenReturnEmptyList() {
+    List<String> result = campaignService.calculateActiveCounters(List.of());
+
+    assertEquals(Collections.emptyList(), result);
+  }
+
+  @Test
+  void givenHistoryWithWildcardMatchWhenCalculateActiveCountersThenReturnActiveCounter() {
+    StreamEventSummaryDTO event = new StreamEventSummaryDTO(
+      NotificationStatusV26DTO.ACCEPTED,
+      TimelineElementCategoryV27DTO.SEND_SIMPLE_REGISTERED_LETTER
+    );
+
+    List<String> result = campaignService.calculateActiveCounters(List.of(event));
+
+    assertEquals(List.of(Counters.Fields.accepted), result);
+  }
+
+  @Test
+  void givenHistoryWithMultipleIndependentEventsWhenCalculateActiveCountersThenReturnAllActive() {
+    StreamEventSummaryDTO event1 = new StreamEventSummaryDTO(
+      NotificationStatusV26DTO.ACCEPTED,
+      null
+    );
+    StreamEventSummaryDTO event2 = new StreamEventSummaryDTO(
+      NotificationStatusV26DTO.DELIVERED,
+      null
+    );
+
+    List<String> result = campaignService.calculateActiveCounters(List.of(event1, event2));
+
+    assertEquals(2, result.size());
+    assertTrue(result.contains(Counters.Fields.accepted));
+    assertTrue(result.contains(Counters.Fields.delivered));
+  }
+
+  @Test
+  void givenHistoryWithConflictWhenCalculateActiveCountersThenExcludeDeactivatedCounters() {
+    StreamEventSummaryDTO event1 = new StreamEventSummaryDTO(
+      NotificationStatusV26DTO.VIEWED,
+      null
+    );
+    StreamEventSummaryDTO event2 = new StreamEventSummaryDTO(
+      NotificationStatusV26DTO.DELIVERING,
+      TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS
+    );
+
+    List<String> result = campaignService.calculateActiveCounters(List.of(event1, event2));
+
+    assertEquals(List.of(Counters.Fields.completed), result);
   }
 }

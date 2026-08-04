@@ -22,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static it.gov.pagopa.pu.send.util.CampaignUtils.COUNTER_RULES;
 
@@ -153,47 +154,38 @@ public class CampaignServiceImpl implements CampaignService {
       return Collections.emptyList();
     }
 
-    Set<String> candidateCounters = new HashSet<>();
+    Set<String> candidateCounters = COUNTER_RULES.entrySet().stream()
+      .filter(entry -> isCounterEligibleForActivation(entry.getValue(), history))
+      .map(Map.Entry::getKey)
+      .collect(Collectors.toSet());
 
-    for (Map.Entry<String, CampaignUtils.CounterRule> entry : COUNTER_RULES.entrySet()) {
-      String counter = entry.getKey();
-      CampaignUtils.CounterRule rule = entry.getValue();
-
-      boolean matchesActivation = rule.activationConditions().stream()
-        .anyMatch(condition -> isConditionMet(condition, history));
-
-      boolean matchesDeactivation = rule.deactivationConditions().stream()
-        .anyMatch(condition -> isConditionMet(condition, history));
-
-      if (matchesActivation && !matchesDeactivation) {
-        candidateCounters.add(counter);
-      }
-    }
-
-    List<String> activeCounters = new ArrayList<>();
-
-    for (String candidate : candidateCounters) {
-      CampaignUtils.CounterRule rule = COUNTER_RULES.get(candidate);
-
-      boolean isExcludedByOtherCounter = rule.deactivatingCounters().stream()
-        .anyMatch(candidateCounters::contains);
-
-      if (!isExcludedByOtherCounter) {
-        activeCounters.add(candidate);
-      }
-    }
-
-    return activeCounters;
+    return candidateCounters.stream()
+      .filter(candidate -> {
+        CampaignUtils.CounterRule rule = COUNTER_RULES.get(candidate);
+        return rule.deactivatingCounters().stream().noneMatch(candidateCounters::contains);
+      })
+      .toList();
   }
 
-  private boolean isConditionMet(StreamEventSummaryDTO condition, List<StreamEventSummaryDTO> history) {
-    return history.stream().anyMatch(event -> {
-      boolean statusMatches = Objects.equals(condition.getNewNotificationStatus(), event.getNewNotificationStatus());
+  private boolean isCounterEligibleForActivation(CampaignUtils.CounterRule rule, List<StreamEventSummaryDTO> history) {
+    boolean matchesActivation = rule.activationConditions().stream()
+      .anyMatch(condition -> hasMatchingEventInHistory(condition, history));
 
-      boolean categoryMatches = condition.getTimelineElementCategory() == null ||
-        Objects.equals(condition.getTimelineElementCategory(), event.getTimelineElementCategory());
+    if (!matchesActivation) {
+      return false;
+    }
 
-      return statusMatches && categoryMatches;
-    });
+    boolean matchesDeactivation = rule.deactivationConditions().stream()
+      .anyMatch(condition -> hasMatchingEventInHistory(condition, history));
+
+    return !matchesDeactivation;
+  }
+
+  private boolean hasMatchingEventInHistory(StreamEventSummaryDTO condition, List<StreamEventSummaryDTO> history) {
+    return history.stream().anyMatch(event ->
+      Objects.equals(condition.getNewNotificationStatus(), event.getNewNotificationStatus()) &&
+        (condition.getTimelineElementCategory() == null ||
+          Objects.equals(condition.getTimelineElementCategory(), event.getTimelineElementCategory()))
+    );
   }
 }
