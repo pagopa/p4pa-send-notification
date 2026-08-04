@@ -5,10 +5,7 @@ import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
-import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
-import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
-import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
@@ -16,6 +13,7 @@ import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.util.CampaignUtils;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static it.gov.pagopa.pu.send.util.CampaignUtils.COUNTER_RULES;
 
 @Slf4j
 @Service
@@ -146,5 +145,55 @@ public class CampaignServiceImpl implements CampaignService {
   @Override
   public void renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest) {
     campaignRepository.updateCampaignName(campaignId, renameCampaignRequest.getName());
+  }
+
+  @Override
+  public List<String> calculateActiveCounters(List<StreamEventSummaryDTO> history) {
+    if (history == null || history.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    Set<String> candidateCounters = new HashSet<>();
+
+    for (Map.Entry<String, CampaignUtils.CounterRule> entry : COUNTER_RULES.entrySet()) {
+      String counter = entry.getKey();
+      CampaignUtils.CounterRule rule = entry.getValue();
+
+      boolean matchesActivation = rule.activationConditions().stream()
+        .anyMatch(condition -> isConditionMet(condition, history));
+
+      boolean matchesDeactivation = rule.deactivationConditions().stream()
+        .anyMatch(condition -> isConditionMet(condition, history));
+
+      if (matchesActivation && !matchesDeactivation) {
+        candidateCounters.add(counter);
+      }
+    }
+
+    List<String> activeCounters = new ArrayList<>();
+
+    for (String candidate : candidateCounters) {
+      CampaignUtils.CounterRule rule = COUNTER_RULES.get(candidate);
+
+      boolean isExcludedByOtherCounter = rule.deactivatingCounters().stream()
+        .anyMatch(candidateCounters::contains);
+
+      if (!isExcludedByOtherCounter) {
+        activeCounters.add(candidate);
+      }
+    }
+
+    return activeCounters;
+  }
+
+  private boolean isConditionMet(StreamEventSummaryDTO condition, List<StreamEventSummaryDTO> history) {
+    return history.stream().anyMatch(event -> {
+      boolean statusMatches = Objects.equals(condition.getNewNotificationStatus(), event.getNewNotificationStatus());
+
+      boolean categoryMatches = condition.getTimelineElementCategory() == null ||
+        Objects.equals(condition.getTimelineElementCategory(), event.getTimelineElementCategory());
+
+      return statusMatches && categoryMatches;
+    });
   }
 }
