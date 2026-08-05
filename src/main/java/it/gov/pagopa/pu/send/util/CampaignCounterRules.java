@@ -54,15 +54,18 @@ public class CampaignCounterRules {
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, null)
       )).build(),
+
     Counters.Fields.delivered, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, null)
       )).build(),
+
     Counters.Fields.completed, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.VIEWED, null),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.EFFECTIVE_DATE, null)
       )).build(),
+
     Counters.Fields.analogicCompletionPreOutcome, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS),
@@ -71,6 +74,7 @@ public class CampaignCounterRules {
       .deactivatingCounters(List.of(
         Counters.Fields.completed, Counters.Fields.analogicCompletion, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound
       )).build(),
+
     Counters.Fields.analogicCompletion, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.ANALOG_FAILURE_WORKFLOW),
@@ -79,6 +83,7 @@ public class CampaignCounterRules {
       .deactivatingCounters(List.of(
         Counters.Fields.completed, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound
       )).build(),
+
     Counters.Fields.digitalCompletionDigitalDomicile, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.DIGITAL_FAILURE_WORKFLOW),
@@ -88,6 +93,7 @@ public class CampaignCounterRules {
       .deactivatingCounters(List.of(
         Counters.Fields.completed, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound
       )).build(),
+
     Counters.Fields.digitalCompletionCourtesyMessage, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.PROBABLE_SCHEDULING_ANALOG_DATE),
@@ -97,14 +103,17 @@ public class CampaignCounterRules {
       .deactivatingCounters(List.of(
         Counters.Fields.completed, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound
       )).build(),
+
     Counters.Fields.failed, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.REFUSED, null)
       )).build(),
+
     Counters.Fields.deceasedRecipient, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.RETURNED_TO_SENDER, null)
       )).build(),
+
     Counters.Fields.recipientNotFound, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.UNREACHABLE, null)
