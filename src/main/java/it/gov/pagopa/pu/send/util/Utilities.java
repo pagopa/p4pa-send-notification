@@ -11,6 +11,10 @@ public class Utilities {
         return MDC.get("traceId");
     }
 
+  public static String getSpanId(){
+    return MDC.get("spanId");
+  }
+
   public static <E extends Enum<E>> Optional<E> safeEnumFromValue(Class<E> c, String value) {
     try {
       return Optional.of(E.valueOf(c, value));
