@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +20,11 @@ import static it.gov.pagopa.pu.send.util.Constants.ZONEID;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SendNotificationStatusHandlerServiceImpl implements SendNotificationStatusHandlerService {
   private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
   private final CampaignService campaignService;
-
-  public SendNotificationStatusHandlerServiceImpl(SendNotificationNoPIIRepository sendNotificationNoPIIRepository, CampaignService campaignService) {
-    this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
-    this.campaignService = campaignService;
-  }
+  private final CampaignCountersService campaignCountersService;
 
   @Transactional
   @Override
@@ -45,15 +43,17 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
 
   @Transactional
   @Override
-  public void handleSendNotificationStatusUpdate(String sendNotificationId, String campaignId, List<StreamEventSummaryDTO> oldHistory, List<StreamEventSummaryDTO> eventToPush) {
-    List<StreamEventSummaryDTO> newHistory = sendNotificationNoPIIRepository.pushStreamEventsHistory(sendNotificationId, eventToPush);
+  public void handleSendNotificationStatusUpdate(String sendNotificationId, String campaignId, List<StreamEventSummaryDTO> oldHistory, List<StreamEventSummaryDTO> eventsToPush) {
+    List<StreamEventSummaryDTO> newHistory = sendNotificationNoPIIRepository.pushStreamEventsHistory(sendNotificationId, eventsToPush);
     NotificationStatusChangeDTO notificationStatusChangeDTO = handleHistoryChange(oldHistory, newHistory);
     campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO);
   }
 
   private NotificationStatusChangeDTO handleHistoryChange(List<StreamEventSummaryDTO> oldHistory, List<StreamEventSummaryDTO> newHistory) {
-    Set<String> oldCounters = campaignService.calculateActiveCounters(oldHistory);
-    Set<String> newCounters = campaignService.calculateActiveCounters(newHistory);
+    Set<String> oldCounters = campaignCountersService.calculateActiveCounters(oldHistory);
+    Set<String> newCounters = campaignCountersService.calculateActiveCounters(newHistory);
+
+    log.debug("Counters diff - oldCounters: {}, newCounters: {}", oldCounters, newCounters);
 
     return NotificationStatusChangeDTO.builder()
       .incrFields(newCounters.stream().filter(c -> !oldCounters.contains(c)).collect(Collectors.toSet()))
@@ -73,7 +73,7 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
 
     Set<String> activeCounters = history == null
       ? new HashSet<>()
-      : campaignService.calculateActiveCounters(history);
+      : campaignCountersService.calculateActiveCounters(history);
 
     activeCounters.add(Counters.Fields.total);
 

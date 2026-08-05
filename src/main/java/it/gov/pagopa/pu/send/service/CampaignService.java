@@ -23,5 +23,4 @@ public interface CampaignService {
   PagedCampaign findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable);
   PagedSendNotifications getCampaignSendNotifications(SendNotificationFiltersDTO sendNotificationFiltersDTO, String fiscalCode, Pageable pageable);
   void renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest);
-  Set<String> calculateActiveCounters(List<StreamEventSummaryDTO> history);
 }

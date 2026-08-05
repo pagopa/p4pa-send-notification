@@ -13,7 +13,6 @@ import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
-import it.gov.pagopa.pu.send.util.CampaignUtils;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +21,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static it.gov.pagopa.pu.send.util.CampaignUtils.COUNTER_RULES;
 
 @Slf4j
 @Service
@@ -146,46 +142,5 @@ public class CampaignServiceImpl implements CampaignService {
   @Override
   public void renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest) {
     campaignRepository.updateCampaignName(campaignId, renameCampaignRequest.getName());
-  }
-
-  @Override
-  public Set<String> calculateActiveCounters(List<StreamEventSummaryDTO> history) {
-    if (history == null || history.isEmpty()) {
-      return Collections.emptySet();
-    }
-
-    Set<String> candidateCounters = COUNTER_RULES.entrySet().stream()
-      .filter(entry -> isCounterEligibleForActivation(entry.getValue(), history))
-      .map(Map.Entry::getKey)
-      .collect(Collectors.toSet());
-
-    return candidateCounters.stream()
-      .filter(candidate -> {
-        CampaignUtils.CounterRule rule = COUNTER_RULES.get(candidate);
-        return rule.deactivatingCounters().stream().noneMatch(candidateCounters::contains);
-      })
-      .collect(Collectors.toSet());
-  }
-
-  private boolean isCounterEligibleForActivation(CampaignUtils.CounterRule rule, List<StreamEventSummaryDTO> history) {
-    boolean matchesActivation = rule.activationConditions().stream()
-      .anyMatch(condition -> hasMatchingEventInHistory(condition, history));
-
-    if (!matchesActivation) {
-      return false;
-    }
-
-    boolean matchesDeactivation = rule.deactivationConditions().stream()
-      .anyMatch(condition -> hasMatchingEventInHistory(condition, history));
-
-    return !matchesDeactivation;
-  }
-
-  private boolean hasMatchingEventInHistory(StreamEventSummaryDTO condition, List<StreamEventSummaryDTO> history) {
-    return history.stream().anyMatch(event ->
-      Objects.equals(condition.getNewNotificationStatus(), event.getNewNotificationStatus()) &&
-        (condition.getTimelineElementCategory() == null ||
-          Objects.equals(condition.getTimelineElementCategory(), event.getTimelineElementCategory()))
-    );
   }
 }

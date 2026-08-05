@@ -12,7 +12,7 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.BaseEntity;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
-import it.gov.pagopa.pu.send.util.CampaignUtils;
+import it.gov.pagopa.pu.send.util.CampaignCounterRules;
 import it.gov.pagopa.pu.send.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
@@ -225,7 +225,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
   private ConditionalOperators.Cond buildStatusCondition(String counterName) {
     Set<TimelineElementCategoryV27DTO> latestEventsOfInterest =
-      CampaignUtils.COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES.getOrDefault(counterName, Collections.emptySet());
+      CampaignCounterRules.COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES.getOrDefault(counterName, Collections.emptySet());
 
     return ConditionalOperators.when(Criteria.where(Fields.lastEventOfInterest).in(latestEventsOfInterest))
       .then(1).otherwise(0);

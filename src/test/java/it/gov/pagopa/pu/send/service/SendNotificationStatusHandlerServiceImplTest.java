@@ -30,10 +30,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class SendNotificationStatusHandlerServiceImplTest {
   public static final uk.co.jemos.podam.api.PodamFactory podamFactory = TestUtils.getPodamFactory();
+
   @Mock
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
   @Mock
   private CampaignService campaignServiceMock;
+  @Mock
+  private CampaignCountersService campaignCountersServiceMock;
+
   @InjectMocks
   private SendNotificationStatusHandlerServiceImpl sendNotificationStatusHandlerService;
 
@@ -41,7 +45,8 @@ class SendNotificationStatusHandlerServiceImplTest {
   void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(
       sendNotificationNoPIIRepositoryMock,
-      campaignServiceMock
+      campaignServiceMock,
+      campaignCountersServiceMock
     );
   }
 
@@ -86,8 +91,8 @@ class SendNotificationStatusHandlerServiceImplTest {
 
     when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush))
       .thenReturn(newHistory);
-    when(campaignServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
-    when(campaignServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
@@ -112,8 +117,8 @@ class SendNotificationStatusHandlerServiceImplTest {
       .build();
 
     when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush)).thenReturn(newHistory);
-    when(campaignServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
-    when(campaignServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
@@ -138,8 +143,8 @@ class SendNotificationStatusHandlerServiceImplTest {
       .build();
 
     when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush)).thenReturn(newHistory);
-    when(campaignServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
-    when(campaignServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
@@ -179,7 +184,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     campaign.setEndDate(endDate);
 
     Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion));
-    when(campaignServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion, Counters.Fields.total))
@@ -214,7 +219,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     campaign.setEndDate(notificationCreationDate);
 
     Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompleted));
-    when(campaignServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompleted, Counters.Fields.total))
@@ -250,7 +255,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     campaign.setEndDate(endDate);
 
     Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted));
-    when(campaignServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.total))

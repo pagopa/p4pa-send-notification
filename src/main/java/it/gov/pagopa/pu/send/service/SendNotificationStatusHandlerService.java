@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface SendNotificationStatusHandlerService {
   Campaign handleNewSendNotification(CreateNotificationRequest createNotificationRequest);
-  void handleSendNotificationStatusUpdate(String sendNotificationId, String campaignId, List<StreamEventSummaryDTO> oldHistory, List<StreamEventSummaryDTO> eventToPush);
+  void handleSendNotificationStatusUpdate(String sendNotificationId, String campaignId, List<StreamEventSummaryDTO> oldHistory, List<StreamEventSummaryDTO> eventsToPush);
   void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, List<StreamEventSummaryDTO> history);
 }
