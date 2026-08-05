@@ -69,7 +69,7 @@ class CampaignCountersServiceImplTest {
   @Test
   void givenHistoryWithConflictWhenCalculateActiveCountersThenExcludeDeactivatedCounters() {
     StreamEventSummaryDTO event1 = new StreamEventSummaryDTO(
-      NotificationStatusV26DTO.VIEWED,
+      NotificationStatusV26DTO.EFFECTIVE_DATE,
       null
     );
     StreamEventSummaryDTO event2 = new StreamEventSummaryDTO(
