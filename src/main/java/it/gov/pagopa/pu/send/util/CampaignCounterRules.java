@@ -6,11 +6,9 @@ import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import lombok.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CampaignCounterRules {
   private CampaignCounterRules() {}
@@ -49,6 +47,19 @@ public class CampaignCounterRules {
     private List<StreamEventSummaryDTO> deactivationConditions = List.of();
   }
 
+  private static final List<String> TERMINAL_COUNTERS = List.of(
+    Counters.Fields.completed,
+    Counters.Fields.deceasedRecipient,
+    Counters.Fields.recipientNotFound
+  );
+
+  private static List<String> withTerminalCounters(String... additionalCounters) {
+    return Stream.concat(
+      TERMINAL_COUNTERS.stream(),
+      Arrays.stream(additionalCounters)
+    ).toList();
+  }
+
   public static final Map<String, CounterRule> COUNTER_RULES = Map.of(
     Counters.Fields.accepted, CounterRule.builder()
       .activationConditions(List.of(
@@ -62,7 +73,6 @@ public class CampaignCounterRules {
 
     Counters.Fields.completed, CounterRule.builder()
       .activationConditions(List.of(
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.VIEWED, null),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.EFFECTIVE_DATE, null)
       )).build(),
 
@@ -71,18 +81,14 @@ public class CampaignCounterRules {
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_ANALOG_FEEDBACK)
       ))
-      .deactivatingCounters(List.of(
-        Counters.Fields.completed, Counters.Fields.analogicCompletion, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound
-      )).build(),
+      .deactivatingCounters(withTerminalCounters(Counters.Fields.analogicCompletion)).build(),
 
     Counters.Fields.analogicCompletion, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.ANALOG_FAILURE_WORKFLOW),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, TimelineElementCategoryV27DTO.ANALOG_SUCCESS_WORKFLOW)
       ))
-      .deactivatingCounters(List.of(
-        Counters.Fields.completed, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound
-      )).build(),
+      .deactivatingCounters(TERMINAL_COUNTERS).build(),
 
     Counters.Fields.digitalCompletionDigitalDomicile, CounterRule.builder()
       .activationConditions(List.of(
@@ -90,19 +96,16 @@ public class CampaignCounterRules {
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_SIMPLE_REGISTERED_LETTER),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, TimelineElementCategoryV27DTO.DIGITAL_SUCCESS_WORKFLOW)
       ))
-      .deactivatingCounters(List.of(
-        Counters.Fields.completed, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound
-      )).build(),
+      .deactivatingCounters(TERMINAL_COUNTERS).build(),
 
     Counters.Fields.digitalCompletionCourtesyMessage, CounterRule.builder()
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.PROBABLE_SCHEDULING_ANALOG_DATE),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SCHEDULE_ANALOG_WORKFLOW),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_COURTESY_MESSAGE)
-      ))
-      .deactivatingCounters(List.of(
-        Counters.Fields.completed, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound
-      )).build(),
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_COURTESY_MESSAGE),
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.VIEWED, null)
+        ))
+      .deactivatingCounters(TERMINAL_COUNTERS).build(),
 
     Counters.Fields.failed, CounterRule.builder()
       .activationConditions(List.of(
