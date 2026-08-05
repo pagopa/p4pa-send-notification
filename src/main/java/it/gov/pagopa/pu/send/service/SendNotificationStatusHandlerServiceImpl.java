@@ -1,6 +1,5 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
@@ -8,7 +7,6 @@ import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
-import it.gov.pagopa.pu.send.util.CampaignUtils;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
