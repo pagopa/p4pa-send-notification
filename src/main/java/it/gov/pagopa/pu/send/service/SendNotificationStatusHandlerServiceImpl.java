@@ -65,7 +65,7 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
 
   @Transactional
   @Override
-  public void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, TimelineElementCategoryV27DTO currentLastEventOfInterest) {
+  public void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, List<StreamEventSummaryDTO> history) {
     Campaign campaign = campaignService.getCampaignById(campaignId);
     if(campaign.getCounters()!=null && Objects.equals(campaign.getCounters().getTotal(),1L)){
       log.info("Deleting campaign having id {}", campaignId);
@@ -73,15 +73,12 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
       return;
     }
 
-    Set<String> activeCounters;
-    if(currentLastEventOfInterest==null){
-      activeCounters = new HashSet<>();
-    }else {
-      activeCounters = new HashSet<>(
-        CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(currentLastEventOfInterest, new HashSet<>())
-      );
-    }
+    Set<String> activeCounters = history == null
+      ? new HashSet<>()
+      : campaignService.calculateActiveCounters(history);
+
     activeCounters.add(Counters.Fields.total);
+
     campaignService.handleStatusChange(campaignId, NotificationStatusChangeDTO.builder()
       .decrFields(activeCounters)
       .build());
