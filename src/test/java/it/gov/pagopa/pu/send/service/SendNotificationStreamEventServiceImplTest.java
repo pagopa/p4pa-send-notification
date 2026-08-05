@@ -4,7 +4,6 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationStatusV26D
 import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
-import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
