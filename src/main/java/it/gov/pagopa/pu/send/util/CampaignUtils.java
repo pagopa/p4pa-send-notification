@@ -71,7 +71,7 @@ public class CampaignUtils {
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_ANALOG_FEEDBACK)
       ),
-      List.of(Counters.Fields.completed, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound),
+      List.of(Counters.Fields.completed, Counters.Fields.analogicCompletion, Counters.Fields.deceasedRecipient, Counters.Fields.recipientNotFound),
       List.of()
     ),
     Counters.Fields.analogicCompletion, new CounterRule(
