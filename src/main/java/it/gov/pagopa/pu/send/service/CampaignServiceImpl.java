@@ -149,9 +149,9 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
-  public List<String> calculateActiveCounters(List<StreamEventSummaryDTO> history) {
+  public Set<String> calculateActiveCounters(List<StreamEventSummaryDTO> history) {
     if (history == null || history.isEmpty()) {
-      return Collections.emptyList();
+      return Collections.emptySet();
     }
 
     Set<String> candidateCounters = COUNTER_RULES.entrySet().stream()
@@ -164,7 +164,7 @@ public class CampaignServiceImpl implements CampaignService {
         CampaignUtils.CounterRule rule = COUNTER_RULES.get(candidate);
         return rule.deactivatingCounters().stream().noneMatch(candidateCounters::contains);
       })
-      .toList();
+      .collect(Collectors.toSet());
   }
 
   private boolean isCounterEligibleForActivation(CampaignUtils.CounterRule rule, List<StreamEventSummaryDTO> history) {

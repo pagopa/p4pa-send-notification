@@ -4,6 +4,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategor
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
@@ -13,10 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static it.gov.pagopa.pu.send.util.Constants.ZONEID;
 
@@ -48,18 +48,16 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
 
   @Transactional
   @Override
-  public void handleSendNotificationStatusUpdate(String sendNotificationId, String campaignId, TimelineElementCategoryV27DTO oldStatus, TimelineElementCategoryV27DTO newStatus) {
-    if(Objects.equals(oldStatus,newStatus)){
-      return;
-    }
-    NotificationStatusChangeDTO notificationStatusChangeDTO = handleStatusChange(oldStatus, newStatus);
+  public void handleSendNotificationStatusUpdate(String sendNotificationId, String campaignId, List<StreamEventSummaryDTO> oldHistory, List<StreamEventSummaryDTO> eventToPush) {
+    List<StreamEventSummaryDTO> newHistory = sendNotificationNoPIIRepository.pushStreamEventsHistory(sendNotificationId, eventToPush);
+    NotificationStatusChangeDTO notificationStatusChangeDTO = handleHistoryChange(oldHistory, newHistory);
     campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO);
-    sendNotificationNoPIIRepository.updateLastEventOfInterestById(sendNotificationId, newStatus);
   }
 
-  private NotificationStatusChangeDTO handleStatusChange(TimelineElementCategoryV27DTO oldStatus, TimelineElementCategoryV27DTO newStatus){
-    Set<String> oldCounters = (oldStatus != null) ? CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.get(oldStatus) : Set.of();
-    Set<String> newCounters = CampaignUtils.TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.getOrDefault(newStatus, Set.of());
+  private NotificationStatusChangeDTO handleHistoryChange(List<StreamEventSummaryDTO> oldHistory, List<StreamEventSummaryDTO> newHistory) {
+    Set<String> oldCounters = campaignService.calculateActiveCounters(oldHistory);
+    Set<String> newCounters = campaignService.calculateActiveCounters(newHistory);
+
     return NotificationStatusChangeDTO.builder()
       .incrFields(newCounters.stream().filter(c -> !oldCounters.contains(c)).collect(Collectors.toSet()))
       .decrFields(oldCounters.stream().filter(c -> !newCounters.contains(c)).collect(Collectors.toSet()))

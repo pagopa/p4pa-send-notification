@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
@@ -329,13 +330,19 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     StreamEventSummaryDTO streamEvent = new StreamEventSummaryDTO();
     List<StreamEventSummaryDTO> streamEvents = List.of(streamEvent);
 
-    when(mongoTemplateMock.updateFirst(
-        Mockito.any(Query.class),
-        Mockito.any(Update.class),
-        Mockito.eq(SendNotificationNoPII.class)))
-      .thenReturn(updateResult);
+    SendNotificationNoPII updatedSendNotification = new SendNotificationNoPII();
+    updatedSendNotification.setHistory(streamEvents);
 
-    assertDoesNotThrow(() -> repository.pushStreamEventsHistory(sendNotificationId, streamEvents));
+    when(mongoTemplateMock.findAndModify(
+      Mockito.any(Query.class),
+      Mockito.any(Update.class),
+      Mockito.any(FindAndModifyOptions.class),
+      Mockito.eq(SendNotificationNoPII.class))
+    ).thenReturn(updatedSendNotification);
+
+    List<StreamEventSummaryDTO> result = repository.pushStreamEventsHistory(sendNotificationId, streamEvents);
+
+    assertEquals(streamEvents, result);
   }
 
   @Test

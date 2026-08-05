@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategor
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
@@ -23,8 +24,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,7 +62,7 @@ class SendNotificationStatusHandlerServiceImplTest {
         createNotificationRequest,
         creationDate
       )).thenReturn(campaign);
-      Mockito.doNothing().when(campaignServiceMock).incrementTotalAndUpdateEndDate(campaign.getCampaignId(),creationDate);
+      doNothing().when(campaignServiceMock).incrementTotalAndUpdateEndDate(campaign.getCampaignId(),creationDate);
 
       Campaign result = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
 
@@ -71,72 +75,79 @@ class SendNotificationStatusHandlerServiceImplTest {
   void whenHandleSendNotificationStatusUpdateThenIncrFieldsPopulated() {
     String sendNotificationId = "sendNotificationId";
     String campaignId = "campaignId";
-    TimelineElementCategoryV27DTO oldStatus = TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS;
-    TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.SEND_DIGITAL_FEEDBACK;
-    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    List<StreamEventSummaryDTO> oldHistory = Collections.emptyList();
+    List<StreamEventSummaryDTO> eventToPush = List.of(new StreamEventSummaryDTO());
+    List<StreamEventSummaryDTO> newHistory = List.of(new StreamEventSummaryDTO());
+
+    Set<String> oldCounters = Set.of(Counters.Fields.completion);
+    Set<String> newCounters = Set.of(Counters.Fields.completion, Counters.Fields.digitalCompleted);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .incrFields(Set.of(Counters.Fields.digitalCompleted))
-      .decrFields(Set.of(Counters.Fields.completion))
+      .decrFields(Set.of())
       .build();
 
-    Mockito.doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
-    when(sendNotificationNoPIIRepositoryMock.updateLastEventOfInterestById(sendNotificationId, newStatus))
-      .thenReturn(updateResult);
+    when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush))
+      .thenReturn(newHistory);
+    when(campaignServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
+    when(campaignServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
+    doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-      sendNotificationId, campaignId, oldStatus, newStatus));
+      sendNotificationId, campaignId, oldHistory, eventToPush));
   }
 
   @Test
   void givenStatusDowngradeWhenHandleSendNotificationStatusUpdateThenDecrFieldsPopulated() {
     String sendNotificationId = "sendNotificationId";
     String campaignId = "campaignId";
-    TimelineElementCategoryV27DTO oldStatus = TimelineElementCategoryV27DTO.SEND_ANALOG_FEEDBACK;
-    TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.REQUEST_ACCEPTED;
-    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+
+    List<StreamEventSummaryDTO> oldHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
+    List<StreamEventSummaryDTO> eventToPush = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
+    List<StreamEventSummaryDTO> newHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
+
+    Set<String> oldCounters = Set.of(Counters.Fields.delivered, Counters.Fields.analogicCompleted);
+    Set<String> newCounters = Set.of();
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .incrFields(Set.of())
       .decrFields(Set.of(Counters.Fields.delivered, Counters.Fields.analogicCompleted))
       .build();
 
-    Mockito.doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
-    when(sendNotificationNoPIIRepositoryMock.updateLastEventOfInterestById(sendNotificationId, newStatus))
-      .thenReturn(updateResult);
+    when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush)).thenReturn(newHistory);
+    when(campaignServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
+    when(campaignServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
+    doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-      sendNotificationId, campaignId, oldStatus, newStatus));
+      sendNotificationId, campaignId, oldHistory, eventToPush));
   }
 
   @Test
   void givenSameStatusWhenHandleSendNotificationStatusUpdateThenNoUpdate() {
     String sendNotificationId = "sendNotificationId";
     String campaignId = "campaignId";
-    TimelineElementCategoryV27DTO status = TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS;
 
-    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-      sendNotificationId, campaignId, status, status));
-  }
+    List<StreamEventSummaryDTO> oldHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
+    List<StreamEventSummaryDTO> eventToPush = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
+    List<StreamEventSummaryDTO> newHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
 
-  @Test
-  void givenNullOldStatusWhenHandleSendNotificationStatusUpdateThenIncrFieldsPopulated() {
-    String sendNotificationId = "sendNotificationId";
-    String campaignId = "campaignId";
-    TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.REQUEST_ACCEPTED;
-    UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
+    Set<String> oldCounters = Set.of(Counters.Fields.analogicCompleted);
+    Set<String> newCounters = Set.of(Counters.Fields.analogicCompleted);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
-      .incrFields(Set.of(Counters.Fields.accepted))
+      .incrFields(Set.of())
       .decrFields(Set.of())
       .build();
 
-    Mockito.doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
-    when(sendNotificationNoPIIRepositoryMock.updateLastEventOfInterestById(sendNotificationId, newStatus))
-      .thenReturn(updateResult);
+    when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush)).thenReturn(newHistory);
+    when(campaignServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
+    when(campaignServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
+    doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-      sendNotificationId, campaignId, null, newStatus));
+      sendNotificationId, campaignId, oldHistory, eventToPush));
   }
 
   @Test
@@ -151,7 +162,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     campaign.setCounters(counters);
 
     when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
-    Mockito.doNothing().when(campaignServiceMock).deleteCampaignById(campaignId);
+    doNothing().when(campaignServiceMock).deleteCampaignById(campaignId);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
       campaignId, notificationCreationDate, lastEventOfInterest));
@@ -179,10 +190,10 @@ class SendNotificationStatusHandlerServiceImplTest {
     sendNotification.setCreationDate(newStartCreationDate);
 
     when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
-    Mockito.doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
+    doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
     when(sendNotificationNoPIIRepositoryMock.findTopByCampaignIdOrderByCreationDateAsc(campaignId))
       .thenReturn(sendNotification);
-    Mockito.doNothing().when(campaignServiceMock).updateStartDate(campaignId, newStartCreationDate.toLocalDate());
+    doNothing().when(campaignServiceMock).updateStartDate(campaignId, newStartCreationDate.toLocalDate());
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
       campaignId, notificationCreationDate, currentLastEventOfInterest));
@@ -211,10 +222,10 @@ class SendNotificationStatusHandlerServiceImplTest {
     sendNotification.setCreationDate(newEndCreationDate);
 
     when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
-    Mockito.doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
+    doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
     when(sendNotificationNoPIIRepositoryMock.findTopByCampaignIdOrderByCreationDateDesc(campaignId))
       .thenReturn(sendNotification);
-    Mockito.doNothing().when(campaignServiceMock).updateEndDate(campaignId, newEndCreationDate.toLocalDate());
+    doNothing().when(campaignServiceMock).updateEndDate(campaignId, newEndCreationDate.toLocalDate());
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
       campaignId, notificationCreationDate, currentLastEventOfInterest));
@@ -240,7 +251,7 @@ class SendNotificationStatusHandlerServiceImplTest {
       .build();
 
     when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
-    Mockito.doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
+    doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
       campaignId, notificationCreationDate, currentLastEventOfInterest));
@@ -266,7 +277,7 @@ class SendNotificationStatusHandlerServiceImplTest {
       .build();
 
     when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
-    Mockito.doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
+    doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
       campaignId, notificationCreationDate, currentLastEventOfInterest));

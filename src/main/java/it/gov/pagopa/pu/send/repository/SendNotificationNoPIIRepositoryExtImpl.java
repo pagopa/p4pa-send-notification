@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -239,10 +240,16 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   @Override
-  public void pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
+  public List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
     Query query = new Query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
-    Update update = new Update().push(Fields.history).each(streamEvents);
-    updateFirst(query, update);
+    Update update = BaseEntityListener.setTechFieldsOnDocumentUpdate(new Update().push(Fields.history).each(streamEvents));
+    SendNotificationNoPII updatedDoc = mongoTemplate.findAndModify(
+      query,
+      update,
+      FindAndModifyOptions.options().returnNew(true),
+      SendNotificationNoPII.class
+    );
+    return updatedDoc.getHistory();
   }
 
 

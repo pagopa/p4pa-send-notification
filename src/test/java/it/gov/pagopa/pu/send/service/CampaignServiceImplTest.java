@@ -36,6 +36,7 @@ import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doNothing;
@@ -327,17 +328,17 @@ class CampaignServiceImplTest {
   }
 
   @Test
-  void givenNullHistoryWhenCalculateActiveCountersThenReturnEmptyList() {
-    List<String> result = campaignService.calculateActiveCounters(null);
+  void givenNullHistoryWhenCalculateActiveCountersThenReturnEmptySet() {
+    Set<String> result = campaignService.calculateActiveCounters(null);
 
-    assertEquals(Collections.emptyList(), result);
+    assertEquals(Collections.emptySet(), result);
   }
 
   @Test
-  void givenEmptyHistoryWhenCalculateActiveCountersThenReturnEmptyList() {
-    List<String> result = campaignService.calculateActiveCounters(List.of());
+  void givenEmptyHistoryWhenCalculateActiveCountersThenReturnEmptySet() {
+    Set<String> result = campaignService.calculateActiveCounters(List.of());
 
-    assertEquals(Collections.emptyList(), result);
+    assertEquals(Collections.emptySet(), result);
   }
 
   @Test
@@ -347,9 +348,9 @@ class CampaignServiceImplTest {
       TimelineElementCategoryV27DTO.SEND_SIMPLE_REGISTERED_LETTER
     );
 
-    List<String> result = campaignService.calculateActiveCounters(List.of(event));
+    Set<String> result = campaignService.calculateActiveCounters(List.of(event));
 
-    assertEquals(List.of(Counters.Fields.accepted), result);
+    assertEquals(Set.of(Counters.Fields.accepted), result);
   }
 
   @Test
@@ -363,8 +364,9 @@ class CampaignServiceImplTest {
       null
     );
 
-    List<String> result = campaignService.calculateActiveCounters(List.of(event1, event2));
+    Set<String> result = campaignService.calculateActiveCounters(List.of(event1, event2));
 
+    assertEquals(Set.of(Counters.Fields.accepted, Counters.Fields.delivered), result);
     assertEquals(2, result.size());
     assertTrue(result.contains(Counters.Fields.accepted));
     assertTrue(result.contains(Counters.Fields.delivered));
@@ -381,8 +383,8 @@ class CampaignServiceImplTest {
       TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS
     );
 
-    List<String> result = campaignService.calculateActiveCounters(List.of(event1, event2));
+    Set<String> result = campaignService.calculateActiveCounters(List.of(event1, event2));
 
-    assertEquals(List.of(Counters.Fields.completed), result);
+    assertEquals(Set.of(Counters.Fields.completed), result);
   }
 }

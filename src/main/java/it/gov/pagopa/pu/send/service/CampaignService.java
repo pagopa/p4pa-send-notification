@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 public interface CampaignService {
   Campaign createIfNotExists(String externalCampaignId, String campaignName, CreateNotificationRequest sendNotificationReq, LocalDate sendNotificationCreationDate);
@@ -22,5 +23,5 @@ public interface CampaignService {
   PagedCampaign findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable);
   PagedSendNotifications getCampaignSendNotifications(SendNotificationFiltersDTO sendNotificationFiltersDTO, String fiscalCode, Pageable pageable);
   void renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest);
-  List<String> calculateActiveCounters(List<StreamEventSummaryDTO> history);
+  Set<String> calculateActiveCounters(List<StreamEventSummaryDTO> history);
 }
