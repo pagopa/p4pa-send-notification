@@ -5,6 +5,7 @@ import com.mongodb.MongoWriteException;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteError;
 import it.gov.pagopa.pu.send.config.json.JsonConfig;
+import it.gov.pagopa.pu.send.exception.common.CommonExceptionHandlerTest;
 import it.gov.pagopa.pu.send.util.UtilitiesTest;
 import org.bson.BsonDocument;
 import org.junit.jupiter.api.AfterEach;
@@ -33,11 +34,11 @@ import static org.mockito.Mockito.doThrow;
 
 @WebMvcTest(value = {
         MongoTooManyRequestsExceptionHandler.class,
-        SendNotificationExceptionHandlerTest.TestController.class})
+        CommonExceptionHandlerTest.TestController.class})
 @ContextConfiguration(classes = {
         SendNotificationExceptionHandlerTest.class,
         MongoTooManyRequestsExceptionHandler.class,
-        SendNotificationExceptionHandlerTest.TestController.class,
+        CommonExceptionHandlerTest.TestController.class,
         JsonConfig.class})
 @AutoConfigureMockMvc(addFilters = false)
 class MongoTooManyRequestsExceptionHandlerTest {
@@ -45,7 +46,7 @@ class MongoTooManyRequestsExceptionHandlerTest {
     private MockMvc mockMvc;
 
     @MockitoSpyBean
-    private SendNotificationExceptionHandlerTest.TestController testControllerSpy;
+    private CommonExceptionHandlerTest.TestController testControllerSpy;
 
     private final String traceId = "TRACEID";
     @BeforeEach
@@ -123,7 +124,8 @@ class MongoTooManyRequestsExceptionHandlerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{\"requiredField\":\"data\"}"))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"[SEND_NOTIFICATION_GENERIC_ERROR] DUMMY\"}", JsonCompareMode.LENIENT))
+                .andExpect(MockMvcResultMatchers.content().json("{\"code\":\"SEND_NOTIFICATION_GENERIC_ERROR\"}", JsonCompareMode.LENIENT))
+                .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"DUMMY\"}", JsonCompareMode.LENIENT))
           .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceId));
     }
 

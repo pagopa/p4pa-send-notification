@@ -2,8 +2,9 @@ package it.gov.pagopa.pu.send.exception;
 
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.pu.send.exception.common.BaseBusinessException;
 
-public class InvalidStatusException extends BaseBusinessException{
+public class InvalidStatusException extends BaseBusinessException {
   public InvalidStatusException(String code, Enum<?> expected, Enum<?> actual) {
     this(code, buildMessage(expected, actual));
   }

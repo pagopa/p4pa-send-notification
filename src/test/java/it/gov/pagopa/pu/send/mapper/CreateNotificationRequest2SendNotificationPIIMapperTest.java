@@ -15,7 +15,7 @@ import it.gov.pagopa.pu.send.dto.generated.Recipient;
 import it.gov.pagopa.pu.send.dto.generated.Recipient.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
 import it.gov.pagopa.pu.send.util.DebtPositionUtils;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -38,6 +38,7 @@ import java.util.Optional;
 
 import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocument;
 import static it.gov.pagopa.pu.send.util.faker.RecipientFaker.buildRecipient;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CreateNotificationRequest2SendNotificationPIIMapperTest {
@@ -74,7 +75,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     OrganizationStationDTO organizationStationDTO = new OrganizationStationDTO();
     organizationStationDTO.setPagoPaInteractionModel(PagoPaInteractionModel.SYNC);
 
-    Mockito.when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
+    when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
       .thenReturn(Optional.of(organizationStationDTO));
 
     String nav = request.getRecipients().getFirst()
@@ -88,10 +89,10 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Organization organization = new Organization();
     organization.setOrganizationId(request.getOrganizationId());
 
-    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
+    when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
       .thenReturn(debtPosition);
 
-    Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
+    when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.of(organization));
 
     // When
@@ -126,7 +127,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     OrganizationStationDTO organizationStationDTO = new OrganizationStationDTO();
     organizationStationDTO.setPagoPaInteractionModel(PagoPaInteractionModel.SYNC);
 
-    Mockito.when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
+    when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
       .thenReturn(Optional.of(organizationStationDTO));
 
     String nav = request.getRecipients().getFirst()
@@ -138,7 +139,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     DebtPositionDTO debtPosition = new DebtPositionDTO();
     debtPosition.setDebtPositionId(null);
 
-    Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
+    when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.empty());
 
     // When
@@ -191,7 +192,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     OrganizationStationDTO organizationStationDTO = new OrganizationStationDTO();
     organizationStationDTO.setPagoPaInteractionModel(PagoPaInteractionModel.ASYNC_GPD);
 
-    Mockito.when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
+    when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
       .thenReturn(Optional.of(organizationStationDTO));
 
 
@@ -206,9 +207,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
         .getPayments().getFirst().getPagoPa().getCreditorTaxId();
       String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
 
-      Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
+      when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
         .thenReturn(debtPosition);
-      Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
+      when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
         .thenReturn(Optional.of(organization));
     }
 
@@ -247,9 +248,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Organization organization = new Organization();
     organization.setOrganizationId(request.getOrganizationId());
 
-    Mockito.when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
+    when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
       .thenReturn(null);
-    Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
+    when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.of(organization));
 
     Assertions.assertThrows(UnknownDebtPositionException.class, () -> mapper.mapToModel(request, null, accessToken));
@@ -261,7 +262,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     CreateNotificationRequest request = buildRequest();
     String accessToken = "ACCESSTOKEN";
 
-    Mockito.when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
+    when(organizationServiceMock.findOrganizationStation(request.getOrganizationId(), null, accessToken))
       .thenReturn(Optional.empty());
 
     String nav = request.getRecipients().getFirst()
@@ -270,7 +271,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .getPayments().getFirst().getPagoPa().getCreditorTaxId();
     String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
 
-    Mockito.when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
+    when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.empty());
 
 

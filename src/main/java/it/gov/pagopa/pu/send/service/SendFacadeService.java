@@ -4,7 +4,7 @@ import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV28DTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 
 import java.io.IOException;
 import java.util.List;

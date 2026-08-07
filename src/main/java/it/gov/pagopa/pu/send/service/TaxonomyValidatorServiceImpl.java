@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.exception.InvalidTaxonomyException;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.model.SendTaxonomy;
 import it.gov.pagopa.pu.send.repository.SendTaxonomyRepository;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
