@@ -18,7 +18,6 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -93,15 +92,17 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
       query.addCriteria(Criteria.where(Fields.startDate).lte(campaignFiltersDTO.getDateTo())
         .and(Fields.endDate).gte(campaignFiltersDTO.getDateFrom()));
     }
-    List<Criteria> orgSubUnitCodeCriteria = new ArrayList<>();
-    if(campaignFiltersDTO.getSenderOrganizationId() != null){
-      orgSubUnitCodeCriteria.add(Criteria.where(Fields.orgSubUnitCode).isNull());
-    }
     if(!CollectionUtils.isEmpty(campaignFiltersDTO.getOrgSubUnitCodes())){
-      orgSubUnitCodeCriteria.add(Criteria.where(Fields.orgSubUnitCode).in(campaignFiltersDTO.getOrgSubUnitCodes()));
-    }
-    if(!orgSubUnitCodeCriteria.isEmpty()){
-      query.addCriteria(new Criteria().orOperator(orgSubUnitCodeCriteria));
+      if(Boolean.TRUE.equals(campaignFiltersDTO.getFetchAll())){
+        query.addCriteria(new Criteria().orOperator(
+          Criteria.where(Fields.orgSubUnitCode).in(campaignFiltersDTO.getOrgSubUnitCodes()),
+          Criteria.where(Fields.orgSubUnitCode).isNull()
+        ));
+      }else {
+        query.addCriteria(Criteria.where(Fields.orgSubUnitCode).in(campaignFiltersDTO.getOrgSubUnitCodes()));
+      }
+    }else{
+      query.addCriteria(Criteria.where(Fields.orgSubUnitCode).isNull());
     }
     if(StringUtils.isNotBlank(campaignFiltersDTO.getCampaignName())){
       query.addCriteria(Criteria.where(Fields.campaignName).regex(Pattern.quote(campaignFiltersDTO.getCampaignName()), "i"));

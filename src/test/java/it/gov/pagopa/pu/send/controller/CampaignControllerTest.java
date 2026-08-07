@@ -100,7 +100,7 @@ class CampaignControllerTest {
       campaignFiltersDTO.getOrgSubUnitCodes(),
       campaignFiltersDTO.getCampaignName(),
       campaignFiltersDTO.getExternalCampaignId(),
-      campaignFiltersDTO.getSenderOrganizationId(),
+      campaignFiltersDTO.getFetchAll(),
       pageable);
 
     Assertions.assertNotNull(response);
