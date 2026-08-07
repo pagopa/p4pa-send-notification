@@ -93,13 +93,12 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
       query.addCriteria(Criteria.where(Fields.startDate).lte(campaignFiltersDTO.getDateTo())
         .and(Fields.endDate).gte(campaignFiltersDTO.getDateFrom()));
     }
-    List<String> orgSubUnitCodes = campaignFiltersDTO.getOrgSubUnitCodes();
     List<Criteria> orgSubUnitCodeCriteria = new ArrayList<>();
     if(campaignFiltersDTO.getSenderOrganizationId() != null){
       orgSubUnitCodeCriteria.add(Criteria.where(Fields.orgSubUnitCode).isNull());
     }
-    if(!CollectionUtils.isEmpty(orgSubUnitCodes)){
-      orgSubUnitCodeCriteria.add(Criteria.where(Fields.orgSubUnitCode).in(orgSubUnitCodes));
+    if(!CollectionUtils.isEmpty(campaignFiltersDTO.getOrgSubUnitCodes())){
+      orgSubUnitCodeCriteria.add(Criteria.where(Fields.orgSubUnitCode).in(campaignFiltersDTO.getOrgSubUnitCodes()));
     }
     if(!orgSubUnitCodeCriteria.isEmpty()){
       query.addCriteria(new Criteria().orOperator(orgSubUnitCodeCriteria));
