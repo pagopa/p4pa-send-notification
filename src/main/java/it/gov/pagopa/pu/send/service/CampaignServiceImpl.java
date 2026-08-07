@@ -2,10 +2,14 @@ package it.gov.pagopa.pu.send.service;
 
 import io.micrometer.common.util.StringUtils;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
+import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
-import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
+import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
+import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
@@ -20,7 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -123,9 +128,9 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
-  public PagedCampaign findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable) {
+  public PagedCampaign findCampaignsByFilters(CampaignFiltersDTO campaignFiltersDTO, Pageable pageable) {
     return pagedCampaignMapper.mapToPagedCampaign(
-      campaignRepository.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable)
+      campaignRepository.findCampaignsByFilters(campaignFiltersDTO, pageable)
     );
   }
 
