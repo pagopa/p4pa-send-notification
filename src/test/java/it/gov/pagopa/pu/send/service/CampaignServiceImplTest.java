@@ -2,10 +2,14 @@ package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
+import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
-import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
+import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
+import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
+import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
@@ -253,23 +257,18 @@ class CampaignServiceImplTest {
 
   @Test
   void whenFindCampaignsByFiltersThenOk() {
-    Long organizationId = 1L;
-    LocalDate dateFrom = LocalDate.of(2026, Month.JULY, 1);
-    LocalDate dateTo = LocalDate.of(2026, Month.JULY, 31);
-    String orgSubUnitCode = "orgSubUnitCode";
-    String campaignName = "campaignName";
-    String externalCampaignId = "externalCampaignId";
+    CampaignFiltersDTO campaignFiltersDTO = podamFactory.manufacturePojo(CampaignFiltersDTO.class);
     Pageable pageable = PageRequest.of(0, 10);
 
     List<Campaign> campaigns = podamFactory.manufacturePojo(List.class, Campaign.class);
     Page<Campaign> campaignPage = new PageImpl<>(campaigns);
     PagedCampaign expected = podamFactory.manufacturePojo(PagedCampaign.class);
 
-    when(campaignRepositoryMock.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable))
+    when(campaignRepositoryMock.findCampaignsByFilters(campaignFiltersDTO, pageable))
       .thenReturn(campaignPage);
     when(pagedCampaignMapperMock.mapToPagedCampaign(campaignPage)).thenReturn(expected);
 
-    PagedCampaign result = campaignService.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable);
+    PagedCampaign result = campaignService.findCampaignsByFilters(campaignFiltersDTO, pageable);
 
     assertEquals(expected, result);
   }

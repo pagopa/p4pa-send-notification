@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -115,12 +116,7 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
   @Test
   void whenFindCampaignsByFiltersThenOk() {
-    Long organizationId = 1L;
-    LocalDate dateFrom = LocalDate.of(2026, Month.JULY, 1);
-    LocalDate dateTo = LocalDate.of(2026, Month.JULY, 31);
-    String orgSubUnitCode = "orgSubUnitCode";
-    String campaignName = "Summer Campaign";
-    String externalCampaignId = "externalCampaignId";
+    CampaignFiltersDTO campaignFiltersDTO = podamFactory.manufacturePojo(CampaignFiltersDTO.class);
 
     List<Campaign> campaigns = podamFactory.manufacturePojo(List.class, Campaign.class);
     Pageable pageable = PageRequest.of(0, campaigns.size());
@@ -129,7 +125,7 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
     when(mongoTemplateMock.count(Mockito.any(Query.class), Mockito.eq(Campaign.class))).thenReturn(Long.valueOf(totalElements));
     when(mongoTemplateMock.find(Mockito.any(Query.class), Mockito.eq(Campaign.class))).thenReturn(campaigns);
 
-    Page<Campaign> result = repository.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable);
+    Page<Campaign> result = repository.findCampaignsByFilters(campaignFiltersDTO, pageable);
 
     assertEquals(totalElements, result.getTotalElements());
     assertEquals(campaigns, result.getContent());
