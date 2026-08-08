@@ -12,12 +12,13 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.BaseEntity;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
-import it.gov.pagopa.pu.send.util.CampaignUtils;
+import it.gov.pagopa.pu.send.util.CampaignCounterRules;
 import it.gov.pagopa.pu.send.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -224,7 +225,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
   private ConditionalOperators.Cond buildStatusCondition(String counterName) {
     Set<TimelineElementCategoryV27DTO> latestEventsOfInterest =
-      CampaignUtils.COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES.getOrDefault(counterName, Collections.emptySet());
+      CampaignCounterRules.COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES.getOrDefault(counterName, Collections.emptySet());
 
     return ConditionalOperators.when(Criteria.where(Fields.lastEventOfInterest).in(latestEventsOfInterest))
       .then(1).otherwise(0);
@@ -239,10 +240,16 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   @Override
-  public void pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
+  public List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
     Query query = new Query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
-    Update update = new Update().push(Fields.history).each(streamEvents);
-    updateFirst(query, update);
+    Update update = BaseEntityListener.setTechFieldsOnDocumentUpdate(new Update().push(Fields.history).each(streamEvents));
+    SendNotificationNoPII updatedDoc = mongoTemplate.findAndModify(
+      query,
+      update,
+      FindAndModifyOptions.options().returnNew(true),
+      SendNotificationNoPII.class
+    );
+    return updatedDoc.getHistory();
   }
 
 

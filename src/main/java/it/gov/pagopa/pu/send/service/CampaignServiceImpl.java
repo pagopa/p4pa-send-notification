@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import io.micrometer.common.util.StringUtils;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
+import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
@@ -127,9 +128,9 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
-  public PagedCampaign findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable) {
+  public PagedCampaign findCampaignsByFilters(CampaignFiltersDTO campaignFiltersDTO, Pageable pageable) {
     return pagedCampaignMapper.mapToPagedCampaign(
-      campaignRepository.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable)
+      campaignRepository.findCampaignsByFilters(campaignFiltersDTO, pageable)
     );
   }
 

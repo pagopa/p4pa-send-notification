@@ -313,7 +313,7 @@ class SendNotificationServiceImplTest {
       Optional.of(notification));
     when(fileStorerServiceMock.buildRelativeSendPath(
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
-    Mockito.doNothing().when(sendNotificationStatusHandlerServiceMock).handleDeletedSendNotification(notification.getCampaignId(),notification.getCreationDate().toLocalDate(),notification.getLastEventOfInterest());
+    Mockito.doNothing().when(sendNotificationStatusHandlerServiceMock).handleDeletedSendNotification(notification.getCampaignId(),notification.getCreationDate().toLocalDate(),notification.getHistory());
     //Then
     sendNotificationService.deleteSendNotification(sendNotificationId);
     verify(sendNotificationPIIRepositoryMock).delete(notification);

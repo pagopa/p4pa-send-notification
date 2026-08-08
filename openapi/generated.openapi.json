@@ -1614,12 +1614,15 @@
             "nullable" : true
           }
         }, {
-          "name" : "orgSubUnitCode",
+          "name" : "orgSubUnitCodes",
           "in" : "query",
           "required" : false,
           "schema" : {
-            "type" : "string",
-            "nullable" : true
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "type" : "string"
+            }
           }
         }, {
           "name" : "campaignName",
@@ -1635,6 +1638,14 @@
           "required" : false,
           "schema" : {
             "type" : "string",
+            "nullable" : true
+          }
+        }, {
+          "name" : "fetchAll",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
             "nullable" : true
           }
         }, {
@@ -3392,6 +3403,38 @@
             "format" : "int64"
           },
           "delivered" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "completed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "analogicCompletionPreOutcome" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "analogicCompletion" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "digitalCompletionDigitalDomicile" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "digitalCompletionCourtesyMessage" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "failed" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "deceasedRecipient" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "recipientNotFound" : {
             "type" : "integer",
             "format" : "int64"
           },
