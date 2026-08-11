@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.organization.config;
 
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.send.config.json.JsonConfig;
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,20 +14,28 @@ import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class OrganizationApisHolderTest extends BaseApiHolderTest {
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
   private OrganizationApisHolder apisHolder;
+  private OrganizationApiClientConfig apiClientConfig;
 
   @BeforeEach
   void setUp() {
-    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    OrganizationApiClientConfig apiClient = new OrganizationApiClientConfig();
-    apiClient.setBaseUrl("http://example.com");
-    apisHolder = new OrganizationApisHolder(apiClient, restTemplateBuilderMock);
+    when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+
+    apiClientConfig = OrganizationApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    apisHolder = new OrganizationApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
+
+    verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getOrganizationApi(null));
   }
 
   @AfterEach
@@ -34,6 +43,15 @@ class OrganizationApisHolderTest extends BaseApiHolderTest {
     Mockito.verifyNoMoreInteractions(
       restTemplateBuilderMock,
       restTemplateMock
+    );
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      token -> apisHolder.getOrganizationApi(token)
+        .getOrganizationApiKey(1L, OrganizationApiKeyType.SEND, null),
+      new ParameterizedTypeReference<>() {}
     );
   }
 

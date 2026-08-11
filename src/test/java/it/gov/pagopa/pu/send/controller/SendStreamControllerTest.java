@@ -1,10 +1,9 @@
 package it.gov.pagopa.pu.send.controller;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV28DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendStreamDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
-import java.util.List;
+import it.gov.pagopa.send.dto.generated.ProgressResponseElementV28DTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +15,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendStreamControllerTest {
@@ -43,7 +46,7 @@ class SendStreamControllerTest {
     String streamId = "STREAMID";
     List<ProgressResponseElementV28DTO> expectedResult = List.of();
 
-    Mockito.when(sendFacadeServiceMock.getStreamEvents(streamId, organizationId, accessToken))
+    when(sendFacadeServiceMock.getStreamEvents(streamId, organizationId, accessToken))
       .thenReturn(expectedResult);
 
     ResponseEntity<List<ProgressResponseElementV28DTO>> response = sendStreamController
@@ -59,7 +62,7 @@ class SendStreamControllerTest {
     String streamId = "streamId";
     SendStreamDTO expectedResult = new SendStreamDTO();
 
-    Mockito.when(sendFacadeServiceMock.getStream(streamId, accessToken))
+    when(sendFacadeServiceMock.getStream(streamId, accessToken))
       .thenReturn(expectedResult);
 
     ResponseEntity<SendStreamDTO> actualResponse = sendStreamController

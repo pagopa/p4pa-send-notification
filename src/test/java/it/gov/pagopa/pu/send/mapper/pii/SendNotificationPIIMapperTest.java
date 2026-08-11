@@ -2,7 +2,6 @@ package it.gov.pagopa.pu.send.mapper.pii;
 
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.common.pii.mapper.BasePIIMapperTest;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.PuRecipient;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
@@ -11,6 +10,7 @@ import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ import static it.gov.pagopa.pu.send.util.faker.PuPaymentFaker.buildPuPayment;
 import static it.gov.pagopa.pu.send.util.faker.PuRecipientFaker.buildPuRecipient;
 import static it.gov.pagopa.pu.send.util.faker.SendNotificationFaker.buildSendNotification;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
@@ -62,7 +62,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     List<PuRecipient> puRecipients = List.of(buildPuRecipient());
     piiDto.setPuRecipients(puRecipients);
 
-    Mockito.when(personalDataServiceMock.get(personalDataId, SendNotificationPIIDTO.class)).thenReturn(piiDto);
+    when(personalDataServiceMock.get(personalDataId, SendNotificationPIIDTO.class)).thenReturn(piiDto);
 
     // When
     SendNotification result = mapper.map(noPii);
@@ -99,7 +99,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     sendNotification.setPagoPaIntMode("SYNC");
     byte[] expectedHash = "BNRMHL75C06G702B".getBytes();
 
-    Mockito.when(dataCipherServiceMock.hash(Mockito.anyString()))
+    when(dataCipherServiceMock.hash(Mockito.anyString()))
       .thenReturn(expectedHash);
 
     SendNotificationNoPII result = mapper.extractNoPiiEntity(sendNotification);

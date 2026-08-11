@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.util;
 
-import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionOrigin;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
 
 import java.time.ZoneId;
 import java.util.List;

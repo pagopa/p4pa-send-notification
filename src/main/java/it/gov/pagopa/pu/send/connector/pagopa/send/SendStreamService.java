@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+import it.gov.pagopa.send.dto.generated.*;
 
 import java.util.List;
 

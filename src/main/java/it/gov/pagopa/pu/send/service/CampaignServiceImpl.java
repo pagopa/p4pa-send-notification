@@ -10,7 +10,7 @@ import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;

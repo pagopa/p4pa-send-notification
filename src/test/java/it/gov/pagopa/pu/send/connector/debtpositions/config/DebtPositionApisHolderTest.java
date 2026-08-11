@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.config;
 
+import it.gov.pagopa.pu.send.config.json.JsonConfig;
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,20 +15,28 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.util.List;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class DebtPositionApisHolderTest extends BaseApiHolderTest {
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
   private DebtPositionApisHolder apisHolder;
+  private DebtPositionApiClientConfig apiClientConfig;
 
   @BeforeEach
   void setUp() {
-    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    DebtPositionApiClientConfig apiClient = new DebtPositionApiClientConfig();
-    apiClient.setBaseUrl("http://example.com");
-    apisHolder = new DebtPositionApisHolder(apiClient, restTemplateBuilderMock);
+    when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+
+    apiClientConfig = DebtPositionApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    apisHolder = new DebtPositionApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
+
+    verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getDebtPositionApi(null));
   }
 
   @AfterEach
@@ -35,6 +44,15 @@ class DebtPositionApisHolderTest extends BaseApiHolderTest {
     Mockito.verifyNoMoreInteractions(
       restTemplateBuilderMock,
       restTemplateMock
+    );
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      token -> apisHolder.getDebtPositionApi(token)
+        .getDebtPositionsByOrganizationIdAndNav(1L, "NAV", List.of()),
+      new ParameterizedTypeReference<>() {}
     );
   }
 

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.client;
 
-import it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.send.connector.debtpositions.config.DebtPositionApisHolder;
 import it.gov.pagopa.pu.send.util.Constants;
 import lombok.extern.slf4j.Slf4j;

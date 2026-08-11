@@ -2,9 +2,9 @@ package it.gov.pagopa.pu.send.connector.organization.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.send.connector.organization.config.OrganizationApisHolder;
+import it.gov.pagopa.pu.send.exception.common.RestInvokeNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 @Slf4j
 @Service
@@ -21,7 +21,7 @@ public class OrgSubUnitApiClient {
     try {
       return organizationApisHolder.getOrgSubUnitEntityControllerApi(accessToken)
         .crudGetOrgsubunit(orgSubUnitId);
-    } catch (HttpClientErrorException.NotFound e) {
+    } catch (RestInvokeNotFoundException e) {
       log.warn("SubUnit with id {} not found", orgSubUnitId);
       return null;
     }

@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.util;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
+import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;

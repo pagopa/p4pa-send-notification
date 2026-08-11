@@ -1,21 +1,18 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.config;
 
-import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
-import it.gov.pagopa.pu.send.connector.send.generated.ApiClient;
-import it.gov.pagopa.pu.send.connector.send.generated.api.EventsApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.NewNotificationApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.NotificationPriceV23Api;
-import it.gov.pagopa.pu.send.connector.send.generated.api.SenderReadB2BApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.StreamsApi;
-import it.gov.pagopa.pu.send.connector.send.generated.api.LegalFactsApi;
-import java.util.Objects;
+import it.gov.pagopa.pu.send.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.send.generated.ApiClient;
+import it.gov.pagopa.send.client.generated.*;
+import it.gov.pagopa.send.dto.generated.ProblemDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -34,13 +31,15 @@ public class PagopaSendApisHolder {
 
   public PagopaSendApisHolder(
     PagopaSendApiClientConfig clientConfig,
-    RestTemplateBuilder restTemplateBuilder){
+    RestTemplateBuilder restTemplateBuilder,
+    JsonMapper jsonMapper
+  ){
     this.restTemplate = restTemplateBuilder.build();
     this.clientConfig = clientConfig;
 
-    if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("SEND"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "SEND", clientConfig.isPrintBodyWhenError(),
+      ProblemDTO.class, ProblemDTO::getTitle, ProblemDTO::getDetail)
+    );
   }
 
   public NewNotificationApi getNewNotificationApiByApiKey(String apiKey, String pdndAccessToken) {

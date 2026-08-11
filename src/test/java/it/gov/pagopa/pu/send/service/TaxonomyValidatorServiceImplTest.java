@@ -2,7 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.exception.InvalidTaxonomyException;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.model.SendTaxonomy;
 import it.gov.pagopa.pu.send.repository.SendTaxonomyRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TaxonomyValidatorServiceImplTest {
@@ -41,7 +42,7 @@ class TaxonomyValidatorServiceImplTest {
     sendTaxonomy.setTaxonomyCode(taxonomyCode);
     sendTaxonomy.setOrganizationType("01");
 
-    Mockito.when(sendTaxonomyRepositoryMock.findByTaxonomyCode(taxonomyCode)).thenReturn(sendTaxonomy);
+    when(sendTaxonomyRepositoryMock.findByTaxonomyCode(taxonomyCode)).thenReturn(sendTaxonomy);
 
     assertDoesNotThrow(() -> service.validateTaxonomyCode(org, taxonomyCode, accessToken));
   }
@@ -52,7 +53,7 @@ class TaxonomyValidatorServiceImplTest {
     String accessToken = "ACCESSTOKEN";
     Organization org = new Organization();
 
-    Mockito.when(sendTaxonomyRepositoryMock.findByTaxonomyCode(taxonomyCode)).thenReturn(null);
+    when(sendTaxonomyRepositoryMock.findByTaxonomyCode(taxonomyCode)).thenReturn(null);
 
     assertThrows(NotFoundException.class, () -> service.validateTaxonomyCode(org, taxonomyCode, accessToken));
   }
@@ -69,7 +70,7 @@ class TaxonomyValidatorServiceImplTest {
     SendTaxonomy sendTaxonomy = new SendTaxonomy();
     sendTaxonomy.setTaxonomyCode(taxonomyCode);
 
-    Mockito.when(sendTaxonomyRepositoryMock.findByTaxonomyCode(taxonomyCode)).thenReturn(sendTaxonomy);
+    when(sendTaxonomyRepositoryMock.findByTaxonomyCode(taxonomyCode)).thenReturn(sendTaxonomy);
 
     assertThrows(InvalidTaxonomyException.class, () -> service.validateTaxonomyCode(org, taxonomyCode, accessToken));
   }

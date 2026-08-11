@@ -1,13 +1,15 @@
 package it.gov.pagopa.pu.send.connector.organization.config;
 
 import it.gov.pagopa.pu.organization.client.generated.*;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationErrorDTO;
 import it.gov.pagopa.pu.organization.generated.ApiClient;
 import it.gov.pagopa.pu.organization.generated.BaseApi;
-import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
+import it.gov.pagopa.pu.send.config.rest.HttpClientErrorJsonBodyHandler;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class OrganizationApisHolder {
@@ -21,13 +23,17 @@ public class OrganizationApisHolder {
 
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
-  public OrganizationApisHolder(OrganizationApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder) {
+  public OrganizationApisHolder(
+    OrganizationApiClientConfig clientConfig,
+    RestTemplateBuilder restTemplateBuilder,
+    JsonMapper jsonMapper
+  ) {
     RestTemplate restTemplate = restTemplateBuilder.build();
     ApiClient apiClient = buildApiClient(restTemplate, clientConfig);
 
-    if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("ORGANIZATION"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "ORGANIZATION", clientConfig.isPrintBodyWhenError(),
+      OrganizationErrorDTO.class, OrganizationErrorDTO::getCode, OrganizationErrorDTO::getMessage)
+    );
 
     this.organizationApi = new OrganizationApi(apiClient);
     this.organizationEntityControllerApi = new OrganizationEntityControllerApi(apiClient);

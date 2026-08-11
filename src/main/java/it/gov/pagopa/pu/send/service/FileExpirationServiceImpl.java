@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.organization.dto.generated.BrokerConfiguration;
 import it.gov.pagopa.pu.send.connector.organization.service.BrokerConfigurationService;
 import it.gov.pagopa.pu.send.dto.generated.FileExpirationResponseDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;

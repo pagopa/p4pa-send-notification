@@ -1,14 +1,13 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
-import it.gov.pagopa.pu.send.connector.pdnd.PdndService;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-
-import java.util.List;
+import it.gov.pagopa.pu.send.connector.pdndservices.PdndService;
+import it.gov.pagopa.send.dto.generated.ProgressResponseElementV28DTO;
+import it.gov.pagopa.send.dto.generated.StreamCreationRequestV28DTO;
+import it.gov.pagopa.send.dto.generated.StreamListElementDTO;
+import it.gov.pagopa.send.dto.generated.StreamMetadataResponseV28DTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendStreamServiceImplTest {
@@ -53,10 +57,10 @@ class SendStreamServiceImplTest {
     StreamCreationRequestV28DTO request = new StreamCreationRequestV28DTO();
     StreamMetadataResponseV28DTO expectedResult = new StreamMetadataResponseV28DTO();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.createStream(request, orgSendApiKey, voucherToken)).thenReturn(expectedResult);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(clientMock.createStream(request, orgSendApiKey, voucherToken)).thenReturn(expectedResult);
 
     //When
     StreamMetadataResponseV28DTO result = service.createStream(request, organizationId, accessToken);
@@ -73,10 +77,10 @@ class SendStreamServiceImplTest {
 
     List<StreamListElementDTO> expectedResult = List.of();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.getStreams(orgSendApiKey, voucherToken)).thenReturn(expectedResult);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(clientMock.getStreams(orgSendApiKey, voucherToken)).thenReturn(expectedResult);
 
     //When
     List<StreamListElementDTO> result = service.getStreams(organizationId, accessToken);
@@ -94,10 +98,10 @@ class SendStreamServiceImplTest {
 
     List<ProgressResponseElementV28DTO> expectedResult = List.of();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.getStreamEvents(streamId, null, orgSendApiKey, voucherToken))
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(clientMock.getStreamEvents(streamId, null, orgSendApiKey, voucherToken))
       .thenReturn(expectedResult);
 
     //When

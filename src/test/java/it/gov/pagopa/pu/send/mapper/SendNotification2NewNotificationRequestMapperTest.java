@@ -1,11 +1,11 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.*;
+import it.gov.pagopa.send.dto.generated.NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +18,7 @@ import java.util.List;
 import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocumentAttachment;
 import static it.gov.pagopa.pu.send.util.faker.SendNotificationFaker.buildSendNotification;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotification2NewNotificationRequestMapperTest {
@@ -35,7 +36,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.setPagoPaIntMode("SYNC");
     SendNotificationNoPII noPII = new SendNotificationNoPII();
 
-    Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
+    when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
 
     //when
     NewNotificationRequestV25DTO result = mapper.apply(noPII);
@@ -77,7 +78,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getF24().setMetadataAttachment(null);
     SendNotificationNoPII noPII = new SendNotificationNoPII();
 
-    Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
+    when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
 
     //when
     NewNotificationRequestV25DTO result = mapper.apply(noPII);
@@ -115,7 +116,7 @@ class SendNotification2NewNotificationRequestMapperTest {
     sendNotification.setDocuments(List.of(buildDocumentAttachment()));
     SendNotificationNoPII noPII = new SendNotificationNoPII();
 
-    Mockito.when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
+    when(sendNotificationPIIMapperMock.map(Mockito.any(SendNotificationNoPII.class))).thenReturn(sendNotification);
 
     //when
     NewNotificationRequestV25DTO result = mapper.apply(noPII);
