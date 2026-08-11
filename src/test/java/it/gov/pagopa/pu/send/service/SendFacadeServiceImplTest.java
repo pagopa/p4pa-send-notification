@@ -3,9 +3,6 @@ package it.gov.pagopa.pu.send.service;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV28DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -15,8 +12,9 @@ import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
-import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.RestInvokeConflictException;
 import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
@@ -26,6 +24,9 @@ import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendStreamRepository;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import it.gov.pagopa.send.dto.generated.*;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.send.dto.generated.StreamMetadataResponseV28DTO.EventTypeEnum;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
@@ -40,7 +41,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
@@ -894,7 +895,7 @@ class SendFacadeServiceImplTest {
     when(sendNotificationMapperMock.apply(notification))
       .thenReturn(request);
     when(sendServiceMock.deliveryNotification(request, orgId, accessToken))
-      .thenThrow(HttpClientErrorException.Conflict.class);
+      .thenThrow(new RestInvokeConflictException("APPNAME", HttpStatus.CONFLICT, "ERROR", "ERRORCODE", "ERRORMESSAGE", null));
 
     //WHEN
     Assertions.assertThrows(ResponseStatusException.class, () -> sendService.deliveryNotification(sendNotificationId, accessToken));

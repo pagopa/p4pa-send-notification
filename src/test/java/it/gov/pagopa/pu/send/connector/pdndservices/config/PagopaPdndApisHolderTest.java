@@ -1,6 +1,7 @@
-package it.gov.pagopa.pu.send.connector.pdnd.config;
+package it.gov.pagopa.pu.send.connector.pdndservices.config;
 
-import it.gov.pagopa.pu.pdnd.dto.generated.PdndServiceType;
+import it.gov.pagopa.pu.pdndservices.dto.generated.PdndServiceType;
+import it.gov.pagopa.pu.send.config.json.JsonConfig;
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,8 @@ import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class PagopaPdndApisHolderTest extends BaseApiHolderTest {
 
@@ -20,14 +23,20 @@ class PagopaPdndApisHolderTest extends BaseApiHolderTest {
   private RestTemplateBuilder restTemplateBuilderMock;
 
   private PagopaPdndApisHolder apisHolder;
+  private PagopaPdndApiClientConfig apiClientConfig;
 
   @BeforeEach
   void setUp() {
-    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    PagopaPdndApiClientConfig apiClient = new PagopaPdndApiClientConfig();
-    apiClient.setBaseUrl("http://example.com");
-    apisHolder = new PagopaPdndApisHolder(apiClient, restTemplateBuilderMock);
+    when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+
+    apiClientConfig = PagopaPdndApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    apisHolder = new PagopaPdndApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
+
+    verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getP4paPdndApiByApiKey(null));
   }
 
   @AfterEach
@@ -35,6 +44,15 @@ class PagopaPdndApisHolderTest extends BaseApiHolderTest {
     Mockito.verifyNoMoreInteractions(
       restTemplateBuilderMock,
       restTemplateMock
+    );
+  }
+
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      token -> apisHolder.getP4paPdndApiByApiKey(token)
+        .getVoucherToken(PdndServiceType.SEND, 1L, "subUnitCode"),
+      new ParameterizedTypeReference<>() {}
     );
   }
 

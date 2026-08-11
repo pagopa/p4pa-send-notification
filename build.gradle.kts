@@ -58,7 +58,7 @@ val bouncycastleVersion = "1.84"
 val httpClientVersion = "5.6.1"
 val httpCoreVersion = "5.4.2"
 val kafkaAppender = "0.2.0-RC2"
-val lz4JavaVersion = "1.11.0"
+val lz4JavaVersion = "1.11.1"
 val postgresJdbcVersion = "42.7.13"
 val caffeineVersion = "3.2.4"
 val commonsLang3Version = "3.20.0"
@@ -189,14 +189,14 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
   typeMappings.set(
     mapOf(
       "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus",
-      "NotificationPriceResponseV23DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO",
-      "ProgressResponseElementV28DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.ProgressResponseElementV28DTO",
-      "LegalFactCategoryDTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO",
+      "NotificationPriceResponseV23DTO" to "it.gov.pagopa.send.dto.generated.NotificationPriceResponseV23DTO",
+      "ProgressResponseElementV28DTO" to "it.gov.pagopa.send.dto.generated.ProgressResponseElementV28DTO",
+      "LegalFactCategoryDTO" to "it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO",
       "FileStatus" to "it.gov.pagopa.pu.send.enums.FileStatus",
-      "TimelineElementCategory" to "it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO",
+      "TimelineElementCategory" to "it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO",
       "Campaign" to "it.gov.pagopa.pu.send.model.Campaign",
       "SendNotification" to "it.gov.pagopa.pu.send.dto.SendNotification",
-      "NotificationStatusV26DTO" to "it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationStatusV26DTO",
+      "NotificationStatusV26DTO" to "it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO",
       "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus",
       "SendNotificationNoPII" to "it.gov.pagopa.pu.send.model.SendNotificationNoPII"
     )
@@ -235,8 +235,9 @@ tasks.register<GenerateTask>("openApiGenerateSendClient") {
   generatorName.set("java")
   inputSpec.set("$rootDir/openapi/external/send-api-external-b2b-pa-bundle.yaml")
   outputDir.set("$projectDir/build/generated")
-  apiPackage.set("it.gov.pagopa.pu.send.connector.send.generated.api")
-  modelPackage.set("it.gov.pagopa.pu.send.connector.send.generated.dto")
+  invokerPackage.set("it.gov.pagopa.send.generated")
+  apiPackage.set("it.gov.pagopa.send.client.generated")
+  modelPackage.set("it.gov.pagopa.send.dto.generated")
   modelNameSuffix.set("DTO")
   configOptions.set(
     mapOf(
@@ -296,11 +297,11 @@ tasks.register<GenerateTask>("openApiGenerateWORKFLOWHUB") {
   remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/$targetEnv/internal/p4pa-workflow-hub.openapi.yaml")
   outputDir.set("$projectDir/build/generated")
   invokerPackage.set("it.gov.pagopa.pu.workflowhub.generated")
-  apiPackage.set("it.gov.pagopa.pu.workflowhub.controller.generated")
+  apiPackage.set("it.gov.pagopa.pu.workflowhub.client.generated")
   modelPackage.set("it.gov.pagopa.pu.workflowhub.dto.generated")
   typeMappings.set(
     mapOf(
-      "DebtPositionDTO" to "it.gov.pagopa.pu.debtposition.dto.generated.DebtPositionDTO",
+      "DebtPositionDTO" to "it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO",
       "IngestionFlowFileType" to "String",
       "WfExecutionConfig" to "String",
       "ExportFileType" to "String",
@@ -338,9 +339,9 @@ tasks.register<GenerateTask>("openApiGenerateDEBTPOSITIONS") {
   generatorName.set("java")
   remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/$targetEnv/internal/p4pa-debt-positions.generated.openapi.json")
   outputDir.set("$projectDir/build/generated")
-  invokerPackage.set("it.gov.pagopa.pu.debtposition.generated")
-  apiPackage.set("it.gov.pagopa.pu.debtposition.client.generated")
-  modelPackage.set("it.gov.pagopa.pu.debtposition.dto.generated")
+  invokerPackage.set("it.gov.pagopa.pu.debtpositions.generated")
+  apiPackage.set("it.gov.pagopa.pu.debtpositions.client.generated")
+  modelPackage.set("it.gov.pagopa.pu.debtpositions.dto.generated")
   typeMappings.set(mapOf("LocalDateTime" to "java.time.LocalDateTime"))
   configOptions.set(
     mapOf(
@@ -371,9 +372,9 @@ tasks.register<GenerateTask>("openApiGeneratePDND") {
   generatorName.set("java")
   remoteInputSpec.set("https://raw.githubusercontent.com/pagopa/p4pa-doc/refs/heads/main/openapi/$targetEnv/internal/p4pa-pdnd-services.generated.openapi.json")
   outputDir.set("$projectDir/build/generated")
-  invokerPackage.set("it.gov.pagopa.pu.pdnd.generated")
-  apiPackage.set("it.gov.pagopa.pu.pdnd.client.generated")
-  modelPackage.set("it.gov.pagopa.pu.pdnd.dto.generated")
+  invokerPackage.set("it.gov.pagopa.pu.pdndservices.generated")
+  apiPackage.set("it.gov.pagopa.pu.pdndservices.client.generated")
+  modelPackage.set("it.gov.pagopa.pu.pdndservices.dto.generated")
   typeMappings.set(mapOf("LocalDateTime" to "java.time.LocalDateTime"))
   configOptions.set(
     mapOf(

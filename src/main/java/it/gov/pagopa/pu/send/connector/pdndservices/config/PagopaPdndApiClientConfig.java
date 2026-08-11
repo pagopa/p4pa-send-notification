@@ -1,4 +1,4 @@
-package it.gov.pagopa.pu.send.connector.pdnd.config;
+package it.gov.pagopa.pu.send.connector.pdndservices.config;
 
 import it.gov.pagopa.pu.send.config.rest.ApiClientConfig;
 import lombok.NoArgsConstructor;

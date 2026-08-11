@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationStatusV26DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
+import it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO;
+import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import org.junit.jupiter.api.Test;

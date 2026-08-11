@@ -1,7 +1,7 @@
-package it.gov.pagopa.pu.send.connector.pdnd;
+package it.gov.pagopa.pu.send.connector.pdndservices;
 
-import it.gov.pagopa.pu.pdnd.dto.generated.PdndAuthData;
-import it.gov.pagopa.pu.send.connector.pdnd.client.PdndApiClient;
+import it.gov.pagopa.pu.pdndservices.dto.generated.PdndAuthData;
+import it.gov.pagopa.pu.send.connector.pdndservices.client.PdndApiClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

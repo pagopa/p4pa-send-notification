@@ -1,14 +1,16 @@
-package it.gov.pagopa.pu.send.connector.pdnd.config;
+package it.gov.pagopa.pu.send.connector.pdndservices.config;
 
-import it.gov.pagopa.pu.pdnd.client.generated.P4paPdndApi;
-import it.gov.pagopa.pu.pdnd.generated.ApiClient;
-import it.gov.pagopa.pu.pdnd.generated.BaseApi;
-import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
+import it.gov.pagopa.pu.pdndservices.client.generated.P4paPdndApi;
+import it.gov.pagopa.pu.pdndservices.dto.generated.PdndServicesErrorDTO;
+import it.gov.pagopa.pu.pdndservices.generated.ApiClient;
+import it.gov.pagopa.pu.pdndservices.generated.BaseApi;
+import it.gov.pagopa.pu.send.config.rest.HttpClientErrorJsonBodyHandler;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @Slf4j
@@ -17,13 +19,17 @@ public class PagopaPdndApisHolder {
   private final P4paPdndApi pdndApi;
   private final ThreadLocal<String> tokenHolder = new ThreadLocal<>();
 
-  public PagopaPdndApisHolder(PagopaPdndApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder) {
+  public PagopaPdndApisHolder(
+    PagopaPdndApiClientConfig clientConfig,
+    RestTemplateBuilder restTemplateBuilder,
+    JsonMapper jsonMapper
+  ) {
     RestTemplate restTemplate = restTemplateBuilder.build();
     ApiClient apiClient = buildApiClient(restTemplate, clientConfig);
 
-    if(clientConfig.isPrintBodyWhenError()){
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("PDND"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "PDND-SERVICES", clientConfig.isPrintBodyWhenError(),
+      PdndServicesErrorDTO.class, PdndServicesErrorDTO::getCode, PdndServicesErrorDTO::getMessage)
+    );
 
     this.pdndApi = new P4paPdndApi(apiClient);
   }

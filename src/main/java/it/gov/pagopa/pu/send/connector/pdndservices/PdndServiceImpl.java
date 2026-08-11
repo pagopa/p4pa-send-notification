@@ -1,8 +1,9 @@
-package it.gov.pagopa.pu.send.connector.pdnd;
+package it.gov.pagopa.pu.send.connector.pdndservices;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.pdnd.dto.generated.PdndAuthData;
+import it.gov.pagopa.pu.pdndservices.dto.generated.PdndAuthData;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
+import it.gov.pagopa.pu.send.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -25,7 +26,7 @@ public class PdndServiceImpl implements PdndService{
       return null;
 
     PdndAuthData pdndAuthData = pdndCacheService.getPdndAccessToken(accessToken, organizationId, null);
-    if (pdndAuthData.getExpiration().isBefore(OffsetDateTime.now())) {
+    if (pdndAuthData.getExpiration().isBefore(OffsetDateTime.now(Constants.ZONEID))) {
       pdndCacheService.evictPdndAccessToken(accessToken, organizationId, null);
       pdndAuthData = pdndCacheService.getPdndAccessToken(accessToken, organizationId, null);
     }

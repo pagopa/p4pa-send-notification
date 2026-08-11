@@ -1,12 +1,15 @@
 package it.gov.pagopa.pu.send.controller;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationPriceResponseV23DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationStatusV26DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
-import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
+import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
+import it.gov.pagopa.pu.send.dto.generated.SendNotificationDTO;
+import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
+import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
+import it.gov.pagopa.send.dto.generated.NotificationPriceResponseV23DTO;
+import it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO;
+import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SendControllerTest {
@@ -199,7 +201,7 @@ class SendControllerTest {
     String notificationRequestId = "notificationRequestId";
     String fileName = "test.txt";
 
-    Mockito.doThrow(new IOException("IO error message"))
+    doThrow(new IOException("IO error message"))
       .when(sendFacadeServiceMock)
       .downloadAndArchiveSendLegalFact(
         notificationRequestId,

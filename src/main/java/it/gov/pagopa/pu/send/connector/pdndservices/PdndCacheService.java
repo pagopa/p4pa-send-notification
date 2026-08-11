@@ -1,8 +1,8 @@
-package it.gov.pagopa.pu.send.connector.pdnd;
+package it.gov.pagopa.pu.send.connector.pdndservices;
 
-import it.gov.pagopa.pu.pdnd.dto.generated.PdndAuthData;
+import it.gov.pagopa.pu.pdndservices.dto.generated.PdndAuthData;
 import it.gov.pagopa.pu.send.config.CacheConfig.Fields;
-import it.gov.pagopa.pu.send.connector.pdnd.client.PdndApiClient;
+import it.gov.pagopa.pu.send.connector.pdndservices.client.PdndApiClient;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
