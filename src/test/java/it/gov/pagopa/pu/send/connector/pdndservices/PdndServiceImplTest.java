@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.connector.pdndservices;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pdndservices.dto.generated.PdndAuthData;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
+import it.gov.pagopa.pu.send.util.Constants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ class PdndServiceImplTest {
     OffsetDateTime offsetDateTime = OffsetDateTime.of(2026, 6, 19, 12, 0, 0, 0, ZoneOffset.UTC);
     pdndAuthData.setExpiration(offsetDateTime.plusHours(1));
     try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
-      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(offsetDateTime);
+      offsetDateTimeMock.when(() -> OffsetDateTime.now(Constants.ZONEID)).thenReturn(offsetDateTime);
       when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN, organizationId, null)).thenReturn(pdndAuthData);
       when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
 
@@ -75,7 +76,7 @@ class PdndServiceImplTest {
     OffsetDateTime offsetDateTime = OffsetDateTime.of(2026, 6, 19, 12, 0, 0, 0, ZoneOffset.UTC);
     pdndAuthData.setExpiration(offsetDateTime.minusHours(1));
     try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
-      offsetDateTimeMock.when(OffsetDateTime::now).thenReturn(offsetDateTime);
+      offsetDateTimeMock.when(() -> OffsetDateTime.now(Constants.ZONEID)).thenReturn(offsetDateTime);
       when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN, organizationId, null)).thenReturn(pdndAuthData);
       doNothing().when(pdndCacheServiceMock).evictPdndAccessToken(ACCESS_TOKEN, organizationId, null);
       when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
