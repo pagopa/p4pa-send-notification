@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.organization.dto.generated.OrganizationErrorDTO;
 import it.gov.pagopa.pu.organization.generated.ApiClient;
 import it.gov.pagopa.pu.organization.generated.BaseApi;
 import it.gov.pagopa.pu.send.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.pu.send.connector.organization.mapper.OrganizationErrorDTOMapper;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class OrganizationApisHolder {
     ApiClient apiClient = buildApiClient(restTemplate, clientConfig);
 
     restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "ORGANIZATION", clientConfig.isPrintBodyWhenError(),
-      OrganizationErrorDTO.class, OrganizationErrorDTO::getCode, OrganizationErrorDTO::getMessage)
+      OrganizationErrorDTO.class, OrganizationErrorDTOMapper::map)
     );
 
     this.organizationApi = new OrganizationApi(apiClient);

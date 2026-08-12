@@ -6,6 +6,7 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionErrorDTO;
 import it.gov.pagopa.pu.debtpositions.generated.ApiClient;
 import it.gov.pagopa.pu.debtpositions.generated.BaseApi;
 import it.gov.pagopa.pu.send.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.pu.send.connector.debtpositions.mapper.DebtPositionErrorDTOMapper;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class DebtPositionApisHolder {
     ApiClient apiClient = buildApiClient(restTemplate, clientConfig);
 
     restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "DEBT-POSITIONS", clientConfig.isPrintBodyWhenError(),
-      DebtPositionErrorDTO.class, DebtPositionErrorDTO::getCode, DebtPositionErrorDTO::getMessage)
+      DebtPositionErrorDTO.class, DebtPositionErrorDTOMapper::map)
     );
 
     this.debtPositionApi = new DebtPositionApi(apiClient);
