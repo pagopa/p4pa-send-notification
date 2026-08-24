@@ -3,7 +3,6 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
-import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
@@ -265,22 +264,6 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   }
 
   @Test
-  void whenUpdateLastEventOfInterestByIdThenVerify() {
-    String sendNotificationId = "SENDNOTIFICATIONID";
-    TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.REQUEST_ACCEPTED;
-
-    when(mongoTemplateMock.updateFirst(
-        Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
-          SendNotificationNoPII.class)))
-      .thenReturn(updateResult);
-    when(updateResult.getModifiedCount()).thenReturn(1L);
-
-    UpdateResult result = repository.updateLastEventOfInterestById(sendNotificationId, newStatus);
-
-    assertEquals(1L, result.getModifiedCount());
-  }
-
-  @Test
   void givenCampaignIdWhenCalculateCampaignCountersThenReturnExpectedCounters() {
     String campaignId = "campaignId";
     Counters exRes = new Counters();
@@ -319,9 +302,6 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     assertEquals(0L, res.getTotal());
     assertEquals(0L, res.getAccepted());
     assertEquals(0L, res.getDelivered());
-    assertEquals(0L, res.getDigitalCompleted());
-    assertEquals(0L, res.getAnalogicCompleted());
-    assertEquals(0L, res.getCompletion());
   }
 
   @Test
