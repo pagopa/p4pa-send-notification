@@ -290,7 +290,6 @@ class SendNotificationServiceImplTest {
     Path relativePath = Path.of("1/sendNotificationId");
 
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
-    notification.setLastEventOfInterest(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED);
     notification.setCreationDate(LocalDateTime.of(2026,Month.JUNE,30,12,0));
     PuPayment puPayment = new PuPayment();
     Payment payment = new Payment();

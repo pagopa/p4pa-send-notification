@@ -25,7 +25,4 @@ public class Counters implements Serializable {
   private Long failed = 0L;
   private Long deceasedRecipient = 0L;
   private Long recipientNotFound = 0L;
-  private Long digitalCompleted = 0L; // TODO: remove in P4ADEV-4923
-  private Long analogicCompleted = 0L;  // TODO: remove in P4ADEV-4923
-  private Long completion = 0L;  // TODO: remove in P4ADEV-4923
 }

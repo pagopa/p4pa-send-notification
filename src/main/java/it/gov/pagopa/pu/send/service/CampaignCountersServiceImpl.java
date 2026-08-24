@@ -30,7 +30,7 @@ public class CampaignCountersServiceImpl implements CampaignCountersService {
 
     log.trace("Found {} eligible candidate counters before deactivation check: {}", candidateCounters.size(), candidateCounters);
 
-    Set<String> finalCounters =candidateCounters.stream()
+    Set<String> finalCounters = candidateCounters.stream()
       .filter(candidate -> {
         CampaignCounterRules.CounterRule rule = COUNTER_RULES.get(candidate);
         return rule.getDeactivatingCounters().stream().noneMatch(candidateCounters::contains);

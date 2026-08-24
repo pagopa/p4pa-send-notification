@@ -81,11 +81,11 @@ class SendNotificationStatusHandlerServiceImplTest {
     List<StreamEventSummaryDTO> eventToPush = List.of(new StreamEventSummaryDTO());
     List<StreamEventSummaryDTO> newHistory = List.of(new StreamEventSummaryDTO());
 
-    Set<String> oldCounters = Set.of(Counters.Fields.completion);
-    Set<String> newCounters = Set.of(Counters.Fields.completion, Counters.Fields.digitalCompleted);
+    Set<String> oldCounters = Set.of(Counters.Fields.accepted);
+    Set<String> newCounters = Set.of(Counters.Fields.accepted, Counters.Fields.delivered);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
-      .incrFields(Set.of(Counters.Fields.digitalCompleted))
+      .incrFields(Set.of(Counters.Fields.delivered))
       .decrFields(Set.of())
       .build();
 
@@ -108,12 +108,12 @@ class SendNotificationStatusHandlerServiceImplTest {
     List<StreamEventSummaryDTO> eventToPush = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
     List<StreamEventSummaryDTO> newHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
 
-    Set<String> oldCounters = Set.of(Counters.Fields.delivered, Counters.Fields.analogicCompleted);
+    Set<String> oldCounters = Set.of(Counters.Fields.delivered, Counters.Fields.analogicCompletion);
     Set<String> newCounters = Set.of();
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .incrFields(Set.of())
-      .decrFields(Set.of(Counters.Fields.delivered, Counters.Fields.analogicCompleted))
+      .decrFields(Set.of(Counters.Fields.delivered, Counters.Fields.analogicCompletion))
       .build();
 
     when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush)).thenReturn(newHistory);
@@ -134,8 +134,8 @@ class SendNotificationStatusHandlerServiceImplTest {
     List<StreamEventSummaryDTO> eventToPush = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
     List<StreamEventSummaryDTO> newHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
 
-    Set<String> oldCounters = Set.of(Counters.Fields.analogicCompleted);
-    Set<String> newCounters = Set.of(Counters.Fields.analogicCompleted);
+    Set<String> oldCounters = Set.of(Counters.Fields.analogicCompletion);
+    Set<String> newCounters = Set.of(Counters.Fields.analogicCompletion);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .incrFields(Set.of())
@@ -183,11 +183,11 @@ class SendNotificationStatusHandlerServiceImplTest {
     campaign.setStartDate(notificationCreationDate);
     campaign.setEndDate(endDate);
 
-    Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion));
+    Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.analogicCompletion));
     when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
-      .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion, Counters.Fields.total))
+      .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.analogicCompletion, Counters.Fields.total))
       .build();
 
     SendNotificationNoPII sendNotification = podamFactory.manufacturePojo(SendNotificationNoPII.class);
@@ -218,11 +218,11 @@ class SendNotificationStatusHandlerServiceImplTest {
     campaign.setStartDate(startDate);
     campaign.setEndDate(notificationCreationDate);
 
-    Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompleted));
+    Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompletionCourtesyMessage));
     when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
-      .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompleted, Counters.Fields.total))
+      .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompletionCourtesyMessage, Counters.Fields.total))
       .build();
 
     SendNotificationNoPII sendNotification = podamFactory.manufacturePojo(SendNotificationNoPII.class);

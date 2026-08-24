@@ -33,7 +33,6 @@ public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult addLegalFact(String sendNotificationId, LegalFactDTO legalFact);
   UpdateResult updateLegalFactStatus(String sendNotificationId, String fileName, FileStatus status);
   Counters calculateCampaignCounters(String campaignId);
-  UpdateResult updateLastEventOfInterestById(String sendNotificationId, TimelineElementCategoryV27DTO newStatus);
   List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents);
   Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable);
 }

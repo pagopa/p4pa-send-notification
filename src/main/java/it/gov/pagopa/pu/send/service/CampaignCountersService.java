@@ -7,5 +7,4 @@ import java.util.Set;
 
 public interface CampaignCountersService {
   Set<String> calculateActiveCounters(List<StreamEventSummaryDTO> history);
-
 }
