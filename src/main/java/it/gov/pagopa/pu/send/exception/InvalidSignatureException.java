@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.exception;
 
+import it.gov.pagopa.pu.send.exception.common.BaseBusinessException;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 
 public class InvalidSignatureException extends BaseBusinessException {

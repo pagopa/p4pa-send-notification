@@ -45,7 +45,7 @@ public class CampaignController implements CampaignApi {
   }
 
   @Override
-  public ResponseEntity<PagedCampaign> findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, List<String> orgSubUnitCodes, String campaignName, String externalCampaignId, Long senderOrganizationId, Pageable pageable) {
+  public ResponseEntity<PagedCampaign> findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, List<String> orgSubUnitCodes, String campaignName, String externalCampaignId, Boolean fetchAll, Pageable pageable) {
     log.info("retrieve campaigns by filters having organizationId {}, dateFrom {} and dateTo {}", organizationId, dateFrom, dateTo);
     return ResponseEntity.ok(
       campaignService.findCampaignsByFilters(
@@ -56,7 +56,7 @@ public class CampaignController implements CampaignApi {
           .orgSubUnitCodes(orgSubUnitCodes)
           .campaignName(campaignName)
           .externalCampaignId(externalCampaignId)
-          .senderOrganizationId(senderOrganizationId)
+          .fetchAll(fetchAll)
         .build(), pageable)
     );
   }

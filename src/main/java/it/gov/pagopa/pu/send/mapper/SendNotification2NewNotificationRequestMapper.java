@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV25DTO.PagoPaIntModeEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationRecipientV24DTO.RecipientTypeEnum;
+import it.gov.pagopa.send.dto.generated.*;
+import it.gov.pagopa.send.dto.generated.NewNotificationRequestV25DTO.PagoPaIntModeEnum;
+import it.gov.pagopa.send.dto.generated.NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum;
+import it.gov.pagopa.send.dto.generated.NotificationRecipientV24DTO.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipient;
 import it.gov.pagopa.pu.send.dto.SendNotification;

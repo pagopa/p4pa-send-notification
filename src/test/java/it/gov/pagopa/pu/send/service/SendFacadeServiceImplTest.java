@@ -3,9 +3,6 @@ package it.gov.pagopa.pu.send.service;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV28DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -15,8 +12,9 @@ import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.RestInvokeConflictException;
 import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
@@ -26,6 +24,9 @@ import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendStreamRepository;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import it.gov.pagopa.send.dto.generated.*;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
+import it.gov.pagopa.send.dto.generated.StreamMetadataResponseV28DTO.EventTypeEnum;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
@@ -40,7 +41,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
@@ -144,8 +145,8 @@ class SendFacadeServiceImplTest {
 
     sendService.preloadFiles(sendNotificationId, accessToken);
 
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1)).updateFilePreloadInformation(eq(sendNotificationId), any(PreLoadResponseDTO.class));
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1)).updateNotificationStatusById(sendNotificationId, NotificationStatus.REGISTERED);
+    verify(sendNotificationNoPIIRepositoryMock, times(1)).updateFilePreloadInformation(eq(sendNotificationId), any(PreLoadResponseDTO.class));
+    verify(sendNotificationNoPIIRepositoryMock, times(1)).updateNotificationStatusById(sendNotificationId, NotificationStatus.REGISTERED);
   }
 
   @Test
@@ -190,9 +191,9 @@ class SendFacadeServiceImplTest {
     when(uploadServiceMock.uploadFile(organizationId, sendNotificationId, documentDTO)).thenReturn(Optional.of(versionId));
 
     sendService.uploadFiles(sendNotificationId);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateFileVersionId(sendNotificationId, fileName, versionId);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.UPLOADED);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.UPLOADED);
+    verify(sendNotificationNoPIIRepositoryMock).updateFileVersionId(sendNotificationId, fileName, versionId);
+    verify(sendNotificationNoPIIRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.UPLOADED);
+    verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.UPLOADED);
   }
 
   @Test
@@ -261,9 +262,9 @@ class SendFacadeServiceImplTest {
     sendService.deliveryNotification(sendNotificationId, accessToken);
 
     //THEN
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
     Assertions.assertEquals(EventTypeEnum.TIMELINE, streamMetadataResponseArgumentCaptor.getValue().getEventType());
   }
@@ -315,9 +316,9 @@ class SendFacadeServiceImplTest {
     sendService.deliveryNotification(sendNotificationId, accessToken);
 
     //THEN
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
   }
 
@@ -352,7 +353,7 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
   }
 
@@ -388,7 +389,7 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
   }
 
@@ -456,9 +457,9 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     Assertions.assertSame(expectedResult, result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
   }
 
@@ -515,13 +516,13 @@ class SendFacadeServiceImplTest {
     assertNotNull(result);
     assertEquals(expectedDTO, result);
     if (!isPagoPaNull && !isRefinementDateNull) {
-      Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+      verify(sendNotificationNoPIIRepositoryMock, times(1))
         .updateNotificationDate(eq(sendNotificationId), any(), eq(noticeCode));
     } else {
-      Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never())
+      verify(sendNotificationNoPIIRepositoryMock, never())
         .updateNotificationDate(any(), any(), any());
     }
-    Mockito.verify(sendNotificationDTOMapperMock).apply(Mockito.any());
+    verify(sendNotificationDTOMapperMock).apply(Mockito.any());
   }
 
   @Test
@@ -552,7 +553,7 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     assertEquals(expectedDTO, result);
-    Mockito.verify(sendNotificationDTOMapperMock).apply(notification);
+    verify(sendNotificationDTOMapperMock).apply(notification);
   }
 
   @Test
@@ -587,8 +588,8 @@ class SendFacadeServiceImplTest {
 
     assertNotNull(result);
     assertEquals(expectedDTO, result);
-    Mockito.verify(sendNotificationDTOMapperMock).apply(notification);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationIun(sendNotificationId, "IUN");
+    verify(sendNotificationDTOMapperMock).apply(notification);
+    verify(sendNotificationNoPIIRepositoryMock).updateNotificationIun(sendNotificationId, "IUN");
   }
 
 
@@ -621,8 +622,8 @@ class SendFacadeServiceImplTest {
     NotificationPriceResponseV23DTO result = sendService.retrieveNotificationPrice(organizationId, nav, accessToken);
 
     assertEquals(expectedResponse, result);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findByOrganizationIdAndNav(organizationId, nav);
-    Mockito.verify(sendServiceMock).retrieveNotificationPrice(creditorTaxId, nav, organizationId, accessToken);
+    verify(sendNotificationNoPIIRepositoryMock).findByOrganizationIdAndNav(organizationId, nav);
+    verify(sendServiceMock).retrieveNotificationPrice(creditorTaxId, nav, organizationId, accessToken);
   }
 
   @Test
@@ -638,7 +639,7 @@ class SendFacadeServiceImplTest {
     // When Then
     assertThrows(SendNotificationNotFoundException.class,
       () -> sendService.retrieveNotificationPrice(organizationId, nav, accessToken));
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).findByOrganizationIdAndNav(organizationId, nav);
+    verify(sendNotificationNoPIIRepositoryMock).findByOrganizationIdAndNav(organizationId, nav);
     Mockito.verifyNoInteractions(sendServiceMock);
   }
 
@@ -737,7 +738,7 @@ class SendFacadeServiceImplTest {
     String streamId = "streamId";
     String lastEventId = "lastEventId";
 
-    UpdateResult expectedResult = Mockito.mock(UpdateResult.class);
+    UpdateResult expectedResult = mock(UpdateResult.class);
     when(sendStreamRepositoryMock.updateLastEventId(streamId, lastEventId))
       .thenReturn(expectedResult);
 
@@ -745,7 +746,7 @@ class SendFacadeServiceImplTest {
     sendService.updateStreamLastEventId(streamId, lastEventId);
 
     //THEN
-    Mockito.verify(sendStreamRepositoryMock)
+    verify(sendStreamRepositoryMock)
       .updateLastEventId(streamId, lastEventId);
   }
 
@@ -894,15 +895,15 @@ class SendFacadeServiceImplTest {
     when(sendNotificationMapperMock.apply(notification))
       .thenReturn(request);
     when(sendServiceMock.deliveryNotification(request, orgId, accessToken))
-      .thenThrow(HttpClientErrorException.Conflict.class);
+      .thenThrow(new RestInvokeConflictException("APPNAME", HttpStatus.CONFLICT, "ERROR", "ERRORCODE", "ERRORMESSAGE", null));
 
     //WHEN
     Assertions.assertThrows(ResponseStatusException.class, () -> sendService.deliveryNotification(sendNotificationId, accessToken));
 
     //THEN
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.times(1))
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never())
+    verify(sendNotificationNoPIIRepositoryMock, never())
       .updateNotificationRequestId(Mockito.anyString(), Mockito.anyString());
     Assertions.assertEquals(EventTypeEnum.TIMELINE, streamMetadataResponseArgumentCaptor.getValue().getEventType());
   }
@@ -1164,7 +1165,7 @@ class SendFacadeServiceImplTest {
       "Error in fetching SEND LegalFact pre-signed URL for sendNotificationDTO %s, category %s, legalFactId %s".formatted(sendNotificationId, category, polishedLegalFactId),
       notFoundException.getMessage()
     );
-    Mockito.verify(sendLegalFactMapperMock)
+    verify(sendLegalFactMapperMock)
       .mapLegalFactDownloadMetadataFromSend(null);
   }
 
@@ -1298,7 +1299,7 @@ class SendFacadeServiceImplTest {
     );
 
     //THEN
-    Mockito.verify(sendNotificationServiceMock).downloadSendLegalFact(
+    verify(sendNotificationServiceMock).downloadSendLegalFact(
       Mockito.eq(sendNotificationId),
       Mockito.eq(category),
       Mockito.eq(polishedLegalFactId),

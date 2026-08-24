@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.model;
 
 import it.gov.pagopa.pu.common.pii.model.NoPIIEntity;
+import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
@@ -37,6 +38,8 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   private List<PuRecipientNoPIIDTO> recipients;
   private List<DocumentDTO> documents;
   private NotificationStatus status;
+  // TODO: remove in P4ADEV-4923
+  private TimelineElementCategoryV27DTO lastEventOfInterest;
   private List<StreamEventSummaryDTO> history;
   private String notificationRequestId;
   private String iun;

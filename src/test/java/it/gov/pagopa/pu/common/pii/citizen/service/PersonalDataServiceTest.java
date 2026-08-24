@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
 import it.gov.pagopa.pu.common.pii.citizen.repository.PersonalDataRepository;
 import it.gov.pagopa.pu.send.config.CacheConfig;
 import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PersonalDataServiceTest {
@@ -47,7 +50,7 @@ class PersonalDataServiceTest {
   @BeforeEach
   void init() {
     cache = new ConcurrentMapCache(CacheConfig.Fields.pii);
-    Mockito.when(cacheManagerMock.getCache(CacheConfig.Fields.pii)).thenReturn(cache);
+    when(cacheManagerMock.getCache(CacheConfig.Fields.pii)).thenReturn(cache);
 
     service = new PersonalDataService(
       repositoryMock,
@@ -71,7 +74,7 @@ class PersonalDataServiceTest {
     SendNotificationPIIDTO pii = new SendNotificationPIIDTO();
 
     byte[] cipherData = new byte[0];
-    Mockito.when(cipherServiceMock.encryptObj(pii)).thenReturn(cipherData);
+    when(cipherServiceMock.encryptObj(pii)).thenReturn(cipherData);
     PersonalData personalDataInput = PersonalData.builder()
       .type(PERSONAL_DATA_TYPE.name())
       .data(cipherData)
@@ -84,7 +87,7 @@ class PersonalDataServiceTest {
       .data(cipherData)
       .build();
 
-    Mockito.when(repositoryMock.save(personalDataInput)).thenReturn(personalDataOutput);
+    when(repositoryMock.save(personalDataInput)).thenReturn(personalDataOutput);
 
     // When
     long insert = service.insert(pii, PERSONAL_DATA_TYPE);
@@ -100,9 +103,9 @@ class PersonalDataServiceTest {
     // Given
     long personalDataId = 1L;
     SendNotificationPIIDTO expected = podamFactory.manufacturePojo(CLASS_PII_DTO);
-    Mockito.when(repositoryMock.findById(personalDataId)).thenReturn(
+    when(repositoryMock.findById(personalDataId)).thenReturn(
       Optional.of(PersonalData.builder().id(personalDataId).data(new byte[0]).type(PERSONAL_DATA_TYPE.name()).build()));
-    Mockito.when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(expected);
+    when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(expected);
 
     // When
     SendNotificationPIIDTO result = service.get(personalDataId, CLASS_PII_DTO);
@@ -115,7 +118,7 @@ class PersonalDataServiceTest {
   void givenNotFoundPersonalDataIdWhenGetThenException() {
     // Given
     long personalDataId = 1L;
-    Mockito.when(repositoryMock.findById(personalDataId)).thenReturn(Optional.empty());
+    when(repositoryMock.findById(personalDataId)).thenReturn(Optional.empty());
 
     // When
     NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> service.get(personalDataId, CLASS_PII_DTO));
@@ -139,10 +142,10 @@ class PersonalDataServiceTest {
     Set<Long> cacheMissedPIds = Set.of(pId1);
     cache.put(pId2, pii2);
 
-    Mockito.when(repositoryMock.findAllById(cacheMissedPIds)).thenReturn(List.of(
+    when(repositoryMock.findAllById(cacheMissedPIds)).thenReturn(List.of(
       PersonalData.builder().id(pId1).data(new byte[0]).type(PERSONAL_DATA_TYPE.name()).build()
     ));
-    Mockito.when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(pii1);
+    when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(pii1);
 
     // When
     Map<Long, SendNotificationPIIDTO> results = service.getAll(personalDataIds, CLASS_PII_DTO);
@@ -187,7 +190,7 @@ class PersonalDataServiceTest {
       PersonalData.builder().id(pId2).data(new byte[0]).type(PERSONAL_DATA_TYPE.name()).build()
     );
 
-    Mockito.when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(pii1);
+    when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(pii1);
 
     // When
     Map<Long, SendNotificationPIIDTO> results = service.getAll(pData, pDataIds, CLASS_PII_DTO);
@@ -201,9 +204,9 @@ class PersonalDataServiceTest {
   void givenNotFoundPersonalDataIdsWhenGetAllThenException() {
     // Given
     Set<Long> personalDataIds = Set.of(1L, 2L);
-    Mockito.when(repositoryMock.findAllById(personalDataIds)).thenReturn(List.of(
+    when(repositoryMock.findAllById(personalDataIds)).thenReturn(List.of(
       PersonalData.builder().id(1L).data(new byte[0]).type(PERSONAL_DATA_TYPE.name()).build()));
-    Mockito.when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(podamFactory.manufacturePojo(CLASS_PII_DTO));
+    when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO)).thenReturn(podamFactory.manufacturePojo(CLASS_PII_DTO));
 
     // When
     NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> service.getAll(personalDataIds, CLASS_PII_DTO));
@@ -239,7 +242,7 @@ class PersonalDataServiceTest {
 
     SendNotificationPIIDTO pii1 = podamFactory.manufacturePojo(CLASS_PII_DTO);
     SendNotificationPIIDTO pii2 = podamFactory.manufacturePojo(CLASS_PII_DTO);
-    Mockito.when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO))
+    when(cipherServiceMock.decryptObj(new byte[0], CLASS_PII_DTO))
       .thenReturn(pii1)
       .thenReturn(pii2);
 
@@ -261,6 +264,6 @@ class PersonalDataServiceTest {
     service.delete(id);
 
     // Then
-    Mockito.verify(repositoryMock).deleteById(id);
+    verify(repositoryMock).deleteById(id);
   }
 }

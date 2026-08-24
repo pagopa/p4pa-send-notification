@@ -19,5 +19,5 @@ public class CampaignFiltersDTO {
   private List<String> orgSubUnitCodes;
   private String campaignName;
   private String externalCampaignId;
-  private Long senderOrganizationId;
+  private Boolean fetchAll;
 }

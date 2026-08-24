@@ -7,20 +7,20 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.send.connector.organization.config.OrganizationApisHolder;
+import it.gov.pagopa.pu.send.exception.common.RestInvokeNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OrganizationApiClientTest {
@@ -48,9 +48,9 @@ class OrganizationApiClientTest {
     String accessToken = "accessToken";
     String apiKey = "apiKey";
 
-    Mockito.when(apisHolder.getOrganizationApi(accessToken))
+    when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
+    when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
       .thenReturn(apiKey);
 
     // When
@@ -66,10 +66,10 @@ class OrganizationApiClientTest {
     Long organizationId = 1L;
     String accessToken = "accessToken";
 
-    Mockito.when(apisHolder.getOrganizationApi(accessToken))
+    when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+    when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     String result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
@@ -86,9 +86,9 @@ class OrganizationApiClientTest {
     String orgId = "1";
     Organization expectedResult = new Organization();
 
-    Mockito.when(apisHolder.getOrganizationEntityControllerApi(accessToken))
+    when(apisHolder.getOrganizationEntityControllerApi(accessToken))
       .thenReturn(organizationEntityControllerApiMock);
-    Mockito.when(organizationEntityControllerApiMock.crudGetOrganization(orgId))
+    when(organizationEntityControllerApiMock.crudGetOrganization(orgId))
       .thenReturn(expectedResult);
 
     // When
@@ -104,10 +104,10 @@ class OrganizationApiClientTest {
     String accessToken = "ACCESSTOKEN";
     String orgId = "1";
 
-    Mockito.when(apisHolder.getOrganizationEntityControllerApi(accessToken))
+    when(apisHolder.getOrganizationEntityControllerApi(accessToken))
       .thenReturn(organizationEntityControllerApiMock);
-    Mockito.when(organizationEntityControllerApiMock.crudGetOrganization(orgId))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+    when(organizationEntityControllerApiMock.crudGetOrganization(orgId))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     Organization result = organizationApiClient.findByOrganizationId(Long.valueOf(orgId), accessToken);
@@ -124,9 +124,9 @@ class OrganizationApiClientTest {
     String segregationCode = "01";
     Organization expectedResult = new Organization();
 
-    Mockito.when(apisHolder.getOrganizationSearchControllerApi(accessToken))
+    when(apisHolder.getOrganizationSearchControllerApi(accessToken))
       .thenReturn(organizationSearchControllerApiMock);
-    Mockito.when(organizationSearchControllerApiMock.crudOrganizationsFindByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode))
+    when(organizationSearchControllerApiMock.crudOrganizationsFindByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode))
       .thenReturn(expectedResult);
 
     // When
@@ -143,10 +143,10 @@ class OrganizationApiClientTest {
     String orgFiscalCode = "00002";
     String segregationCode = "01";
 
-    Mockito.when(apisHolder.getOrganizationSearchControllerApi(accessToken))
+    when(apisHolder.getOrganizationSearchControllerApi(accessToken))
       .thenReturn(organizationSearchControllerApiMock);
-    Mockito.when(organizationSearchControllerApiMock.crudOrganizationsFindByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+    when(organizationSearchControllerApiMock.crudOrganizationsFindByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     Optional<Organization> result = organizationApiClient.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken);
@@ -163,9 +163,9 @@ class OrganizationApiClientTest {
     String stationId = "STATIONID";
     OrganizationStationDTO expectedResult = new OrganizationStationDTO();
 
-    Mockito.when(apisHolder.getOrganizationApi(accessToken))
+    when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationStation(organizationId, stationId))
+    when(organizationApiMock.getOrganizationStation(organizationId, stationId))
       .thenReturn(expectedResult);
 
     // When
@@ -182,10 +182,10 @@ class OrganizationApiClientTest {
     Long organizationId = 1L;
     String stationId = "STATIONID";
 
-    Mockito.when(apisHolder.getOrganizationApi(accessToken))
+    when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    Mockito.when(organizationApiMock.getOrganizationStation(organizationId, stationId))
-      .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "NotFound", null, null, null));
+    when(organizationApiMock.getOrganizationStation(organizationId, stationId))
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
     OrganizationStationDTO result = organizationApiClient.findOrganizationStation(organizationId, stationId, accessToken);

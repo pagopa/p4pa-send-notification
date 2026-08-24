@@ -7,7 +7,7 @@ import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.generated.FileExpirationResponseDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
@@ -24,6 +24,8 @@ import uk.co.jemos.podam.api.PodamFactory;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FileExpirationServiceImplTest {
@@ -56,9 +58,9 @@ class FileExpirationServiceImplTest {
     notification.setSendNotificationId(sendNotificationId);
     notification.setOrganizationId(organizationId);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(null);
 
     NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
@@ -79,9 +81,9 @@ class FileExpirationServiceImplTest {
     BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
     brokerConfiguration.setLegalFactsExpirationDays(null);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
     NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredLegalFacts(sendNotificationId, accessToken));
@@ -110,9 +112,9 @@ class FileExpirationServiceImplTest {
     BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
     brokerConfiguration.setLegalFactsExpirationDays(expirationDays);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
     FileExpirationResponseDTO result =
@@ -143,9 +145,9 @@ class FileExpirationServiceImplTest {
     BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
     brokerConfiguration.setLegalFactsExpirationDays(expirationDays);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
     FileExpirationResponseDTO result =
@@ -194,9 +196,9 @@ class FileExpirationServiceImplTest {
     BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
     brokerConfiguration.setLegalFactsExpirationDays(expirationDays);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
     FileExpirationResponseDTO result =
@@ -247,11 +249,11 @@ class FileExpirationServiceImplTest {
     brokerConfiguration.setLegalFactsExpirationDays(expirationDays);
     UpdateResult updateResult = UpdateResult.acknowledged(1, organizationId, null);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
-    Mockito.when(sendNotificationNoPIIRepositoryMock.updateLegalFactStatus(sendNotificationId, expiredFileName, FileStatus.EXPIRED))
+    when(sendNotificationNoPIIRepositoryMock.updateLegalFactStatus(sendNotificationId, expiredFileName, FileStatus.EXPIRED))
       .thenReturn(updateResult);
     Mockito.doNothing().when(fileStorerServiceMock).deleteFromSharedFolder(organizationId,sendNotificationId,expiredFileName);
 
@@ -272,9 +274,9 @@ class FileExpirationServiceImplTest {
     notification.setSendNotificationId(sendNotificationId);
     notification.setOrganizationId(organizationId);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(null);
 
     NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken));
@@ -295,9 +297,9 @@ class FileExpirationServiceImplTest {
     BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
     brokerConfiguration.setSendFilesExpirationDays(null);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
     NotFoundException notFoundException = Assertions.assertThrows(NotFoundException.class, () -> fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken));
@@ -326,9 +328,9 @@ class FileExpirationServiceImplTest {
     BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
     brokerConfiguration.setSendFilesExpirationDays(expirationDays);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
     FileExpirationResponseDTO result = fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken);
@@ -358,9 +360,9 @@ class FileExpirationServiceImplTest {
     BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
     brokerConfiguration.setSendFilesExpirationDays(expirationDays);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
     FileExpirationResponseDTO result = fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken);
@@ -408,9 +410,9 @@ class FileExpirationServiceImplTest {
     BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
     brokerConfiguration.setSendFilesExpirationDays(expirationDays);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
 
     FileExpirationResponseDTO result = fileExpirationService.deleteExpiredDocuments(sendNotificationId, accessToken);
@@ -460,11 +462,11 @@ class FileExpirationServiceImplTest {
     brokerConfiguration.setSendFilesExpirationDays(expirationDays);
     UpdateResult updateResult = UpdateResult.acknowledged(1, organizationId, null);
 
-    Mockito.when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
+    when(sendNotificationServiceMock.findSendNotification(sendNotificationId))
       .thenReturn(notification);
-    Mockito.when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
+    when(brokerConfigurationServiceMock.getBrokerConfigurationByOrganizationId(organizationId, accessToken))
       .thenReturn(brokerConfiguration);
-    Mockito.when(sendNotificationNoPIIRepositoryMock.updateFileStatus(sendNotificationId, expiredFileName, FileStatus.EXPIRED))
+    when(sendNotificationNoPIIRepositoryMock.updateFileStatus(sendNotificationId, expiredFileName, FileStatus.EXPIRED))
       .thenReturn(updateResult);
     Mockito.doNothing().when(fileStorerServiceMock).deleteFromSharedFolder(organizationId,sendNotificationId,sendNotificationId+"_"+expiredFileName);
 

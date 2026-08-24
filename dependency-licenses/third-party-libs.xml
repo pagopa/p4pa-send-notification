@@ -12,7 +12,7 @@
 </tr>
 <tr>
 <td><a href='https://github.com/yawkat/lz4-java'>at.yawk.lz4:lz4-java</a></td>
-<td>1.11.0</td>
+<td>1.11.1</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -347,17 +347,17 @@
 </tr>
 <tr>
 <td>org.apache.httpcomponents.client5:httpclient5</td>
-<td>5.6.1</td>
+<td>5.6.4</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td>org.apache.httpcomponents.core5:httpcore5</td>
-<td>5.4.2</td>
+<td>5.4.3</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
 <td>org.apache.httpcomponents.core5:httpcore5-h2</td>
-<td>5.4.2</td>
+<td>5.4.3</td>
 <td><a href='https://www.apache.org/licenses/LICENSE-2.0'>Apache-2.0</a></td>
 </tr>
 <tr>
@@ -399,6 +399,11 @@
 <td><a href='https://www.bouncycastle.org/download/bouncy-castle-java/'>org.bouncycastle:bcprov-jdk18on</a></td>
 <td>1.84</td>
 <td><a href='https://www.bouncycastle.org/licence.html'>MIT</a></td>
+</tr>
+<tr>
+<td><a href='https://checkerframework.org/'>org.checkerframework:checker-qual</a></td>
+<td>3.55.1</td>
+<td><a href='https://opensource.org/licenses/mit'>MIT</a></td>
 </tr>
 <tr>
 <td><a href='https://www.eclipse.org'>org.eclipse.angus:angus-activation</a></td>
@@ -492,7 +497,7 @@
 </tr>
 <tr>
 <td><a href='https://jdbc.postgresql.org/'>org.postgresql:postgresql</a></td>
-<td>42.7.12</td>
+<td>42.7.13</td>
 <td><a href='https://opensource.org/licenses/BSD-2-Clause'>BSD-2-Clause</a></td>
 </tr>
 <tr>

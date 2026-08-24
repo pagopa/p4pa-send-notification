@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamMetadataResponseV28DTO;
+import it.gov.pagopa.send.dto.generated.StreamMetadataResponseV28DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendStreamDTO;
 import it.gov.pagopa.pu.send.model.SendStream;
 import org.springframework.stereotype.Service;

@@ -2,8 +2,8 @@ package it.gov.pagopa.pu.send.connector.pagopa.send;
 
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
-import it.gov.pagopa.pu.send.connector.pdnd.PdndService;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+import it.gov.pagopa.pu.send.connector.pdndservices.PdndService;
+import it.gov.pagopa.send.dto.generated.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendServiceTest {
@@ -49,10 +51,10 @@ class SendServiceTest {
     List<PreLoadRequestDTO> request = List.of();
     List<PreLoadResponseDTO> expectedResult = List.of();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
         .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.preloadFiles(Mockito.same(request), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(clientMock.preloadFiles(Mockito.same(request), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
@@ -70,10 +72,10 @@ class SendServiceTest {
     NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
     NewNotificationResponseDTO expectedResult = new NewNotificationResponseDTO();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.deliveryNotification(Mockito.same(request), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(clientMock.deliveryNotification(Mockito.same(request), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
@@ -91,10 +93,10 @@ class SendServiceTest {
     String notificationRequestId = "NOTIFICATION_ID";
     NewNotificationRequestStatusResponseV25DTO expectedResult = new NewNotificationRequestStatusResponseV25DTO();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.notificationStatus(Mockito.same(notificationRequestId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(clientMock.notificationStatus(Mockito.same(notificationRequestId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
@@ -113,10 +115,10 @@ class SendServiceTest {
     String nav = "NAV";
     NotificationPriceResponseV23DTO expectedResult = new NotificationPriceResponseV23DTO();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.retrieveNotificationPrice(Mockito.same(paTaxId), Mockito.same(nav), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(clientMock.retrieveNotificationPrice(Mockito.same(paTaxId), Mockito.same(nav), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
@@ -134,10 +136,10 @@ class SendServiceTest {
     String sendNotificationId = "SEND_NOTIFICATION_ID";
     List<LegalFactListElementV20DTO>  expectedResult = new ArrayList<>();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.getLegalFacts(Mockito.same(sendNotificationId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(clientMock.getLegalFacts(Mockito.same(sendNotificationId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
@@ -156,10 +158,10 @@ class SendServiceTest {
     String legalFactId = "LEGAL_FACT_ID";
     LegalFactDownloadMetadataResponseDTO expectedResult = new LegalFactDownloadMetadataResponseDTO();
 
-    Mockito.when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
       .thenReturn(orgSendApiKey);
-    Mockito.when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    Mockito.when(clientMock.getLegalFactDownloadMetadata(Mockito.same(sendNotificationId), Mockito.same(legalFactId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(clientMock.getLegalFactDownloadMetadata(Mockito.same(sendNotificationId), Mockito.same(legalFactId), Mockito.same(orgSendApiKey), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When

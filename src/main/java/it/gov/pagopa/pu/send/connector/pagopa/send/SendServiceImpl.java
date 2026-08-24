@@ -2,8 +2,8 @@ package it.gov.pagopa.pu.send.connector.pagopa.send;
 
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
-import it.gov.pagopa.pu.send.connector.pdnd.PdndService;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+import it.gov.pagopa.pu.send.connector.pdndservices.PdndService;
+import it.gov.pagopa.send.dto.generated.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
