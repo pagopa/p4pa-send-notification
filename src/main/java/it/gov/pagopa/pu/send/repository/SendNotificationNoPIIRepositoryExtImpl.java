@@ -3,7 +3,6 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.config.BaseEntityListener;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
-import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
@@ -20,19 +19,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.CollectionUtils;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationNoPIIRepositoryExt {
 
@@ -205,15 +199,16 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
   @Override
   public Counters calculateCampaignCounters(String campaignId) {
+    GroupOperation groupOperation = Aggregation.group()
+      .count().as(Counters.Fields.total);
+
+    for (String counterName : CampaignCounterRules.COUNTER_RULES.keySet()) {
+      groupOperation = groupOperation.sum(buildStatusCondition(counterName)).as(counterName);
+    }
+
     Aggregation aggregation = Aggregation.newAggregation(
       Aggregation.match(Criteria.where(Fields.campaignId).is(campaignId)),
-      Aggregation.group()
-        .count().as(Counters.Fields.total)
-        .sum(buildStatusCondition(Counters.Fields.accepted)).as(Counters.Fields.accepted)
-        .sum(buildStatusCondition(Counters.Fields.delivered)).as(Counters.Fields.delivered)
-        .sum(buildStatusCondition(Counters.Fields.digitalCompleted)).as(Counters.Fields.digitalCompleted)
-        .sum(buildStatusCondition(Counters.Fields.analogicCompleted)).as(Counters.Fields.analogicCompleted)
-        .sum(buildStatusCondition(Counters.Fields.completion)).as(Counters.Fields.completion)
+      groupOperation
     );
 
     AggregationResults<Counters> results = mongoTemplate.aggregate(aggregation, SendNotificationNoPII.class, Counters.class);
@@ -223,20 +218,77 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     return counters != null ? counters : new Counters();
   }
 
-  private ConditionalOperators.Cond buildStatusCondition(String counterName) {
-    Set<TimelineElementCategoryV27DTO> latestEventsOfInterest =
-      CampaignCounterRules.COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES.getOrDefault(counterName, Collections.emptySet());
-
-    return ConditionalOperators.when(Criteria.where(Fields.lastEventOfInterest).in(latestEventsOfInterest))
-      .then(1).otherwise(0);
+  private AggregationExpression buildStatusCondition(String counterName) {
+    AggregationExpression isActive = buildIsActiveExpression(counterName);
+    return ConditionalOperators.when(isActive).then(1).otherwise(0);
   }
 
-  @Override
-  public UpdateResult updateLastEventOfInterestById(String sendNotificationId, TimelineElementCategoryV27DTO newStatus) {
-    return updateFirst(
-      Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
-      new Update().set(Fields.lastEventOfInterest, newStatus)
-    );
+  private AggregationExpression buildIsActiveExpression(String counterName) {
+    CampaignCounterRules.CounterRule rule = CampaignCounterRules.COUNTER_RULES.get(counterName);
+    AggregationExpression isEligible = buildIsEligibleExpression(rule);
+
+    if (rule.getDeactivatingCounters().isEmpty()) {
+      return isEligible;
+    }
+
+    List<AggregationExpression> conditions = new ArrayList<>();
+    conditions.add(isEligible);
+
+    for (String deactivatingCounter : rule.getDeactivatingCounters()) {
+      CampaignCounterRules.CounterRule deactivatingRule = CampaignCounterRules.COUNTER_RULES.get(deactivatingCounter);
+      conditions.add(BooleanOperators.Not.not(buildIsEligibleExpression(deactivatingRule)));
+    }
+
+    return BooleanOperators.And.and(conditions.toArray());
+  }
+
+  private AggregationExpression buildIsEligibleExpression(CampaignCounterRules.CounterRule rule) {
+    AggregationExpression matchesActivation = buildAnyMatchExpression(rule.getActivationConditions());
+
+    if (rule.getDeactivationConditions().isEmpty()) {
+      return matchesActivation;
+    }
+
+    AggregationExpression matchesDeactivation = buildAnyMatchExpression(rule.getDeactivationConditions());
+
+    return BooleanOperators.And.and(matchesActivation, BooleanOperators.Not.not(matchesDeactivation));
+  }
+
+  private AggregationExpression buildAnyMatchExpression(List<StreamEventSummaryDTO> conditions) {
+    AggregationExpression condExpression;
+
+    if (conditions.size() == 1) {
+      condExpression = buildConditionExpression(conditions.getFirst());
+    } else {
+      List<AggregationExpression> orConditions = conditions.stream()
+        .map(this::buildConditionExpression)
+        .toList();
+
+      condExpression = BooleanOperators.Or.or(orConditions.toArray());
+    }
+
+    AggregationExpression historyOrDefault = ConditionalOperators.ifNull(Fields.history)
+      .then(Collections.emptyList());
+
+    AggregationExpression filter = ArrayOperators.Filter.filter(historyOrDefault)
+      .as("event")
+      .by(condExpression);
+
+    AggregationExpression size = ArrayOperators.Size.lengthOfArray(filter);
+    return ComparisonOperators.Gt.valueOf(size).greaterThanValue(0);
+  }
+
+  private AggregationExpression buildConditionExpression(StreamEventSummaryDTO condition) {
+    AggregationExpression statusEq = ComparisonOperators.Eq.valueOf("$$event.newNotificationStatus")
+      .equalToValue(condition.getNewNotificationStatus().getValue());
+
+    if (condition.getTimelineElementCategory() != null) {
+      AggregationExpression categoryEq = ComparisonOperators.Eq.valueOf("$$event.timelineElementCategory")
+        .equalToValue(condition.getTimelineElementCategory().getValue());
+      return BooleanOperators.And.and(statusEq, categoryEq);
+    }
+
+    return statusEq;
   }
 
   @Override
@@ -251,7 +303,6 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     );
     return updatedDoc.getHistory();
   }
-
 
   @Override
   public Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable) {

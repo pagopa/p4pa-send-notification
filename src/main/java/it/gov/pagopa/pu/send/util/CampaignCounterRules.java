@@ -7,34 +7,10 @@ import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import lombok.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CampaignCounterRules {
   private CampaignCounterRules() {}
-
-  // TODO: remove in P4ADEV-4923
-  public static final Map<TimelineElementCategoryV27DTO, Set<String>> TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS = Map.of(
-    TimelineElementCategoryV27DTO.REQUEST_ACCEPTED, Set.of(Counters.Fields.accepted),
-    TimelineElementCategoryV27DTO.DIGITAL_SUCCESS_WORKFLOW, Set.of(Counters.Fields.accepted, Counters.Fields.delivered),
-    TimelineElementCategoryV27DTO.ANALOG_SUCCESS_WORKFLOW, Set.of(Counters.Fields.accepted, Counters.Fields.delivered),
-    TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion),
-    TimelineElementCategoryV27DTO.SEND_ANALOG_FEEDBACK, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.analogicCompleted),
-    TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.completion),
-    TimelineElementCategoryV27DTO.SEND_DIGITAL_FEEDBACK, Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompleted)
-  );
-
-  // TODO: remove in P4ADEV-4923
-  public static final Map<String, Set<TimelineElementCategoryV27DTO>> COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES =
-    Collections.unmodifiableMap(
-      TIMELINE_ELEMENT_CATEGORY2COUNTER_FIELDS.entrySet().stream()
-        .flatMap(entry -> entry.getValue().stream()
-          .map(counterName -> Map.entry(counterName, entry.getKey())))
-        .collect(Collectors.groupingBy(
-          Map.Entry::getKey,
-          Collectors.mapping(Map.Entry::getValue, Collectors.toSet())
-        ))
-    );
 
   @Getter
   @Builder
@@ -44,7 +20,7 @@ public class CampaignCounterRules {
     @Builder.Default
     private List<String> deactivatingCounters = List.of();
     @Builder.Default
-    private List<StreamEventSummaryDTO> deactivationConditions = List.of();
+    private List<StreamEventSummaryDTO> deactivationConditions = List.of(); // To be configured if deactivation logic is needed and a deactivation counter is missing, otherwise configuring the counter itself is preferred
   }
 
   private static final List<String> TERMINAL_COUNTERS = List.of(
@@ -103,7 +79,7 @@ public class CampaignCounterRules {
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.PROBABLE_SCHEDULING_ANALOG_DATE),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SCHEDULE_ANALOG_WORKFLOW),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_COURTESY_MESSAGE),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.VIEWED, null)
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.VIEWED, TimelineElementCategoryV27DTO.NOTIFICATION_VIEWED)
         ))
       // if it's not completed via courtesy message, the notification moves to a digital or analog domicile
       .deactivatingCounters(withTerminalCounters(Counters.Fields.digitalCompletionDigitalDomicile, Counters.Fields.analogicCompletion)).build(),

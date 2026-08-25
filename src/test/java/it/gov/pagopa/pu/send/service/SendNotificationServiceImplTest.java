@@ -7,7 +7,6 @@ import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
-import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -293,7 +292,6 @@ class SendNotificationServiceImplTest {
     Path relativePath = Path.of("1/sendNotificationId");
 
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
-    notification.setLastEventOfInterest(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED);
     notification.setCreationDate(LocalDateTime.of(2026,Month.JUNE,30,12,0));
     PuPayment puPayment = new PuPayment();
     Payment payment = new Payment();
