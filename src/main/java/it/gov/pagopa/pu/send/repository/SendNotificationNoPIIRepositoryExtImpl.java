@@ -280,11 +280,11 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
   private AggregationExpression buildConditionExpression(StreamEventSummaryDTO condition) {
     AggregationExpression statusEq = ComparisonOperators.Eq.valueOf("$$event.newNotificationStatus")
-      .equalToValue(condition.getNewNotificationStatus().name());
+      .equalToValue(condition.getNewNotificationStatus().getValue());
 
     if (condition.getTimelineElementCategory() != null) {
       AggregationExpression categoryEq = ComparisonOperators.Eq.valueOf("$$event.timelineElementCategory")
-        .equalToValue(condition.getTimelineElementCategory().name());
+        .equalToValue(condition.getTimelineElementCategory().getValue());
       return BooleanOperators.And.and(statusEq, categoryEq);
     }
 
@@ -303,7 +303,6 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     );
     return updatedDoc.getHistory();
   }
-
 
   @Override
   public Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable) {
