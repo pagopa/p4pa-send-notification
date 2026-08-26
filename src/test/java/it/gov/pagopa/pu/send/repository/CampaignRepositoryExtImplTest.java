@@ -151,7 +151,7 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
       new Document()
     );
 
-    Mockito.when(mongoTemplateMock.aggregate(
+    when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(Campaign.class),
       Mockito.eq(Document.class)
@@ -176,7 +176,7 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
       new Document()
     );
 
-    Mockito.when(mongoTemplateMock.aggregate(
+    when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(Campaign.class),
       Mockito.eq(Document.class)
@@ -197,7 +197,7 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
       new Document()
     );
 
-    Mockito.when(mongoTemplateMock.aggregate(
+    when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(Campaign.class),
       Mockito.eq(Document.class)

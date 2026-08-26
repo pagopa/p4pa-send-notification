@@ -332,7 +332,7 @@ class CampaignServiceImplTest {
   void whenFindLatestFullRecalculationDateThenOk() {
     //Given
     OffsetDateTime expectedLatestFullRecalculationDate = OffsetDateTime.now();
-    Mockito.when(campaignRepositoryMock.findLatestFullRecalculationDate())
+    when(campaignRepositoryMock.findLatestFullRecalculationDate())
       .thenReturn(expectedLatestFullRecalculationDate);
     //When
     OffsetDateTime actualLatestFullRecalculationDate = campaignService.findLatestFullRecalculationDate();
@@ -345,10 +345,10 @@ class CampaignServiceImplTest {
     //Given
     OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now();
     List<String> expectedCampaignIds = List.of("id1", "id2", "id3");
-    Mockito.when(sendNotificationNoPIIRepositoryExtMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate))
+    when(sendNotificationNoPIIRepositoryExtMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate))
       .thenReturn(expectedCampaignIds);
     //When
-    List<String> actualCampaignIds = sendNotificationNoPIIRepositoryExtMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
+    List<String> actualCampaignIds = campaignService.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
     //Then
     Assertions.assertEquals(expectedCampaignIds, actualCampaignIds);
   }

@@ -358,7 +358,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       new Document()
     );
 
-    Mockito.when(mongoTemplateMock.aggregate(
+    when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(SendNotificationNoPII.class),
       Mockito.eq(Document.class)
@@ -382,7 +382,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       new Document()
     );
 
-    Mockito.when(mongoTemplateMock.aggregate(
+    when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(SendNotificationNoPII.class),
       Mockito.eq(Document.class)
@@ -406,7 +406,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       new Document()
     );
 
-    Mockito.when(mongoTemplateMock.aggregate(
+    when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(SendNotificationNoPII.class),
       Mockito.eq(Document.class)
