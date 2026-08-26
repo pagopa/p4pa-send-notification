@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.send.model.Campaign;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface CampaignService {
@@ -26,4 +27,6 @@ public interface CampaignService {
   PagedCampaign findCampaignsByFilters(CampaignFiltersDTO campaignFiltersDTO, Pageable pageable);
   PagedSendNotifications getCampaignSendNotifications(SendNotificationFiltersDTO sendNotificationFiltersDTO, String fiscalCode, Pageable pageable);
   void renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest);
+  OffsetDateTime findLatestFullRecalculationDate();
+  List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime lastRecalculationDate);
 }

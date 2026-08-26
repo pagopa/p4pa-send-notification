@@ -7,17 +7,23 @@ import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.Campaign.Fields;
+import it.gov.pagopa.pu.send.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -26,6 +32,7 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
 
   public static final String FIELD_COUNTERS_TEMPLATE = "%s.%s";
   public static final String FIELD_COUNTERS_TOTAL = FIELD_COUNTERS_TEMPLATE.formatted(Fields.counters, Counters.Fields.total);
+  public static final String FIELD_COUNTERS_FULL_RECALCULATION_DATE = FIELD_COUNTERS_TEMPLATE.formatted(Fields.counters, Counters.Fields.fullRecalculationDate);
 
   public CampaignRepositoryExtImpl(MongoTemplate mongoTemplate) {
     this.mongoTemplate = mongoTemplate;
@@ -123,5 +130,21 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
       Query.query(Criteria.where(Fields.campaignId).is(campaignId)),
       new Update().set(Fields.campaignName, name)
     );
+  }
+
+  @Override
+  public OffsetDateTime findLatestFullRecalculationDate() {
+    Aggregation aggregation = Aggregation.newAggregation(
+      Aggregation.sort(Sort.Direction.DESC, FIELD_COUNTERS_FULL_RECALCULATION_DATE),
+      Aggregation.limit(1),
+      Aggregation.project()
+        .and(FIELD_COUNTERS_FULL_RECALCULATION_DATE).as(Counters.Fields.fullRecalculationDate)
+        .andExclude("_id")
+    );
+    AggregationResults<Document> latestFullRecalculationDateAggregationResults = mongoTemplate.aggregate(aggregation, Campaign.class, Document.class);
+    Document latestFullRecalculationDateDocument = latestFullRecalculationDateAggregationResults.getUniqueMappedResult();
+    return latestFullRecalculationDateDocument != null ?
+      DateUtils.toOffsetDateTime(latestFullRecalculationDateDocument.getDate(Counters.Fields.fullRecalculationDate)) :
+      null;
   }
 }

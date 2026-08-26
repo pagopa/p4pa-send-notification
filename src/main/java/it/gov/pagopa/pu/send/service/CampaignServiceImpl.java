@@ -17,6 +17,7 @@ import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepositoryExtImpl;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,13 +34,21 @@ import java.util.Optional;
 public class CampaignServiceImpl implements CampaignService {
   private final CampaignRepository campaignRepository;
   private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
+  private final SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt;
   private final PagedCampaignMapper pagedCampaignMapper;
   private final PagedSendNotificationsMapper pagedSendNotificationsMapper;
   private final DataCipherService dataCipherService;
 
-  public CampaignServiceImpl(CampaignRepository campaignRepository, SendNotificationNoPIIRepository sendNotificationNoPIIRepository, PagedCampaignMapper pagedCampaignMapper, PagedSendNotificationsMapper pagedSendNotificationsMapper, DataCipherService dataCipherService) {
+  public CampaignServiceImpl(
+    CampaignRepository campaignRepository,
+    SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
+    SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt,
+    PagedCampaignMapper pagedCampaignMapper,
+    PagedSendNotificationsMapper pagedSendNotificationsMapper,
+    DataCipherService dataCipherService) {
     this.campaignRepository = campaignRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
+    this.sendNotificationNoPIIRepositoryExt = sendNotificationNoPIIRepositoryExt;
     this.pagedCampaignMapper = pagedCampaignMapper;
     this.pagedSendNotificationsMapper = pagedSendNotificationsMapper;
     this.dataCipherService = dataCipherService;
@@ -147,5 +157,15 @@ public class CampaignServiceImpl implements CampaignService {
   @Override
   public void renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest) {
     campaignRepository.updateCampaignName(campaignId, renameCampaignRequest.getName());
+  }
+
+  @Override
+  public OffsetDateTime findLatestFullRecalculationDate() {
+    return campaignRepository.findLatestFullRecalculationDate();
+  }
+
+  @Override
+  public List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime lastRecalculationDate) {
+    return sendNotificationNoPIIRepositoryExt.findIdsOfUpdatedCampaignsByNotificationUpdateDate(lastRecalculationDate);
   }
 }

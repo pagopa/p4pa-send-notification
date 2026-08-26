@@ -34,4 +34,5 @@ public interface SendNotificationNoPIIRepositoryExt {
   Counters calculateCampaignCounters(String campaignId);
   List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents);
   Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable);
+  List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate);
 }

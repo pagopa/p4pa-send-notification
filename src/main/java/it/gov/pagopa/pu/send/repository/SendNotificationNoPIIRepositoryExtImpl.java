@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -43,6 +44,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_PAYMENT_NOTICE_CODE = "%s.%s.%s.pagoPa.noticeCode".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.puPayments, PuPayment.Fields.payment);
   public static final String FIELD_RECIPIENT_FISCAL_CODE_HASH = "%s.%s".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.fiscalCodeHash);
   private static final String FIELD_FILTERED_NOTIFICATION_DATE = "recipients.$[].puPayments.$[elem].notificationDate";
+  private static final String FIELD_NOTIFICATION_UPDATE_DATE = "updateDate";
 
   private final MongoTemplate mongoTemplate;
 
@@ -329,5 +331,20 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     query.with(pageable);
     List<SendNotificationNoPII> sendNotifications = mongoTemplate.find(query, SendNotificationNoPII.class);
     return new PageImpl<>(sendNotifications, pageable, count);
+  }
+
+  @Override
+  public List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate) {
+    String campaignIdListAlias = Fields.campaignId + "List";
+    Aggregation aggregation = Aggregation.newAggregation(
+      Aggregation.match(Criteria.where(FIELD_NOTIFICATION_UPDATE_DATE).gt(latestRecalculationDate)),
+      Aggregation.group()
+        .addToSet(Fields.campaignId).as(campaignIdListAlias)
+    );
+    AggregationResults<Document> lastRecalculationDateAggregationResults = mongoTemplate.aggregate(aggregation, SendNotificationNoPII.class, Document.class);
+    Document result = lastRecalculationDateAggregationResults.getUniqueMappedResult();
+    return result != null && result.getList(campaignIdListAlias, String.class) != null ?
+      result.getList(campaignIdListAlias, String.class) :
+      new ArrayList<>();
   }
 }

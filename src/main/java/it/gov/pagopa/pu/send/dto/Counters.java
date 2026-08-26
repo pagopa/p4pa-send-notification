@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -25,4 +26,5 @@ public class Counters implements Serializable {
   private Long failed = 0L;
   private Long deceasedRecipient = 0L;
   private Long recipientNotFound = 0L;
+  private OffsetDateTime fullRecalculationDate;
 }
