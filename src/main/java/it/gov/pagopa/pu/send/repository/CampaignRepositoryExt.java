@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 public interface CampaignRepositoryExt {
   UpdateResult incrementTotalAndUpdateEndDate(String campaignId, LocalDate endDate);
@@ -16,4 +17,5 @@ public interface CampaignRepositoryExt {
   UpdateResult updateEndDate(String campaignId, LocalDate endDate);
   Page<Campaign> findCampaignsByFilters(CampaignFiltersDTO campaignFiltersDTO, Pageable pageable);
   UpdateResult updateCampaignName(String campaignId, String name);
+  OffsetDateTime findLatestFullRecalculationDate();
 }

@@ -7,6 +7,7 @@ import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.service.CampaignService;
+import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.co.jemos.podam.api.PodamFactory;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -137,5 +139,32 @@ class CampaignControllerTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedResponse, response.getBody());
+  }
+
+  @Test
+  void findLatestFullRecalculationDate() {
+    //GIVEN
+    OffsetDateTime expectedLatestRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+    when(campaignServiceMock.findLatestFullRecalculationDate())
+      .thenReturn(expectedLatestRecalculationDate);
+    //WHEN
+    ResponseEntity<OffsetDateTime> actualResponseEntity = campaignController.findLatestFullRecalculationDate();
+    //THEN
+    Assertions.assertEquals(HttpStatus.OK, actualResponseEntity.getStatusCode());
+    Assertions.assertEquals(expectedLatestRecalculationDate, actualResponseEntity.getBody());
+  }
+
+  @Test
+  void findIdsOfUpdatedCampaignsByNotificationUpdateDate() {
+    //GIVEN
+    OffsetDateTime latestRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+    List<String> expectedIdList = List.of("id1", "id2", "id3");
+    when(campaignServiceMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestRecalculationDate))
+      .thenReturn(expectedIdList);
+    //WHEN
+    ResponseEntity<List<String>> actualResponseEntity = campaignController.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestRecalculationDate);
+    //THEN
+    Assertions.assertEquals(HttpStatus.OK, actualResponseEntity.getStatusCode());
+    Assertions.assertEquals(expectedIdList, actualResponseEntity.getBody());
   }
 }

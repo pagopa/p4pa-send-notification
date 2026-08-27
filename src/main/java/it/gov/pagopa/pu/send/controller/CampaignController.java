@@ -88,4 +88,17 @@ public class CampaignController implements CampaignApi {
         .build(),
       fiscalCode,pageable));
   }
+
+  @Override
+  public ResponseEntity<OffsetDateTime> findLatestFullRecalculationDate() {
+    log.info("Retrieve latest date for a full campaign counters recalculation");
+    return ResponseEntity.ok(campaignService.findLatestFullRecalculationDate());
+  }
+
+  @Override
+  public ResponseEntity<List<String>> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate) {
+    log.info("Retrieve ids for campaigns updated after {}", latestRecalculationDate);
+    return ResponseEntity.ok(campaignService.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestRecalculationDate));
+  }
+
 }

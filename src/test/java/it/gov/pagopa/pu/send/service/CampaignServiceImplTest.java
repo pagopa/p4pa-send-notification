@@ -18,9 +18,11 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepositoryExtImpl;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +37,7 @@ import uk.co.jemos.podam.api.PodamFactory;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,6 +53,8 @@ class CampaignServiceImplTest {
   @Mock
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
   @Mock
+  private SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExtMock;
+  @Mock
   private PagedCampaignMapper pagedCampaignMapperMock;
   @Mock
   private PagedSendNotificationsMapper pagedSendNotificationsMapperMock;
@@ -64,6 +69,7 @@ class CampaignServiceImplTest {
     Mockito.verifyNoMoreInteractions(
       campaignRepositoryMock,
       sendNotificationNoPIIRepositoryMock,
+      sendNotificationNoPIIRepositoryExtMock,
       pagedCampaignMapperMock,
       pagedSendNotificationsMapperMock,
       dataCipherServiceMock
@@ -320,5 +326,30 @@ class CampaignServiceImplTest {
     when(campaignRepositoryMock.updateCampaignName(campaignId, request.getName())).thenReturn(updateResult);
 
     assertDoesNotThrow(()->campaignService.renameCampaign(campaignId, request));
+  }
+
+  @Test
+  void whenFindLatestFullRecalculationDateThenOk() {
+    //Given
+    OffsetDateTime expectedLatestFullRecalculationDate = OffsetDateTime.now();
+    when(campaignRepositoryMock.findLatestFullRecalculationDate())
+      .thenReturn(expectedLatestFullRecalculationDate);
+    //When
+    OffsetDateTime actualLatestFullRecalculationDate = campaignService.findLatestFullRecalculationDate();
+    //Then
+    Assertions.assertEquals(expectedLatestFullRecalculationDate, actualLatestFullRecalculationDate);
+  }
+
+  @Test
+  void whenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenOk() {
+    //Given
+    OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now();
+    List<String> expectedCampaignIds = List.of("id1", "id2", "id3");
+    when(sendNotificationNoPIIRepositoryExtMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate))
+      .thenReturn(expectedCampaignIds);
+    //When
+    List<String> actualCampaignIds = campaignService.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
+    //Then
+    Assertions.assertEquals(expectedCampaignIds, actualCampaignIds);
   }
 }

@@ -11,7 +11,9 @@ import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.pu.send.util.Constants;
 import org.bson.Document;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -342,5 +344,79 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     assertEquals(notifications, result.getContent());
     assertEquals(pageable.getOffset(), result.getNumber());
     assertEquals(pageable.getPageSize(), result.getSize());
+  }
+
+  @Test
+  void givenDocumentWithCampaignIdListKeyWhenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenOk() {
+    //GIVEN
+    OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+    List<String> expectedCampaignIdList = List.of("id1", "id2", "id3");
+    String campaignIdListAlias = SendNotificationNoPII.Fields.campaignId + "List";
+
+    AggregationResults<Document> aggregationResults = new AggregationResults<>(
+      List.of(new Document(campaignIdListAlias, expectedCampaignIdList)),
+      new Document()
+    );
+
+    when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(SendNotificationNoPII.class),
+      Mockito.eq(Document.class)
+    )).thenReturn(aggregationResults);
+
+    //WHEN
+    List<String> actualCampaignIdList = repository.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
+
+    //THEN
+    Assertions.assertNotNull(actualCampaignIdList);
+    Assertions.assertEquals(expectedCampaignIdList, actualCampaignIdList);
+  }
+
+  @Test
+  void givenDocumentWithoutCampaignIdListKeyWhenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenEmptyList() {
+    //GIVEN
+    OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+
+    AggregationResults<Document> aggregationResults = new AggregationResults<>(
+      List.of(new Document()),
+      new Document()
+    );
+
+    when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(SendNotificationNoPII.class),
+      Mockito.eq(Document.class)
+    )).thenReturn(aggregationResults);
+
+    //WHEN
+    List<String> actualCampaignIdList = repository.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
+
+    //THEN
+    Assertions.assertNotNull(actualCampaignIdList);
+    Assertions.assertEquals(0, actualCampaignIdList.size());
+  }
+
+  @Test
+  void givenNoDocumentWhenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenEmptyList() {
+    //GIVEN
+    OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+
+    AggregationResults<Document> aggregationResults = new AggregationResults<>(
+      List.of(),
+      new Document()
+    );
+
+    when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(SendNotificationNoPII.class),
+      Mockito.eq(Document.class)
+    )).thenReturn(aggregationResults);
+
+    //WHEN
+    List<String> actualCampaignIdList = repository.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
+
+    //THEN
+    Assertions.assertNotNull(actualCampaignIdList);
+    Assertions.assertEquals(0, actualCampaignIdList.size());
   }
 }
