@@ -19,6 +19,7 @@ import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepositoryExtImpl;
+import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -145,6 +146,7 @@ class CampaignServiceImplTest {
   @Test
   void givenExistingCampaignWhenAlignCampaignThenUpdateCountersAndSave() {
     String campaignId = "campaignId";
+    OffsetDateTime recalculationDate = OffsetDateTime.now(Constants.ZONEID);
     Campaign campaign = Campaign.builder().build();
     Counters mockCounters = new Counters();
 
@@ -152,20 +154,22 @@ class CampaignServiceImplTest {
     when(sendNotificationNoPIIRepositoryMock.calculateCampaignCounters(campaignId)).thenReturn(mockCounters);
     when(campaignRepositoryMock.save(campaign)).thenReturn(campaign);
 
-    campaignService.alignCampaign(campaignId);
+    campaignService.alignCampaign(campaignId, recalculationDate);
 
     assertEquals(mockCounters, campaign.getCounters());
+    assertEquals(recalculationDate, campaign.getCounters().getFullRecalculationDate());
   }
 
   @Test
   void givenNotExistingCampaignWhenAlignCampaignThenThrowNotFoundException() {
     String campaignId = "campaignId";
+    OffsetDateTime recalculationDate = OffsetDateTime.now(Constants.ZONEID);
 
     when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.empty());
 
     NotFoundException exception = assertThrows(
       NotFoundException.class,
-      () -> campaignService.alignCampaign(campaignId)
+      () -> campaignService.alignCampaign(campaignId, recalculationDate)
     );
 
     assertEquals(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, exception.getCode());

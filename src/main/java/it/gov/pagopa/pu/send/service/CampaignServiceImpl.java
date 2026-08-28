@@ -86,7 +86,7 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
-  public void alignCampaign(String campaignId) {
+  public void alignCampaign(String campaignId, OffsetDateTime fullRecalculationDate) {
     Campaign campaign = campaignRepository.findById(campaignId)
       .orElseThrow(() -> new NotFoundException(
         ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND,
@@ -94,6 +94,7 @@ public class CampaignServiceImpl implements CampaignService {
       ));
 
     Counters counters = sendNotificationNoPIIRepository.calculateCampaignCounters(campaignId);
+    counters.setFullRecalculationDate(fullRecalculationDate);
 
     campaign.setCounters(counters);
 
