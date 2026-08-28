@@ -61,10 +61,11 @@ class CampaignControllerTest {
   @Test
   void whenAlignCampaignThenOk() {
     String campaignId = "campaignId";
+    OffsetDateTime now = OffsetDateTime.now(Constants.ZONEID);
 
-    Mockito.doNothing().when(campaignServiceMock).alignCampaign(campaignId);
+    Mockito.doNothing().when(campaignServiceMock).alignCampaign(campaignId, now);
 
-    ResponseEntity<Void> response = campaignController.alignCampaign(campaignId);
+    ResponseEntity<Void> response = campaignController.alignCampaign(campaignId, now);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());

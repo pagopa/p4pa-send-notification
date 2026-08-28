@@ -36,10 +36,10 @@ public class CampaignController implements CampaignApi {
   }
 
   @Override
-  public ResponseEntity<Void> alignCampaign(String campaignId) {
+  public ResponseEntity<Void> alignCampaign(String campaignId, OffsetDateTime fullRecalculationDate) {
     log.info("align campaign with id {}", campaignId);
 
-    campaignService.alignCampaign(campaignId);
+    campaignService.alignCampaign(campaignId, fullRecalculationDate);
 
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }

@@ -17,7 +17,7 @@ import java.util.List;
 public interface CampaignService {
   Campaign createIfNotExists(String externalCampaignId, String campaignName, CreateNotificationRequest sendNotificationReq, LocalDate sendNotificationCreationDate);
   List<String> fetchAllIds();
-  void alignCampaign(String campaignId);
+  void alignCampaign(String campaignId, OffsetDateTime recalculationDate);
   void incrementTotalAndUpdateEndDate(String campaignId, LocalDate endDate);
   void handleStatusChange(String campaignId, NotificationStatusChangeDTO notificationStatusChangeDTO);
   Campaign getCampaignById(String campaignId);
