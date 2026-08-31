@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -338,6 +339,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     String campaignIdListAlias = Fields.campaignId + "List";
     Aggregation aggregation = Aggregation.newAggregation(
       Aggregation.match(Criteria.where(FIELD_NOTIFICATION_UPDATE_DATE).gt(latestRecalculationDate)),
+      Aggregation.sort(Sort.Direction.ASC, Fields.campaignId),
       Aggregation.group()
         .addToSet(Fields.campaignId).as(campaignIdListAlias)
     );
