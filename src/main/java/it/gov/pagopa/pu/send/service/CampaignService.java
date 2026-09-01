@@ -28,5 +28,6 @@ public interface CampaignService {
   PagedSendNotifications getCampaignSendNotifications(SendNotificationFiltersDTO sendNotificationFiltersDTO, String fiscalCode, Pageable pageable);
   void renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest);
   OffsetDateTime findLatestFullRecalculationDate();
+  OffsetDateTime findFirstCampaignStartDate();
   List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime lastRecalculationDate);
 }

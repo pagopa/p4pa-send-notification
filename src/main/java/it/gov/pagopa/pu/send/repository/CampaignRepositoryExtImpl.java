@@ -147,4 +147,20 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
       DateUtils.toOffsetDateTime(latestFullRecalculationDateDocument.getDate(Counters.Fields.fullRecalculationDate)) :
       null;
   }
+
+  @Override
+  public OffsetDateTime findFirstCampaignStartDate() {
+    Aggregation aggregation = Aggregation.newAggregation( // Did not aggregate with MAX because execution looks unstable on Cosmos
+      Aggregation.sort(Sort.Direction.ASC, Fields.startDate),
+      Aggregation.limit(1),
+      Aggregation.project()
+        .and(Fields.startDate).as(Fields.startDate)
+        .andExclude("_id")
+    );
+    AggregationResults<Document> firstCampaignStartDateAggregationResults = mongoTemplate.aggregate(aggregation, Campaign.class, Document.class);
+    Document firstCampaignStartDateDocument = firstCampaignStartDateAggregationResults.getUniqueMappedResult();
+    return firstCampaignStartDateDocument != null ?
+      DateUtils.toOffsetDateTime(firstCampaignStartDateDocument.getDate(Fields.startDate)) :
+      null;
+  }
 }

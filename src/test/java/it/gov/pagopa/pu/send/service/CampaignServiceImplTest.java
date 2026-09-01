@@ -345,6 +345,18 @@ class CampaignServiceImplTest {
   }
 
   @Test
+  void whenFindFirstCampaignStartDateThenOk() {
+    //Given
+    OffsetDateTime expectedFirstCampaignStartDate = OffsetDateTime.now();
+    when(campaignRepositoryMock.findFirstCampaignStartDate())
+      .thenReturn(expectedFirstCampaignStartDate);
+    //When
+    OffsetDateTime actualFirstCampaignStartDate = campaignService.findFirstCampaignStartDate();
+    //Then
+    Assertions.assertEquals(expectedFirstCampaignStartDate, actualFirstCampaignStartDate);
+  }
+
+  @Test
   void whenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenOk() {
     //Given
     OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now();

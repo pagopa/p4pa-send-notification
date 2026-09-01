@@ -18,4 +18,5 @@ public interface CampaignRepositoryExt {
   Page<Campaign> findCampaignsByFilters(CampaignFiltersDTO campaignFiltersDTO, Pageable pageable);
   UpdateResult updateCampaignName(String campaignId, String name);
   OffsetDateTime findLatestFullRecalculationDate();
+  OffsetDateTime findFirstCampaignStartDate();
 }

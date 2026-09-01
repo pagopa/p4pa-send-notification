@@ -143,7 +143,7 @@ class CampaignControllerTest {
   }
 
   @Test
-  void findLatestFullRecalculationDate() {
+  void whenFindLatestFullRecalculationDateThenOk() {
     //GIVEN
     OffsetDateTime expectedLatestRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
     when(campaignServiceMock.findLatestFullRecalculationDate())
@@ -156,7 +156,20 @@ class CampaignControllerTest {
   }
 
   @Test
-  void findIdsOfUpdatedCampaignsByNotificationUpdateDate() {
+  void whenFindFirstCampaignStartDateThenOk() {
+    //GIVEN
+    OffsetDateTime expectedFirstCampaignStartDate = OffsetDateTime.now(Constants.ZONEID);
+    when(campaignServiceMock.findFirstCampaignStartDate())
+      .thenReturn(expectedFirstCampaignStartDate);
+    //WHEN
+    ResponseEntity<OffsetDateTime> actualResponseEntity = campaignController.findFirstCampaignStartDate();
+    //THEN
+    Assertions.assertEquals(HttpStatus.OK, actualResponseEntity.getStatusCode());
+    Assertions.assertEquals(expectedFirstCampaignStartDate, actualResponseEntity.getBody());
+  }
+
+  @Test
+  void whenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenOk() {
     //GIVEN
     OffsetDateTime latestRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
     List<String> expectedIdList = List.of("id1", "id2", "id3");
