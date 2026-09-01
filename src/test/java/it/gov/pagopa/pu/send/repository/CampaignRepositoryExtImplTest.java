@@ -209,4 +209,74 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
     //THEN
     Assertions.assertNull(actualLatestFullRecalculationDate);
   }
+
+  @Test
+  void givenDocumentWithStartDateKeyWhenFindFirstCampaignStartDateThenOk() {
+    //GIVEN
+    Date expectedFirstCampaignStartDate = Date.from(OffsetDateTime.now(Constants.ZONEID).toInstant());
+
+    AggregationResults<Document> aggregationResults = new AggregationResults<>(
+      List.of(new Document(Campaign.Fields.startDate, expectedFirstCampaignStartDate)),
+      new Document()
+    );
+
+    when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(Campaign.class),
+      Mockito.eq(Document.class)
+    )).thenReturn(aggregationResults);
+
+    //WHEN
+    OffsetDateTime actualFirstCampaignStartOffsetDateTime = repository.findFirstCampaignStartDate();
+
+    //THEN
+    Assertions.assertNotNull(actualFirstCampaignStartOffsetDateTime);
+    Assertions.assertEquals(
+      OffsetDateTime.ofInstant(expectedFirstCampaignStartDate.toInstant(), Constants.ZONEID),
+      actualFirstCampaignStartOffsetDateTime
+    );
+  }
+
+  @Test
+  void givenDocumentWithoutCampaignStartDateKeyWhenFindFirstCampaignStartDateThenNull() {
+    //GIVEN
+    AggregationResults<Document> aggregationResults = new AggregationResults<>(
+      List.of(new Document()),
+      new Document()
+    );
+
+    when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(Campaign.class),
+      Mockito.eq(Document.class)
+    )).thenReturn(aggregationResults);
+
+    //WHEN
+    OffsetDateTime actualFirstCampaignStartDate = repository.findFirstCampaignStartDate();
+
+    //THEN
+    Assertions.assertNull(actualFirstCampaignStartDate);
+  }
+
+  @Test
+  void givenNoDocumentWhenFindFirstCampaignStartDateThenNull() {
+    //GIVEN
+    AggregationResults<Document> aggregationResults = new AggregationResults<>(
+      List.of(),
+      new Document()
+    );
+
+    when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(Campaign.class),
+      Mockito.eq(Document.class)
+    )).thenReturn(aggregationResults);
+
+    //WHEN
+    OffsetDateTime actualFirstCampaignStartDate = repository.findFirstCampaignStartDate();
+
+    //THEN
+    Assertions.assertNull(actualFirstCampaignStartDate);
+  }
+
 }

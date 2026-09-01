@@ -96,6 +96,12 @@ public class CampaignController implements CampaignApi {
   }
 
   @Override
+  public ResponseEntity<OffsetDateTime> findFirstCampaignStartDate() {
+    log.info("Retrieve first campaign start date");
+    return ResponseEntity.ok(campaignService.findFirstCampaignStartDate());
+  }
+
+  @Override
   public ResponseEntity<List<String>> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate) {
     log.info("Retrieve ids for campaigns updated after {}", latestRecalculationDate);
     return ResponseEntity.ok(campaignService.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestRecalculationDate));

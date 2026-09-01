@@ -166,6 +166,11 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
+  public OffsetDateTime findFirstCampaignStartDate() {
+    return campaignRepository.findFirstCampaignStartDate();
+  }
+
+  @Override
   public List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime lastRecalculationDate) {
     return sendNotificationNoPIIRepositoryExt.findIdsOfUpdatedCampaignsByNotificationUpdateDate(lastRecalculationDate);
   }
