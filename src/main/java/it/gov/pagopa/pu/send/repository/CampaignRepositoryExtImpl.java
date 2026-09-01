@@ -134,7 +134,7 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
 
   @Override
   public OffsetDateTime findLatestFullRecalculationDate() {
-    Aggregation aggregation = Aggregation.newAggregation(
+    Aggregation aggregation = Aggregation.newAggregation( // Did not aggregate with MAX because execution looks unstable on Cosmos
       Aggregation.sort(Sort.Direction.DESC, FIELD_COUNTERS_FULL_RECALCULATION_DATE),
       Aggregation.limit(1),
       Aggregation.project()
