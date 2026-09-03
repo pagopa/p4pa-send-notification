@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
@@ -17,7 +18,6 @@ import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
-import it.gov.pagopa.pu.send.model.SendCampaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
@@ -107,9 +107,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       }
     }
 
-    SendCampaign sendCampaign = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
+    Campaign campaign = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
     SendNotification sendNotification = sendNotificationPIIRepository.save(
-      mapper.mapToModel(createNotificationRequest, sendCampaign.getCampaignId(), accessToken)
+      mapper.mapToModel(createNotificationRequest, campaign.getCampaignId(), accessToken)
     );
 
     return CreateNotificationResponse

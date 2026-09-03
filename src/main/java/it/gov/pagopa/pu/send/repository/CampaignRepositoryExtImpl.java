@@ -5,8 +5,8 @@ import it.gov.pagopa.pu.send.config.BaseEntityListener;
 import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
-import it.gov.pagopa.pu.send.model.SendCampaign;
-import it.gov.pagopa.pu.send.model.SendCampaign.Fields;
+import it.gov.pagopa.pu.send.model.Campaign;
+import it.gov.pagopa.pu.send.model.Campaign.Fields;
 import it.gov.pagopa.pu.send.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -39,7 +39,7 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
   }
 
   private UpdateResult updateFirst(Query query, Update update) {
-    return mongoTemplate.updateFirst(query, BaseEntityListener.setTechFieldsOnDocumentUpdate(update), SendCampaign.class);
+    return mongoTemplate.updateFirst(query, BaseEntityListener.setTechFieldsOnDocumentUpdate(update), Campaign.class);
   }
 
   @Override
@@ -91,7 +91,7 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
   }
 
   @Override
-  public Page<SendCampaign> findCampaignsByFilters(CampaignFiltersDTO campaignFiltersDTO, Pageable pageable) {
+  public Page<Campaign> findCampaignsByFilters(CampaignFiltersDTO campaignFiltersDTO, Pageable pageable) {
     Query query = new Query();
     query.addCriteria(Criteria
       .where(Fields.organizationId).is(campaignFiltersDTO.getOrganizationId()));
@@ -118,10 +118,10 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
       query.addCriteria(Criteria.where(Fields.externalId).is(campaignFiltersDTO.getExternalCampaignId()));
     }
 
-    long count = mongoTemplate.count(query, SendCampaign.class);
+    long count = mongoTemplate.count(query, Campaign.class);
     query.with(pageable);
-    List<SendCampaign> sendCampaigns = mongoTemplate.find(query, SendCampaign.class);
-    return new PageImpl<>(sendCampaigns, pageable, count);
+    List<Campaign> campaigns = mongoTemplate.find(query, Campaign.class);
+    return new PageImpl<>(campaigns, pageable, count);
   }
 
   @Override
@@ -141,7 +141,7 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
         .and(FIELD_COUNTERS_FULL_RECALCULATION_DATE).as(Counters.Fields.fullRecalculationDate)
         .andExclude("_id")
     );
-    AggregationResults<Document> latestFullRecalculationDateAggregationResults = mongoTemplate.aggregate(aggregation, SendCampaign.class, Document.class);
+    AggregationResults<Document> latestFullRecalculationDateAggregationResults = mongoTemplate.aggregate(aggregation, Campaign.class, Document.class);
     Document latestFullRecalculationDateDocument = latestFullRecalculationDateAggregationResults.getUniqueMappedResult();
     return latestFullRecalculationDateDocument != null ?
       DateUtils.toOffsetDateTime(latestFullRecalculationDateDocument.getDate(Counters.Fields.fullRecalculationDate)) :
@@ -157,7 +157,7 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
         .and(Fields.startDate).as(Fields.startDate)
         .andExclude("_id")
     );
-    AggregationResults<Document> firstCampaignStartDateAggregationResults = mongoTemplate.aggregate(aggregation, SendCampaign.class, Document.class);
+    AggregationResults<Document> firstCampaignStartDateAggregationResults = mongoTemplate.aggregate(aggregation, Campaign.class, Document.class);
     Document firstCampaignStartDateDocument = firstCampaignStartDateAggregationResults.getUniqueMappedResult();
     return firstCampaignStartDateDocument != null ?
       DateUtils.toOffsetDateTime(firstCampaignStartDateDocument.getDate(Fields.startDate)) :

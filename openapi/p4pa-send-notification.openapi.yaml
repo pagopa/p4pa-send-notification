@@ -1226,7 +1226,7 @@ paths:
           content:
             application/json:
               schema:
-                type: 'SendCampaign'
+                type: 'Campaign'
         '403':
           description: Forbidden
           content:
@@ -1794,7 +1794,7 @@ components:
         content:
           type: array
           items:
-            type: 'SendCampaign'
+            type: 'Campaign'
         size:
           type: integer
           format: int64

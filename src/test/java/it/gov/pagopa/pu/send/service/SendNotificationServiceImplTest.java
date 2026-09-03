@@ -6,7 +6,7 @@ import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
-import it.gov.pagopa.pu.send.model.SendCampaign;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
@@ -107,19 +107,19 @@ class SendNotificationServiceImplTest {
     String accessToken = "accessToken";
     Organization org = new Organization();
 
-    SendCampaign sendCampaign = new SendCampaign();
-    sendCampaign.setCampaignId("campaignId");
+    Campaign campaign = new Campaign();
+    campaign.setCampaignId("campaignId");
 
     PersonalData personalData = new PersonalData();
     personalData.setId(1L);
 
     LocalDate expectedDate = LocalDate.of(2026, Month.JUNE, 21);
 
-    when(mapperMock.mapToModel(request, sendCampaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
+    when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
     when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
     when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
     Mockito.doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
-    when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(sendCampaign);
+    when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
       localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
@@ -187,8 +187,8 @@ class SendNotificationServiceImplTest {
     String accessToken = "accessToken";
     Organization org = new Organization();
     OrgSubUnit subUnit = new OrgSubUnit();
-    SendCampaign sendCampaign = new SendCampaign();
-    sendCampaign.setCampaignId("campaignId");
+    Campaign campaign = new Campaign();
+    campaign.setCampaignId("campaignId");
 
     LocalDate expectedDate = LocalDate.of(2026, Month.JUNE, 21);
 
@@ -200,10 +200,10 @@ class SendNotificationServiceImplTest {
     when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
       .thenReturn(subUnit);
 
-    when(mapperMock.mapToModel(request, sendCampaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
+    when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
     when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
       .thenReturn(sendNotification);
-    when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(sendCampaign);
+    when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
       localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);

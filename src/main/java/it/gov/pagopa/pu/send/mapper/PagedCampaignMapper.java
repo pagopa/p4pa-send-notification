@@ -1,14 +1,14 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
-import it.gov.pagopa.pu.send.model.SendCampaign;
+import it.gov.pagopa.pu.send.model.Campaign;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PagedCampaignMapper {
 
-  public PagedCampaign mapToPagedCampaign(Page<SendCampaign> campaignPage) {
+  public PagedCampaign mapToPagedCampaign(Page<Campaign> campaignPage) {
     return PagedCampaign.builder()
       .content(campaignPage.getContent())
       .size((long) campaignPage.getSize())

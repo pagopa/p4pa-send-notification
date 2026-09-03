@@ -5,7 +5,7 @@ import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
-import it.gov.pagopa.pu.send.model.SendCampaign;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.service.CampaignService;
 import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -29,7 +29,7 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class SendCampaignControllerTest {
+class CampaignControllerTest {
   public static final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   @Mock
@@ -114,11 +114,11 @@ class SendCampaignControllerTest {
   @Test
   void whenGetCampaignThenOk() {
     String campaignId = "campaignId";
-    SendCampaign expectedResponse = podamFactory.manufacturePojo(SendCampaign.class);
+    Campaign expectedResponse = podamFactory.manufacturePojo(Campaign.class);
 
     when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(expectedResponse);
 
-    ResponseEntity<SendCampaign> response = campaignController.getCampaign(campaignId);
+    ResponseEntity<Campaign> response = campaignController.getCampaign(campaignId);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());

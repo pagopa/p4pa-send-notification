@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class SendCampaignCountersServiceImplTest {
+class CampaignCountersServiceImplTest {
   @InjectMocks
   private CampaignCountersServiceImpl campaignCountersService;
 

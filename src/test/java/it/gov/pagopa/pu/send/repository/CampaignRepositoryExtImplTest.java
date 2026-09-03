@@ -4,7 +4,7 @@ import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
-import it.gov.pagopa.pu.send.model.SendCampaign;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.bson.Document;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
+class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
   public static final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
   @Mock
@@ -50,7 +50,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.updateFirst(Mockito.any(Query.class),
         Mockito.any(Update.class),
-        Mockito.eq(SendCampaign.class)))
+        Mockito.eq(Campaign.class)))
       .thenReturn(updateResult);
     when(updateResult.getModifiedCount()).thenReturn(1L);
 
@@ -66,7 +66,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.updateFirst(
       Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
-          SendCampaign.class)))
+          Campaign.class)))
       .thenReturn(updateResult);
     when(updateResult.getModifiedCount()).thenReturn(1L);
 
@@ -82,7 +82,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.updateFirst(Mockito.any(Query.class),
         Mockito.any(Update.class),
-        Mockito.eq(SendCampaign.class)))
+        Mockito.eq(Campaign.class)))
       .thenReturn(updateResult);
     when(updateResult.getModifiedCount()).thenReturn(1L);
 
@@ -98,7 +98,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.updateFirst(Mockito.any(Query.class),
         Mockito.any(Update.class),
-        Mockito.eq(SendCampaign.class)))
+        Mockito.eq(Campaign.class)))
       .thenReturn(updateResult);
     when(updateResult.getModifiedCount()).thenReturn(1L);
 
@@ -113,7 +113,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.updateFirst(Mockito.any(Query.class),
       Mockito.any(Update.class),
-      Mockito.eq(SendCampaign.class)))
+      Mockito.eq(Campaign.class)))
       .thenReturn(updateResult);
     when(updateResult.getModifiedCount()).thenReturn(1L);
 
@@ -126,17 +126,17 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
   void whenFindCampaignsByFiltersThenOk() {
     CampaignFiltersDTO campaignFiltersDTO = podamFactory.manufacturePojo(CampaignFiltersDTO.class);
 
-    List<SendCampaign> sendCampaigns = podamFactory.manufacturePojo(List.class, SendCampaign.class);
-    Pageable pageable = PageRequest.of(0, sendCampaigns.size());
-    int totalElements = sendCampaigns.size() + 1;
+    List<Campaign> campaigns = podamFactory.manufacturePojo(List.class, Campaign.class);
+    Pageable pageable = PageRequest.of(0, campaigns.size());
+    int totalElements = campaigns.size() + 1;
 
-    when(mongoTemplateMock.count(Mockito.any(Query.class), Mockito.eq(SendCampaign.class))).thenReturn(Long.valueOf(totalElements));
-    when(mongoTemplateMock.find(Mockito.any(Query.class), Mockito.eq(SendCampaign.class))).thenReturn(sendCampaigns);
+    when(mongoTemplateMock.count(Mockito.any(Query.class), Mockito.eq(Campaign.class))).thenReturn(Long.valueOf(totalElements));
+    when(mongoTemplateMock.find(Mockito.any(Query.class), Mockito.eq(Campaign.class))).thenReturn(campaigns);
 
-    Page<SendCampaign> result = repository.findCampaignsByFilters(campaignFiltersDTO, pageable);
+    Page<Campaign> result = repository.findCampaignsByFilters(campaignFiltersDTO, pageable);
 
     assertEquals(totalElements, result.getTotalElements());
-    assertEquals(sendCampaigns, result.getContent());
+    assertEquals(campaigns, result.getContent());
     assertEquals(pageable.getOffset(), result.getNumber());
     assertEquals(pageable.getPageSize(), result.getSize());
   }
@@ -153,7 +153,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
-      Mockito.eq(SendCampaign.class),
+      Mockito.eq(Campaign.class),
       Mockito.eq(Document.class)
     )).thenReturn(aggregationResults);
 
@@ -178,7 +178,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
-      Mockito.eq(SendCampaign.class),
+      Mockito.eq(Campaign.class),
       Mockito.eq(Document.class)
     )).thenReturn(aggregationResults);
 
@@ -199,7 +199,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
-      Mockito.eq(SendCampaign.class),
+      Mockito.eq(Campaign.class),
       Mockito.eq(Document.class)
     )).thenReturn(aggregationResults);
 
@@ -216,13 +216,13 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
     Date expectedFirstCampaignStartDate = Date.from(OffsetDateTime.now(Constants.ZONEID).toInstant());
 
     AggregationResults<Document> aggregationResults = new AggregationResults<>(
-      List.of(new Document(SendCampaign.Fields.startDate, expectedFirstCampaignStartDate)),
+      List.of(new Document(Campaign.Fields.startDate, expectedFirstCampaignStartDate)),
       new Document()
     );
 
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
-      Mockito.eq(SendCampaign.class),
+      Mockito.eq(Campaign.class),
       Mockito.eq(Document.class)
     )).thenReturn(aggregationResults);
 
@@ -247,7 +247,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
-      Mockito.eq(SendCampaign.class),
+      Mockito.eq(Campaign.class),
       Mockito.eq(Document.class)
     )).thenReturn(aggregationResults);
 
@@ -268,7 +268,7 @@ class SendCampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
-      Mockito.eq(SendCampaign.class),
+      Mockito.eq(Campaign.class),
       Mockito.eq(Document.class)
     )).thenReturn(aggregationResults);
 

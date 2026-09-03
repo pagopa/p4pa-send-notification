@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @SuperBuilder
 @FieldNameConstants
 @EqualsAndHashCode(callSuper = false)
-public class SendCampaign extends BaseEntity {
+public class Campaign extends BaseEntity {
   @Id
   private String campaignId;
   @NotEmpty

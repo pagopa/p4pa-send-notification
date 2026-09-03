@@ -1966,7 +1966,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SendCampaign"
+                  "$ref" : "#/components/schemas/Campaign"
                 }
               }
             }
@@ -3697,6 +3697,54 @@
           }
         }
       },
+      "Campaign" : {
+        "required" : [ "counters", "endDate", "externalId", "organizationId", "startDate" ],
+        "type" : "object",
+        "properties" : {
+          "creationDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updateDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updateOperatorExternalId" : {
+            "type" : "string"
+          },
+          "updateTraceId" : {
+            "type" : "string"
+          },
+          "campaignId" : {
+            "type" : "string"
+          },
+          "externalId" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "campaignName" : {
+            "type" : "string"
+          },
+          "organizationId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "orgSubUnitCode" : {
+            "type" : "string"
+          },
+          "counters" : {
+            "$ref" : "#/components/schemas/Counters"
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
       "Counters" : {
         "type" : "object",
         "properties" : {
@@ -3757,7 +3805,7 @@
           "content" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/SendCampaign"
+              "$ref" : "#/components/schemas/Campaign"
             }
           },
           "size" : {
@@ -3775,54 +3823,6 @@
           "number" : {
             "type" : "integer",
             "format" : "int32"
-          }
-        }
-      },
-      "SendCampaign" : {
-        "required" : [ "counters", "endDate", "externalId", "organizationId", "startDate" ],
-        "type" : "object",
-        "properties" : {
-          "creationDate" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "updateDate" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "updateOperatorExternalId" : {
-            "type" : "string"
-          },
-          "updateTraceId" : {
-            "type" : "string"
-          },
-          "campaignId" : {
-            "type" : "string"
-          },
-          "externalId" : {
-            "minLength" : 1,
-            "type" : "string"
-          },
-          "campaignName" : {
-            "type" : "string"
-          },
-          "organizationId" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "orgSubUnitCode" : {
-            "type" : "string"
-          },
-          "counters" : {
-            "$ref" : "#/components/schemas/Counters"
-          },
-          "startDate" : {
-            "type" : "string",
-            "format" : "date"
-          },
-          "endDate" : {
-            "type" : "string",
-            "format" : "date"
           }
         }
       },

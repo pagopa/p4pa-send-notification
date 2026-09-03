@@ -4,7 +4,7 @@ import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
-import it.gov.pagopa.pu.send.model.SendCampaign;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import jakarta.transaction.Transactional;
@@ -28,17 +28,17 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
 
   @Transactional
   @Override
-  public SendCampaign handleNewSendNotification(CreateNotificationRequest createNotificationRequest) {
+  public Campaign handleNewSendNotification(CreateNotificationRequest createNotificationRequest) {
     LocalDate creationDate = LocalDate.now(ZONEID);
-    SendCampaign sendCampaign = campaignService.createIfNotExists(
+    Campaign campaign = campaignService.createIfNotExists(
       createNotificationRequest.getExternalCampaignId(),
       createNotificationRequest.getCampaignName(),
       createNotificationRequest,
       creationDate
     );
 
-    campaignService.incrementTotalAndUpdateEndDate(sendCampaign.getCampaignId(), creationDate);
-    return sendCampaign;
+    campaignService.incrementTotalAndUpdateEndDate(campaign.getCampaignId(), creationDate);
+    return campaign;
   }
 
   @Transactional
@@ -64,9 +64,9 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
   @Transactional
   @Override
   public void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, List<StreamEventSummaryDTO> history) {
-    SendCampaign sendCampaign = campaignService.getCampaignById(campaignId);
-    if(sendCampaign.getCounters()!=null && Objects.equals(sendCampaign.getCounters().getTotal(),1L)){
-      log.info("Deleting sendCampaign having id {}", campaignId);
+    Campaign campaign = campaignService.getCampaignById(campaignId);
+    if(campaign.getCounters()!=null && Objects.equals(campaign.getCounters().getTotal(),1L)){
+      log.info("Deleting campaign having id {}", campaignId);
       campaignService.deleteCampaignById(campaignId);
       return;
     }
@@ -81,13 +81,13 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
       .decrFields(activeCounters)
       .build());
 
-    if(sendCampaign.getStartDate().equals(notificationCreationDate)){
+    if(campaign.getStartDate().equals(notificationCreationDate)){
       SendNotificationNoPII sendNotification = sendNotificationNoPIIRepository.findTopByCampaignIdOrderByCreationDateAsc(campaignId);
-      log.info("Updating startDate of sendCampaign having id {} to {}", campaignId, sendNotification.getCreationDate().toLocalDate());
+      log.info("Updating startDate of campaign having id {} to {}", campaignId, sendNotification.getCreationDate().toLocalDate());
       campaignService.updateStartDate(campaignId, sendNotification.getCreationDate().toLocalDate());
-    }else if(sendCampaign.getEndDate().equals(notificationCreationDate)){
+    }else if(campaign.getEndDate().equals(notificationCreationDate)){
       SendNotificationNoPII sendNotification = sendNotificationNoPIIRepository.findTopByCampaignIdOrderByCreationDateDesc(campaignId);
-      log.info("Updating endDate of sendCampaign having id {} to {}", campaignId, sendNotification.getCreationDate().toLocalDate());
+      log.info("Updating endDate of campaign having id {} to {}", campaignId, sendNotification.getCreationDate().toLocalDate());
       campaignService.updateEndDate(campaignId, sendNotification.getCreationDate().toLocalDate());
     }
   }
