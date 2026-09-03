@@ -1,8 +1,8 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactDownloadMetadataResponseDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactListElementV20DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactsIdV20DTO;
+import it.gov.pagopa.send.dto.generated.LegalFactDownloadMetadataResponseDTO;
+import it.gov.pagopa.send.dto.generated.LegalFactListElementV20DTO;
+import it.gov.pagopa.send.dto.generated.LegalFactsIdV20DTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDownloadMetadataDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactIdDTO;

@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
+import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;

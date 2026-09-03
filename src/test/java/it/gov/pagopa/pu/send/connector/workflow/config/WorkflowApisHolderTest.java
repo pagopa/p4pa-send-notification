@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.connector.workflow.config;
 
+import it.gov.pagopa.pu.send.config.json.JsonConfig;
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,21 +13,28 @@ import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class WorkflowApisHolderTest extends BaseApiHolderTest {
     @Mock
     private RestTemplateBuilder restTemplateBuilderMock;
 
-    private WorkflowApisHolder workflowApisHolder;
+    private WorkflowApisHolder apisHolder;
+    private WorkflowApiClientConfig apiClientConfig;
 
     @BeforeEach
-    void setUp() {
-        Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-        Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-        WorkflowApiClientConfig clientConfig = WorkflowApiClientConfig.builder()
+    void init() {
+        when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+        when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+
+        apiClientConfig = WorkflowApiClientConfig.builder()
           .baseUrl("http://example.com")
+          .maxAttempts(3)
           .build();
-        workflowApisHolder = new WorkflowApisHolder(clientConfig, restTemplateBuilderMock);
+        apisHolder = new WorkflowApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
+
+      verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getSendNotificationApi(null));
     }
 
     @AfterEach
@@ -37,13 +45,22 @@ class WorkflowApisHolderTest extends BaseApiHolderTest {
         );
     }
 
+  @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      accessToken -> apisHolder.getSendNotificationApi(accessToken)
+        .sendNotificationProcess("sendNotificationId"),
+      new ParameterizedTypeReference<>() {}
+    );
+  }
+
     @Test
     void whenSendNotificationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
         assertAuthenticationShouldBeSetInThreadSafeMode(
-                accessToken -> workflowApisHolder.getSendNotificationApi(accessToken)
+                accessToken -> apisHolder.getSendNotificationApi(accessToken)
                   .sendNotificationProcess("sendNotificationId"),
                 new ParameterizedTypeReference<>() {},
-                workflowApisHolder::unload);
+                apisHolder::unload);
     }
 
 }

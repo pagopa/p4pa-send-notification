@@ -2,20 +2,28 @@ package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.config.BaseEntityListener;
+import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.Campaign.Fields;
+import it.gov.pagopa.pu.send.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -24,6 +32,7 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
 
   public static final String FIELD_COUNTERS_TEMPLATE = "%s.%s";
   public static final String FIELD_COUNTERS_TOTAL = FIELD_COUNTERS_TEMPLATE.formatted(Fields.counters, Counters.Fields.total);
+  public static final String FIELD_COUNTERS_FULL_RECALCULATION_DATE = FIELD_COUNTERS_TEMPLATE.formatted(Fields.counters, Counters.Fields.fullRecalculationDate);
 
   public CampaignRepositoryExtImpl(MongoTemplate mongoTemplate) {
     this.mongoTemplate = mongoTemplate;
@@ -82,24 +91,31 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
   }
 
   @Override
-  public Page<Campaign> findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable) {
+  public Page<Campaign> findCampaignsByFilters(CampaignFiltersDTO campaignFiltersDTO, Pageable pageable) {
     Query query = new Query();
     query.addCriteria(Criteria
-      .where(Fields.organizationId).is(organizationId));
-    if(dateFrom!=null && dateTo!=null){
-      query.addCriteria(Criteria.where(Fields.startDate).lte(dateTo)
-        .and(Fields.endDate).gte(dateFrom));
+      .where(Fields.organizationId).is(campaignFiltersDTO.getOrganizationId()));
+    if(campaignFiltersDTO.getDateFrom()!=null && campaignFiltersDTO.getDateTo()!=null){
+      query.addCriteria(Criteria.where(Fields.startDate).lte(campaignFiltersDTO.getDateTo())
+        .and(Fields.endDate).gte(campaignFiltersDTO.getDateFrom()));
     }
-    if(StringUtils.isNotBlank(orgSubUnitCode)){
-      query.addCriteria(Criteria.where(Fields.orgSubUnitCode).is(orgSubUnitCode));
-    }else {
-      query.addCriteria(Criteria.where(Fields.orgSubUnitCode).is(null));
+    if(!CollectionUtils.isEmpty(campaignFiltersDTO.getOrgSubUnitCodes())){
+      if(Boolean.TRUE.equals(campaignFiltersDTO.getFetchAll())){
+        query.addCriteria(new Criteria().orOperator(
+          Criteria.where(Fields.orgSubUnitCode).in(campaignFiltersDTO.getOrgSubUnitCodes()),
+          Criteria.where(Fields.orgSubUnitCode).isNull()
+        ));
+      }else {
+        query.addCriteria(Criteria.where(Fields.orgSubUnitCode).in(campaignFiltersDTO.getOrgSubUnitCodes()));
+      }
+    }else{
+      query.addCriteria(Criteria.where(Fields.orgSubUnitCode).isNull());
     }
-    if(StringUtils.isNotBlank(campaignName)){
-      query.addCriteria(Criteria.where(Fields.campaignName).regex(Pattern.quote(campaignName), "i"));
+    if(StringUtils.isNotBlank(campaignFiltersDTO.getCampaignName())){
+      query.addCriteria(Criteria.where(Fields.campaignName).regex(Pattern.quote(campaignFiltersDTO.getCampaignName()), "i"));
     }
-    if(StringUtils.isNotBlank(externalCampaignId)){
-      query.addCriteria(Criteria.where(Fields.externalId).is(externalCampaignId));
+    if(StringUtils.isNotBlank(campaignFiltersDTO.getExternalCampaignId())){
+      query.addCriteria(Criteria.where(Fields.externalId).is(campaignFiltersDTO.getExternalCampaignId()));
     }
 
     long count = mongoTemplate.count(query, Campaign.class);
@@ -114,5 +130,37 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
       Query.query(Criteria.where(Fields.campaignId).is(campaignId)),
       new Update().set(Fields.campaignName, name)
     );
+  }
+
+  @Override
+  public OffsetDateTime findLatestFullRecalculationDate() {
+    Aggregation aggregation = Aggregation.newAggregation( // Did not aggregate with MAX because execution looks unstable on Cosmos
+      Aggregation.sort(Sort.Direction.DESC, FIELD_COUNTERS_FULL_RECALCULATION_DATE),
+      Aggregation.limit(1),
+      Aggregation.project()
+        .and(FIELD_COUNTERS_FULL_RECALCULATION_DATE).as(Counters.Fields.fullRecalculationDate)
+        .andExclude("_id")
+    );
+    AggregationResults<Document> latestFullRecalculationDateAggregationResults = mongoTemplate.aggregate(aggregation, Campaign.class, Document.class);
+    Document latestFullRecalculationDateDocument = latestFullRecalculationDateAggregationResults.getUniqueMappedResult();
+    return latestFullRecalculationDateDocument != null ?
+      DateUtils.toOffsetDateTime(latestFullRecalculationDateDocument.getDate(Counters.Fields.fullRecalculationDate)) :
+      null;
+  }
+
+  @Override
+  public OffsetDateTime findFirstCampaignStartDate() {
+    Aggregation aggregation = Aggregation.newAggregation( // Did not aggregate with MAX because execution looks unstable on Cosmos
+      Aggregation.sort(Sort.Direction.ASC, Fields.startDate),
+      Aggregation.limit(1),
+      Aggregation.project()
+        .and(Fields.startDate).as(Fields.startDate)
+        .andExclude("_id")
+    );
+    AggregationResults<Document> firstCampaignStartDateAggregationResults = mongoTemplate.aggregate(aggregation, Campaign.class, Document.class);
+    Document firstCampaignStartDateDocument = firstCampaignStartDateAggregationResults.getUniqueMappedResult();
+    return firstCampaignStartDateDocument != null ?
+      DateUtils.toOffsetDateTime(firstCampaignStartDateDocument.getDate(Fields.startDate)) :
+      null;
   }
 }

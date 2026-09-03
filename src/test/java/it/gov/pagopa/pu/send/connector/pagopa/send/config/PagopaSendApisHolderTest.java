@@ -1,8 +1,8 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.config;
 
+import it.gov.pagopa.pu.send.config.json.JsonConfig;
 import it.gov.pagopa.pu.send.connector.BaseApiHolderTest;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
-import java.util.UUID;
+import it.gov.pagopa.send.dto.generated.NewNotificationRequestV24DTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,22 +14,32 @@ import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import java.util.UUID;
+
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class PagopaSendApisHolderTest extends BaseApiHolderTest {
   @Mock
   private RestTemplateBuilder restTemplateBuilderMock;
 
   private PagopaSendApisHolder apisHolder;
+  private PagopaSendApiClientConfig apiClientConfig;
 
   private final String voucherToken = "VOUCHERTOKEN";
 
   @BeforeEach
   void setUp() {
-    Mockito.when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
-    Mockito.when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
-    PagopaSendApiClientConfig apiClient = new PagopaSendApiClientConfig();
-    apiClient.setBaseUrl("http://example.com");
-    apisHolder = new PagopaSendApisHolder(apiClient, restTemplateBuilderMock);
+    when(restTemplateBuilderMock.build()).thenReturn(restTemplateMock);
+    when(restTemplateMock.getUriTemplateHandler()).thenReturn(new DefaultUriBuilderFactory());
+
+    apiClientConfig = PagopaSendApiClientConfig.builder()
+      .baseUrl("http://example.com")
+      .maxAttempts(3)
+      .build();
+    apisHolder = new PagopaSendApisHolder(apiClientConfig, restTemplateBuilderMock, new JsonConfig().objectMapperJackson3());
+
+    verifyHttpClientErrorJsonBodyHandlerConfiguration(apisHolder.getNewNotificationApiByApiKey(null, voucherToken));
   }
 
   @AfterEach
@@ -41,13 +51,21 @@ class PagopaSendApisHolderTest extends BaseApiHolderTest {
   }
 
   @Test
+  void testRetryConfiguration() {
+    assertRetry(apiClientConfig,
+      apiKey -> apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken)
+        .sendNewNotificationV24(new NewNotificationRequestV24DTO()),
+      new ParameterizedTypeReference<>() {}
+    );
+  }
+
+  @Test
   void whenGetNewNotificationApiThenAuthenticationShouldBeSetInThreadSafeMode() throws InterruptedException {
     assertAuthenticationShouldBeSetInThreadSafeMode(
       apiKey -> apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken)
         .sendNewNotificationV24(new NewNotificationRequestV24DTO()),
       new ParameterizedTypeReference<>() {},
-      () -> {
-      },
+      () -> {},
       AUTH_TYPE.API_KEY,
       "x-api-key");
   }

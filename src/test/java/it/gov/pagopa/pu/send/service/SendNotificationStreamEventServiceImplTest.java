@@ -1,10 +1,9 @@
 package it.gov.pagopa.pu.send.service;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationStatusV26DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
+import it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO;
+import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
-import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -21,8 +21,6 @@ import static org.mockito.Mockito.*;
 class SendNotificationStreamEventServiceImplTest {
   @Mock
   private SendNotificationStatusHandlerService sendNotificationStatusHandlerServiceMock;
-  @Mock
-  private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
 
   @InjectMocks
   private SendNotificationStreamEventServiceImpl service;
@@ -30,80 +28,61 @@ class SendNotificationStreamEventServiceImplTest {
   @AfterEach
   void verifyNoMoreInteractions() {
     Mockito.verifyNoMoreInteractions(
-      sendNotificationStatusHandlerServiceMock,
-      sendNotificationNoPIIRepositoryMock
+      sendNotificationStatusHandlerServiceMock
     );
   }
 
   @Test
-  void givenTimelineElementCategoriesOfInterestWhenNotifySendNotificationStreamEventsThenUpdateLastEventOfInterestAndPushHistory() {
-    //GIVEN
+  void givenNotificationWithHistoryWhenNotifySendNotificationStreamEventsThenInvokeStatusHandlerWithHistory() {
+    // GIVEN
+    List<StreamEventSummaryDTO> history = List.of(
+      new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
+    );
+
     SendNotificationNoPII sendNotification = SendNotificationNoPII.builder()
       .sendNotificationId("sendNotificationId1")
       .campaignId("sendCampaignId1")
-      .lastEventOfInterest(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
+      .history(history)
       .build();
 
-    List<StreamEventSummaryDTO> streamEvents =
-      List.of(
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.REQUEST_ACCEPTED),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS)
-      );
+    List<StreamEventSummaryDTO> streamEvents = List.of(
+      new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.SEND_DIGITAL_PROGRESS)
+    );
 
-    doNothing()
-      .when(sendNotificationStatusHandlerServiceMock)
-      .handleSendNotificationStatusUpdate(
-        sendNotification.getSendNotificationId(),
-        sendNotification.getCampaignId(),
-        sendNotification.getLastEventOfInterest(),
-        streamEvents.getLast().getTimelineElementCategory()
-      );
-
-    doNothing()
-      .when(sendNotificationNoPIIRepositoryMock)
-      .pushStreamEventsHistory(sendNotification.getSendNotificationId(), streamEvents);
-
-    //WHEN
+    // WHEN
     service.notifySendNotificationStreamEvents(sendNotification, streamEvents);
 
-    //THEN
+    // THEN
     verify(sendNotificationStatusHandlerServiceMock).handleSendNotificationStatusUpdate(
       sendNotification.getSendNotificationId(),
       sendNotification.getCampaignId(),
-      sendNotification.getLastEventOfInterest(),
-      streamEvents.getLast().getTimelineElementCategory()
+      history,
+      streamEvents
     );
   }
 
   @Test
-  void givenNoTimelineElementCategoriesOfInterestWhenNotifySendNotificationStreamEventsThenSkipUpdateLastEventOfInterestAndPushHistory() {
-    //GIVEN
+  void givenNotificationWithNullHistoryWhenNotifySendNotificationStreamEventsThenInvokeStatusHandlerWithEmptyList() {
+    // GIVEN
     SendNotificationNoPII sendNotification = SendNotificationNoPII.builder()
       .sendNotificationId("sendNotificationId1")
       .campaignId("sendCampaignId1")
-      .lastEventOfInterest(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED)
+      .history(null)
       .build();
 
-    List<StreamEventSummaryDTO> streamEvents =
-      List.of(
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.AAR_CREATION_REQUEST),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.AAR_GENERATION)
-      );
+    List<StreamEventSummaryDTO> streamEvents = List.of(
+      new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, TimelineElementCategoryV27DTO.AAR_CREATION_REQUEST)
+    );
 
-    doNothing()
-      .when(sendNotificationNoPIIRepositoryMock)
-      .pushStreamEventsHistory(sendNotification.getSendNotificationId(), streamEvents);
-
-    //WHEN
+    // WHEN
     service.notifySendNotificationStreamEvents(sendNotification, streamEvents);
 
-    //THEN
-    verify(sendNotificationStatusHandlerServiceMock, times(0))
-      .handleSendNotificationStatusUpdate(
-        eq(sendNotification.getSendNotificationId()),
-        eq(sendNotification.getCampaignId()),
-        eq(sendNotification.getLastEventOfInterest()),
-        isA(TimelineElementCategoryV27DTO.class)
-      );
+    // THEN
+    verify(sendNotificationStatusHandlerServiceMock).handleSendNotificationStatusUpdate(
+      sendNotification.getSendNotificationId(),
+      sendNotification.getCampaignId(),
+      Collections.emptyList(),
+      streamEvents
+    );
   }
 }

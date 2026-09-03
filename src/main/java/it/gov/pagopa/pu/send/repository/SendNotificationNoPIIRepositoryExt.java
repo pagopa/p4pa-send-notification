@@ -1,8 +1,7 @@
 package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
@@ -33,7 +32,7 @@ public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult addLegalFact(String sendNotificationId, LegalFactDTO legalFact);
   UpdateResult updateLegalFactStatus(String sendNotificationId, String fileName, FileStatus status);
   Counters calculateCampaignCounters(String campaignId);
-  UpdateResult updateLastEventOfInterestById(String sendNotificationId, TimelineElementCategoryV27DTO newStatus);
-  void pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents);
+  List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents);
   Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable);
+  List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate);
 }

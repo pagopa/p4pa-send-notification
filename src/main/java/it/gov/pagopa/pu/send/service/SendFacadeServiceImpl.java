@@ -2,8 +2,6 @@ package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.SendStreamService;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.StreamCreationRequestV28DTO.EventTypeEnum;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -12,8 +10,9 @@ import it.gov.pagopa.pu.send.dto.generated.LegalFactListElementDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.InvalidStatusException;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
 import it.gov.pagopa.pu.send.exception.SendNotificationNotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.RestInvokeConflictException;
 import it.gov.pagopa.pu.send.mapper.SendLegalFactMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2NewNotificationRequestMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
@@ -22,14 +21,17 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendStreamRepository;
-import it.gov.pagopa.pu.send.util.*;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
+import it.gov.pagopa.pu.send.util.HttpUtils;
+import it.gov.pagopa.pu.send.util.NotificationUtils;
+import it.gov.pagopa.send.dto.generated.*;
+import it.gov.pagopa.send.dto.generated.StreamCreationRequestV28DTO.EventTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
@@ -149,7 +151,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
         sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
         sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
       }
-    }  catch (HttpClientErrorException.Conflict ex) {
+    }  catch (RestInvokeConflictException ex) {
       sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
       throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
     }

@@ -2,14 +2,9 @@ package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
-import it.gov.pagopa.pu.send.connector.send.generated.api.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
-
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.UUID;
-
+import it.gov.pagopa.send.client.generated.*;
+import it.gov.pagopa.send.dto.generated.*;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,9 +13,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendClientTest {
@@ -83,9 +82,9 @@ class SendClientTest {
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
-    Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken))
+    when(apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken))
       .thenReturn(newNotificationApiMock);
-    Mockito.when(newNotificationApiMock.presignedUploadRequest(requestList))
+    when(newNotificationApiMock.presignedUploadRequest(requestList))
       .thenReturn(responseList);
 
     // When
@@ -101,9 +100,9 @@ class SendClientTest {
     NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
     NewNotificationResponseDTO response = new NewNotificationResponseDTO();
 
-    Mockito.when(apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken))
+    when(apisHolder.getNewNotificationApiByApiKey(apiKey, voucherToken))
       .thenReturn(newNotificationApiMock);
-    Mockito.when(newNotificationApiMock.sendNewNotificationV25(request))
+    when(newNotificationApiMock.sendNewNotificationV25(request))
       .thenReturn(response);
 
     // When
@@ -119,9 +118,9 @@ class SendClientTest {
     String notificationRequestId = "REQUESTID";
     NewNotificationRequestStatusResponseV25DTO response = new NewNotificationRequestStatusResponseV25DTO();
 
-    Mockito.when(apisHolder.getSenderReadB2BApiByApiKey(apiKey, voucherToken))
+    when(apisHolder.getSenderReadB2BApiByApiKey(apiKey, voucherToken))
       .thenReturn(senderReadB2BApiMock);
-    Mockito.when(senderReadB2BApiMock.retrieveNotificationRequestStatusV25(notificationRequestId, null, null))
+    when(senderReadB2BApiMock.retrieveNotificationRequestStatusV25(notificationRequestId, null, null))
       .thenReturn(response);
 
     // When
@@ -138,9 +137,9 @@ class SendClientTest {
 
     NotificationPriceResponseV23DTO response = new NotificationPriceResponseV23DTO();
 
-    Mockito.when(apisHolder.getNotificationPriceApi(apiKey, voucherToken))
+    when(apisHolder.getNotificationPriceApi(apiKey, voucherToken))
       .thenReturn(notificationPriceApiMock);
-    Mockito.when(notificationPriceApiMock.retrieveNotificationPriceV23(paTaxId, noticeCode))
+    when(notificationPriceApiMock.retrieveNotificationPriceV23(paTaxId, noticeCode))
       .thenReturn(response);
 
     NotificationPriceResponseV23DTO result = sendClient.retrieveNotificationPrice(paTaxId, noticeCode, apiKey, voucherToken);
@@ -154,9 +153,9 @@ class SendClientTest {
     StreamCreationRequestV28DTO request = new StreamCreationRequestV28DTO();
     StreamMetadataResponseV28DTO response = new StreamMetadataResponseV28DTO();
 
-    Mockito.when(apisHolder.getStreamsApi(apiKey, voucherToken))
+    when(apisHolder.getStreamsApi(apiKey, voucherToken))
       .thenReturn(streamsApiMock);
-    Mockito.when(streamsApiMock.createEventStreamV28(request))
+    when(streamsApiMock.createEventStreamV28(request))
       .thenReturn(response);
 
     StreamMetadataResponseV28DTO result = sendClient.createStream(request, apiKey, voucherToken);
@@ -168,9 +167,9 @@ class SendClientTest {
   void givenValidRequestWhenGetStreamsThenVerifyResponse() {
     List<StreamListElementDTO> response = List.of();
 
-    Mockito.when(apisHolder.getStreamsApi(apiKey, voucherToken))
+    when(apisHolder.getStreamsApi(apiKey, voucherToken))
       .thenReturn(streamsApiMock);
-    Mockito.when(streamsApiMock.listEventStreamsV28())
+    when(streamsApiMock.listEventStreamsV28())
       .thenReturn(response);
 
     List<StreamListElementDTO> result = sendClient.getStreams(apiKey, voucherToken);
@@ -183,9 +182,9 @@ class SendClientTest {
     UUID streamId = UUID.randomUUID();
     List<ProgressResponseElementV28DTO> response = List.of();
 
-    Mockito.when(apisHolder.getEventsApi(apiKey, voucherToken))
+    when(apisHolder.getEventsApi(apiKey, voucherToken))
       .thenReturn(eventsApiMock);
-    Mockito.when(eventsApiMock.consumeEventStreamV28(streamId, null))
+    when(eventsApiMock.consumeEventStreamV28(streamId, null))
       .thenReturn(response);
 
     List<ProgressResponseElementV28DTO> result = sendClient.getStreamEvents(
@@ -211,9 +210,9 @@ class SendClientTest {
     //Expected LegalFact list received from SEND
     List<LegalFactListElementV20DTO> expectedResult = Collections.singletonList(legalFactListElementV20DTO);
 
-    Mockito.when(apisHolder.getLegalFactsApiByApiKey(apiKey, voucherToken))
+    when(apisHolder.getLegalFactsApiByApiKey(apiKey, voucherToken))
       .thenReturn(legalFactsApiMock);
-    Mockito.when(legalFactsApiMock.retrieveNotificationLegalFactsV20(iun))
+    when(legalFactsApiMock.retrieveNotificationLegalFactsV20(iun))
       .thenReturn(expectedResult);
 
     // WHEN
@@ -238,9 +237,9 @@ class SendClientTest {
     expectedResult.setContentLength(contentLength);
     expectedResult.setUrl(url);
 
-    Mockito.when(apisHolder.getLegalFactsApiByApiKey(apiKey, voucherToken))
+    when(apisHolder.getLegalFactsApiByApiKey(apiKey, voucherToken))
       .thenReturn(legalFactsApiMock);
-    Mockito.when(legalFactsApiMock.downloadLegalFactById(iun, legalFactId))
+    when(legalFactsApiMock.downloadLegalFactById(iun, legalFactId))
       .thenReturn(expectedResult);
 
     // WHEN

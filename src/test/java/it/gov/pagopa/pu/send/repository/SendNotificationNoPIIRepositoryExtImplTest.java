@@ -1,9 +1,8 @@
 package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO.HttpMethodEnum;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
@@ -12,7 +11,9 @@ import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.pu.send.util.Constants;
 import org.bson.Document;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
@@ -264,22 +266,6 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   }
 
   @Test
-  void whenUpdateLastEventOfInterestByIdThenVerify() {
-    String sendNotificationId = "SENDNOTIFICATIONID";
-    TimelineElementCategoryV27DTO newStatus = TimelineElementCategoryV27DTO.REQUEST_ACCEPTED;
-
-    when(mongoTemplateMock.updateFirst(
-        Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
-          SendNotificationNoPII.class)))
-      .thenReturn(updateResult);
-    when(updateResult.getModifiedCount()).thenReturn(1L);
-
-    UpdateResult result = repository.updateLastEventOfInterestById(sendNotificationId, newStatus);
-
-    assertEquals(1L, result.getModifiedCount());
-  }
-
-  @Test
   void givenCampaignIdWhenCalculateCampaignCountersThenReturnExpectedCounters() {
     String campaignId = "campaignId";
     Counters exRes = new Counters();
@@ -318,9 +304,6 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     assertEquals(0L, res.getTotal());
     assertEquals(0L, res.getAccepted());
     assertEquals(0L, res.getDelivered());
-    assertEquals(0L, res.getDigitalCompleted());
-    assertEquals(0L, res.getAnalogicCompleted());
-    assertEquals(0L, res.getCompletion());
   }
 
   @Test
@@ -329,13 +312,19 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     StreamEventSummaryDTO streamEvent = new StreamEventSummaryDTO();
     List<StreamEventSummaryDTO> streamEvents = List.of(streamEvent);
 
-    when(mongoTemplateMock.updateFirst(
-        Mockito.any(Query.class),
-        Mockito.any(Update.class),
-        Mockito.eq(SendNotificationNoPII.class)))
-      .thenReturn(updateResult);
+    SendNotificationNoPII updatedSendNotification = new SendNotificationNoPII();
+    updatedSendNotification.setHistory(streamEvents);
 
-    assertDoesNotThrow(() -> repository.pushStreamEventsHistory(sendNotificationId, streamEvents));
+    when(mongoTemplateMock.findAndModify(
+      Mockito.any(Query.class),
+      Mockito.any(Update.class),
+      Mockito.any(FindAndModifyOptions.class),
+      Mockito.eq(SendNotificationNoPII.class))
+    ).thenReturn(updatedSendNotification);
+
+    List<StreamEventSummaryDTO> result = repository.pushStreamEventsHistory(sendNotificationId, streamEvents);
+
+    assertEquals(streamEvents, result);
   }
 
   @Test
@@ -355,5 +344,79 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     assertEquals(notifications, result.getContent());
     assertEquals(pageable.getOffset(), result.getNumber());
     assertEquals(pageable.getPageSize(), result.getSize());
+  }
+
+  @Test
+  void givenDocumentWithCampaignIdListKeyWhenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenOk() {
+    //GIVEN
+    OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+    List<String> expectedCampaignIdList = List.of("id1", "id2", "id3");
+    String campaignIdListAlias = SendNotificationNoPII.Fields.campaignId + "List";
+
+    AggregationResults<Document> aggregationResults = new AggregationResults<>(
+      List.of(new Document(campaignIdListAlias, expectedCampaignIdList)),
+      new Document()
+    );
+
+    when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(SendNotificationNoPII.class),
+      Mockito.eq(Document.class)
+    )).thenReturn(aggregationResults);
+
+    //WHEN
+    List<String> actualCampaignIdList = repository.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
+
+    //THEN
+    Assertions.assertNotNull(actualCampaignIdList);
+    Assertions.assertEquals(expectedCampaignIdList, actualCampaignIdList);
+  }
+
+  @Test
+  void givenDocumentWithoutCampaignIdListKeyWhenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenEmptyList() {
+    //GIVEN
+    OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+
+    AggregationResults<Document> aggregationResults = new AggregationResults<>(
+      List.of(new Document()),
+      new Document()
+    );
+
+    when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(SendNotificationNoPII.class),
+      Mockito.eq(Document.class)
+    )).thenReturn(aggregationResults);
+
+    //WHEN
+    List<String> actualCampaignIdList = repository.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
+
+    //THEN
+    Assertions.assertNotNull(actualCampaignIdList);
+    Assertions.assertEquals(0, actualCampaignIdList.size());
+  }
+
+  @Test
+  void givenNoDocumentWhenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenEmptyList() {
+    //GIVEN
+    OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+
+    AggregationResults<Document> aggregationResults = new AggregationResults<>(
+      List.of(),
+      new Document()
+    );
+
+    when(mongoTemplateMock.aggregate(
+      Mockito.any(Aggregation.class),
+      Mockito.eq(SendNotificationNoPII.class),
+      Mockito.eq(Document.class)
+    )).thenReturn(aggregationResults);
+
+    //WHEN
+    List<String> actualCampaignIdList = repository.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
+
+    //THEN
+    Assertions.assertNotNull(actualCampaignIdList);
+    Assertions.assertEquals(0, actualCampaignIdList.size());
   }
 }

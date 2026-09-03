@@ -2,8 +2,7 @@ package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.config.BaseEntityListener;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.PreLoadResponseDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
@@ -12,26 +11,24 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.BaseEntity;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
-import it.gov.pagopa.pu.send.util.CampaignUtils;
+import it.gov.pagopa.pu.send.util.CampaignCounterRules;
 import it.gov.pagopa.pu.send.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.CollectionUtils;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationNoPIIRepositoryExt {
 
@@ -48,6 +45,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_PAYMENT_NOTICE_CODE = "%s.%s.%s.pagoPa.noticeCode".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.puPayments, PuPayment.Fields.payment);
   public static final String FIELD_RECIPIENT_FISCAL_CODE_HASH = "%s.%s".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.fiscalCodeHash);
   private static final String FIELD_FILTERED_NOTIFICATION_DATE = "recipients.$[].puPayments.$[elem].notificationDate";
+  private static final String FIELD_NOTIFICATION_UPDATE_DATE = "updateDate";
 
   private final MongoTemplate mongoTemplate;
 
@@ -204,15 +202,16 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
   @Override
   public Counters calculateCampaignCounters(String campaignId) {
+    GroupOperation groupOperation = Aggregation.group()
+      .count().as(Counters.Fields.total);
+
+    for (String counterName : CampaignCounterRules.COUNTER_RULES.keySet()) {
+      groupOperation = groupOperation.sum(buildStatusCondition(counterName)).as(counterName);
+    }
+
     Aggregation aggregation = Aggregation.newAggregation(
       Aggregation.match(Criteria.where(Fields.campaignId).is(campaignId)),
-      Aggregation.group()
-        .count().as(Counters.Fields.total)
-        .sum(buildStatusCondition(Counters.Fields.accepted)).as(Counters.Fields.accepted)
-        .sum(buildStatusCondition(Counters.Fields.delivered)).as(Counters.Fields.delivered)
-        .sum(buildStatusCondition(Counters.Fields.digitalCompleted)).as(Counters.Fields.digitalCompleted)
-        .sum(buildStatusCondition(Counters.Fields.analogicCompleted)).as(Counters.Fields.analogicCompleted)
-        .sum(buildStatusCondition(Counters.Fields.completion)).as(Counters.Fields.completion)
+      groupOperation
     );
 
     AggregationResults<Counters> results = mongoTemplate.aggregate(aggregation, SendNotificationNoPII.class, Counters.class);
@@ -222,29 +221,91 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     return counters != null ? counters : new Counters();
   }
 
-  private ConditionalOperators.Cond buildStatusCondition(String counterName) {
-    Set<TimelineElementCategoryV27DTO> latestEventsOfInterest =
-      CampaignUtils.COUNTER_FIELD2TIMELINE_ELEMENT_CATEGORIES.getOrDefault(counterName, Collections.emptySet());
+  private AggregationExpression buildStatusCondition(String counterName) {
+    AggregationExpression isActive = buildIsActiveExpression(counterName);
+    return ConditionalOperators.when(isActive).then(1).otherwise(0);
+  }
 
-    return ConditionalOperators.when(Criteria.where(Fields.lastEventOfInterest).in(latestEventsOfInterest))
-      .then(1).otherwise(0);
+  private AggregationExpression buildIsActiveExpression(String counterName) {
+    CampaignCounterRules.CounterRule rule = CampaignCounterRules.COUNTER_RULES.get(counterName);
+    AggregationExpression isEligible = buildIsEligibleExpression(rule);
+
+    if (rule.getDeactivatingCounters().isEmpty()) {
+      return isEligible;
+    }
+
+    List<AggregationExpression> conditions = new ArrayList<>();
+    conditions.add(isEligible);
+
+    for (String deactivatingCounter : rule.getDeactivatingCounters()) {
+      CampaignCounterRules.CounterRule deactivatingRule = CampaignCounterRules.COUNTER_RULES.get(deactivatingCounter);
+      conditions.add(BooleanOperators.Not.not(buildIsEligibleExpression(deactivatingRule)));
+    }
+
+    return BooleanOperators.And.and(conditions.toArray());
+  }
+
+  private AggregationExpression buildIsEligibleExpression(CampaignCounterRules.CounterRule rule) {
+    AggregationExpression matchesActivation = buildAnyMatchExpression(rule.getActivationConditions());
+
+    if (rule.getDeactivationConditions().isEmpty()) {
+      return matchesActivation;
+    }
+
+    AggregationExpression matchesDeactivation = buildAnyMatchExpression(rule.getDeactivationConditions());
+
+    return BooleanOperators.And.and(matchesActivation, BooleanOperators.Not.not(matchesDeactivation));
+  }
+
+  private AggregationExpression buildAnyMatchExpression(List<StreamEventSummaryDTO> conditions) {
+    AggregationExpression condExpression;
+
+    if (conditions.size() == 1) {
+      condExpression = buildConditionExpression(conditions.getFirst());
+    } else {
+      List<AggregationExpression> orConditions = conditions.stream()
+        .map(this::buildConditionExpression)
+        .toList();
+
+      condExpression = BooleanOperators.Or.or(orConditions.toArray());
+    }
+
+    AggregationExpression historyOrDefault = ConditionalOperators.ifNull(Fields.history)
+      .then(Collections.emptyList());
+
+    AggregationExpression filter = ArrayOperators.Filter.filter(historyOrDefault)
+      .as("event")
+      .by(condExpression);
+
+    AggregationExpression size = ArrayOperators.Size.lengthOfArray(filter);
+    return ComparisonOperators.Gt.valueOf(size).greaterThanValue(0);
+  }
+
+  private AggregationExpression buildConditionExpression(StreamEventSummaryDTO condition) {
+    AggregationExpression statusEq = ComparisonOperators.Eq.valueOf("$$event.newNotificationStatus")
+      .equalToValue(condition.getNewNotificationStatus().getValue());
+
+    if (condition.getTimelineElementCategory() != null) {
+      AggregationExpression categoryEq = ComparisonOperators.Eq.valueOf("$$event.timelineElementCategory")
+        .equalToValue(condition.getTimelineElementCategory().getValue());
+      return BooleanOperators.And.and(statusEq, categoryEq);
+    }
+
+    return statusEq;
   }
 
   @Override
-  public UpdateResult updateLastEventOfInterestById(String sendNotificationId, TimelineElementCategoryV27DTO newStatus) {
-    return updateFirst(
-      Query.query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId)),
-      new Update().set(Fields.lastEventOfInterest, newStatus)
-    );
-  }
-
-  @Override
-  public void pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
+  public List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
     Query query = new Query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
-    Update update = new Update().push(Fields.history).each(streamEvents);
-    updateFirst(query, update);
+    Update update = BaseEntityListener.setTechFieldsOnDocumentUpdate(new Update().push(Fields.history).each(streamEvents));
+    SendNotificationNoPII updatedDoc = mongoTemplate.findAndModify(
+      query,
+      update,
+      FindAndModifyOptions.options().returnNew(true),
+      SendNotificationNoPII.class
+    );
+    return updatedDoc.getHistory();
   }
-
 
   @Override
   public Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable) {
@@ -271,5 +332,21 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     query.with(pageable);
     List<SendNotificationNoPII> sendNotifications = mongoTemplate.find(query, SendNotificationNoPII.class);
     return new PageImpl<>(sendNotifications, pageable, count);
+  }
+
+  @Override
+  public List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate) {
+    String campaignIdListAlias = Fields.campaignId + "List";
+    Aggregation aggregation = Aggregation.newAggregation(
+      Aggregation.match(Criteria.where(FIELD_NOTIFICATION_UPDATE_DATE).gt(latestRecalculationDate)),
+      Aggregation.sort(Sort.Direction.ASC, Fields.campaignId),
+      Aggregation.group()
+        .addToSet(Fields.campaignId).as(campaignIdListAlias)
+    );
+    AggregationResults<Document> lastRecalculationDateAggregationResults = mongoTemplate.aggregate(aggregation, SendNotificationNoPII.class, Document.class);
+    Document result = lastRecalculationDateAggregationResults.getUniqueMappedResult();
+    return result != null && result.getList(campaignIdListAlias, String.class) != null ?
+      result.getList(campaignIdListAlias, String.class) :
+      new ArrayList<>();
   }
 }

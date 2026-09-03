@@ -6,8 +6,7 @@ import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
+import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
@@ -17,6 +16,7 @@ import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
@@ -47,7 +47,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationServiceImplTest {
@@ -113,18 +115,18 @@ class SendNotificationServiceImplTest {
 
     LocalDate expectedDate = LocalDate.of(2026, Month.JUNE, 21);
 
-    Mockito.when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
-    Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
-    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
+    when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
+    when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
+    when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
     Mockito.doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
-    Mockito.when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
+    when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
       localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
 
       CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
 
-      Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
+      verify(sendNotificationPIIRepositoryMock).save(sendNotification);
       Assertions.assertNotNull(response);
       Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
     }
@@ -136,7 +138,7 @@ class SendNotificationServiceImplTest {
     request.setOrganizationId(1L);
     String accessToken = "accessToken";
 
-    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+    when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
       .thenReturn(null);
 
     NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () ->
@@ -155,13 +157,13 @@ class SendNotificationServiceImplTest {
     String accessToken = "accessToken";
     Organization org = new Organization();
 
-    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+    when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
       .thenReturn(org);
 
     Mockito.doNothing().when(taxonomyValidatorServiceMock)
       .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
 
-    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+    when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
       .thenReturn(null);
 
     NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () ->
@@ -190,25 +192,25 @@ class SendNotificationServiceImplTest {
 
     LocalDate expectedDate = LocalDate.of(2026, Month.JUNE, 21);
 
-    Mockito.when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+    when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
       .thenReturn(org);
     Mockito.doNothing().when(taxonomyValidatorServiceMock)
       .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
 
-    Mockito.when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+    when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
       .thenReturn(subUnit);
 
-    Mockito.when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
-    Mockito.when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
+    when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
+    when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
       .thenReturn(sendNotification);
-    Mockito.when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
+    when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
       localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
 
       CreateNotificationResponse response = sendNotificationService.createSendNotification(request, accessToken);
 
-      Mockito.verify(sendNotificationPIIRepositoryMock).save(sendNotification);
+      verify(sendNotificationPIIRepositoryMock).save(sendNotification);
       Assertions.assertNotNull(response);
       Assertions.assertEquals("SENDNOTIFICATIONID", response.getSendNotificationId());
     }
@@ -225,23 +227,23 @@ class SendNotificationServiceImplTest {
     InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
     OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0, ZoneOffset.UTC);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.of(notification))
       .thenReturn(Optional.of(updatedNotification));
-    Mockito.when(fileStorerServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
-    Mockito.when(workflowServiceMock.sendNotificationProcess(sendNotificationId, null))
+    when(fileStorerServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId, sendNotificationId+"_"+fileName)).thenReturn(inputStream);
+    when(workflowServiceMock.sendNotificationProcess(sendNotificationId, null))
         .thenReturn(workflow);
 
     try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
       offsetDateTimeMock.when(()->OffsetDateTime.now(Constants.ZONEID)).thenReturn(now);
-      Mockito.when(sendNotificationNoPIIRepositoryMock.updateFileStatusAndUploadDate(sendNotificationId,fileName, FileStatus.READY, now)).thenReturn(null);
+      when(sendNotificationNoPIIRepositoryMock.updateFileStatusAndUploadDate(sendNotificationId,fileName, FileStatus.READY, now)).thenReturn(null);
 
       StartNotificationResponse result = sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null);
 
       Assertions.assertEquals(new StartNotificationResponse("workflowId", "runId"), result);
 
-      Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING);
-      Mockito.verify(workflowServiceMock).sendNotificationProcess(sendNotificationId, null);
+      verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING);
+      verify(workflowServiceMock).sendNotificationProcess(sendNotificationId, null);
     }
   }
 
@@ -253,7 +255,7 @@ class SendNotificationServiceImplTest {
     notification.setStatus(NotificationStatus.WAITING_FILE);
     notification.setDocuments(List.of());
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
     SendNotificationFileNotFoundException exception = Assertions.assertThrows(SendNotificationFileNotFoundException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null));
@@ -271,8 +273,8 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.WAITING);
     InputStream inputStream = new ByteArrayInputStream("TEST FILE HASH P4PA SEND".getBytes());
 
-    Mockito.when(fileStorerServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId,sendNotificationId+"_"+fileName)).thenReturn(inputStream);
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
+    when(fileStorerServiceMock.retrieveFile(notification.getOrganizationId(), sendNotificationId,sendNotificationId+"_"+fileName)).thenReturn(inputStream);
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
     InvalidSignatureException exception = Assertions.assertThrows(InvalidSignatureException.class, () -> sendNotificationService.startSendNotification(sendNotificationId, loadFileRequest, null));
@@ -290,7 +292,6 @@ class SendNotificationServiceImplTest {
     Path relativePath = Path.of("1/sendNotificationId");
 
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
-    notification.setLastEventOfInterest(TimelineElementCategoryV27DTO.REQUEST_ACCEPTED);
     notification.setCreationDate(LocalDateTime.of(2026,Month.JUNE,30,12,0));
     PuPayment puPayment = new PuPayment();
     Payment payment = new Payment();
@@ -306,14 +307,14 @@ class SendNotificationServiceImplTest {
     notification.getRecipients().getFirst().setPuPayments(List.of(puPayment));
 
     //When
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
-    Mockito.when(fileStorerServiceMock.buildRelativeSendPath(
+    when(fileStorerServiceMock.buildRelativeSendPath(
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
-    Mockito.doNothing().when(sendNotificationStatusHandlerServiceMock).handleDeletedSendNotification(notification.getCampaignId(),notification.getCreationDate().toLocalDate(),notification.getLastEventOfInterest());
+    Mockito.doNothing().when(sendNotificationStatusHandlerServiceMock).handleDeletedSendNotification(notification.getCampaignId(),notification.getCreationDate().toLocalDate(),notification.getHistory());
     //Then
     sendNotificationService.deleteSendNotification(sendNotificationId);
-    Mockito.verify(sendNotificationPIIRepositoryMock).delete(notification);
+    verify(sendNotificationPIIRepositoryMock).delete(notification);
   }
 
   @Test
@@ -338,9 +339,9 @@ class SendNotificationServiceImplTest {
     notification.getRecipients().getFirst().setPuPayments(List.of(puPayment));
 
     //When
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
-    Mockito.when(fileStorerServiceMock.buildRelativeSendPath(
+    when(fileStorerServiceMock.buildRelativeSendPath(
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
     try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
       mockedFiles.when(() -> Files.deleteIfExists(any(Path.class))).thenThrow(new IOException("DUMMY"));
@@ -357,7 +358,7 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
     notification.setStatus(NotificationStatus.ACCEPTED);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
 
     //When
@@ -394,9 +395,9 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = new SendNotificationNoPII();
     SendNotificationDTO expectedResult = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
         .thenReturn(Optional.of(notification));
-    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     // When
@@ -411,7 +412,7 @@ class SendNotificationServiceImplTest {
     // Given
     String sendNotificationId = "NOTIFICATIONID";
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
       .thenReturn(Optional.empty());
 
     // When, Then
@@ -425,9 +426,9 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = new SendNotificationNoPII();
     SendNotificationDTO expectedResult = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     // When
@@ -442,7 +443,7 @@ class SendNotificationServiceImplTest {
     // Given
     String notificationRequestId = "NOTIFICATION_REQUEST_ID";
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
       .thenReturn(Optional.empty());
 
     // When, Then
@@ -457,9 +458,9 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = new SendNotificationNoPII();
     SendNotificationDTO expectedResult = new SendNotificationDTO();
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+    when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
       .thenReturn(Optional.of(notification));
-    Mockito.when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     // When
@@ -475,7 +476,7 @@ class SendNotificationServiceImplTest {
     Long organizationId = 1L;
     String nav = "NAV";
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+    when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
       .thenReturn(Optional.empty());
 
     // When, Then
@@ -490,7 +491,7 @@ class SendNotificationServiceImplTest {
     NotificationStatus status = NotificationStatus.REFUSED;
     UpdateResult expectedResult = UpdateResult.acknowledged(1, 1L, null);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(requestId, status))
+    when(sendNotificationNoPIIRepositoryMock.updateNotificationStatus(requestId, status))
       .thenReturn(expectedResult);
 
     // When
@@ -503,7 +504,7 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals(1, result.getModifiedCount());
     Assertions.assertSame(expectedResult, result);
 
-    Mockito.verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatus(requestId, status);
+    verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatus(requestId, status);
   }
 
   @Test
@@ -512,7 +513,7 @@ class SendNotificationServiceImplTest {
     String notificationId = "123";
     LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
     String fileName = "test.pdf";
-    InputStream inputStreamMock = Mockito.mock(InputStream.class);
+    InputStream inputStreamMock = mock(InputStream.class);
     String expectedUrl = "test.pdf";
     OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0,ZoneOffset.UTC);
 
@@ -522,8 +523,8 @@ class SendNotificationServiceImplTest {
     notification.setLegalFacts(new ArrayList<>());
 
     try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
-      Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
-      Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
+      when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+      when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
         .thenReturn(expectedUrl);
       offsetDateTimeMock.when(()->OffsetDateTime.now(Constants.ZONEID)).thenReturn(now);
 
@@ -533,8 +534,8 @@ class SendNotificationServiceImplTest {
       );
 
       // Then
-      Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
-      Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
+      verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
+      verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
         fact.getFileName().equals(fileName) &&
           fact.getUrl().equals(expectedUrl) &&
           fact.getCategory().equals(category)
@@ -548,7 +549,7 @@ class SendNotificationServiceImplTest {
     String notificationId = "123";
     LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
     String fileName = "test.pdf";
-    InputStream inputStreamMock = Mockito.mock(InputStream.class);
+    InputStream inputStreamMock = mock(InputStream.class);
     String expectedUrl = "test.pdf";
     OffsetDateTime now = OffsetDateTime.of(2026,7,1,12,0,0,0,ZoneOffset.UTC);
 
@@ -557,8 +558,8 @@ class SendNotificationServiceImplTest {
     notification.setOrganizationId(1L);
 
     try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
-      Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
-      Mockito.when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
+      when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+      when(fileStorerServiceMock.saveToSharedFolder(1L, notificationId, inputStreamMock, fileName))
         .thenReturn(expectedUrl);
       offsetDateTimeMock.when(()->OffsetDateTime.now(Constants.ZONEID)).thenReturn(now);
 
@@ -568,8 +569,8 @@ class SendNotificationServiceImplTest {
       );
 
       // Then
-      Mockito.verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
-      Mockito.verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
+      verify(fileStorerServiceMock).saveToSharedFolder(1L, notificationId, inputStreamMock, fileName);
+      verify(sendNotificationNoPIIRepositoryMock).addLegalFact(eq(notificationId), argThat(fact ->
         fact.getFileName().equals(fileName) &&
           fact.getUrl().equals(expectedUrl) &&
           fact.getCategory().equals(category) &&
@@ -584,7 +585,7 @@ class SendNotificationServiceImplTest {
     String id = "123";
     String fileName = "file.pdf";
     LegalFactCategoryDTO category = LegalFactCategoryDTO.SENDER_ACK;
-    InputStream inputStreamMock = Mockito.mock(InputStream.class);
+    InputStream inputStreamMock = mock(InputStream.class);
 
     LegalFactDTO existingFact = LegalFactDTO.builder()
       .category(category)
@@ -593,7 +594,7 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setLegalFacts(List.of(existingFact));
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(id)).thenReturn(Optional.of(notification));
+    when(sendNotificationNoPIIRepositoryMock.findById(id)).thenReturn(Optional.of(notification));
 
     // When & Then
     FileAlreadyExistsException exception = Assertions.assertThrows(FileAlreadyExistsException.class, () ->
@@ -603,7 +604,7 @@ class SendNotificationServiceImplTest {
     Assertions.assertEquals("LEGAL_FACT_ALREADY_EXISTS", exception.getCode());
 
     Mockito.verifyNoInteractions(fileStorerServiceMock);
-    Mockito.verify(sendNotificationNoPIIRepositoryMock, Mockito.never()).addLegalFact(any(), any());
+    verify(sendNotificationNoPIIRepositoryMock, never()).addLegalFact(any(), any());
   }
 
   @Test
@@ -620,7 +621,7 @@ class SendNotificationServiceImplTest {
       .category(LegalFactCategoryDTO.SENDER_ACK)
       .build()));
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+    when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
 
     List<LegalFactDTO> response = sendNotificationService.getLegalFacts(notificationId);
 
@@ -638,7 +639,7 @@ class SendNotificationServiceImplTest {
     notification.setSendNotificationId(notificationId);
     notification.setOrganizationId(1L);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
+    when(sendNotificationNoPIIRepositoryMock.findById(notificationId)).thenReturn(Optional.of(notification));
 
     // When
     Assertions.assertDoesNotThrow(() -> sendNotificationService.getLegalFacts(notificationId));
@@ -650,7 +651,7 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII expectedResult = new SendNotificationNoPII();
     expectedResult.setSendNotificationId(sendNotificationId);
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.of(expectedResult));
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.of(expectedResult));
 
     SendNotificationNoPII result = sendNotificationService.findSendNotification(sendNotificationId);
 
@@ -661,7 +662,7 @@ class SendNotificationServiceImplTest {
   void givenNoNotificationWhenFindSendNotificationThen() {
     String sendNotificationId = "123";
 
-    Mockito.when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.empty());
+    when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(Optional.empty());
 
     SendNotificationNotFoundException sendNotificationNotFoundException = Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotification(sendNotificationId));
 

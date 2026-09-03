@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.connector.workflow.client;
 
 import it.gov.pagopa.pu.send.connector.workflow.config.WorkflowApisHolder;
-import it.gov.pagopa.pu.workflowhub.controller.generated.SendNotificationApi;
+import it.gov.pagopa.pu.workflowhub.client.generated.SendNotificationApi;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class WorkflowApiClientTest {
@@ -40,9 +42,9 @@ class WorkflowApiClientTest {
     String sendNotificationId = "sendNotificationId";
     WorkflowCreatedDTO expectedResult = new WorkflowCreatedDTO();
 
-    Mockito.when(workflowApisHolderMock.getSendNotificationApi(accessToken))
+    when(workflowApisHolderMock.getSendNotificationApi(accessToken))
       .thenReturn(sendNotificationApiMock);
-    Mockito.when(sendNotificationApiMock.sendNotificationProcess(Mockito.same(sendNotificationId)))
+    when(sendNotificationApiMock.sendNotificationProcess(Mockito.same(sendNotificationId)))
       .thenReturn(expectedResult);
 
     // When
@@ -59,9 +61,9 @@ class WorkflowApiClientTest {
     String sendStreamId = "sendStreamId";
     WorkflowCreatedDTO expectedResult = new WorkflowCreatedDTO();
 
-    Mockito.when(workflowApisHolderMock.getSendNotificationApi(accessToken))
+    when(workflowApisHolderMock.getSendNotificationApi(accessToken))
       .thenReturn(sendNotificationApiMock);
-    Mockito.when(sendNotificationApiMock.consumeSendStream(Mockito.same(sendStreamId)))
+    when(sendNotificationApiMock.consumeSendStream(Mockito.same(sendStreamId)))
       .thenReturn(expectedResult);
 
     // When

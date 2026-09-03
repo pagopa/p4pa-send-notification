@@ -1,14 +1,17 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.config;
 
 
-import it.gov.pagopa.pu.debtposition.client.generated.DebtPositionApi;
-import it.gov.pagopa.pu.debtposition.generated.ApiClient;
-import it.gov.pagopa.pu.debtposition.generated.BaseApi;
-import it.gov.pagopa.pu.send.config.rest.RestTemplateConfig;
+import it.gov.pagopa.pu.debtpositions.client.generated.DebtPositionApi;
+import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionErrorDTO;
+import it.gov.pagopa.pu.debtpositions.generated.ApiClient;
+import it.gov.pagopa.pu.debtpositions.generated.BaseApi;
+import it.gov.pagopa.pu.send.config.rest.HttpClientErrorJsonBodyHandler;
+import it.gov.pagopa.pu.send.connector.debtpositions.mapper.DebtPositionErrorDTOMapper;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class DebtPositionApisHolder {
@@ -17,13 +20,17 @@ public class DebtPositionApisHolder {
 
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
-  public DebtPositionApisHolder(DebtPositionApiClientConfig clientConfig, RestTemplateBuilder restTemplateBuilder) {
+  public DebtPositionApisHolder(
+    DebtPositionApiClientConfig clientConfig,
+    RestTemplateBuilder restTemplateBuilder,
+    JsonMapper jsonMapper
+  ) {
     RestTemplate restTemplate = restTemplateBuilder.build();
     ApiClient apiClient = buildApiClient(restTemplate, clientConfig);
 
-    if (clientConfig.isPrintBodyWhenError()) {
-      restTemplate.setErrorHandler(RestTemplateConfig.bodyPrinterWhenError("DEBT-POSITIONS"));
-    }
+    restTemplate.setErrorHandler(new HttpClientErrorJsonBodyHandler<>(jsonMapper, "DEBT-POSITIONS", clientConfig.isPrintBodyWhenError(),
+      DebtPositionErrorDTO.class, DebtPositionErrorDTOMapper::map)
+    );
 
     this.debtPositionApi = new DebtPositionApi(apiClient);
   }

@@ -1,8 +1,8 @@
 package it.gov.pagopa.pu.send.util.faker;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.LegalFactCategoryDTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NewNotificationRequestV24DTO;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.NotificationFeePolicyDTO;
+import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
+import it.gov.pagopa.send.dto.generated.NewNotificationRequestV24DTO;
+import it.gov.pagopa.send.dto.generated.NotificationFeePolicyDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;

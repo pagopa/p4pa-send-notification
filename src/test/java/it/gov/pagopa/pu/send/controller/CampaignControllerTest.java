@@ -1,11 +1,13 @@
 package it.gov.pagopa.pu.send.controller;
 
+import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.service.CampaignService;
+import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -21,8 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.co.jemos.podam.api.PodamFactory;
 
-import java.time.LocalDate;
-import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -60,10 +61,11 @@ class CampaignControllerTest {
   @Test
   void whenAlignCampaignThenOk() {
     String campaignId = "campaignId";
+    OffsetDateTime now = OffsetDateTime.now(Constants.ZONEID);
 
-    Mockito.doNothing().when(campaignServiceMock).alignCampaign(campaignId);
+    Mockito.doNothing().when(campaignServiceMock).alignCampaign(campaignId, now);
 
-    ResponseEntity<Void> response = campaignController.alignCampaign(campaignId);
+    ResponseEntity<Void> response = campaignController.alignCampaign(campaignId, now);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -87,19 +89,22 @@ class CampaignControllerTest {
 
   @Test
   void whenFindCampaignsByFiltersThenOk() {
-    Long organizationId = 1L;
-    LocalDate dateFrom = LocalDate.of(2026, Month.JULY, 1);
-    LocalDate dateTo = LocalDate.of(2026, Month.JULY, 31);
-    String orgSubUnitCode = "orgSubUnitCode";
-    String campaignName = "campaignName";
-    String externalCampaignId = "externalCampaignId";
+    CampaignFiltersDTO campaignFiltersDTO = podamFactory.manufacturePojo(CampaignFiltersDTO.class);
     Pageable pageable = PageRequest.of(0, 10);
     PagedCampaign expectedResponse = podamFactory.manufacturePojo(PagedCampaign.class);
 
-    when(campaignServiceMock.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable))
+    when(campaignServiceMock.findCampaignsByFilters(campaignFiltersDTO, pageable))
       .thenReturn(expectedResponse);
 
-    ResponseEntity<PagedCampaign> response = campaignController.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable);
+    ResponseEntity<PagedCampaign> response = campaignController.findCampaignsByFilters(
+      campaignFiltersDTO.getOrganizationId(),
+      campaignFiltersDTO.getDateFrom(),
+      campaignFiltersDTO.getDateTo(),
+      campaignFiltersDTO.getOrgSubUnitCodes(),
+      campaignFiltersDTO.getCampaignName(),
+      campaignFiltersDTO.getExternalCampaignId(),
+      campaignFiltersDTO.getFetchAll(),
+      pageable);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -135,5 +140,45 @@ class CampaignControllerTest {
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertEquals(expectedResponse, response.getBody());
+  }
+
+  @Test
+  void whenFindLatestFullRecalculationDateThenOk() {
+    //GIVEN
+    OffsetDateTime expectedLatestRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+    when(campaignServiceMock.findLatestFullRecalculationDate())
+      .thenReturn(expectedLatestRecalculationDate);
+    //WHEN
+    ResponseEntity<OffsetDateTime> actualResponseEntity = campaignController.findLatestFullRecalculationDate();
+    //THEN
+    Assertions.assertEquals(HttpStatus.OK, actualResponseEntity.getStatusCode());
+    Assertions.assertEquals(expectedLatestRecalculationDate, actualResponseEntity.getBody());
+  }
+
+  @Test
+  void whenFindFirstCampaignStartDateThenOk() {
+    //GIVEN
+    OffsetDateTime expectedFirstCampaignStartDate = OffsetDateTime.now(Constants.ZONEID);
+    when(campaignServiceMock.findFirstCampaignStartDate())
+      .thenReturn(expectedFirstCampaignStartDate);
+    //WHEN
+    ResponseEntity<OffsetDateTime> actualResponseEntity = campaignController.findFirstCampaignStartDate();
+    //THEN
+    Assertions.assertEquals(HttpStatus.OK, actualResponseEntity.getStatusCode());
+    Assertions.assertEquals(expectedFirstCampaignStartDate, actualResponseEntity.getBody());
+  }
+
+  @Test
+  void whenFindIdsOfUpdatedCampaignsByNotificationUpdateDateThenOk() {
+    //GIVEN
+    OffsetDateTime latestRecalculationDate = OffsetDateTime.now(Constants.ZONEID);
+    List<String> expectedIdList = List.of("id1", "id2", "id3");
+    when(campaignServiceMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestRecalculationDate))
+      .thenReturn(expectedIdList);
+    //WHEN
+    ResponseEntity<List<String>> actualResponseEntity = campaignController.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestRecalculationDate);
+    //THEN
+    Assertions.assertEquals(HttpStatus.OK, actualResponseEntity.getStatusCode());
+    Assertions.assertEquals(expectedIdList, actualResponseEntity.getBody());
   }
 }

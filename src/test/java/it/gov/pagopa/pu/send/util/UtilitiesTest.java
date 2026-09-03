@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.util;
 
-import it.gov.pagopa.pu.send.connector.send.generated.dto.TimelineElementCategoryV27DTO;
+import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
@@ -8,6 +8,17 @@ import org.slf4j.MDC;
 import java.util.Optional;
 
 public class UtilitiesTest {
+
+  public static void setTraceId(String traceId) {
+    setTraceId(traceId, null);
+  }
+  public static void setTraceId(String traceId, String spanId) {
+    MDC.put("traceId", traceId);
+    MDC.put("spanId", spanId);
+  }
+  public static void clearTraceIdContext(){
+    MDC.clear();
+  }
 
   @Test
   void testGetTraceId(){
@@ -23,11 +34,18 @@ public class UtilitiesTest {
     clearTraceIdContext();
   }
 
-  public static void setTraceId(String traceId) {
-    MDC.put("traceId", traceId);
-  }
-  public static void clearTraceIdContext(){
-    MDC.clear();
+  @Test
+  void testGetSpanId(){
+    // Given
+    String expectedResult = "SPANID";
+    setTraceId("TRACEID", expectedResult);
+
+    // When
+    String result = Utilities.getSpanId();
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+    clearTraceIdContext();
   }
 
   @Test

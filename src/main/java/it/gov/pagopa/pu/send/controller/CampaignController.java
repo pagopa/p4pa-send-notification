@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.controller.generated.CampaignApi;
+import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
@@ -35,19 +36,28 @@ public class CampaignController implements CampaignApi {
   }
 
   @Override
-  public ResponseEntity<Void> alignCampaign(String campaignId) {
+  public ResponseEntity<Void> alignCampaign(String campaignId, OffsetDateTime fullRecalculationDate) {
     log.info("align campaign with id {}", campaignId);
 
-    campaignService.alignCampaign(campaignId);
+    campaignService.alignCampaign(campaignId, fullRecalculationDate);
 
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   @Override
-  public ResponseEntity<PagedCampaign> findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable) {
+  public ResponseEntity<PagedCampaign> findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, List<String> orgSubUnitCodes, String campaignName, String externalCampaignId, Boolean fetchAll, Pageable pageable) {
     log.info("retrieve campaigns by filters having organizationId {}, dateFrom {} and dateTo {}", organizationId, dateFrom, dateTo);
     return ResponseEntity.ok(
-      campaignService.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable)
+      campaignService.findCampaignsByFilters(
+        CampaignFiltersDTO.builder()
+          .organizationId(organizationId)
+          .dateFrom(dateFrom)
+          .dateTo(dateTo)
+          .orgSubUnitCodes(orgSubUnitCodes)
+          .campaignName(campaignName)
+          .externalCampaignId(externalCampaignId)
+          .fetchAll(fetchAll)
+        .build(), pageable)
     );
   }
 
@@ -78,4 +88,23 @@ public class CampaignController implements CampaignApi {
         .build(),
       fiscalCode,pageable));
   }
+
+  @Override
+  public ResponseEntity<OffsetDateTime> findLatestFullRecalculationDate() {
+    log.info("Retrieve latest date for a full campaign counters recalculation");
+    return ResponseEntity.ok(campaignService.findLatestFullRecalculationDate());
+  }
+
+  @Override
+  public ResponseEntity<OffsetDateTime> findFirstCampaignStartDate() {
+    log.info("Retrieve first campaign start date");
+    return ResponseEntity.ok(campaignService.findFirstCampaignStartDate());
+  }
+
+  @Override
+  public ResponseEntity<List<String>> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate) {
+    log.info("Retrieve ids for campaigns updated after {}", latestRecalculationDate);
+    return ResponseEntity.ok(campaignService.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestRecalculationDate));
+  }
+
 }

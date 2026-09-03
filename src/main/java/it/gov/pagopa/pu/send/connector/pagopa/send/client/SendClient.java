@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send.client;
 
 import it.gov.pagopa.pu.send.connector.pagopa.send.config.PagopaSendApisHolder;
-import it.gov.pagopa.pu.send.connector.send.generated.dto.*;
+import it.gov.pagopa.send.dto.generated.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

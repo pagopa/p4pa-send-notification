@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import io.micrometer.common.util.StringUtils;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
+import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
@@ -9,13 +10,14 @@ import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
-import it.gov.pagopa.pu.send.exception.NotFoundException;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
+import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepositoryExtImpl;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,13 +34,21 @@ import java.util.Optional;
 public class CampaignServiceImpl implements CampaignService {
   private final CampaignRepository campaignRepository;
   private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
+  private final SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt;
   private final PagedCampaignMapper pagedCampaignMapper;
   private final PagedSendNotificationsMapper pagedSendNotificationsMapper;
   private final DataCipherService dataCipherService;
 
-  public CampaignServiceImpl(CampaignRepository campaignRepository, SendNotificationNoPIIRepository sendNotificationNoPIIRepository, PagedCampaignMapper pagedCampaignMapper, PagedSendNotificationsMapper pagedSendNotificationsMapper, DataCipherService dataCipherService) {
+  public CampaignServiceImpl(
+    CampaignRepository campaignRepository,
+    SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
+    SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt,
+    PagedCampaignMapper pagedCampaignMapper,
+    PagedSendNotificationsMapper pagedSendNotificationsMapper,
+    DataCipherService dataCipherService) {
     this.campaignRepository = campaignRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
+    this.sendNotificationNoPIIRepositoryExt = sendNotificationNoPIIRepositoryExt;
     this.pagedCampaignMapper = pagedCampaignMapper;
     this.pagedSendNotificationsMapper = pagedSendNotificationsMapper;
     this.dataCipherService = dataCipherService;
@@ -75,7 +86,7 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
-  public void alignCampaign(String campaignId) {
+  public void alignCampaign(String campaignId, OffsetDateTime fullRecalculationDate) {
     Campaign campaign = campaignRepository.findById(campaignId)
       .orElseThrow(() -> new NotFoundException(
         ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND,
@@ -83,6 +94,7 @@ public class CampaignServiceImpl implements CampaignService {
       ));
 
     Counters counters = sendNotificationNoPIIRepository.calculateCampaignCounters(campaignId);
+    counters.setFullRecalculationDate(fullRecalculationDate);
 
     campaign.setCounters(counters);
 
@@ -127,9 +139,9 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
-  public PagedCampaign findCampaignsByFilters(Long organizationId, LocalDate dateFrom, LocalDate dateTo, String orgSubUnitCode, String campaignName, String externalCampaignId, Pageable pageable) {
+  public PagedCampaign findCampaignsByFilters(CampaignFiltersDTO campaignFiltersDTO, Pageable pageable) {
     return pagedCampaignMapper.mapToPagedCampaign(
-      campaignRepository.findCampaignsByFilters(organizationId, dateFrom, dateTo, orgSubUnitCode, campaignName, externalCampaignId, pageable)
+      campaignRepository.findCampaignsByFilters(campaignFiltersDTO, pageable)
     );
   }
 
@@ -146,5 +158,20 @@ public class CampaignServiceImpl implements CampaignService {
   @Override
   public void renameCampaign(String campaignId, RenameCampaignRequest renameCampaignRequest) {
     campaignRepository.updateCampaignName(campaignId, renameCampaignRequest.getName());
+  }
+
+  @Override
+  public OffsetDateTime findLatestFullRecalculationDate() {
+    return campaignRepository.findLatestFullRecalculationDate();
+  }
+
+  @Override
+  public OffsetDateTime findFirstCampaignStartDate() {
+    return campaignRepository.findFirstCampaignStartDate();
+  }
+
+  @Override
+  public List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime lastRecalculationDate) {
+    return sendNotificationNoPIIRepositoryExt.findIdsOfUpdatedCampaignsByNotificationUpdateDate(lastRecalculationDate);
   }
 }
