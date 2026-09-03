@@ -12,13 +12,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
 
 @Data
-@Document("campaign")
+@Document("send_campaign")
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 @FieldNameConstants
 @EqualsAndHashCode(callSuper = false)
-public class Campaign extends BaseEntity {
+public class SendCampaign extends BaseEntity {
   @Id
   private String campaignId;
   @NotEmpty

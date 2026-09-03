@@ -13,7 +13,7 @@ import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
-import it.gov.pagopa.pu.send.model.Campaign;
+import it.gov.pagopa.pu.send.model.SendCampaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CampaignServiceImplTest {
+class SendCampaignServiceImplTest {
   public static final PodamFactory podamFactory = TestUtils.getPodamFactory();
   @Mock
   private CampaignRepository campaignRepositoryMock;
@@ -87,16 +87,16 @@ class CampaignServiceImplTest {
     request.setOrganizationId(1L);
     request.setSubUnitCode("orgSubUnitCode");
 
-    Campaign existingCampaign = Campaign.builder().externalId(externalCampaignId).build();
+    SendCampaign existingSendCampaign = SendCampaign.builder().externalId(externalCampaignId).build();
 
     when(campaignRepositoryMock.findByExternalIdAndOrganizationIdAndOrgSubUnitCode(
       externalCampaignId, request.getOrganizationId(), request.getSubUnitCode()))
-      .thenReturn(Optional.of(existingCampaign));
+      .thenReturn(Optional.of(existingSendCampaign));
 
-    Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
+    SendCampaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
 
     assertNotNull(result);
-    assertEquals(existingCampaign, result);
+    assertEquals(existingSendCampaign, result);
   }
 
   @Test
@@ -109,7 +109,7 @@ class CampaignServiceImplTest {
     request.setOrganizationId(1L);
     request.setSubUnitCode("orgSubUnitCode");
 
-    Campaign expectedCampaign = Campaign.builder()
+    SendCampaign expectedSendCampaign = SendCampaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(request.getOrganizationId())
@@ -122,12 +122,12 @@ class CampaignServiceImplTest {
       externalCampaignId, request.getOrganizationId(), request.getSubUnitCode()))
       .thenReturn(Optional.empty());
 
-    when(campaignRepositoryMock.save(expectedCampaign)).thenReturn(expectedCampaign);
+    when(campaignRepositoryMock.save(expectedSendCampaign)).thenReturn(expectedSendCampaign);
 
-    Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
+    SendCampaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
 
     assertNotNull(result);
-    assertEquals(expectedCampaign, result);
+    assertEquals(expectedSendCampaign, result);
   }
 
   @Test
@@ -147,17 +147,17 @@ class CampaignServiceImplTest {
   void givenExistingCampaignWhenAlignCampaignThenUpdateCountersAndSave() {
     String campaignId = "campaignId";
     OffsetDateTime recalculationDate = OffsetDateTime.now(Constants.ZONEID);
-    Campaign campaign = Campaign.builder().build();
+    SendCampaign sendCampaign = SendCampaign.builder().build();
     Counters mockCounters = new Counters();
 
-    when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.of(campaign));
+    when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.of(sendCampaign));
     when(sendNotificationNoPIIRepositoryMock.calculateCampaignCounters(campaignId)).thenReturn(mockCounters);
-    when(campaignRepositoryMock.save(campaign)).thenReturn(campaign);
+    when(campaignRepositoryMock.save(sendCampaign)).thenReturn(sendCampaign);
 
     campaignService.alignCampaign(campaignId, recalculationDate);
 
-    assertEquals(mockCounters, campaign.getCounters());
-    assertEquals(recalculationDate, campaign.getCounters().getFullRecalculationDate());
+    assertEquals(mockCounters, sendCampaign.getCounters());
+    assertEquals(recalculationDate, sendCampaign.getCounters().getFullRecalculationDate());
   }
 
   @Test
@@ -173,18 +173,18 @@ class CampaignServiceImplTest {
     );
 
     assertEquals(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, exception.getCode());
-    assertEquals(String.format("Campaign having id %s not found", campaignId), exception.getMessage());
+    assertEquals(String.format("SendCampaign having id %s not found", campaignId), exception.getMessage());
   }
 
   @Test
   void whenIncrementTotalAndUpdateEndDateThenOk() {
-    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
+    SendCampaign sendCampaign = podamFactory.manufacturePojo(SendCampaign.class);
     LocalDate endDate = LocalDate.of(2026, Month.JUNE, 30);
     UpdateResult updateResult = podamFactory.manufacturePojo(UpdateResult.class);
 
-    when(campaignRepositoryMock.incrementTotalAndUpdateEndDate(campaign.getCampaignId(), endDate)).thenReturn(updateResult);
+    when(campaignRepositoryMock.incrementTotalAndUpdateEndDate(sendCampaign.getCampaignId(), endDate)).thenReturn(updateResult);
 
-    assertDoesNotThrow(()->campaignService.incrementTotalAndUpdateEndDate(campaign.getCampaignId(), endDate));
+    assertDoesNotThrow(()->campaignService.incrementTotalAndUpdateEndDate(sendCampaign.getCampaignId(), endDate));
   }
 
   @Test
@@ -215,14 +215,14 @@ class CampaignServiceImplTest {
 
   @Test
   void whenGetCampaignByIdThenOk() {
-    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
+    SendCampaign sendCampaign = podamFactory.manufacturePojo(SendCampaign.class);
 
-    when(campaignRepositoryMock.findById(campaign.getCampaignId())).thenReturn(Optional.of(campaign));
+    when(campaignRepositoryMock.findById(sendCampaign.getCampaignId())).thenReturn(Optional.of(sendCampaign));
 
-    Campaign result = campaignService.getCampaignById(campaign.getCampaignId());
+    SendCampaign result = campaignService.getCampaignById(sendCampaign.getCampaignId());
 
     assertNotNull(result);
-    assertEquals(campaign, result);
+    assertEquals(sendCampaign, result);
   }
 
   @Test
@@ -270,8 +270,8 @@ class CampaignServiceImplTest {
     CampaignFiltersDTO campaignFiltersDTO = podamFactory.manufacturePojo(CampaignFiltersDTO.class);
     Pageable pageable = PageRequest.of(0, 10);
 
-    List<Campaign> campaigns = podamFactory.manufacturePojo(List.class, Campaign.class);
-    Page<Campaign> campaignPage = new PageImpl<>(campaigns);
+    List<SendCampaign> sendCampaigns = podamFactory.manufacturePojo(List.class, SendCampaign.class);
+    Page<SendCampaign> campaignPage = new PageImpl<>(sendCampaigns);
     PagedCampaign expected = podamFactory.manufacturePojo(PagedCampaign.class);
 
     when(campaignRepositoryMock.findCampaignsByFilters(campaignFiltersDTO, pageable))

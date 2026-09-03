@@ -4,7 +4,7 @@ import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
-import it.gov.pagopa.pu.send.model.Campaign;
+import it.gov.pagopa.pu.send.model.SendCampaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.Constants;
@@ -54,7 +54,7 @@ class SendNotificationStatusHandlerServiceImplTest {
   void whenHandleNewSendNotificationThenOk() {
     CreateNotificationRequest createNotificationRequest = podamFactory.manufacturePojo(CreateNotificationRequest.class);
     LocalDate creationDate = LocalDate.of(2026, Month.JUNE, 30);
-    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
+    SendCampaign sendCampaign = podamFactory.manufacturePojo(SendCampaign.class);
     try(MockedStatic<LocalDate> localDateMockedStatic = Mockito.mockStatic(LocalDate.class)) {
       localDateMockedStatic.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(creationDate);
       when(campaignServiceMock.createIfNotExists(
@@ -62,13 +62,13 @@ class SendNotificationStatusHandlerServiceImplTest {
         createNotificationRequest.getCampaignName(),
         createNotificationRequest,
         creationDate
-      )).thenReturn(campaign);
-      doNothing().when(campaignServiceMock).incrementTotalAndUpdateEndDate(campaign.getCampaignId(),creationDate);
+      )).thenReturn(sendCampaign);
+      doNothing().when(campaignServiceMock).incrementTotalAndUpdateEndDate(sendCampaign.getCampaignId(),creationDate);
 
-      Campaign result = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
+      SendCampaign result = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
 
       Assertions.assertNotNull(result);
-      Assertions.assertEquals(campaign,result);
+      Assertions.assertEquals(sendCampaign,result);
     }
   }
 
@@ -159,10 +159,10 @@ class SendNotificationStatusHandlerServiceImplTest {
 
     Counters counters = new Counters();
     counters.setTotal(1L);
-    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
-    campaign.setCounters(counters);
+    SendCampaign sendCampaign = podamFactory.manufacturePojo(SendCampaign.class);
+    sendCampaign.setCounters(counters);
 
-    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
+    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(sendCampaign);
     doNothing().when(campaignServiceMock).deleteCampaignById(campaignId);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
@@ -178,10 +178,10 @@ class SendNotificationStatusHandlerServiceImplTest {
 
     Counters counters = new Counters();
     counters.setTotal(2L);
-    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
-    campaign.setCounters(counters);
-    campaign.setStartDate(notificationCreationDate);
-    campaign.setEndDate(endDate);
+    SendCampaign sendCampaign = podamFactory.manufacturePojo(SendCampaign.class);
+    sendCampaign.setCounters(counters);
+    sendCampaign.setStartDate(notificationCreationDate);
+    sendCampaign.setEndDate(endDate);
 
     Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.analogicCompletion));
     when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
@@ -194,7 +194,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     LocalDateTime newStartCreationDate = LocalDateTime.of(2026, Month.JULY, 3, 0, 0);
     sendNotification.setCreationDate(newStartCreationDate);
 
-    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
+    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(sendCampaign);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
     when(sendNotificationNoPIIRepositoryMock.findTopByCampaignIdOrderByCreationDateAsc(campaignId))
       .thenReturn(sendNotification);
@@ -213,10 +213,10 @@ class SendNotificationStatusHandlerServiceImplTest {
 
     Counters counters = new Counters();
     counters.setTotal(2L);
-    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
-    campaign.setCounters(counters);
-    campaign.setStartDate(startDate);
-    campaign.setEndDate(notificationCreationDate);
+    SendCampaign sendCampaign = podamFactory.manufacturePojo(SendCampaign.class);
+    sendCampaign.setCounters(counters);
+    sendCampaign.setStartDate(startDate);
+    sendCampaign.setEndDate(notificationCreationDate);
 
     Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompletionCourtesyMessage));
     when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
@@ -229,7 +229,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     LocalDateTime newEndCreationDate = LocalDateTime.of(2026, Month.JUNE, 29, 0, 0);
     sendNotification.setCreationDate(newEndCreationDate);
 
-    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
+    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(sendCampaign);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
     when(sendNotificationNoPIIRepositoryMock.findTopByCampaignIdOrderByCreationDateDesc(campaignId))
       .thenReturn(sendNotification);
@@ -249,10 +249,10 @@ class SendNotificationStatusHandlerServiceImplTest {
 
     Counters counters = new Counters();
     counters.setTotal(2L);
-    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
-    campaign.setCounters(counters);
-    campaign.setStartDate(startDate);
-    campaign.setEndDate(endDate);
+    SendCampaign sendCampaign = podamFactory.manufacturePojo(SendCampaign.class);
+    sendCampaign.setCounters(counters);
+    sendCampaign.setStartDate(startDate);
+    sendCampaign.setEndDate(endDate);
 
     Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted));
     when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
@@ -261,7 +261,7 @@ class SendNotificationStatusHandlerServiceImplTest {
       .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.total))
       .build();
 
-    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
+    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(sendCampaign);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
@@ -278,16 +278,16 @@ class SendNotificationStatusHandlerServiceImplTest {
 
     Counters counters = new Counters();
     counters.setTotal(2L);
-    Campaign campaign = podamFactory.manufacturePojo(Campaign.class);
-    campaign.setCounters(counters);
-    campaign.setStartDate(startDate);
-    campaign.setEndDate(endDate);
+    SendCampaign sendCampaign = podamFactory.manufacturePojo(SendCampaign.class);
+    sendCampaign.setCounters(counters);
+    sendCampaign.setStartDate(startDate);
+    sendCampaign.setEndDate(endDate);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .decrFields(Set.of(Counters.Fields.total))
       .build();
 
-    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
+    when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(sendCampaign);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(

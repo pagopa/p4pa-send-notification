@@ -17,7 +17,7 @@ import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
-import it.gov.pagopa.pu.send.model.Campaign;
+import it.gov.pagopa.pu.send.model.SendCampaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
@@ -107,9 +107,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       }
     }
 
-    Campaign campaign = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
+    SendCampaign sendCampaign = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
     SendNotification sendNotification = sendNotificationPIIRepository.save(
-      mapper.mapToModel(createNotificationRequest, campaign.getCampaignId(), accessToken)
+      mapper.mapToModel(createNotificationRequest, sendCampaign.getCampaignId(), accessToken)
     );
 
     return CreateNotificationResponse

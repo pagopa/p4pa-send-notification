@@ -7,7 +7,7 @@ import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
-import it.gov.pagopa.pu.send.model.Campaign;
+import it.gov.pagopa.pu.send.model.SendCampaign;
 import it.gov.pagopa.pu.send.service.CampaignService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +62,7 @@ public class CampaignController implements CampaignApi {
   }
 
   @Override
-  public ResponseEntity<Campaign> getCampaign(String campaignId) {
+  public ResponseEntity<SendCampaign> getCampaign(String campaignId) {
     log.info("retrieve campaign having campaignId {}", campaignId);
     return ResponseEntity.ok(campaignService.getCampaignById(campaignId));
   }

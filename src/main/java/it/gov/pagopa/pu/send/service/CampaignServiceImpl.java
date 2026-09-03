@@ -13,7 +13,7 @@ import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
-import it.gov.pagopa.pu.send.model.Campaign;
+import it.gov.pagopa.pu.send.model.SendCampaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
@@ -55,18 +55,18 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
-  public Campaign createIfNotExists(String externalCampaignId, String campaignName, CreateNotificationRequest sendNotificationReq, LocalDate sendNotificationCreationDate) {
+  public SendCampaign createIfNotExists(String externalCampaignId, String campaignName, CreateNotificationRequest sendNotificationReq, LocalDate sendNotificationCreationDate) {
     Long organizationId = sendNotificationReq.getOrganizationId();
     String orgSubUnitCode = sendNotificationReq.getSubUnitCode();
 
-    Optional<Campaign> existingCampaign = campaignRepository
+    Optional<SendCampaign> existingCampaign = campaignRepository
       .findByExternalIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, organizationId, orgSubUnitCode);
 
     if (existingCampaign.isPresent()) {
       return existingCampaign.get();
     }
 
-    Campaign newCampaign = Campaign.builder()
+    SendCampaign newSendCampaign = SendCampaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(organizationId)
@@ -75,7 +75,7 @@ public class CampaignServiceImpl implements CampaignService {
       .endDate(sendNotificationCreationDate)
       .build();
 
-    return campaignRepository.save(newCampaign);
+    return campaignRepository.save(newSendCampaign);
   }
 
   @Override
@@ -87,18 +87,18 @@ public class CampaignServiceImpl implements CampaignService {
 
   @Override
   public void alignCampaign(String campaignId, OffsetDateTime fullRecalculationDate) {
-    Campaign campaign = campaignRepository.findById(campaignId)
+    SendCampaign sendCampaign = campaignRepository.findById(campaignId)
       .orElseThrow(() -> new NotFoundException(
         ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND,
-        String.format("Campaign having id %s not found", campaignId)
+        String.format("SendCampaign having id %s not found", campaignId)
       ));
 
     Counters counters = sendNotificationNoPIIRepository.calculateCampaignCounters(campaignId);
     counters.setFullRecalculationDate(fullRecalculationDate);
 
-    campaign.setCounters(counters);
+    sendCampaign.setCounters(counters);
 
-    campaignRepository.save(campaign);
+    campaignRepository.save(sendCampaign);
   }
 
   @Override
@@ -118,9 +118,9 @@ public class CampaignServiceImpl implements CampaignService {
   }
 
   @Override
-  public Campaign getCampaignById(String campaignId) {
+  public SendCampaign getCampaignById(String campaignId) {
     return campaignRepository.findById(campaignId)
-      .orElseThrow(()-> new NotFoundException(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, "Campaign having id "+campaignId+" not found"));
+      .orElseThrow(()-> new NotFoundException(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, "SendCampaign having id "+campaignId+" not found"));
   }
 
   @Override
