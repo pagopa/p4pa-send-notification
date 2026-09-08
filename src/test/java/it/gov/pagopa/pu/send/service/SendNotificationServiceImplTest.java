@@ -30,6 +30,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -284,14 +286,19 @@ class SendNotificationServiceImplTest {
   }
 
 
-  @Test
-  void givenDeleteNotificationRequestWhenDeleteSendNotificationThenVerify() {
+  @ParameterizedTest
+  @EnumSource(value = NotificationStatus.class, names = {
+    "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED"
+  })
+  void givenNotificationWithStatusBeforeInValidationWhenDeleteSendNotificationThenVerify(
+    NotificationStatus notificationStatus
+  ) {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     Path relativePath = Path.of("1/sendNotificationId");
 
-    SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
+    SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY, notificationStatus);
     notification.setCreationDate(LocalDateTime.of(2026,Month.JUNE,30,12,0));
     PuPayment puPayment = new PuPayment();
     Payment payment = new Payment();
@@ -350,13 +357,19 @@ class SendNotificationServiceImplTest {
     }
   }
 
-  @Test
-  void givenDeleteNotificationRequestWithStatusCompleteWhenDeleteSendNotificationThenInvalidStatusException() {
+  @ParameterizedTest
+  @EnumSource(value = NotificationStatus.class, names = {
+    "IN_VALIDATION", "ACCEPTED", "REFUSED", "DELIVERING", "DELIVERED", "VIEWED",
+    "EFFECTIVE_DATE", "PAID", "UNREACHABLE", "CANCELLED", "RETURNED_TO_SENDER"
+  })
+  void givenNotificationWithStatusEqualsOrAfterInValidationWhenDeleteSendNotificationThenInvalidStatusException(
+    NotificationStatus notificationStatus
+  ) {
     //Given
     String sendNotificationId = "sendNotificationId";
     String fileName = "file.pdf";
     SendNotificationNoPII notification = createMockNotification(sendNotificationId, fileName, FileStatus.READY);
-    notification.setStatus(NotificationStatus.ACCEPTED);
+    notification.setStatus(notificationStatus);
 
     when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId)).thenReturn(
       Optional.of(notification));
@@ -365,14 +378,18 @@ class SendNotificationServiceImplTest {
     Exception exception = Assertions.assertThrows(InvalidStatusException.class, () -> sendNotificationService.deleteSendNotification(sendNotificationId));
 
     //Then
-    Assertions.assertEquals("Cannot delete notification with status complete", exception.getMessage());
+    Assertions.assertEquals("Cannot delete notification with status %s".formatted(notificationStatus), exception.getMessage());
   }
 
   private SendNotificationNoPII createMockNotification(String sendNotificationId, String fileName, FileStatus fileStatus) {
+    return this.createMockNotification(sendNotificationId, fileName, fileStatus, NotificationStatus.WAITING_FILE);
+  }
+
+  private SendNotificationNoPII createMockNotification(String sendNotificationId, String fileName, FileStatus fileStatus, NotificationStatus notificationStatus) {
     SendNotificationNoPII notification = new SendNotificationNoPII();
     notification.setOrganizationId(1L);
     notification.setSendNotificationId(sendNotificationId);
-    notification.setStatus(NotificationStatus.WAITING_FILE);
+    notification.setStatus(notificationStatus);
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO();
     notification.setRecipients(List.of(recipient));
 
