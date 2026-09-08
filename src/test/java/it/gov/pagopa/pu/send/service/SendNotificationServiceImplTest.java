@@ -290,7 +290,7 @@ class SendNotificationServiceImplTest {
   @EnumSource(value = NotificationStatus.class, names = {
     "WAITING_FILE", "SENDING", "REGISTERED", "UPLOADED"
   })
-  void givenDeleteNotificationRequestWhenDeleteSendNotificationThenVerify(
+  void givenNotificationWithStatusBeforeInValidationWhenDeleteSendNotificationThenVerify(
     NotificationStatus notificationStatus
   ) {
     //Given
