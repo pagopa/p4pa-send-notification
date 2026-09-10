@@ -1,33 +1,21 @@
 package it.gov.pagopa.pu.send.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
+import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldNameConstants
-public class CampaignCountersAggregationResult implements Serializable {
-  private Long total = 0L;
-  private Long accepted = 0L;
-  private Long delivered = 0L;
-  private Long completed = 0L;
-  private Long analogicCompletionPreOutcome = 0L;
-  private Long analogicCompletion = 0L;
-  private Long digitalCompletionDigitalDomicile = 0L;
-  private Long digitalCompletionCourtesyMessage = 0L;
-  private Long failed = 0L;
-  private Long deceasedRecipient = 0L;
-  private Long recipientNotFound = 0L;
-  private OffsetDateTime fullRecalculationDate;
+public class CampaignCountersAggregationResult extends Counters implements Serializable {
+
   private LocalDate startDate;
   private LocalDate endDate;
 }

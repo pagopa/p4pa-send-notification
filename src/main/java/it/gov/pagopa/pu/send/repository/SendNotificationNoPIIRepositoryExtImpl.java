@@ -203,7 +203,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   @Override
   public CampaignCountersAggregationResult calculateCampaignCounters(String campaignId) {
     GroupOperation groupOperation = Aggregation.group()
-      .count().as(CampaignCountersAggregationResult.Fields.total)
+      .count().as(Counters.Fields.total)
       .min(BaseEntity.Fields.creationDate).as(CampaignCountersAggregationResult.Fields.startDate)
       .max(BaseEntity.Fields.creationDate).as(CampaignCountersAggregationResult.Fields.endDate);
 
