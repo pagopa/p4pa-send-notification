@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
+import it.gov.pagopa.pu.send.mapper.CampaignCountersMapper;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
@@ -58,6 +59,8 @@ class CampaignServiceImplTest {
   private PagedSendNotificationsMapper pagedSendNotificationsMapperMock;
   @Mock
   private DataCipherService dataCipherServiceMock;
+  @Mock
+  private CampaignCountersMapper campaignCountersMapperMock;
 
   @InjectMocks
   private CampaignServiceImpl campaignService;
@@ -70,7 +73,8 @@ class CampaignServiceImplTest {
       sendNotificationNoPIIRepositoryExtMock,
       pagedCampaignMapperMock,
       pagedSendNotificationsMapperMock,
-      dataCipherServiceMock
+      dataCipherServiceMock,
+      campaignCountersMapperMock
     );
   }
 
@@ -146,11 +150,12 @@ class CampaignServiceImplTest {
     OffsetDateTime recalculationDate = OffsetDateTime.now(Constants.ZONEID);
     Campaign campaign = Campaign.builder().build();
     Counters mockCounters = new Counters();
-    CampaignCountersAggregationResult mockCampaignCountersAggregationResult = new CampaignCountersAggregationResult(mockCounters, null, null);
+    CampaignCountersAggregationResult mockCampaignCountersAggregationResult = new CampaignCountersAggregationResult();
 
     when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.of(campaign));
     when(sendNotificationNoPIIRepositoryMock.calculateCampaignCounters(campaignId)).thenReturn(mockCampaignCountersAggregationResult);
     when(campaignRepositoryMock.save(campaign)).thenReturn(campaign);
+    when(campaignCountersMapperMock.toCounters(mockCampaignCountersAggregationResult)).thenReturn(mockCounters);
 
     campaignService.alignCampaign(campaignId, recalculationDate);
 

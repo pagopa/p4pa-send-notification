@@ -2,17 +2,16 @@ package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.dto.CampaignCountersAggregationResult;
-import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
-import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
-import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
-import it.gov.pagopa.pu.send.util.TestUtils;
 import it.gov.pagopa.pu.send.util.Constants;
+import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
 import org.bson.Document;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import uk.co.jemos.podam.api.PodamFactory;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
@@ -270,11 +268,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   @Test
   void givenCampaignIdWhenCalculateCampaignCountersThenReturnExpectedCounters() {
     String campaignId = "campaignId";
-    CampaignCountersAggregationResult exRes = CampaignCountersAggregationResult.builder()
-      .counters(new Counters())
-      .startDate(LocalDate.now())
-      .endDate(LocalDate.now())
-      .build();
+    CampaignCountersAggregationResult exRes = podamFactory.manufacturePojo(CampaignCountersAggregationResult.class);
 
     AggregationResults<CampaignCountersAggregationResult> aggregationResults = new AggregationResults<>(
       List.of(exRes),
@@ -308,10 +302,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     CampaignCountersAggregationResult res = repository.calculateCampaignCounters(campaignId);
 
     assertNotNull(res);
-    assertNotNull(res.getCounters());
-    assertEquals(0L, res.getCounters().getTotal());
-    assertEquals(0L, res.getCounters().getAccepted());
-    assertEquals(0L, res.getCounters().getDelivered());
+    assertEquals(0L, res.getTotal());
+    assertEquals(0L, res.getAccepted());
+    assertEquals(0L, res.getDelivered());
   }
   @Test
   void givenStreamEventsWhenPushStreamEventsHistoryThenOk() {

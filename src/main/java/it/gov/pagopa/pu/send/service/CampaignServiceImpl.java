@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
+import it.gov.pagopa.pu.send.mapper.CampaignCountersMapper;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
@@ -35,20 +36,22 @@ public class CampaignServiceImpl implements CampaignService {
   private final PagedCampaignMapper pagedCampaignMapper;
   private final PagedSendNotificationsMapper pagedSendNotificationsMapper;
   private final DataCipherService dataCipherService;
+  private final CampaignCountersMapper campaignCountersMapper;
 
   public CampaignServiceImpl(
-    CampaignRepository campaignRepository,
-    SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
-    SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt,
-    PagedCampaignMapper pagedCampaignMapper,
-    PagedSendNotificationsMapper pagedSendNotificationsMapper,
-    DataCipherService dataCipherService) {
+          CampaignRepository campaignRepository,
+          SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
+          SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt,
+          PagedCampaignMapper pagedCampaignMapper,
+          PagedSendNotificationsMapper pagedSendNotificationsMapper,
+          DataCipherService dataCipherService, CampaignCountersMapper campaignCountersMapper) {
     this.campaignRepository = campaignRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendNotificationNoPIIRepositoryExt = sendNotificationNoPIIRepositoryExt;
     this.pagedCampaignMapper = pagedCampaignMapper;
     this.pagedSendNotificationsMapper = pagedSendNotificationsMapper;
     this.dataCipherService = dataCipherService;
+      this.campaignCountersMapper = campaignCountersMapper;
   }
 
   @Override
@@ -92,7 +95,7 @@ public class CampaignServiceImpl implements CampaignService {
 
     CampaignCountersAggregationResult result = sendNotificationNoPIIRepository.calculateCampaignCounters(campaignId);
 
-    Counters counters = result.getCounters();
+    Counters counters = campaignCountersMapper.toCounters(result);
     counters.setFullRecalculationDate(fullRecalculationDate);
 
     campaign.setCounters(counters);

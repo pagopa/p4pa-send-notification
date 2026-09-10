@@ -203,7 +203,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   @Override
   public CampaignCountersAggregationResult calculateCampaignCounters(String campaignId) {
     GroupOperation groupOperation = Aggregation.group()
-      .count().as("counters." + Counters.Fields.total)
+      .count().as(CampaignCountersAggregationResult.Fields.total)
       .min(BaseEntity.Fields.creationDate).as(CampaignCountersAggregationResult.Fields.startDate)
       .max(BaseEntity.Fields.creationDate).as(CampaignCountersAggregationResult.Fields.endDate);
 
@@ -220,7 +220,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
 
     CampaignCountersAggregationResult counters = results.getUniqueMappedResult();
 
-    return counters != null ? counters : new CampaignCountersAggregationResult(new Counters(), null, null);
+    return counters != null ? counters : new CampaignCountersAggregationResult();
   }
 
   private AggregationExpression buildStatusCondition(String counterName) {

@@ -8,6 +8,7 @@ import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -15,7 +16,18 @@ import java.time.LocalDate;
 @Builder
 @FieldNameConstants
 public class CampaignCountersAggregationResult implements Serializable {
-  private Counters counters;
+  private Long total = 0L;
+  private Long accepted = 0L;
+  private Long delivered = 0L;
+  private Long completed = 0L;
+  private Long analogicCompletionPreOutcome = 0L;
+  private Long analogicCompletion = 0L;
+  private Long digitalCompletionDigitalDomicile = 0L;
+  private Long digitalCompletionCourtesyMessage = 0L;
+  private Long failed = 0L;
+  private Long deceasedRecipient = 0L;
+  private Long recipientNotFound = 0L;
+  private OffsetDateTime fullRecalculationDate;
   private LocalDate startDate;
   private LocalDate endDate;
 }
