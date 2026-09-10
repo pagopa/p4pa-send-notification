@@ -201,11 +201,11 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   @Override
-  public Counters calculateCampaignCounters(String campaignId) {
+  public CampaignCountersAggregationResult calculateCampaignCounters(String campaignId) {
     GroupOperation groupOperation = Aggregation.group()
-      .count().as(Counters.Fields.total)
-      .min(BaseEntity.Fields.creationDate).as(Counters.Fields.startDate)
-      .max(BaseEntity.Fields.creationDate).as(Counters.Fields.endDate);
+      .count().as("counters." + Counters.Fields.total)
+      .min(BaseEntity.Fields.creationDate).as(CampaignCountersAggregationResult.Fields.startDate)
+      .max(BaseEntity.Fields.creationDate).as(CampaignCountersAggregationResult.Fields.endDate);
 
     for (String counterName : CampaignCounterRules.COUNTER_RULES.keySet()) {
       groupOperation = groupOperation.sum(buildStatusCondition(counterName)).as(counterName);
@@ -216,11 +216,11 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
       groupOperation
     );
 
-    AggregationResults<Counters> results = mongoTemplate.aggregate(aggregation, SendNotificationNoPII.class, Counters.class);
+    AggregationResults<CampaignCountersAggregationResult> results = mongoTemplate.aggregate(aggregation, SendNotificationNoPII.class, CampaignCountersAggregationResult.class);
 
-    Counters counters = results.getUniqueMappedResult();
+    CampaignCountersAggregationResult counters = results.getUniqueMappedResult();
 
-    return counters != null ? counters : new Counters();
+    return counters != null ? counters : new CampaignCountersAggregationResult(new Counters(), null, null);
   }
 
   private AggregationExpression buildStatusCondition(String counterName) {

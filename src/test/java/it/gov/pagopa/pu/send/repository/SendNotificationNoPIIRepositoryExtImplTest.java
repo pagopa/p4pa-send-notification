@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.send.dto.CampaignCountersAggregationResult;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
 import it.gov.pagopa.pu.send.dto.Counters;
@@ -30,6 +31,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import uk.co.jemos.podam.api.PodamFactory;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
@@ -268,9 +270,13 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   @Test
   void givenCampaignIdWhenCalculateCampaignCountersThenReturnExpectedCounters() {
     String campaignId = "campaignId";
-    Counters exRes = new Counters();
+    CampaignCountersAggregationResult exRes = CampaignCountersAggregationResult.builder()
+      .counters(new Counters())
+      .startDate(LocalDate.now())
+      .endDate(LocalDate.now())
+      .build();
 
-    AggregationResults<Counters> aggregationResults = new AggregationResults<>(
+    AggregationResults<CampaignCountersAggregationResult> aggregationResults = new AggregationResults<>(
       List.of(exRes),
       new Document()
     );
@@ -278,10 +284,10 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(SendNotificationNoPII.class),
-      Mockito.eq(Counters.class)
+      Mockito.eq(CampaignCountersAggregationResult.class)
     )).thenReturn(aggregationResults);
 
-    Counters res = repository.calculateCampaignCounters(campaignId);
+    CampaignCountersAggregationResult res = repository.calculateCampaignCounters(campaignId);
 
     assertEquals(exRes, res);
   }
@@ -290,22 +296,23 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   void givenCampaignIdWithNoResultsWhenCalculateCampaignCountersThenReturnCountersWithZeroValues() {
     String campaignId = "campaignId";
 
-    AggregationResults<Counters> aggregationResults = new AggregationResults<>(Collections.emptyList(), new Document());
+    AggregationResults<CampaignCountersAggregationResult> aggregationResults =
+      new AggregationResults<>(Collections.emptyList(), new Document());
 
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(SendNotificationNoPII.class),
-      Mockito.eq(Counters.class)
+      Mockito.eq(CampaignCountersAggregationResult.class)
     )).thenReturn(aggregationResults);
 
-    Counters res = repository.calculateCampaignCounters(campaignId);
+    CampaignCountersAggregationResult res = repository.calculateCampaignCounters(campaignId);
 
     assertNotNull(res);
-    assertEquals(0L, res.getTotal());
-    assertEquals(0L, res.getAccepted());
-    assertEquals(0L, res.getDelivered());
+    assertNotNull(res.getCounters());
+    assertEquals(0L, res.getCounters().getTotal());
+    assertEquals(0L, res.getCounters().getAccepted());
+    assertEquals(0L, res.getCounters().getDelivered());
   }
-
   @Test
   void givenStreamEventsWhenPushStreamEventsHistoryThenOk() {
     String sendNotificationId = "sendNotificationId";

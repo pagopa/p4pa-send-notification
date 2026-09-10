@@ -2,10 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
-import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
-import it.gov.pagopa.pu.send.dto.Counters;
-import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
-import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
+import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
@@ -149,9 +146,10 @@ class CampaignServiceImplTest {
     OffsetDateTime recalculationDate = OffsetDateTime.now(Constants.ZONEID);
     Campaign campaign = Campaign.builder().build();
     Counters mockCounters = new Counters();
+    CampaignCountersAggregationResult mockCampaignCountersAggregationResult = new CampaignCountersAggregationResult(mockCounters, null, null);
 
     when(campaignRepositoryMock.findById(campaignId)).thenReturn(Optional.of(campaign));
-    when(sendNotificationNoPIIRepositoryMock.calculateCampaignCounters(campaignId)).thenReturn(mockCounters);
+    when(sendNotificationNoPIIRepositoryMock.calculateCampaignCounters(campaignId)).thenReturn(mockCampaignCountersAggregationResult);
     when(campaignRepositoryMock.save(campaign)).thenReturn(campaign);
 
     campaignService.alignCampaign(campaignId, recalculationDate);

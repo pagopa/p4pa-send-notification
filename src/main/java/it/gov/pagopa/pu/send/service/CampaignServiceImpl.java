@@ -2,10 +2,7 @@ package it.gov.pagopa.pu.send.service;
 
 import io.micrometer.common.util.StringUtils;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
-import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
-import it.gov.pagopa.pu.send.dto.Counters;
-import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
-import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
+import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
@@ -93,12 +90,14 @@ public class CampaignServiceImpl implements CampaignService {
         String.format("Campaign having id %s not found", campaignId)
       ));
 
-    Counters counters = sendNotificationNoPIIRepository.calculateCampaignCounters(campaignId);
+    CampaignCountersAggregationResult result = sendNotificationNoPIIRepository.calculateCampaignCounters(campaignId);
+
+    Counters counters = result.getCounters();
     counters.setFullRecalculationDate(fullRecalculationDate);
 
     campaign.setCounters(counters);
-    campaign.setStartDate(counters.getStartDate());
-    campaign.setEndDate(counters.getEndDate());
+    campaign.setStartDate(result.getStartDate());
+    campaign.setEndDate(result.getEndDate());
 
     campaignRepository.save(campaign);
   }
