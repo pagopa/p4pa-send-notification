@@ -1,17 +1,17 @@
 package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
-import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
-import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
-import it.gov.pagopa.pu.send.dto.Counters;
+import it.gov.pagopa.pu.send.dto.CampaignCountersAggregationResult;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
-import it.gov.pagopa.pu.send.util.TestUtils;
 import it.gov.pagopa.pu.send.util.Constants;
+import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
 import org.bson.Document;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -268,9 +268,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   @Test
   void givenCampaignIdWhenCalculateCampaignCountersThenReturnExpectedCounters() {
     String campaignId = "campaignId";
-    Counters exRes = new Counters();
+    CampaignCountersAggregationResult exRes = podamFactory.manufacturePojo(CampaignCountersAggregationResult.class);
 
-    AggregationResults<Counters> aggregationResults = new AggregationResults<>(
+    AggregationResults<CampaignCountersAggregationResult> aggregationResults = new AggregationResults<>(
       List.of(exRes),
       new Document()
     );
@@ -278,10 +278,10 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(SendNotificationNoPII.class),
-      Mockito.eq(Counters.class)
+      Mockito.eq(CampaignCountersAggregationResult.class)
     )).thenReturn(aggregationResults);
 
-    Counters res = repository.calculateCampaignCounters(campaignId);
+    CampaignCountersAggregationResult res = repository.calculateCampaignCounters(campaignId);
 
     assertEquals(exRes, res);
   }
@@ -290,22 +290,22 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   void givenCampaignIdWithNoResultsWhenCalculateCampaignCountersThenReturnCountersWithZeroValues() {
     String campaignId = "campaignId";
 
-    AggregationResults<Counters> aggregationResults = new AggregationResults<>(Collections.emptyList(), new Document());
+    AggregationResults<CampaignCountersAggregationResult> aggregationResults =
+      new AggregationResults<>(Collections.emptyList(), new Document());
 
     when(mongoTemplateMock.aggregate(
       Mockito.any(Aggregation.class),
       Mockito.eq(SendNotificationNoPII.class),
-      Mockito.eq(Counters.class)
+      Mockito.eq(CampaignCountersAggregationResult.class)
     )).thenReturn(aggregationResults);
 
-    Counters res = repository.calculateCampaignCounters(campaignId);
+    CampaignCountersAggregationResult res = repository.calculateCampaignCounters(campaignId);
 
     assertNotNull(res);
     assertEquals(0L, res.getTotal());
     assertEquals(0L, res.getAccepted());
     assertEquals(0L, res.getDelivered());
   }
-
   @Test
   void givenStreamEventsWhenPushStreamEventsHistoryThenOk() {
     String sendNotificationId = "sendNotificationId";
