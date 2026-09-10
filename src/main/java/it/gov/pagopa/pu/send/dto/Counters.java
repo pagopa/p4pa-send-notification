@@ -28,4 +28,3 @@ public class Counters implements Serializable {
   private Long recipientNotFound = 0L;
   private OffsetDateTime fullRecalculationDate;
 }
-
