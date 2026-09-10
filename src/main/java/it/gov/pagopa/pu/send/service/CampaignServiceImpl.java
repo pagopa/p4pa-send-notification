@@ -97,6 +97,8 @@ public class CampaignServiceImpl implements CampaignService {
     counters.setFullRecalculationDate(fullRecalculationDate);
 
     campaign.setCounters(counters);
+    campaign.setStartDate(counters.getStartDate());
+    campaign.setEndDate(counters.getEndDate());
 
     campaignRepository.save(campaign);
   }
