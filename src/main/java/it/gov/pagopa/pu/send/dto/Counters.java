@@ -1,6 +1,6 @@
 package it.gov.pagopa.pu.send.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @Builder
 @FieldNameConstants
+@JsonIgnoreProperties({"startDate", "endDate"})
 public class Counters implements Serializable {
   private Long total = 0L;
   private Long accepted = 0L;
@@ -29,9 +30,7 @@ public class Counters implements Serializable {
   private Long deceasedRecipient = 0L;
   private Long recipientNotFound = 0L;
   private OffsetDateTime fullRecalculationDate;
-  @JsonIgnore
   private LocalDate startDate;
-  @JsonIgnore
   private LocalDate endDate;
 }
 
