@@ -1,10 +1,10 @@
 package it.gov.pagopa.pu.send.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
+import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldNameConstants
 public class Counters implements Serializable {
   private Long total = 0L;

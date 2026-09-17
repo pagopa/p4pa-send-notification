@@ -1,14 +1,14 @@
 package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
-import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
-import it.gov.pagopa.pu.send.dto.Counters;
+import it.gov.pagopa.pu.send.dto.CampaignCountersAggregationResult;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -31,7 +31,7 @@ public interface SendNotificationNoPIIRepositoryExt {
   Optional<SendNotificationNoPII> findByNotificationRequestId(String notificationRequestId);
   UpdateResult addLegalFact(String sendNotificationId, LegalFactDTO legalFact);
   UpdateResult updateLegalFactStatus(String sendNotificationId, String fileName, FileStatus status);
-  Counters calculateCampaignCounters(String campaignId);
+  CampaignCountersAggregationResult calculateCampaignCounters(String campaignId);
   List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents);
   Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable);
   List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate);

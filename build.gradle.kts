@@ -63,6 +63,7 @@ val postgresJdbcVersion = "42.7.13"
 val caffeineVersion = "3.2.4"
 val commonsLang3Version = "3.20.0"
 val podamVersion = "8.0.2.RELEASE"
+val mapStructVersion = "1.6.3"
 
 // CVE Security dependencies
 val tomcatEmbedCoreVersion = "11.0.25"
@@ -94,12 +95,15 @@ dependencies {
     exclude(group = "org.lz4", module = "lz4-java")
   }
   implementation("at.yawk.lz4:lz4-java:$lz4JavaVersion")
+  implementation("org.mapstruct:mapstruct:$mapStructVersion")
 
   // CVE Security dependencies
   implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion")
 
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")
+  annotationProcessor("org.mapstruct:mapstruct-processor:$mapStructVersion")
+  testAnnotationProcessor("org.mapstruct:mapstruct-processor:$mapStructVersion")
   testAnnotationProcessor("org.projectlombok:lombok")
 
   //	Testing

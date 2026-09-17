@@ -2,15 +2,13 @@ package it.gov.pagopa.pu.send.service;
 
 import io.micrometer.common.util.StringUtils;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
-import it.gov.pagopa.pu.send.dto.CampaignFiltersDTO;
-import it.gov.pagopa.pu.send.dto.Counters;
-import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
-import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
+import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
 import it.gov.pagopa.pu.send.dto.generated.PagedCampaign;
 import it.gov.pagopa.pu.send.dto.generated.PagedSendNotifications;
 import it.gov.pagopa.pu.send.dto.generated.RenameCampaignRequest;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
+import it.gov.pagopa.pu.send.mapper.CampaignCountersMapper;
 import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
@@ -38,20 +36,22 @@ public class CampaignServiceImpl implements CampaignService {
   private final PagedCampaignMapper pagedCampaignMapper;
   private final PagedSendNotificationsMapper pagedSendNotificationsMapper;
   private final DataCipherService dataCipherService;
+  private final CampaignCountersMapper campaignCountersMapper;
 
   public CampaignServiceImpl(
-    CampaignRepository campaignRepository,
-    SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
-    SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt,
-    PagedCampaignMapper pagedCampaignMapper,
-    PagedSendNotificationsMapper pagedSendNotificationsMapper,
-    DataCipherService dataCipherService) {
+          CampaignRepository campaignRepository,
+          SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
+          SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt,
+          PagedCampaignMapper pagedCampaignMapper,
+          PagedSendNotificationsMapper pagedSendNotificationsMapper,
+          DataCipherService dataCipherService, CampaignCountersMapper campaignCountersMapper) {
     this.campaignRepository = campaignRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
     this.sendNotificationNoPIIRepositoryExt = sendNotificationNoPIIRepositoryExt;
     this.pagedCampaignMapper = pagedCampaignMapper;
     this.pagedSendNotificationsMapper = pagedSendNotificationsMapper;
     this.dataCipherService = dataCipherService;
+      this.campaignCountersMapper = campaignCountersMapper;
   }
 
   @Override
@@ -93,10 +93,14 @@ public class CampaignServiceImpl implements CampaignService {
         String.format("Campaign having id %s not found", campaignId)
       ));
 
-    Counters counters = sendNotificationNoPIIRepository.calculateCampaignCounters(campaignId);
+    CampaignCountersAggregationResult result = sendNotificationNoPIIRepository.calculateCampaignCounters(campaignId);
+
+    Counters counters = campaignCountersMapper.toCounters(result);
     counters.setFullRecalculationDate(fullRecalculationDate);
 
     campaign.setCounters(counters);
+    campaign.setStartDate(result.getStartDate());
+    campaign.setEndDate(result.getEndDate());
 
     campaignRepository.save(campaign);
   }
