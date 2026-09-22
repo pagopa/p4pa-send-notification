@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class SendNotification2SendNotificationDTOMapper {
 
   public SendNotificationDTO apply(SendNotificationNoPII sendNotificationNoPII) {
+    //ToDo add subject in ticket P4ADEV-5084
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
     notificationDTO.setSendNotificationId(sendNotificationNoPII.getSendNotificationId());
     notificationDTO.setCampaignId(sendNotificationNoPII.getCampaignId());

@@ -34,6 +34,7 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
     noPII.setIun(fullDTO.getIun());
     noPII.setNotificationFeePolicy(fullDTO.getNotificationFeePolicy());
     noPII.setPhysicalCommunicationType(fullDTO.getPhysicalCommunicationType());
+    noPII.setSubject(fullDTO.getSubject());
     noPII.setSenderDenomination(fullDTO.getSenderDenomination());
     noPII.setSenderTaxId(fullDTO.getSenderTaxId());
     noPII.setAmount(fullDTO.getAmount());
@@ -78,6 +79,7 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
     sendNotification.setIun(noPii.getIun());
     sendNotification.setNotificationFeePolicy(noPii.getNotificationFeePolicy());
     sendNotification.setPhysicalCommunicationType(noPii.getPhysicalCommunicationType());
+    sendNotification.setSubject(noPii.getSubject());
     sendNotification.setSenderDenomination(noPii.getSenderDenomination());
     sendNotification.setSenderTaxId(noPii.getSenderTaxId());
     sendNotification.setAmount(noPii.getAmount());

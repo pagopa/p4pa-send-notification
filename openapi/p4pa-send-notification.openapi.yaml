@@ -1406,6 +1406,7 @@ components:
         - notificationFeePolicy
         - physicalCommunicationType
         - externalCampaignId
+        - subject
       properties:
         organizationId:
           type: integer
@@ -1426,6 +1427,8 @@ components:
         physicalCommunicationType:
           type: string
           enum: [ AR_REGISTERED_LETTER, REGISTERED_LETTER_890 ]
+        subject:
+          type: string
         senderDenomination:
           type: string
         senderTaxId:

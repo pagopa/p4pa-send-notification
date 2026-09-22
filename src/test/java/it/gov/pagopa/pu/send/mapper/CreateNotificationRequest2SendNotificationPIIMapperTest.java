@@ -108,6 +108,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     checkDocuments(result);
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
+    Assertions.assertEquals("Test Notifica Piattaforma Unitaria", result.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
     Assertions.assertEquals(99999999, result.getAmount());
@@ -155,6 +156,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     checkDocuments(result);
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
+    Assertions.assertEquals("Test Notifica Piattaforma Unitaria", result.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
     Assertions.assertEquals(99999999, result.getAmount());
@@ -230,6 +232,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     }
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
+    Assertions.assertEquals("Test Notifica Piattaforma Unitaria", request.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
@@ -278,7 +281,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertThrows(NotFoundException.class, () -> mapper.mapToModel(request, null, accessToken));
   }
 
-  private static CreateNotificationRequest buildRequest() {
+  private CreateNotificationRequest buildRequest() {
     Recipient recipient = buildRecipient();
     Document document = buildDocument();
 
@@ -289,6 +292,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setDocuments(Collections.singletonList(document));
     request.setNotificationFeePolicy(NotificationFeePolicyEnum.DELIVERY_MODE);
     request.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER);
+    request.setSubject("Test Notifica Piattaforma Unitaria");
     request.setSenderDenomination("SENDERDENOMINATION");
     request.setSenderTaxId("SENDERTAXID");
     request.setAmount(BigDecimal.valueOf(99999999));

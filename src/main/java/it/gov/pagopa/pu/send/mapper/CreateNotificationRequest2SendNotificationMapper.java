@@ -57,6 +57,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
     sendNotification.setOrganizationId(organizationId);
     sendNotification.setNotificationFeePolicy(request.getNotificationFeePolicy().getValue());
     sendNotification.setPhysicalCommunicationType(request.getPhysicalCommunicationType().getValue());
+    sendNotification.setSubject(request.getSubject());
     sendNotification.setSenderDenomination(request.getSenderDenomination());
     sendNotification.setSenderTaxId(request.getSenderTaxId());
     sendNotification.setTaxonomyCode(request.getTaxonomyCode());

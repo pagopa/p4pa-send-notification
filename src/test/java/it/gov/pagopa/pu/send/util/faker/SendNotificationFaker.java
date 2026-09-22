@@ -26,6 +26,7 @@ public class SendNotificationFaker {
       .documents(List.of(buildDocumentAttachment(), buildDocumentDTO()))
       .notificationFeePolicy(NotificationFeePolicyDTO.DELIVERY_MODE.getValue())
       .physicalCommunicationType(NewNotificationRequestV24DTO.PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue())
+      .subject("Test Notifica Piattaforma Unitaria")
       .senderDenomination("Ente Intermediario 2")
       .senderTaxId("00000000018")
       .amount(100)
