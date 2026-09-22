@@ -1581,6 +1581,7 @@ components:
         - status
         - payments
         - campaignId
+        - subject
       properties:
         sendNotificationId:
           type: string
@@ -1595,6 +1596,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SendNotificationPaymentsDTO'
+        subject:
+          type: string
         status:
           type: 'NotificationStatus'
         errors:

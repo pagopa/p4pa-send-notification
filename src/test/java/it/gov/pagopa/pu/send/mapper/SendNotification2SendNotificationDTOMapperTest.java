@@ -25,6 +25,7 @@ class SendNotification2SendNotificationDTOMapperTest {
 
   @Test
   void givenPagoPaPaymentSendNotificationWhenMapThenReturnSendNotificationDTO() {
+    // given
     OffsetDateTime now = OffsetDateTime.now();
     PuPayment puPayment1 = new PuPayment(1L, new Payment(PagoPa.builder().noticeCode("NOTICECODE1").build(), null), now);
     PuPayment puPayment2 = new PuPayment(1L, new Payment(PagoPa.builder().noticeCode("NOTICECODE2").build(), null), now);
@@ -32,48 +33,36 @@ class SendNotification2SendNotificationDTOMapperTest {
     SendNotificationNoPII sendNotificationNoPII = createSendNotificationNoPII(List.of(puPayment1, puPayment2, puPayment3));
 
     // when
-    SendNotificationDTO result = mapper.apply(sendNotificationNoPII);
+    SendNotificationDTO sendNotificationDTO = mapper.apply(sendNotificationNoPII);
 
     // then
-    TestUtils.checkNotNullFields(result);
-    assertNotNull(result);
-    assertEquals("12345", result.getSendNotificationId());
-    assertEquals(1L, result.getOrganizationId());
-    assertEquals("IUN", result.getIun());
-    assertEquals(NotificationStatus.IN_VALIDATION, result.getStatus());
-
     List<SendNotificationPaymentsDTO> expectedPayments = List.of(
       new SendNotificationPaymentsDTO(1L, List.of("NOTICECODE1", "NOTICECODE2"), now),
       new SendNotificationPaymentsDTO(2L, List.of("NOTICECODE3"), now)
     );
-    assertEquals(expectedPayments, result.getPayments());
+    assertMappedSendNotificationDTO(sendNotificationDTO, sendNotificationNoPII, expectedPayments);
   }
 
   @Test
   void givenF24PaymentSendNotificationWhenMapThenReturnSendNotificationDTO() {
+    // given
     OffsetDateTime now = OffsetDateTime.now();
     PuPayment puPayment = new PuPayment(1L, new Payment(null,  F24Payment.builder().title("F24").build()), now);
     SendNotificationNoPII sendNotificationNoPII = createSendNotificationNoPII(List.of(puPayment));
 
     // when
-    SendNotificationDTO result = mapper.apply(sendNotificationNoPII);
+    SendNotificationDTO sendNotificationDTO = mapper.apply(sendNotificationNoPII);
 
     // then
-    TestUtils.checkNotNullFields(result);
-    assertNotNull(result);
-    assertEquals("12345", result.getSendNotificationId());
-    assertEquals(1L, result.getOrganizationId());
-    assertEquals("IUN", result.getIun());
-    assertEquals(NotificationStatus.IN_VALIDATION, result.getStatus());
-
     List<SendNotificationPaymentsDTO> expectedPayments = List.of(
       new SendNotificationPaymentsDTO(1L, Collections.emptyList(), now)
     );
-    assertEquals(expectedPayments, result.getPayments());
+    assertMappedSendNotificationDTO(sendNotificationDTO, sendNotificationNoPII, expectedPayments);
   }
 
   @Test
   void givenBothPagoPaAndF24PaymentSendNotificationWhenMapThenReturnSendNotificationDTO() {
+    // given
     OffsetDateTime now = OffsetDateTime.now();
     Payment payment = new Payment(
       PagoPa.builder().noticeCode("NOTICECODE").build(),
@@ -83,47 +72,44 @@ class SendNotification2SendNotificationDTOMapperTest {
     SendNotificationNoPII sendNotificationNoPII = createSendNotificationNoPII(List.of(puPayment));
 
     // when
-    SendNotificationDTO result = mapper.apply(sendNotificationNoPII);
+    SendNotificationDTO sendNotificationDTO = mapper.apply(sendNotificationNoPII);
 
     // then
-    TestUtils.checkNotNullFields(result);
-    assertNotNull(result);
-    assertEquals("12345", result.getSendNotificationId());
-    assertEquals(1L, result.getOrganizationId());
-    assertEquals("IUN", result.getIun());
-    assertEquals(NotificationStatus.IN_VALIDATION, result.getStatus());
-
     List<SendNotificationPaymentsDTO> expectedPayments = List.of(
       new SendNotificationPaymentsDTO(1L, List.of("NOTICECODE"), now)
     );
-    assertEquals(expectedPayments, result.getPayments());
+    assertMappedSendNotificationDTO(sendNotificationDTO, sendNotificationNoPII, expectedPayments);
   }
 
   @Test
   void givenPagoPaPaymentWithoutDebtPositionIdSendNotificationWhenMapThenReturnSendNotificationDTO() {
+    // given
     OffsetDateTime now = OffsetDateTime.now();
     PuPayment puPayment = new PuPayment(null, new Payment(PagoPa.builder().noticeCode("NOTICECODE").build(), null), now);
     SendNotificationNoPII sendNotificationNoPII = createSendNotificationNoPII(List.of(puPayment));
 
     // when
-    SendNotificationDTO result = mapper.apply(sendNotificationNoPII);
+    SendNotificationDTO sendNotificationDTO = mapper.apply(sendNotificationNoPII);
 
     // then
-    TestUtils.checkNotNullFields(result);
-    assertNotNull(result);
-    assertEquals("12345", result.getSendNotificationId());
-    assertEquals(1L, result.getOrganizationId());
-    assertEquals("IUN", result.getIun());
-    assertEquals(NotificationStatus.IN_VALIDATION, result.getStatus());
-
     List<SendNotificationPaymentsDTO> expectedPayments = List.of(
       new SendNotificationPaymentsDTO(null, List.of("NOTICECODE"), now)
     );
-    assertEquals(expectedPayments, result.getPayments());
+    assertMappedSendNotificationDTO(sendNotificationDTO, sendNotificationNoPII, expectedPayments);
   }
 
+  private void assertMappedSendNotificationDTO(SendNotificationDTO mappedSendNotificationDTO, SendNotificationNoPII sendNotificationNoPII, List<SendNotificationPaymentsDTO> expectedPayments) {
+    TestUtils.checkNotNullFields(mappedSendNotificationDTO);
+    assertNotNull(mappedSendNotificationDTO);
+    assertEquals(sendNotificationNoPII.getSendNotificationId(), mappedSendNotificationDTO.getSendNotificationId());
+    assertEquals(sendNotificationNoPII.getOrganizationId(), mappedSendNotificationDTO.getOrganizationId());
+    assertEquals(sendNotificationNoPII.getIun(), mappedSendNotificationDTO.getIun());
+    assertEquals(sendNotificationNoPII.getStatus(), mappedSendNotificationDTO.getStatus());
+    assertEquals(sendNotificationNoPII.getSubject(), mappedSendNotificationDTO.getSubject());
+    assertEquals(expectedPayments, mappedSendNotificationDTO.getPayments());
+  }
 
-  private static SendNotificationNoPII createSendNotificationNoPII(List<PuPayment> puPayments) {
+  private SendNotificationNoPII createSendNotificationNoPII(List<PuPayment> puPayments) {
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO();
     recipient.setPuPayments(puPayments);
 
@@ -134,6 +120,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     sendNotificationNoPII.setStatus(NotificationStatus.IN_VALIDATION);
     sendNotificationNoPII.setRecipients(List.of(recipient));
     sendNotificationNoPII.setCampaignId("CAMPAIGN_ID1");
+    sendNotificationNoPII.setSubject("SUBJECT");
     return sendNotificationNoPII;
   }
 

@@ -2729,7 +2729,7 @@
         }
       },
       "SendNotificationDTO" : {
-        "required" : [ "campaignId", "organizationId", "payments", "sendNotificationId", "status" ],
+        "required" : [ "campaignId", "organizationId", "payments", "sendNotificationId", "status", "subject" ],
         "type" : "object",
         "properties" : {
           "sendNotificationId" : {
@@ -2751,6 +2751,9 @@
             "items" : {
               "$ref" : "#/components/schemas/SendNotificationPaymentsDTO"
             }
+          },
+          "subject" : {
+            "type" : "string"
           },
           "status" : {
             "$ref" : "#/components/schemas/NotificationStatus"
