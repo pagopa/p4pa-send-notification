@@ -80,6 +80,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     assertEquals(noPii.getIun(), result.getIun());
     assertEquals(noPii.getNotificationFeePolicy(), result.getNotificationFeePolicy());
     assertEquals(noPii.getPhysicalCommunicationType(), result.getPhysicalCommunicationType());
+    assertEquals(noPii.getSubject(), result.getSubject());
     assertEquals(noPii.getSenderDenomination(), result.getSenderDenomination());
     assertEquals(noPii.getSenderTaxId(), result.getSenderTaxId());
     assertEquals(noPii.getAmount(), result.getAmount());
@@ -107,10 +108,10 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     TestUtils.checkNotNullFields(result, "personalDataId", "creationDate", "updateDate", "updateOperatorExternalId", "updateTraceId", "lastEventOfInterest", "history");
     assertNotNull(result);
     assertEquals(sendNotification.getSendNotificationId(), result.getSendNotificationId());
+    assertEquals(sendNotification.getSubject(), result.getSubject());
     assertEquals(expectedHash, result.getRecipients().getFirst().getFiscalCodeHash());
     assertEquals(sendNotification.getPuRecipients().getFirst().getPuPayments(), result.getRecipients().getFirst().getPuPayments());
   }
-
 
   @Test
   void givenFullDTOWhenExtractPiiEntityThenVerify() {
@@ -122,6 +123,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     assertNotNull(result);
     Assertions.assertEquals(sendNotification.getPuRecipients(), result.getPuRecipients());
   }
+
   private static SendNotificationNoPII getNoPII(Long personalDataId) {
     SendNotificationNoPII noPii = new SendNotificationNoPII();
     noPii.setSendNotificationId("SNID001");
@@ -140,6 +142,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     noPii.setIun("IUN123");
     noPii.setNotificationFeePolicy("Policy001");
     noPii.setPhysicalCommunicationType("Digital");
+    noPii.setSubject("Test Notifica Piattaforma Unitaria");
     noPii.setSenderDenomination("Sender Org");
     noPii.setSenderTaxId("TAX001");
     noPii.setAmount(100);

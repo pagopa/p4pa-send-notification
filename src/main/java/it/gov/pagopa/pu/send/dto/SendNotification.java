@@ -28,6 +28,7 @@ public class SendNotification implements FullEntityPIIDTO<SendNotificationNoPII,
   private String iun;
   private String notificationFeePolicy;
   private String physicalCommunicationType;
+  private String subject;
   private String senderDenomination;
   private String senderTaxId;
   private int amount;
