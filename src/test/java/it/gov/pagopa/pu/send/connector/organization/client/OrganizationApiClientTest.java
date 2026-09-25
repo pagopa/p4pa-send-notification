@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.organization.client.generated.OrganizationEntityControll
 import it.gov.pagopa.pu.organization.client.generated.OrganizationSearchControllerApi;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.send.connector.organization.config.OrganizationApisHolder;
 import it.gov.pagopa.pu.send.exception.common.RestInvokeNotFoundException;
@@ -46,18 +47,20 @@ class OrganizationApiClientTest {
     // Given
     Long organizationId = 1L;
     String accessToken = "accessToken";
-    String apiKey = "apiKey";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+
 
     when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
     when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
-      .thenReturn(apiKey);
+      .thenReturn(organizationApiKeys);
 
     // When
-    String result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
+    OrganizationApiKeys result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
 
     // Then
-    assertSame(apiKey, result);
+    assertSame(organizationApiKeys, result);
   }
 
   @Test
@@ -72,7 +75,7 @@ class OrganizationApiClientTest {
       .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
 
     // When
-    String result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
+    OrganizationApiKeys result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
 
     // Then
     assertNull(result);

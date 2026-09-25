@@ -40,7 +40,7 @@ public class SendStreamServiceImpl implements SendStreamService{
   }
 
   private String getApiKeyFromOrganization(Long organizationId, String accessToken) {
-    return organizationService.getOrganizationApiKey(organizationId, accessToken);
+    return organizationService.getOrganizationApiKey(organizationId, accessToken).getApiKey();
   }
 
 }

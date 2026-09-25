@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.organization.service;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.send.connector.organization.client.OrganizationApiClient;
 import org.springframework.cache.annotation.CacheConfig;
@@ -20,7 +21,7 @@ public class OrganizationServiceImpl implements OrganizationService {
   }
 
   @Override
-  public String getOrganizationApiKey(Long organizationId, String accessToken) {
+  public OrganizationApiKeys getOrganizationApiKey(Long organizationId, String accessToken) {
     return organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
   }
 
