@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.pagopa.send;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.pdndservices.PdndService;
@@ -50,7 +51,9 @@ class SendStreamServiceImplTest {
   void whenCreateStreamThenInvokeClient() {
     // Given
     long organizationId = 123L;
-    String orgSendApiKey = "ORG_SEND_API_KEY";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+
     Organization organization = new Organization();
     organization.setOrganizationId(organizationId);
 
@@ -58,9 +61,9 @@ class SendStreamServiceImplTest {
     StreamMetadataResponseV28DTO expectedResult = new StreamMetadataResponseV28DTO();
 
     when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
-      .thenReturn(orgSendApiKey);
+      .thenReturn(organizationApiKeys);
     when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    when(clientMock.createStream(request, orgSendApiKey, voucherToken)).thenReturn(expectedResult);
+    when(clientMock.createStream(request, organizationApiKeys.getApiKey(), voucherToken)).thenReturn(expectedResult);
 
     //When
     StreamMetadataResponseV28DTO result = service.createStream(request, organizationId, accessToken);
@@ -73,14 +76,15 @@ class SendStreamServiceImplTest {
   void whenGetStreamsThenInvokeClient() {
     // Given
     long organizationId = 123L;
-    String orgSendApiKey = "ORG_SEND_API_KEY";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
 
     List<StreamListElementDTO> expectedResult = List.of();
 
     when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
-      .thenReturn(orgSendApiKey);
+      .thenReturn(organizationApiKeys);
     when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    when(clientMock.getStreams(orgSendApiKey, voucherToken)).thenReturn(expectedResult);
+    when(clientMock.getStreams(organizationApiKeys.getApiKey(), voucherToken)).thenReturn(expectedResult);
 
     //When
     List<StreamListElementDTO> result = service.getStreams(organizationId, accessToken);
@@ -93,15 +97,17 @@ class SendStreamServiceImplTest {
   void whenGetStreamEventsThenInvokeClient() {
     // Given
     long organizationId = 123L;
-    String orgSendApiKey = "ORG_SEND_API_KEY";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
+
     String streamId = "streamId";
 
     List<ProgressResponseElementV28DTO> expectedResult = List.of();
 
     when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
-      .thenReturn(orgSendApiKey);
+      .thenReturn(organizationApiKeys);
     when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
-    when(clientMock.getStreamEvents(streamId, null, orgSendApiKey, voucherToken))
+    when(clientMock.getStreamEvents(streamId, null, organizationApiKeys.getApiKey(), voucherToken))
       .thenReturn(expectedResult);
 
     //When

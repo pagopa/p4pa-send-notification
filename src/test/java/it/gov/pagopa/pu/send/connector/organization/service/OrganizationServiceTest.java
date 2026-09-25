@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.organization.service;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.send.connector.organization.client.OrganizationApiClient;
 import org.junit.jupiter.api.AfterEach;
@@ -39,16 +40,17 @@ class OrganizationServiceTest {
     // Given
     Long organizationId = 1L;
     String accessToken = "accessToken";
-    String apiKey = "apiKey";
+    OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
+    organizationApiKeys.setApiKey("apiKey");
 
     Mockito.when(organizationApiClientMock.getOrganizationApiKey(organizationId, accessToken))
-      .thenReturn(apiKey);
+      .thenReturn(organizationApiKeys);
 
     // When
-    String result = service.getOrganizationApiKey(organizationId, accessToken);
+    OrganizationApiKeys result = service.getOrganizationApiKey(organizationId, accessToken);
 
     // Then
-    Assertions.assertSame(apiKey, result);
+    Assertions.assertSame(organizationApiKeys, result);
   }
 
   @Test
