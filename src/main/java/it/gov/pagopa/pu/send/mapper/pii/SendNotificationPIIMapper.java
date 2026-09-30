@@ -7,18 +7,23 @@ import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.model.SendTaxonomy;
+import it.gov.pagopa.pu.send.service.SendTaxonomyService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotification, SendNotificationNoPII, SendNotificationPIIDTO> {
 
   private final DataCipherService dataCipherService;
+  private final SendTaxonomyService sendTaxonomyService;
 
-  public SendNotificationPIIMapper(PersonalDataService personalDataService, DataCipherService dataCipherService) {
+  public SendNotificationPIIMapper(PersonalDataService personalDataService, DataCipherService dataCipherService, SendTaxonomyService sendTaxonomyService) {
     super(SendNotificationPIIDTO.class, personalDataService);
     this.dataCipherService = dataCipherService;
+    this.sendTaxonomyService = sendTaxonomyService;
   }
 
   @Override
@@ -85,6 +90,7 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
     sendNotification.setAmount(noPii.getAmount());
     sendNotification.setPaymentExpirationDate(noPii.getPaymentExpirationDate());
     sendNotification.setTaxonomyCode(noPii.getTaxonomyCode());
+    sendNotification.setTaxonomyDescription(findTaxonomyDescription(noPii.getTaxonomyCode()));
     sendNotification.setPaFee(noPii.getPaFee());
     sendNotification.setVat(noPii.getVat());
     sendNotification.setPagoPaIntMode(noPii.getPagoPaIntMode());
@@ -94,5 +100,14 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
     sendNotification.setNoPII(noPii);
 
     return sendNotification;
+  }
+
+  private String findTaxonomyDescription(String taxonomyCode) {
+    if(taxonomyCode==null) {
+      return null;
+    }
+    return Optional.ofNullable(sendTaxonomyService.findByTaxonomyCode(taxonomyCode))
+      .map(SendTaxonomy::getServiceTypeDescription)
+      .orElse(null);
   }
 }
