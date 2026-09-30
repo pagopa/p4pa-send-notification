@@ -171,3 +171,6 @@ cache:
   pdndAccessToken:
     size: "\${CACHE_PDNDACCESSTOKEN_SIZE:100}"
     expire-in: "\${CACHE_PDNDACCESSTOKEN_MINUTES:1}"
+  taxonomy:
+    size: "\${CACHE_TAXONOMY_SIZE:1000}"
+    expire-in: "\${CACHE_TAXONOMY_MINUTES:60}"
