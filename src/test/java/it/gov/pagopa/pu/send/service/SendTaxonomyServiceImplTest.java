@@ -11,7 +11,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SendTaxonomyServiceImplTest {
@@ -30,7 +31,7 @@ class SendTaxonomyServiceImplTest {
   }
 
   @Test
-  void findByTaxonomyCode() {
+  void givenValidTaxonomyCodeWhenFindByTaxonomyCodeThenReturnSendTaxonomy() {
     //GIVEN
     String taxonomyCode = "taxonomy_code";
 
@@ -44,5 +45,16 @@ class SendTaxonomyServiceImplTest {
 
     //THEN
     Assertions.assertEquals(expectedSendTaxonomy, actualSendTaxonomy);
+  }
+
+  @Test
+  void givenNullTaxonomyCodeWhenFindByTaxonomyCodeThenReturnNull() {
+    //WHEN
+    SendTaxonomy actualSendTaxonomy = service.findByTaxonomyCode(null);
+
+    //THEN
+    Assertions.assertNull(actualSendTaxonomy);
+    verify(sendTaxonomyRepositoryMock, never())
+      .findByTaxonomyCode(isNull());
   }
 }

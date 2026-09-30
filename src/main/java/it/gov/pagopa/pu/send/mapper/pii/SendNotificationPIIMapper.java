@@ -103,9 +103,6 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
   }
 
   private String findTaxonomyDescription(String taxonomyCode) {
-    if(taxonomyCode==null) {
-      return null;
-    }
     return Optional.ofNullable(sendTaxonomyService.findByTaxonomyCode(taxonomyCode))
       .map(SendTaxonomy::getServiceTypeDescription)
       .orElse(null);

@@ -13,6 +13,9 @@ public class SendTaxonomyServiceImpl implements SendTaxonomyService {
 
   @Override
   public SendTaxonomy findByTaxonomyCode(String taxonomyCode) {
+    if(taxonomyCode==null) {
+      return null;
+    }
     return sendTaxonomyRepository.findByTaxonomyCode(taxonomyCode);
   }
 
