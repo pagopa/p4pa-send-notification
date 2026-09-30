@@ -99,7 +99,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     SendNotification result = mapper.mapToModel(request, null, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts", "campaignId");
+    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts", "campaignId", "taxonomyDescription");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -147,7 +147,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     SendNotification result = mapper.mapToModel(request, null, accessToken);
 
     // Then
-    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts", "campaignId");
+    TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun", "notificationDate", "personalDataId", "noPII", "legalFacts", "campaignId", "taxonomyDescription");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
@@ -220,7 +220,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
     // Then
     TestUtils.checkNotNullFields(result, "sendNotificationId", "organizationId", "notificationRequestId", "iun",
-      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate", "legalFacts", "campaignId");
+      "notificationDate", "personalDataId", "noPII", "paymentExpirationDate", "legalFacts", "campaignId", "taxonomyDescription");
 
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());

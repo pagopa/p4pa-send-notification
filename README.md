@@ -126,6 +126,8 @@ See [application.yml](src/main/resources/application.yml) for each configurable 
 | CACHE_PDNDACCESSTOKEN_MINUTES | PDND accessToken cache retention (minutes) | 1       |
 | CACHE_ORGANIZATION_SIZE       | Organization cache size                    | 100     |
 | CACHE_ORGANIZATION_MINUTES    | Organization cache retention (minutes)     | 10      |
+| CACHE_TAXONOMY_SIZE           | Taxonomy data cache size                   | 1000    |
+| CACHE_TAXONOMY_MINUTES        | Taxonomy data cache retention (minutes)    | 60      |
 
 ##### 🔗 REST
 | ENV                                               | DESCRIPTION                               | DEFAULT |

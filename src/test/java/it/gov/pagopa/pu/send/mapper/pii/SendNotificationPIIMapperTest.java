@@ -9,6 +9,8 @@ import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.model.SendTaxonomy;
+import it.gov.pagopa.pu.send.service.SendTaxonomyService;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import org.junit.jupiter.api.AfterEach;
@@ -34,17 +36,19 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
 
   @Mock
   private DataCipherService dataCipherServiceMock;
+  @Mock
+  private SendTaxonomyService sendTaxonomyServiceMock;
 
   private SendNotificationPIIMapper mapper;
 
   @BeforeEach
   void setUp() {
-    mapper = new SendNotificationPIIMapper(personalDataServiceMock, dataCipherServiceMock);
+    mapper = new SendNotificationPIIMapper(personalDataServiceMock, dataCipherServiceMock, sendTaxonomyServiceMock);
   }
 
   @AfterEach
   void verifyNoMoreInteractions(){
-    Mockito.verifyNoMoreInteractions(dataCipherServiceMock);
+    Mockito.verifyNoMoreInteractions(dataCipherServiceMock, sendTaxonomyServiceMock);
   }
 
   @Override
@@ -61,8 +65,12 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     SendNotificationPIIDTO piiDto = new SendNotificationPIIDTO();
     List<PuRecipient> puRecipients = List.of(buildPuRecipient());
     piiDto.setPuRecipients(puRecipients);
+    SendTaxonomy sendTaxonomy = new SendTaxonomy();
+    sendTaxonomy.setTaxonomyCode(noPii.getTaxonomyCode());
+    sendTaxonomy.setServiceTypeDescription("TAXONOMY_DESCRIPTION");
 
     when(personalDataServiceMock.get(personalDataId, SendNotificationPIIDTO.class)).thenReturn(piiDto);
+    when(sendTaxonomyServiceMock.findByTaxonomyCode(noPii.getTaxonomyCode())).thenReturn(sendTaxonomy);
 
     // When
     SendNotification result = mapper.map(noPii);
