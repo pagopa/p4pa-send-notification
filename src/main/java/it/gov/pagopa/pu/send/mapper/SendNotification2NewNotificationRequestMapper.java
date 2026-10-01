@@ -36,7 +36,7 @@ public class SendNotification2NewNotificationRequestMapper {
     NewNotificationRequestV25DTO newNotification = new NewNotificationRequestV25DTO();
     newNotification.setIdempotenceToken(sendNotification.getSendNotificationId());
     newNotification.setPaProtocolNumber(sendNotification.getPaProtocolNumber());
-    newNotification.setSubject("Notifica Piattaforma Unitaria");
+    newNotification.setSubject(sendNotification.getSubject());
 
     newNotification.recipients(setRecipients(sendNotification));
     newNotification.setDocuments(setDocuments(sendNotification));

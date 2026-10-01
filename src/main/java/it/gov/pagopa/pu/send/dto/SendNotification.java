@@ -28,11 +28,13 @@ public class SendNotification implements FullEntityPIIDTO<SendNotificationNoPII,
   private String iun;
   private String notificationFeePolicy;
   private String physicalCommunicationType;
+  private String subject;
   private String senderDenomination;
   private String senderTaxId;
   private int amount;
   private String paymentExpirationDate;
   private String taxonomyCode;
+  private String taxonomyDescription;
   private int paFee;
   private int vat;
   private String pagoPaIntMode;

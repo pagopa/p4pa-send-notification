@@ -24,6 +24,7 @@ public class SendNotification2SendNotificationDTOMapper {
     notificationDTO.setIun(sendNotificationNoPII.getIun());
     notificationDTO.setStatus(sendNotificationNoPII.getStatus());
     notificationDTO.setPayments(buildPayments(sendNotificationNoPII));
+    notificationDTO.setSubject(sendNotificationNoPII.getSubject());
     return notificationDTO;
   }
 

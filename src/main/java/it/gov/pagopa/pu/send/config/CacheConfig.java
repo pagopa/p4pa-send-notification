@@ -29,6 +29,8 @@ public class CacheConfig {
     private CacheConfigurationProperties pdndAccessToken;
     @NestedConfigurationProperty
     private CacheConfigurationProperties organization;
+    @NestedConfigurationProperty
+    private CacheConfigurationProperties taxonomy;
 
     @Data
     @NoArgsConstructor
@@ -45,6 +47,7 @@ public class CacheConfig {
         cacheManager.registerCustomCache(Fields.pii, buildCache(pii));
         cacheManager.registerCustomCache(Fields.pdndAccessToken, buildCache(pdndAccessToken));
         cacheManager.registerCustomCache(Fields.organization, buildCache(organization));
+        cacheManager.registerCustomCache(Fields.taxonomy, buildCache(taxonomy));
         return cacheManager;
     }
 
