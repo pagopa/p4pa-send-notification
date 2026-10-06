@@ -57,7 +57,6 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final OrganizationService organizationService;
   private final OrgSubUnitService orgSubUnitService;
   private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
-  private final SendNotification2SendNotificationDTOMapper sendNotification2SendNotificationDTOMapper;
   private final SendNotificationPaidService sendNotificationPaidService;
 
   public SendNotificationServiceImpl(
@@ -72,7 +71,6 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     OrganizationService organizationService,
     OrgSubUnitService orgSubUnitService,
     SendNotificationStatusHandlerService sendNotificationStatusHandlerService,
-    SendNotification2SendNotificationDTOMapper sendNotification2SendNotificationDTOMapper,
     SendNotificationPaidService sendNotificationPaidService
   ) {
     this.fileShareBaseUrl = fileShareBaseUrl;
@@ -86,7 +84,6 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.organizationService = organizationService;
     this.orgSubUnitService = orgSubUnitService;
     this.sendNotificationStatusHandlerService = sendNotificationStatusHandlerService;
-    this.sendNotification2SendNotificationDTOMapper = sendNotification2SendNotificationDTOMapper;
     this.sendNotificationPaidService = sendNotificationPaidService;
   }
 
@@ -306,6 +303,6 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
     notification = sendNotificationPaidService.handlePaidNotification(notification);
 
-    return sendNotification2SendNotificationDTOMapper.mapToSendNotificationDTO(notification);
+    return sendNotificationDTOMapper.mapToSendNotificationDTO(notification);
   }
 }

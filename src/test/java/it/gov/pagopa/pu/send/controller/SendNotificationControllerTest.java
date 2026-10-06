@@ -377,4 +377,23 @@ class SendNotificationControllerTest {
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertSame(expectedResult, response.getBody());
   }
+
+  @Test
+  void whenUpdateDebtPositionStatusThenReturnOk() {
+    // Given
+    Long organizationId = 1L;
+    String nav = "NAV";
+    SendNotificationDTO expectedResult = new SendNotificationDTO();
+
+    when(sendNotificationServiceMock.updateDebtPositionStatus(organizationId, nav))
+      .thenReturn(expectedResult);
+
+    // When
+    ResponseEntity<SendNotificationDTO> response = sendNotificationController.updateDebtPositionStatus(organizationId, nav);
+
+    // Then
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
+  }
 }

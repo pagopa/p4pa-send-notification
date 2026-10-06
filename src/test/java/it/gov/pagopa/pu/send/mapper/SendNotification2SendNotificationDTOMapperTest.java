@@ -6,6 +6,8 @@ import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO;
+import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -179,5 +181,37 @@ class SendNotification2SendNotificationDTOMapperTest {
     sendNotificationNoPII.setHistory(Collections.emptyList());
 
     return sendNotificationNoPII;
+  }
+
+  @Test
+  void givenNotificationWithHistoryWhenMapThenHistoryIsMapped() {
+    // Given
+    PuPayment puPayment = PuPayment.builder()
+      .debtPositionId(1L)
+      .payment(new Payment(
+        PagoPa.builder()
+          .noticeCode("NOTICECODE")
+          .build(),
+        null
+      ))
+      .build();
+
+    StreamEventSummaryDTO historyEvent = new StreamEventSummaryDTO();
+    historyEvent.setNewNotificationStatus(NotificationStatusV26DTO.PU_PAID);
+    historyEvent.setTimelineElementCategory(TimelineElementCategoryV27DTO.PU_PAYMENT);
+
+    SendNotificationNoPII sendNotificationNoPII = createSendNotificationNoPII(List.of(puPayment));
+
+    sendNotificationNoPII.setHistory(List.of(historyEvent));
+
+    // When
+    SendNotificationDTO result = mapper.mapToSendNotificationDTO(sendNotificationNoPII);
+
+    // Then
+    assertNotNull(result.getHistory());
+    assertEquals(1, result.getHistory().size());
+    assertEquals(historyEvent, result.getHistory().getFirst());
+    assertEquals(NotificationStatusV26DTO.PU_PAID, result.getHistory().getFirst().getNewNotificationStatus());
+    assertEquals(TimelineElementCategoryV27DTO.PU_PAYMENT, result.getHistory().getFirst().getTimelineElementCategory());
   }
 }
