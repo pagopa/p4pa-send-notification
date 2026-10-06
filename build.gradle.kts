@@ -212,7 +212,6 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
       "Campaign" to "it.gov.pagopa.pu.send.model.Campaign",
       "SendNotification" to "it.gov.pagopa.pu.send.dto.SendNotification",
       "NotificationStatusV26DTO" to "it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO",
-      "NotificationStatus" to "it.gov.pagopa.pu.send.enums.NotificationStatus",
       "SendNotificationNoPII" to "it.gov.pagopa.pu.send.model.SendNotificationNoPII"
     )
   )

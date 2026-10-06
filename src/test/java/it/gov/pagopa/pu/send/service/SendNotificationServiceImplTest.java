@@ -414,7 +414,7 @@ class SendNotificationServiceImplTest {
 
     when(sendNotificationNoPIIRepositoryMock.findById(sendNotificationId))
         .thenReturn(Optional.of(notification));
-    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     // When
@@ -445,7 +445,7 @@ class SendNotificationServiceImplTest {
 
     when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
       .thenReturn(Optional.of(notification));
-    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     // When
@@ -477,7 +477,7 @@ class SendNotificationServiceImplTest {
 
     when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
       .thenReturn(Optional.of(notification));
-    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     // When

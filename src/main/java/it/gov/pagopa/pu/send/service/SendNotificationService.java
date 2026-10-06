@@ -21,4 +21,5 @@ public interface SendNotificationService {
   void downloadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream);
   List<LegalFactDTO> getLegalFacts(String sendNotificationId);
   SendNotificationNoPII findSendNotification(String sendNotificationId);
+  SendNotificationDTO updateDebtPositionStatus(Long organizationId, String nav);
 }

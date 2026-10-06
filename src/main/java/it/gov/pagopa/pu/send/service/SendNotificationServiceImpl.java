@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
@@ -30,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -57,6 +57,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final OrganizationService organizationService;
   private final OrgSubUnitService orgSubUnitService;
   private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
+  private final SendNotification2SendNotificationDTOMapper sendNotification2SendNotificationDTOMapper;
+  private final SendNotificationPaidService sendNotificationPaidService;
 
   public SendNotificationServiceImpl(
     @Value("${fileshare-public-base-url}") String fileShareBaseUrl,
@@ -69,7 +71,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     TaxonomyValidatorService taxonomyValidatorService,
     OrganizationService organizationService,
     OrgSubUnitService orgSubUnitService,
-    SendNotificationStatusHandlerService sendNotificationStatusHandlerService
+    SendNotificationStatusHandlerService sendNotificationStatusHandlerService,
+    SendNotification2SendNotificationDTOMapper sendNotification2SendNotificationDTOMapper,
+    SendNotificationPaidService sendNotificationPaidService
   ) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
@@ -82,6 +86,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.organizationService = organizationService;
     this.orgSubUnitService = orgSubUnitService;
     this.sendNotificationStatusHandlerService = sendNotificationStatusHandlerService;
+    this.sendNotification2SendNotificationDTOMapper = sendNotification2SendNotificationDTOMapper;
+    this.sendNotificationPaidService = sendNotificationPaidService;
   }
 
   @Transactional
@@ -165,12 +171,12 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
   @Override
   public SendNotificationDTO findSendNotificationDTO(String sendNotificationId) {
-    return sendNotificationDTOMapper.apply(findSendNotification(sendNotificationId));
+    return sendNotificationDTOMapper.mapToSendNotificationDTO(findSendNotification(sendNotificationId));
   }
 
   @Override
   public SendNotificationDTO findSendNotificationDTOByNotificationRequestId(String notificationRequestId) {
-    return sendNotificationDTOMapper.apply(findSendNotificationByNotificationRequestId(notificationRequestId));
+    return sendNotificationDTOMapper.mapToSendNotificationDTO(findSendNotificationByNotificationRequestId(notificationRequestId));
   }
 
   private SendNotificationNoPII findSendNotificationByNotificationRequestId(String notificationRequestId) {
@@ -180,7 +186,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
   @Override
   public SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
-    return sendNotificationDTOMapper.apply(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
+    return sendNotificationDTOMapper.mapToSendNotificationDTO(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with orgId "+organizationId+" and nav " + nav)));
   }
 
@@ -291,5 +297,15 @@ public class SendNotificationServiceImpl implements SendNotificationService {
         "Error while deleting file %s for sendNotificationId %s.", filePath.getFileName(), sendNotificationId
       ));
     }
+  }
+
+  @Override
+  public SendNotificationDTO updateDebtPositionStatus(Long organizationId, String nav) {
+    SendNotificationNoPII notification = sendNotificationNoPIIRepository.updatePaymentStatusByOrganizationIdAndNav(organizationId, nav, InstallmentStatus.PAID)
+        .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with orgId %s and nav %s".formatted(organizationId, nav)));
+
+    notification = sendNotificationPaidService.handlePaidNotification(notification);
+
+    return sendNotification2SendNotificationDTOMapper.mapToSendNotificationDTO(notification);
   }
 }
