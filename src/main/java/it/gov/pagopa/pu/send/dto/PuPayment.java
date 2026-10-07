@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.dto;
 
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.send.dto.generated.Payment;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,4 +20,5 @@ public class PuPayment implements Serializable {
   private Long debtPositionId;
   private Payment payment;
   private OffsetDateTime notificationDate;
+  private InstallmentStatus status;
 }

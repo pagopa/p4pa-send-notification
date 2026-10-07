@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.send.config.BaseEntityListener;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.*;
@@ -46,6 +47,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   public static final String FIELD_RECIPIENT_FISCAL_CODE_HASH = "%s.%s".formatted(Fields.recipients, PuRecipientNoPIIDTO.Fields.fiscalCodeHash);
   private static final String FIELD_FILTERED_NOTIFICATION_DATE = "recipients.$[].puPayments.$[elem].notificationDate";
   private static final String FIELD_NOTIFICATION_UPDATE_DATE = "updateDate";
+  private static final String FIELD_FILTERED_PAYMENT_STATUS = "recipients.$[].puPayments.$[elem].status";
 
   private final MongoTemplate mongoTemplate;
 
@@ -350,5 +352,23 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     return result != null && result.getList(campaignIdListAlias, String.class) != null ?
       result.getList(campaignIdListAlias, String.class) :
       new ArrayList<>();
+  }
+
+  @Override
+  public Optional<SendNotificationNoPII> updatePaymentStatusByOrganizationIdAndNav(Long organizationId, String nav, InstallmentStatus status) {
+    Query query = Query.query(
+      Criteria.where(Fields.organizationId).is(organizationId)
+        .and(FIELD_PAYMENT_NOTICE_CODE).is(nav)
+    );
+
+    Update update = BaseEntityListener.setTechFieldsOnDocumentUpdate(
+      new Update().set(FIELD_FILTERED_PAYMENT_STATUS, status)
+        .filterArray("elem.payment.pagoPa.noticeCode", nav)
+    );
+
+    SendNotificationNoPII updatedNotification =
+      mongoTemplate.findAndModify(query, update, FindAndModifyOptions.options().returnNew(true), SendNotificationNoPII.class);
+
+    return Optional.ofNullable(updatedNotification);
   }
 }

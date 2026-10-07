@@ -16,8 +16,9 @@ import java.util.stream.Collectors;
 @Service
 public class SendNotification2SendNotificationDTOMapper {
 
-  public SendNotificationDTO apply(SendNotificationNoPII sendNotificationNoPII) {
+  public SendNotificationDTO mapToSendNotificationDTO (SendNotificationNoPII sendNotificationNoPII) {
     SendNotificationDTO notificationDTO = new SendNotificationDTO();
+
     notificationDTO.setSendNotificationId(sendNotificationNoPII.getSendNotificationId());
     notificationDTO.setCampaignId(sendNotificationNoPII.getCampaignId());
     notificationDTO.setOrganizationId(sendNotificationNoPII.getOrganizationId());
@@ -25,6 +26,8 @@ public class SendNotification2SendNotificationDTOMapper {
     notificationDTO.setStatus(sendNotificationNoPII.getStatus());
     notificationDTO.setPayments(buildPayments(sendNotificationNoPII));
     notificationDTO.setSubject(sendNotificationNoPII.getSubject());
+    notificationDTO.setHistory(sendNotificationNoPII.getHistory());
+
     return notificationDTO;
   }
 

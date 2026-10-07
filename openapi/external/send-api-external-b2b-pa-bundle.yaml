@@ -4623,6 +4623,7 @@ components:
           * `CANCELLED` - L'ente ha annullato l'invio della notifica
           * `PAID` - [DEPRECATO] Uno dei destinatari ha pagato la notifica
           * `RETURNED_TO_SENDER` - La notifica è stata restituita al mittente
+          * `PU_PAID` - Uno dei destinatari ha pagato la notifica (valore custom di PU)
       enum:
         - IN_VALIDATION
         - ACCEPTED
@@ -4635,6 +4636,8 @@ components:
         - UNREACHABLE
         - CANCELLED
         - RETURNED_TO_SENDER
+      # Enum values introduced by PU for internal usage:
+        - PU_PAID
     NotificationStatusHistoryV26:
       description: elenco degli avanzamenti effettuati dal processo di notifica
       type: array
@@ -6450,6 +6453,7 @@ components:
           * `ANALOG_WORKFLOW_RECIPIENT_DECEASED` - Destinatario deceduto
           * `PUBLIC_REGISTRY_VALIDATION_CALL` - Ricerca dell'indirizzo di spedizione in fase di validazione notifica
           * `PUBLIC_REGISTRY_VALIDATION_RESPONSE` - Recupero dell'indirizzo di spedizione dai registri nazionali
+          * `PU_PAYMENT` - Evento di ricezione dal mittente dell'informazione di chiusura di uno o più pagamenti di tipo pagoPA (valore custom di PU)
       enum:
         - SENDER_ACK_CREATION_REQUEST
         - VALIDATE_NORMALIZE_ADDRESSES_REQUEST
@@ -6496,6 +6500,8 @@ components:
         - ANALOG_WORKFLOW_RECIPIENT_DECEASED
         - PUBLIC_REGISTRY_VALIDATION_CALL
         - PUBLIC_REGISTRY_VALIDATION_RESPONSE
+      # INTRODUCED BY PU for internal usage
+        - PU_PAYMENT
     SenderAckCreationRequestDetails:
       type: object
       properties:

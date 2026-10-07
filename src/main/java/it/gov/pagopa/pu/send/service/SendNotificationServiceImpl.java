@@ -30,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -165,12 +164,12 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
   @Override
   public SendNotificationDTO findSendNotificationDTO(String sendNotificationId) {
-    return sendNotificationDTOMapper.apply(findSendNotification(sendNotificationId));
+    return sendNotificationDTOMapper.mapToSendNotificationDTO(findSendNotification(sendNotificationId));
   }
 
   @Override
   public SendNotificationDTO findSendNotificationDTOByNotificationRequestId(String notificationRequestId) {
-    return sendNotificationDTOMapper.apply(findSendNotificationByNotificationRequestId(notificationRequestId));
+    return sendNotificationDTOMapper.mapToSendNotificationDTO(findSendNotificationByNotificationRequestId(notificationRequestId));
   }
 
   private SendNotificationNoPII findSendNotificationByNotificationRequestId(String notificationRequestId) {
@@ -180,7 +179,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
   @Override
   public SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav) {
-    return sendNotificationDTOMapper.apply(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
+    return sendNotificationDTOMapper.mapToSendNotificationDTO(sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with orgId "+organizationId+" and nav " + nav)));
   }
 
