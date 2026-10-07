@@ -80,7 +80,9 @@ public class SendNotificationPaidServiceImpl implements SendNotificationPaidServ
 
   private void appendHistory(SendNotificationNoPII notification, StreamEventSummaryDTO event) {
     List<StreamEventSummaryDTO> history =
-      notification.getHistory() == null ? new ArrayList<>() : new ArrayList<>(notification.getHistory());
+      notification.getHistory() == null
+        ? new ArrayList<>()
+        : new ArrayList<>(notification.getHistory());
 
     history.add(event);
     notification.setHistory(history);
