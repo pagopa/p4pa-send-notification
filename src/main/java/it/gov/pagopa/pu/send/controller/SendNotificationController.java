@@ -124,10 +124,4 @@ public class SendNotificationController implements NotificationApi {
     log.info("Deleting expired documents for send notification having sendNotificationId {}", sendNotificationId);
     return ResponseEntity.ok(fileExpirationService.deleteExpiredDocuments(sendNotificationId, SecurityUtils.getAccessToken()));
   }
-
-  @Override
-  public ResponseEntity<SendNotificationDTO> updateDebtPositionStatus(Long organizationId, String nav) {
-    log.info("Updating debt position status for notification having organizationId {} and nav {}", organizationId, nav);
-    return ResponseEntity.ok(sendNotificationService.updateDebtPositionStatus(organizationId, nav));
-  }
 }

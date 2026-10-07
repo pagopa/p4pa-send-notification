@@ -435,11 +435,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SendNotificationErrorDTO'
-  /notification/organization/{organizationId}/nav/{nav}:
+  /payments/organization/{organizationId}/nav/{nav}:
     put:
       tags:
-        - Notification
-      operationId: updateDebtPositionStatus
+        - Payments
+      operationId: notifyPayment
       parameters:
         - name: organizationId
           in: path

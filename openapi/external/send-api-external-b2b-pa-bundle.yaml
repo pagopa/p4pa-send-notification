@@ -4636,6 +4636,7 @@ components:
         - UNREACHABLE
         - CANCELLED
         - RETURNED_TO_SENDER
+      # Enum values introduced by PU for internal usage:
         - PU_PAID
     NotificationStatusHistoryV26:
       description: elenco degli avanzamenti effettuati dal processo di notifica
@@ -6499,6 +6500,7 @@ components:
         - ANALOG_WORKFLOW_RECIPIENT_DECEASED
         - PUBLIC_REGISTRY_VALIDATION_CALL
         - PUBLIC_REGISTRY_VALIDATION_RESPONSE
+      # INTRODUCED BY PU for internal usage
         - PU_PAYMENT
     SenderAckCreationRequestDetails:
       type: object

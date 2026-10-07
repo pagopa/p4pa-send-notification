@@ -1,7 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
@@ -57,7 +56,6 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final OrganizationService organizationService;
   private final OrgSubUnitService orgSubUnitService;
   private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
-  private final SendNotificationPaidService sendNotificationPaidService;
 
   public SendNotificationServiceImpl(
     @Value("${fileshare-public-base-url}") String fileShareBaseUrl,
@@ -70,8 +68,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     TaxonomyValidatorService taxonomyValidatorService,
     OrganizationService organizationService,
     OrgSubUnitService orgSubUnitService,
-    SendNotificationStatusHandlerService sendNotificationStatusHandlerService,
-    SendNotificationPaidService sendNotificationPaidService
+    SendNotificationStatusHandlerService sendNotificationStatusHandlerService
   ) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
@@ -84,7 +81,6 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.organizationService = organizationService;
     this.orgSubUnitService = orgSubUnitService;
     this.sendNotificationStatusHandlerService = sendNotificationStatusHandlerService;
-    this.sendNotificationPaidService = sendNotificationPaidService;
   }
 
   @Transactional
@@ -294,15 +290,5 @@ public class SendNotificationServiceImpl implements SendNotificationService {
         "Error while deleting file %s for sendNotificationId %s.", filePath.getFileName(), sendNotificationId
       ));
     }
-  }
-
-  @Override
-  public SendNotificationDTO updateDebtPositionStatus(Long organizationId, String nav) {
-    SendNotificationNoPII notification = sendNotificationNoPIIRepository.updatePaymentStatusByOrganizationIdAndNav(organizationId, nav, InstallmentStatus.PAID)
-        .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with orgId %s and nav %s".formatted(organizationId, nav)));
-
-    notification = sendNotificationPaidService.handlePaidNotification(notification);
-
-    return sendNotificationDTOMapper.mapToSendNotificationDTO(notification);
   }
 }

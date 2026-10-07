@@ -2,7 +2,6 @@ package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
@@ -688,60 +687,5 @@ class SendNotificationServiceImplTest {
     SendNotificationNotFoundException sendNotificationNotFoundException = Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotification(sendNotificationId));
 
     Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_NOTIFICATION_NOT_FOUND, sendNotificationNotFoundException.getCode());
-  }
-
-  @Test
-  void givenExistentNotificationWhenUpdateDebtPositionStatusThenReturnMappedNotification() {
-    // Given
-    Long organizationId = 1L;
-    String nav = "NAV";
-
-    SendNotificationNoPII notification = new SendNotificationNoPII();
-    SendNotificationNoPII handledNotification = new SendNotificationNoPII();
-    SendNotificationDTO expectedResult = new SendNotificationDTO();
-
-    when(sendNotificationNoPIIRepositoryMock.updatePaymentStatusByOrganizationIdAndNav(organizationId, nav, InstallmentStatus.PAID))
-      .thenReturn(Optional.of(notification));
-
-    when(sendNotificationPaidServiceMock.handlePaidNotification(notification))
-      .thenReturn(handledNotification);
-
-    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(handledNotification))
-      .thenReturn(expectedResult);
-
-    // When
-    SendNotificationDTO result = sendNotificationService.updateDebtPositionStatus(organizationId, nav);
-
-    // Then
-    Assertions.assertSame(expectedResult, result);
-
-    verify(sendNotificationNoPIIRepositoryMock)
-      .updatePaymentStatusByOrganizationIdAndNav(organizationId, nav, InstallmentStatus.PAID);
-    verify(sendNotificationPaidServiceMock)
-      .handlePaidNotification(notification);
-    verify(sendNotificationDTOMapperMock)
-      .mapToSendNotificationDTO(handledNotification);
-  }
-
-  @Test
-  void givenNotExistentNotificationWhenUpdateDebtPositionStatusThenThrowNotFoundException() {
-    // Given
-    Long organizationId = 1L;
-    String nav = "NAV";
-
-    when(sendNotificationNoPIIRepositoryMock.updatePaymentStatusByOrganizationIdAndNav(organizationId, nav, InstallmentStatus.PAID))
-      .thenReturn(Optional.empty());
-
-    // When
-    SendNotificationNotFoundException exception =
-      Assertions.assertThrows(SendNotificationNotFoundException.class,
-        () -> sendNotificationService.updateDebtPositionStatus(organizationId, nav)
-      );
-
-    // Then
-    Assertions.assertEquals("Notification not found with orgId 1 and nav NAV", exception.getMessage());
-
-    verify(sendNotificationNoPIIRepositoryMock)
-      .updatePaymentStatusByOrganizationIdAndNav(organizationId, nav, InstallmentStatus.PAID);
   }
 }

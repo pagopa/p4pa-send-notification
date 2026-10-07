@@ -22,6 +22,9 @@
     "name" : "Streams",
     "description" : "the Streams API"
   }, {
+    "name" : "Payments",
+    "description" : "the Payments API"
+  }, {
     "name" : "Campaign",
     "description" : "the Campaign API"
   } ],
@@ -227,10 +230,10 @@
         } ]
       }
     },
-    "/p4pasend/notification/organization/{organizationId}/nav/{nav}" : {
+    "/p4pasend/payments/organization/{organizationId}/nav/{nav}" : {
       "put" : {
-        "tags" : [ "Notification" ],
-        "operationId" : "updateDebtPositionStatus",
+        "tags" : [ "Payments" ],
+        "operationId" : "notifyPayment",
         "parameters" : [ {
           "name" : "organizationId",
           "in" : "path",

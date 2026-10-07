@@ -17,6 +17,9 @@ public class SendNotificationPaidServiceImpl implements SendNotificationPaidServ
 
   private final SendNotificationStreamEventService sendNotificationStreamEventService;
 
+  private static final NotificationStatusV26DTO INTERNAL_IUN_PAID_STATUS = NotificationStatusV26DTO.PU_PAID;
+  private static final TimelineElementCategoryV27DTO INTERNAL_IUN_PAID_CATEGORY = TimelineElementCategoryV27DTO.PU_PAYMENT;
+
   @Override
   public SendNotificationNoPII handlePaidNotification(SendNotificationNoPII notification) {
     if (!areAllPaymentsPaid(notification)) {
@@ -37,7 +40,6 @@ public class SendNotificationPaidServiceImpl implements SendNotificationPaidServ
   }
 
   private boolean areAllPaymentsPaid(SendNotificationNoPII notification) {
-
     List<PuPayment> payments = Optional
       .ofNullable(notification.getRecipients())
       .orElseGet(Collections::emptyList)
@@ -62,17 +64,16 @@ public class SendNotificationPaidServiceImpl implements SendNotificationPaidServ
       .orElseGet(Collections::emptyList)
       .stream()
       .anyMatch(event ->
-        NotificationStatusV26DTO.PU_PAID.equals(event.getNewNotificationStatus())
-          && TimelineElementCategoryV27DTO.PU_PAYMENT.equals(event.getTimelineElementCategory())
+        INTERNAL_IUN_PAID_STATUS.equals(event.getNewNotificationStatus())
+          && INTERNAL_IUN_PAID_CATEGORY.equals(event.getTimelineElementCategory())
       );
   }
 
   private StreamEventSummaryDTO buildPuPaidEvent() {
-
     StreamEventSummaryDTO event = new StreamEventSummaryDTO();
 
-    event.setNewNotificationStatus(NotificationStatusV26DTO.PU_PAID);
-    event.setTimelineElementCategory(TimelineElementCategoryV27DTO.PU_PAYMENT);
+    event.setNewNotificationStatus(INTERNAL_IUN_PAID_STATUS);
+    event.setTimelineElementCategory(INTERNAL_IUN_PAID_CATEGORY);
 
     return event;
   }
