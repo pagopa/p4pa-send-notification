@@ -13,9 +13,7 @@ import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
-import it.gov.pagopa.pu.send.repository.CampaignRepository;
-import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
-import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepositoryExtImpl;
+import it.gov.pagopa.pu.send.repository.*;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +30,6 @@ import java.util.Optional;
 public class CampaignServiceImpl implements CampaignService {
   private final CampaignRepository campaignRepository;
   private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
-  private final SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt;
   private final PagedCampaignMapper pagedCampaignMapper;
   private final PagedSendNotificationsMapper pagedSendNotificationsMapper;
   private final DataCipherService dataCipherService;
@@ -41,13 +38,11 @@ public class CampaignServiceImpl implements CampaignService {
   public CampaignServiceImpl(
           CampaignRepository campaignRepository,
           SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
-          SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt,
           PagedCampaignMapper pagedCampaignMapper,
           PagedSendNotificationsMapper pagedSendNotificationsMapper,
           DataCipherService dataCipherService, CampaignCountersMapper campaignCountersMapper) {
     this.campaignRepository = campaignRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
-    this.sendNotificationNoPIIRepositoryExt = sendNotificationNoPIIRepositoryExt;
     this.pagedCampaignMapper = pagedCampaignMapper;
     this.pagedSendNotificationsMapper = pagedSendNotificationsMapper;
     this.dataCipherService = dataCipherService;
@@ -66,7 +61,7 @@ public class CampaignServiceImpl implements CampaignService {
       return existingCampaign.get();
     }
 
-    Campaign newCampaign = Campaign.builder()
+    Campaign campaign = Campaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(organizationId)
@@ -75,7 +70,7 @@ public class CampaignServiceImpl implements CampaignService {
       .endDate(sendNotificationCreationDate)
       .build();
 
-    return campaignRepository.save(newCampaign);
+    return campaignRepository.upsert(campaign);
   }
 
   @Override
@@ -176,6 +171,6 @@ public class CampaignServiceImpl implements CampaignService {
 
   @Override
   public List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime lastRecalculationDate) {
-    return sendNotificationNoPIIRepositoryExt.findIdsOfUpdatedCampaignsByNotificationUpdateDate(lastRecalculationDate);
+    return sendNotificationNoPIIRepository.findIdsOfUpdatedCampaignsByNotificationUpdateDate(lastRecalculationDate);
   }
 }

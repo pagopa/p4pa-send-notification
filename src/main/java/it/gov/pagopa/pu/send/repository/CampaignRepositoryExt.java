@@ -19,4 +19,5 @@ public interface CampaignRepositoryExt {
   UpdateResult updateCampaignName(String campaignId, String name);
   OffsetDateTime findLatestFullRecalculationDate();
   OffsetDateTime findFirstCampaignStartDate();
+  Campaign upsert(Campaign campaign);
 }

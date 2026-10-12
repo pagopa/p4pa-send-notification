@@ -11,6 +11,7 @@ import org.bson.Document;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
@@ -27,8 +29,7 @@ import uk.co.jemos.podam.api.PodamFactory;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.OffsetDateTime;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -278,5 +279,35 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
     //THEN
     Assertions.assertNull(actualFirstCampaignStartDate);
   }
+
+  @Test
+  void upsert() {
+    // Given
+    Campaign campaign = new Campaign();
+    campaign.setExternalId("CAMPAIGN_EXTERNAL_ID");
+    campaign.setCampaignName("CAMPAIGN_NAME");
+    campaign.setOrganizationId(1L);
+    campaign.setOrgSubUnitCode("ORG_SUB_UNIT_CODE");
+    campaign.setStartDate(LocalDate.now());
+    campaign.setEndDate(LocalDate.now());
+
+    ArgumentCaptor<Update> updateArgumentCaptor = ArgumentCaptor.forClass(Update.class);
+
+    when(mongoTemplateMock.findAndModify(
+      Mockito.any(Query.class),
+      updateArgumentCaptor.capture(),
+      Mockito.any(FindAndModifyOptions.class),
+      Mockito.eq(Campaign.class))
+    ).thenReturn(campaign);
+
+    // When
+    Campaign upsertedCampaign = repository.upsert(campaign);
+
+    // Then
+    assertEquals(campaign, upsertedCampaign);
+    Document upsertObject = updateArgumentCaptor.getValue().getUpdateObject();
+    TestUtils.assertUpsertedFields(upsertObject, Campaign.class, "campaignId", "counters");
+  }
+
 
 }

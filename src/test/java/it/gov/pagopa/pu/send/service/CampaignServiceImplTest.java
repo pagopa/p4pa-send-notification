@@ -14,9 +14,7 @@ import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
-import it.gov.pagopa.pu.send.repository.CampaignRepository;
-import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
-import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepositoryExtImpl;
+import it.gov.pagopa.pu.send.repository.*;
 import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -52,8 +50,6 @@ class CampaignServiceImplTest {
   @Mock
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
   @Mock
-  private SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExtMock;
-  @Mock
   private PagedCampaignMapper pagedCampaignMapperMock;
   @Mock
   private PagedSendNotificationsMapper pagedSendNotificationsMapperMock;
@@ -70,7 +66,6 @@ class CampaignServiceImplTest {
     Mockito.verifyNoMoreInteractions(
       campaignRepositoryMock,
       sendNotificationNoPIIRepositoryMock,
-      sendNotificationNoPIIRepositoryExtMock,
       pagedCampaignMapperMock,
       pagedSendNotificationsMapperMock,
       dataCipherServiceMock,
@@ -101,7 +96,7 @@ class CampaignServiceImplTest {
   }
 
   @Test
-  void givenNotExistingCampaignWhenCreateIfNotExistsThenSaveNewCampaign() {
+  void givenNotExistingCampaignWhenCreateIfNotExistsThenUpsertNewCampaign() {
     String externalCampaignId = "externalCampaignId";
     String campaignName = "campaignName";
     LocalDate creationDate = LocalDate.of(2026, Month.JUNE, 18);
@@ -123,7 +118,7 @@ class CampaignServiceImplTest {
       externalCampaignId, request.getOrganizationId(), request.getSubUnitCode()))
       .thenReturn(Optional.empty());
 
-    when(campaignRepositoryMock.save(expectedCampaign)).thenReturn(expectedCampaign);
+    when(campaignRepositoryMock.upsert(expectedCampaign)).thenReturn(expectedCampaign);
 
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
 
@@ -364,7 +359,7 @@ class CampaignServiceImplTest {
     //Given
     OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now();
     List<String> expectedCampaignIds = List.of("id1", "id2", "id3");
-    when(sendNotificationNoPIIRepositoryExtMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate))
+    when(sendNotificationNoPIIRepositoryMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate))
       .thenReturn(expectedCampaignIds);
     //When
     List<String> actualCampaignIds = campaignService.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);
