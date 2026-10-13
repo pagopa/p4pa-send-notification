@@ -70,6 +70,8 @@ public class CampaignServiceImpl implements CampaignService {
       .endDate(sendNotificationCreationDate)
       .build();
 
+    log.info("Upserting of campaign with externalId {}, organizationId {}, subUnitCode {}", campaign.getExternalId(), campaign.getOrganizationId(), campaign.getOrgSubUnitCode());
+
     return campaignRepository.upsert(campaign);
   }
 
