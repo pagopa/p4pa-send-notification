@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -163,26 +162,5 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
     return firstCampaignStartDateDocument != null ?
       DateUtils.toOffsetDateTime(firstCampaignStartDateDocument.getDate(Fields.startDate)) :
       null;
-  }
-
-  @Override
-  public Campaign upsert(Campaign campaign) {
-    Query query = new Query(
-      Criteria.where(Fields.organizationId).is(campaign.getOrganizationId())
-        .and(Fields.orgSubUnitCode).is(campaign.getOrgSubUnitCode())
-        .and(Fields.externalId).is(campaign.getExternalId())
-    );
-    Update update = BaseEntityListener.setTechFieldsOnDocumentUpdate(
-      new Update().
-        set(Fields.campaignName, campaign.getCampaignName()).
-        setOnInsert(Fields.startDate, campaign.getStartDate()).
-        set(Fields.endDate, campaign.getEndDate())
-    );
-    return mongoTemplate.findAndModify(
-      query,
-      update,
-      FindAndModifyOptions.options().returnNew(true).upsert(true),
-      Campaign.class
-    );
   }
 }

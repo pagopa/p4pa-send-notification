@@ -13,7 +13,8 @@ import it.gov.pagopa.pu.send.mapper.PagedCampaignMapper;
 import it.gov.pagopa.pu.send.mapper.PagedSendNotificationsMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
-import it.gov.pagopa.pu.send.repository.*;
+import it.gov.pagopa.pu.send.repository.CampaignRepository;
+import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -62,7 +63,7 @@ public class CampaignServiceImpl implements CampaignService {
       return existingCampaign.get();
     }
 
-    Campaign campaign = Campaign.builder()
+    Campaign newCampaign = Campaign.builder()
       .externalId(externalCampaignId)
       .campaignName(campaignName)
       .organizationId(organizationId)
@@ -71,12 +72,11 @@ public class CampaignServiceImpl implements CampaignService {
       .endDate(sendNotificationCreationDate)
       .build();
 
-    log.info("Upserting of campaign with externalId {}, organizationId {}, subUnitCode {}", campaign.getExternalId(), campaign.getOrganizationId(), campaign.getOrgSubUnitCode());
-
     try {
-      return campaignRepository.upsert(campaign);
+      log.info("Saving campaign with externalId {}, organizationId {}, subUnitCode {}", newCampaign.getExternalId(), newCampaign.getOrganizationId(), newCampaign.getOrgSubUnitCode());
+      return campaignRepository.save(newCampaign);
     } catch (DuplicateKeyException e) {
-      log.info("Duplicate key exception on campaign with externalId {}, organizationId {}, subUnitCode {}", campaign.getExternalId(), campaign.getOrganizationId(), campaign.getOrgSubUnitCode());
+      log.info("Duplicate key exception while saving campaign with externalId {}, organizationId {}, subUnitCode {}; fetching already existing campaign", newCampaign.getExternalId(), newCampaign.getOrganizationId(), newCampaign.getOrgSubUnitCode());
       return campaignRepository
         .findByExternalIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, organizationId, orgSubUnitCode).orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, "Campaign not found for organizationId %d, subUnitCode %s, externalCampaignId %s".formatted(organizationId, orgSubUnitCode, externalCampaignId)));
     }
