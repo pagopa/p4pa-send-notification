@@ -16,6 +16,7 @@ import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.*;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -72,7 +73,13 @@ public class CampaignServiceImpl implements CampaignService {
 
     log.info("Upserting of campaign with externalId {}, organizationId {}, subUnitCode {}", campaign.getExternalId(), campaign.getOrganizationId(), campaign.getOrgSubUnitCode());
 
-    return campaignRepository.upsert(campaign);
+    try {
+      return campaignRepository.upsert(campaign);
+    } catch (DuplicateKeyException e) {
+      log.info("Duplicate key exception on campaign with externalId {}, organizationId {}, subUnitCode {}", campaign.getExternalId(), campaign.getOrganizationId(), campaign.getOrgSubUnitCode());
+      return campaignRepository
+        .findByExternalIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, organizationId, orgSubUnitCode).orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, "Campaign not found for organizationId %d, subUnitCode %s, externalCampaignId %s".formatted(organizationId, orgSubUnitCode, externalCampaignId)));
+    }
   }
 
   @Override
