@@ -167,13 +167,14 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
 
   @Override
   public Campaign upsert(Campaign campaign) {
-    Query query = new Query(Criteria.where(Fields.externalId).is(campaign.getExternalId()));
+    Query query = new Query(
+      Criteria.where(Fields.externalId).is(campaign.getExternalId())
+        .and(Fields.organizationId).is(campaign.getOrganizationId())
+        .and(Fields.orgSubUnitCode).is(campaign.getOrgSubUnitCode())
+    );
     Update update = BaseEntityListener.setTechFieldsOnDocumentUpdate(
       new Update().
-        setOnInsert(Fields.externalId, campaign.getExternalId()).
         set(Fields.campaignName, campaign.getCampaignName()).
-        setOnInsert(Fields.organizationId, campaign.getOrganizationId()).
-        setOnInsert(Fields.orgSubUnitCode, campaign.getOrgSubUnitCode()).
         setOnInsert(Fields.startDate, campaign.getStartDate()).
         set(Fields.endDate, campaign.getEndDate())
     );
