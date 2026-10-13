@@ -291,10 +291,11 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
     campaign.setStartDate(LocalDate.now());
     campaign.setEndDate(LocalDate.now());
 
+    ArgumentCaptor<Query> queryArgumentCaptor = ArgumentCaptor.forClass(Query.class);
     ArgumentCaptor<Update> updateArgumentCaptor = ArgumentCaptor.forClass(Update.class);
 
     when(mongoTemplateMock.findAndModify(
-      Mockito.any(Query.class),
+      queryArgumentCaptor.capture(),
       updateArgumentCaptor.capture(),
       Mockito.any(FindAndModifyOptions.class),
       Mockito.eq(Campaign.class))
@@ -305,8 +306,9 @@ class CampaignRepositoryExtImplTest extends BaseMongoRepositoryTest {
 
     // Then
     assertEquals(campaign, upsertedCampaign);
-    Document upsertObject = updateArgumentCaptor.getValue().getUpdateObject();
-    TestUtils.assertUpsertedFields(upsertObject, Campaign.class, "campaignId", "counters");
+    Document queryDocument = queryArgumentCaptor.getValue().getQueryObject();
+    Document updateDocument = updateArgumentCaptor.getValue().getUpdateObject();
+    TestUtils.assertUpsertedFields(queryDocument, updateDocument, Campaign.class, "campaignId", "counters");
   }
 
 

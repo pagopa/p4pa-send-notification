@@ -54,35 +54,36 @@ public class TestUtils {
   }
 
   /**
-   * It will assert that all non excluded fields of class 'C' are set in the upsert document
+   * It will assert that all non excluded fields of class 'C' are set in the query or update document
    */
-  public static <C> void assertUpsertedFields(Document upsertDocument, Class<C> clazz, String... excludedFieldNames) {
-    List<String> upsertedFieldNameList = getUpsertedFieldNameList(upsertDocument);
+  public static <C> void assertUpsertedFields(Document queryDocument, Document updateDocument, Class<C> clazz, String... excludedFieldNames) {
+    Set<String> queryFieldNameList = queryDocument.keySet();
+    List<String> upsertedFieldNameList = getUpsertedFieldNameList(updateDocument);
     List<Field> classFieldList = Arrays.asList(clazz.getDeclaredFields());
     List<String> excludedFieldNameList = Arrays.asList(excludedFieldNames);
     classFieldList.forEach(field ->
       Assertions.assertTrue(
-        upsertedFieldNameList.contains(field.getName()) || excludedFieldNameList.contains(field.getName()),
-        "The field %s of the object of type %s is neither set in the upsert document nor excluded!".formatted(field.getName(), clazz)
+        queryFieldNameList.contains(field.getName()) || upsertedFieldNameList.contains(field.getName()) || excludedFieldNameList.contains(field.getName()),
+        "The field %s of the object of type %s is neither set in the query document, nor in the update document nor excluded!".formatted(field.getName(), clazz)
       )
     );
   }
 
   /**
-   * Extract from the upsertDocument names of all upserted fields
+   * Extract from the updateDocument names of all upserted fields
    */
-  private static List<String> getUpsertedFieldNameList(Document upsertDocument) {
+  private static List<String> getUpsertedFieldNameList(Document updateDocument) {
     List<String> upsertedFieldNameList = new ArrayList<>();
-    extractUpsertedFieldNames(upsertDocument, "$set", upsertedFieldNameList);
-    extractUpsertedFieldNames(upsertDocument, "$setOnInsert", upsertedFieldNameList);
+    extractUpsertedFieldNames(updateDocument, "$set", upsertedFieldNameList);
+    extractUpsertedFieldNames(updateDocument, "$setOnInsert", upsertedFieldNameList);
     return upsertedFieldNameList;
   }
 
   /**
-   * Extract from the upsertDocument names of upserted fields for the specified upsertOperator ($set|$setOnInsert)
+   * Extract from the updateDocument names of upserted fields for the specified upsertOperator ($set|$setOnInsert)
    */
-  private static void extractUpsertedFieldNames(Document upsertDocument, String upsertOperator, List<String> upsertedFieldNameList) {
-    List<String> partialUpsertedFieldNameList = upsertDocument.get(upsertOperator, Document.class).entrySet().stream()
+  private static void extractUpsertedFieldNames(Document updateDocument, String upsertOperator, List<String> upsertedFieldNameList) {
+    List<String> partialUpsertedFieldNameList = updateDocument.get(upsertOperator, Document.class).entrySet().stream()
       .filter(e -> e.getValue() != null)
       .map(Map.Entry::getKey)
       .toList();
