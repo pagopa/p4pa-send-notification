@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.service;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.send.connector.debtpositions.client.DebtPositionApiClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.mockito.Mockito.when;
 
@@ -45,6 +48,25 @@ class DebtPositionServiceTest {
 
     // When
     DebtPositionDTO result = service.findDebtPositionByInstallment(organizationId, nav, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void whenGetInstallmentsByOrganizationIdAndNavThenInvokeClient(){
+    // Given
+    Long organizationId = 1L;
+    String nav = "NAV";
+    String accessToken = "accessToken";
+
+    List<InstallmentDTO> expectedResult = List.of(new InstallmentDTO());
+
+    when(debtPositionApiClientMock.getInstallmentsByOrganizationIdAndNav(organizationId, nav, null, accessToken))
+      .thenReturn(expectedResult);
+
+    // When
+    List<InstallmentDTO> result = service.getInstallmentsByOrganizationIdAndNav(organizationId, nav, null, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);

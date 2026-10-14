@@ -1,9 +1,12 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.client;
 
 import it.gov.pagopa.pu.debtpositions.client.generated.DebtPositionApi;
+import it.gov.pagopa.pu.debtpositions.client.generated.InstallmentApi;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.send.connector.debtpositions.config.DebtPositionApisHolder;
 import it.gov.pagopa.pu.send.util.Constants;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +26,8 @@ class DebtPositionApiClientTest {
   private DebtPositionApisHolder apisHolder;
   @Mock
   private DebtPositionApi debtPositionApiMock;
+  @Mock
+  private InstallmentApi installmentApiMock;
 
   private DebtPositionApiClient debtPositionApiClient;
 
@@ -69,5 +74,26 @@ class DebtPositionApiClientTest {
 
     // Then
     assertNull(result);
+  }
+
+  @Test
+  void givenValidRequestWhenGetInstallmentsByOrganizationIdAndNavThenVerifyResponse() {
+    // Given
+    Long organizationId = 1L;
+    String nav = "NAV";
+    String accessToken = "accessToken";
+
+    List<InstallmentDTO> expectedResult = List.of(new InstallmentDTO());
+
+    when(apisHolder.getInstallmentApi(accessToken))
+      .thenReturn(installmentApiMock);
+    when(installmentApiMock.getInstallmentsByOrganizationIdAndNav(organizationId, nav, null))
+      .thenReturn(expectedResult);
+
+    // When
+    List<InstallmentDTO> result = debtPositionApiClient.getInstallmentsByOrganizationIdAndNav(organizationId, nav, null, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
   }
 }
