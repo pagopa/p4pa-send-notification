@@ -56,6 +56,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final OrganizationService organizationService;
   private final OrgSubUnitService orgSubUnitService;
   private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
+  private final SendNotificationPaidService sendNotificationPaidService;
 
   public SendNotificationServiceImpl(
     @Value("${fileshare-public-base-url}") String fileShareBaseUrl,
@@ -68,7 +69,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     TaxonomyValidatorService taxonomyValidatorService,
     OrganizationService organizationService,
     OrgSubUnitService orgSubUnitService,
-    SendNotificationStatusHandlerService sendNotificationStatusHandlerService
+    SendNotificationStatusHandlerService sendNotificationStatusHandlerService,
+    SendNotificationPaidService sendNotificationPaidService
   ) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
@@ -81,6 +83,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.organizationService = organizationService;
     this.orgSubUnitService = orgSubUnitService;
     this.sendNotificationStatusHandlerService = sendNotificationStatusHandlerService;
+    this.sendNotificationPaidService = sendNotificationPaidService;
   }
 
   @Transactional
@@ -110,6 +113,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     SendNotification sendNotification = sendNotificationPIIRepository.save(
       mapper.mapToModel(createNotificationRequest, campaign.getCampaignId(), accessToken)
     );
+
+    sendNotificationPaidService.handlePaidNotification(sendNotification.getNoPII());
 
     return CreateNotificationResponse
       .builder()

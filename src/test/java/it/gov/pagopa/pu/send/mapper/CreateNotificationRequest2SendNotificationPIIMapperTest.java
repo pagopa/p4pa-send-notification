@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
@@ -34,8 +36,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import static it.gov.pagopa.pu.send.util.Constants.ORDINARY_DEBT_POSITION_ORIGINS;
 import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocument;
 import static it.gov.pagopa.pu.send.util.faker.RecipientFaker.buildRecipient;
 import static org.mockito.Mockito.when;
@@ -89,8 +93,15 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Organization organization = new Organization();
     organization.setOrganizationId(request.getOrganizationId());
 
+    InstallmentDTO installmentDTO = new InstallmentDTO();
+    installmentDTO.setStatus(InstallmentStatus.PAID);
+    List<InstallmentDTO> installments = List.of(installmentDTO);
+
     when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
       .thenReturn(debtPosition);
+
+    when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken))
+      .thenReturn(installments);
 
     when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.of(organization));
@@ -137,9 +148,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .getPayments().getFirst().getPagoPa().getCreditorTaxId();
     String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
 
-    DebtPositionDTO debtPosition = new DebtPositionDTO();
-    debtPosition.setDebtPositionId(null);
-
     when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.empty());
 
@@ -152,7 +160,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
     Assertions.assertEquals("ROSSI MARIO", result.getPuRecipients().getFirst().getRecipient().getDenomination());
-    checkPayments(debtPosition, result);
     checkDocuments(result);
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
@@ -203,6 +210,10 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Organization organization = new Organization();
     organization.setOrganizationId(request.getOrganizationId());
 
+    InstallmentDTO installmentDTO = new InstallmentDTO();
+    installmentDTO.setStatus(InstallmentStatus.PAID);
+    List<InstallmentDTO> installments = List.of(installmentDTO);
+
     if (paymentNull.equals("f24null")) {
       String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
       String orgFiscalCode = request.getRecipients().getFirst()
@@ -211,6 +222,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
 
       when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
         .thenReturn(debtPosition);
+      when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken))
+        .thenReturn(installments);
       when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
         .thenReturn(Optional.of(organization));
     }
@@ -311,6 +324,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       Assertions.assertEquals("CREDITORTAXID", result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getCreditorTaxId());
       Assertions.assertEquals("NOTICECODE", result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getNoticeCode());
       Assertions.assertEquals(true, result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getApplyCost());
+      Assertions.assertEquals(InstallmentStatus.PAID, result.getPuRecipients().getFirst().getPuPayments().getFirst().getStatus());
     }
   }
 

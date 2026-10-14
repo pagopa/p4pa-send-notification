@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.connector.debtpositions.config;
 
 
 import it.gov.pagopa.pu.debtpositions.client.generated.DebtPositionApi;
+import it.gov.pagopa.pu.debtpositions.client.generated.InstallmentApi;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionErrorDTO;
 import it.gov.pagopa.pu.debtpositions.generated.ApiClient;
 import it.gov.pagopa.pu.debtpositions.generated.BaseApi;
@@ -17,6 +18,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class DebtPositionApisHolder {
 
   private final DebtPositionApi debtPositionApi;
+  private final InstallmentApi installmentApi;
 
   private final ThreadLocal<String> bearerTokenHolder = new ThreadLocal<>();
 
@@ -33,6 +35,7 @@ public class DebtPositionApisHolder {
     );
 
     this.debtPositionApi = new DebtPositionApi(apiClient);
+    this.installmentApi = new InstallmentApi(apiClient);
   }
 
   @PreDestroy
@@ -42,6 +45,10 @@ public class DebtPositionApisHolder {
 
   public DebtPositionApi getDebtPositionApi(String accessToken) {
     return getApi(accessToken, debtPositionApi);
+  }
+
+  public InstallmentApi getInstallmentApi(String accessToken) {
+    return getApi(accessToken, installmentApi);
   }
 
   private ApiClient buildApiClient(RestTemplate restTemplate, DebtPositionApiClientConfig clientConfig) {
