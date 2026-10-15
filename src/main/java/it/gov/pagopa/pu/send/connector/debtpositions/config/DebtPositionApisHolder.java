@@ -47,10 +47,6 @@ public class DebtPositionApisHolder {
     return getApi(accessToken, debtPositionApi);
   }
 
-  public InstallmentApi getInstallmentApi(String accessToken) {
-    return getApi(accessToken, installmentApi);
-  }
-
   private ApiClient buildApiClient(RestTemplate restTemplate, DebtPositionApiClientConfig clientConfig) {
     ApiClient apiClient = new ApiClient(restTemplate);
     apiClient.setBasePath(clientConfig.getBaseUrl());

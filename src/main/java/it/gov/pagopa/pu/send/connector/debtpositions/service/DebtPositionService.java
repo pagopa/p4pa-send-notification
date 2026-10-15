@@ -8,5 +8,4 @@ import java.util.List;
 
 public interface DebtPositionService {
   DebtPositionDTO findDebtPositionByInstallment(Long organizationId, String nav, String accessToken);
-  List<InstallmentDTO> getInstallmentsByOrganizationIdAndNav(Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOriginList, String accessToken);
 }

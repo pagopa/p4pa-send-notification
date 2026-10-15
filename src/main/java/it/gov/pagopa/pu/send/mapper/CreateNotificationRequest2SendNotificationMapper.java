@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
@@ -24,8 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Stream;
-
-import static it.gov.pagopa.pu.send.util.Constants.ORDINARY_DEBT_POSITION_ORIGINS;
 
 @Service
 public class CreateNotificationRequest2SendNotificationMapper {
@@ -133,9 +132,14 @@ public class CreateNotificationRequest2SendNotificationMapper {
     if (debtPosition == null) {
       throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
     } else {
-      List<InstallmentDTO> installments = debtPositionService.getInstallmentsByOrganizationIdAndNav(organizationId, nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken);
-      return new PuPayment(debtPosition.getDebtPositionId(), p, null,
-        !installments.isEmpty() ? installments.getFirst().getStatus() : null);
+      InstallmentStatus status = debtPosition.getPaymentOptions().stream()
+        .flatMap(paymentOption -> paymentOption.getInstallments().stream())
+        .filter(installment -> installment.getNav().equals(nav))
+        .findFirst()
+        .map(InstallmentDTO::getStatus)
+        .orElse(null);
+
+      return new PuPayment(debtPosition.getDebtPositionId(), p, null, status);
     }
   }
 

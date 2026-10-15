@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.mapper;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
+import it.gov.pagopa.pu.debtpositions.dto.generated.PaymentOptionDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
@@ -39,7 +40,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static it.gov.pagopa.pu.send.util.Constants.ORDINARY_DEBT_POSITION_ORIGINS;
 import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocument;
 import static it.gov.pagopa.pu.send.util.faker.RecipientFaker.buildRecipient;
 import static org.mockito.Mockito.when;
@@ -93,15 +93,17 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Organization organization = new Organization();
     organization.setOrganizationId(request.getOrganizationId());
 
+    PaymentOptionDTO paymentOptionDTO = new PaymentOptionDTO();
+
     InstallmentDTO installmentDTO = new InstallmentDTO();
     installmentDTO.setStatus(InstallmentStatus.PAID);
-    List<InstallmentDTO> installments = List.of(installmentDTO);
+    installmentDTO.setNav(nav);
+    paymentOptionDTO.setInstallments(List.of(installmentDTO));
+
+    debtPosition.setPaymentOptions(List.of(paymentOptionDTO));
 
     when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
       .thenReturn(debtPosition);
-
-    when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken))
-      .thenReturn(installments);
 
     when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.of(organization));
@@ -210,20 +212,23 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Organization organization = new Organization();
     organization.setOrganizationId(request.getOrganizationId());
 
-    InstallmentDTO installmentDTO = new InstallmentDTO();
-    installmentDTO.setStatus(InstallmentStatus.PAID);
-    List<InstallmentDTO> installments = List.of(installmentDTO);
-
     if (paymentNull.equals("f24null")) {
       String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
       String orgFiscalCode = request.getRecipients().getFirst()
         .getPayments().getFirst().getPagoPa().getCreditorTaxId();
       String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
 
+      PaymentOptionDTO paymentOptionDTO = new PaymentOptionDTO();
+
+      InstallmentDTO installmentDTO = new InstallmentDTO();
+      installmentDTO.setStatus(InstallmentStatus.PAID);
+      installmentDTO.setNav(nav);
+      paymentOptionDTO.setInstallments(List.of(installmentDTO));
+
+      debtPosition.setPaymentOptions(List.of(paymentOptionDTO));
+
       when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
         .thenReturn(debtPosition);
-      when(debtPositionServiceMock.getInstallmentsByOrganizationIdAndNav(organization.getOrganizationId(), nav, ORDINARY_DEBT_POSITION_ORIGINS, accessToken))
-        .thenReturn(installments);
       when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
         .thenReturn(Optional.of(organization));
     }

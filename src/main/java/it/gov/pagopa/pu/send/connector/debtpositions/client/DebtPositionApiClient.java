@@ -1,8 +1,6 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.client;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
-import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionOrigin;
-import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
 import it.gov.pagopa.pu.send.connector.debtpositions.config.DebtPositionApisHolder;
 import it.gov.pagopa.pu.send.util.Constants;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +28,5 @@ public class DebtPositionApiClient {
      } else {
        return debtPositions.getFirst();
      }
-  }
-
-  public List<InstallmentDTO> getInstallmentsByOrganizationIdAndNav(
-    Long organizationId, String nav, List<DebtPositionOrigin> debtPositionOriginList, String accessToken) {
-    return debtPositionApisHolder.getInstallmentApi(accessToken)
-      .getInstallmentsByOrganizationIdAndNav(organizationId, nav, debtPositionOriginList);
   }
 }
