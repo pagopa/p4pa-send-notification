@@ -1,6 +1,8 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
@@ -130,7 +132,14 @@ public class CreateNotificationRequest2SendNotificationMapper {
     if (debtPosition == null) {
       throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
     } else {
-      return new PuPayment(debtPosition.getDebtPositionId(), p, null, null);
+      InstallmentStatus status = debtPosition.getPaymentOptions().stream()
+        .flatMap(paymentOption -> paymentOption.getInstallments().stream())
+        .filter(installment -> installment.getNav().equals(nav))
+        .findFirst()
+        .map(InstallmentDTO::getStatus)
+        .orElse(null);
+
+      return new PuPayment(debtPosition.getDebtPositionId(), p, null, status);
     }
   }
 
