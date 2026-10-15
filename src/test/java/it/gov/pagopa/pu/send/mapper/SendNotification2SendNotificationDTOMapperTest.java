@@ -163,6 +163,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     assertEquals(sendNotificationNoPII.getSubject(), mappedSendNotificationDTO.getSubject());
     assertEquals(expectedPayments, mappedSendNotificationDTO.getPayments());
     assertEquals(sendNotificationNoPII.getHistory(), mappedSendNotificationDTO.getHistory());
+    assertEquals(sendNotificationNoPII.getNotificationRequestId(), mappedSendNotificationDTO.getNotificationRequestId());
   }
 
   private SendNotificationNoPII createSendNotificationNoPII(List<PuPayment> puPayments) {
@@ -179,6 +180,7 @@ class SendNotification2SendNotificationDTOMapperTest {
     sendNotificationNoPII.setCampaignId("CAMPAIGN_ID1");
     sendNotificationNoPII.setSubject("SUBJECT");
     sendNotificationNoPII.setHistory(Collections.emptyList());
+    sendNotificationNoPII.setNotificationRequestId("NOTIFICATION_REQUEST_ID1");
 
     return sendNotificationNoPII;
   }
