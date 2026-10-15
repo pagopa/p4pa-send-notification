@@ -16,7 +16,6 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
-import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepositoryExtImpl;
 import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -28,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -52,8 +52,6 @@ class CampaignServiceImplTest {
   @Mock
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
   @Mock
-  private SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExtMock;
-  @Mock
   private PagedCampaignMapper pagedCampaignMapperMock;
   @Mock
   private PagedSendNotificationsMapper pagedSendNotificationsMapperMock;
@@ -70,7 +68,6 @@ class CampaignServiceImplTest {
     Mockito.verifyNoMoreInteractions(
       campaignRepositoryMock,
       sendNotificationNoPIIRepositoryMock,
-      sendNotificationNoPIIRepositoryExtMock,
       pagedCampaignMapperMock,
       pagedSendNotificationsMapperMock,
       dataCipherServiceMock,
@@ -124,6 +121,38 @@ class CampaignServiceImplTest {
       .thenReturn(Optional.empty());
 
     when(campaignRepositoryMock.save(expectedCampaign)).thenReturn(expectedCampaign);
+
+    Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
+
+    assertNotNull(result);
+    assertEquals(expectedCampaign, result);
+  }
+
+  @Test
+  void givenDuplicateKeyExceptionOnSaveCampaignWhenCreateIfNotExistsThenDoNothing() {
+    String externalCampaignId = "externalCampaignId";
+    String campaignName = "campaignName";
+    LocalDate creationDate = LocalDate.of(2026, Month.JUNE, 18);
+
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    request.setSubUnitCode("orgSubUnitCode");
+
+    Campaign expectedCampaign = Campaign.builder()
+      .externalId(externalCampaignId)
+      .campaignName(campaignName)
+      .organizationId(request.getOrganizationId())
+      .orgSubUnitCode(request.getSubUnitCode())
+      .startDate(creationDate)
+      .endDate(creationDate)
+      .build();
+
+    when(campaignRepositoryMock.findByExternalIdAndOrganizationIdAndOrgSubUnitCode(
+      externalCampaignId, request.getOrganizationId(), request.getSubUnitCode()))
+      .thenReturn(Optional.empty())
+      .thenReturn(Optional.of(expectedCampaign));
+
+    when(campaignRepositoryMock.save(expectedCampaign)).thenThrow(new DuplicateKeyException("campaign exists already"));
 
     Campaign result = campaignService.createIfNotExists(externalCampaignId, campaignName, request, creationDate);
 
@@ -364,7 +393,7 @@ class CampaignServiceImplTest {
     //Given
     OffsetDateTime latestFullRecalculationDate = OffsetDateTime.now();
     List<String> expectedCampaignIds = List.of("id1", "id2", "id3");
-    when(sendNotificationNoPIIRepositoryExtMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate))
+    when(sendNotificationNoPIIRepositoryMock.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate))
       .thenReturn(expectedCampaignIds);
     //When
     List<String> actualCampaignIds = campaignService.findIdsOfUpdatedCampaignsByNotificationUpdateDate(latestFullRecalculationDate);

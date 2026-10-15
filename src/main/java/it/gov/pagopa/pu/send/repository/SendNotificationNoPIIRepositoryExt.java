@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.repository;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.send.dto.CampaignCountersAggregationResult;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
@@ -35,4 +36,5 @@ public interface SendNotificationNoPIIRepositoryExt {
   List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents);
   Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable);
   List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate);
+  Optional<SendNotificationNoPII> updatePaymentStatusByOrganizationIdAndNav(Long organizationId, String nav, InstallmentStatus status);
 }

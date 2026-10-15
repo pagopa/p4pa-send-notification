@@ -15,9 +15,9 @@ import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.view.CampaignIdView;
 import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
-import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepositoryExtImpl;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -32,7 +32,6 @@ import java.util.Optional;
 public class CampaignServiceImpl implements CampaignService {
   private final CampaignRepository campaignRepository;
   private final SendNotificationNoPIIRepository sendNotificationNoPIIRepository;
-  private final SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt;
   private final PagedCampaignMapper pagedCampaignMapper;
   private final PagedSendNotificationsMapper pagedSendNotificationsMapper;
   private final DataCipherService dataCipherService;
@@ -41,13 +40,11 @@ public class CampaignServiceImpl implements CampaignService {
   public CampaignServiceImpl(
           CampaignRepository campaignRepository,
           SendNotificationNoPIIRepository sendNotificationNoPIIRepository,
-          SendNotificationNoPIIRepositoryExtImpl sendNotificationNoPIIRepositoryExt,
           PagedCampaignMapper pagedCampaignMapper,
           PagedSendNotificationsMapper pagedSendNotificationsMapper,
           DataCipherService dataCipherService, CampaignCountersMapper campaignCountersMapper) {
     this.campaignRepository = campaignRepository;
     this.sendNotificationNoPIIRepository = sendNotificationNoPIIRepository;
-    this.sendNotificationNoPIIRepositoryExt = sendNotificationNoPIIRepositoryExt;
     this.pagedCampaignMapper = pagedCampaignMapper;
     this.pagedSendNotificationsMapper = pagedSendNotificationsMapper;
     this.dataCipherService = dataCipherService;
@@ -75,7 +72,14 @@ public class CampaignServiceImpl implements CampaignService {
       .endDate(sendNotificationCreationDate)
       .build();
 
-    return campaignRepository.save(newCampaign);
+    try {
+      log.info("Saving campaign with externalId {}, organizationId {}, subUnitCode {}", newCampaign.getExternalId(), newCampaign.getOrganizationId(), newCampaign.getOrgSubUnitCode());
+      return campaignRepository.save(newCampaign);
+    } catch (DuplicateKeyException e) {
+      log.info("Duplicate key exception while saving campaign with externalId {}, organizationId {}, subUnitCode {}; fetching already existing campaign", newCampaign.getExternalId(), newCampaign.getOrganizationId(), newCampaign.getOrgSubUnitCode());
+      return campaignRepository
+        .findByExternalIdAndOrganizationIdAndOrgSubUnitCode(externalCampaignId, organizationId, orgSubUnitCode).orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_CAMPAIGN_NOT_FOUND, "Campaign not found for organizationId %d, subUnitCode %s, externalCampaignId %s".formatted(organizationId, orgSubUnitCode, externalCampaignId)));
+    }
   }
 
   @Override
@@ -176,6 +180,6 @@ public class CampaignServiceImpl implements CampaignService {
 
   @Override
   public List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime lastRecalculationDate) {
-    return sendNotificationNoPIIRepositoryExt.findIdsOfUpdatedCampaignsByNotificationUpdateDate(lastRecalculationDate);
+    return sendNotificationNoPIIRepository.findIdsOfUpdatedCampaignsByNotificationUpdateDate(lastRecalculationDate);
   }
 }

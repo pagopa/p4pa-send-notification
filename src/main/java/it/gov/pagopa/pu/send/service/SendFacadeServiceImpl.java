@@ -176,7 +176,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       })
     );
 
-    return sendNotificationDTOMapper.apply(notification);
+    return sendNotificationDTOMapper.mapToSendNotificationDTO(notification);
   }
 
   @Override
@@ -193,7 +193,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       notification.setIun(notificationStatus.getIun());
       notification.setStatus(NotificationStatus.ACCEPTED);
     }
-    SendNotificationDTO sendNotificationDTO = sendNotificationDTOMapper.apply(notification);
+    SendNotificationDTO sendNotificationDTO = sendNotificationDTOMapper.mapToSendNotificationDTO(notification);
 
     if (notificationStatus != null && notificationStatus.getErrors() != null && !notificationStatus.getErrors().isEmpty()) {
       sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
@@ -275,7 +275,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
                                                                         String accessToken) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
-    return this.retrieveLegalFactDownloadMetadata(sendNotificationDTOMapper.apply(notification), legalFactId, accessToken);
+    return this.retrieveLegalFactDownloadMetadata(sendNotificationDTOMapper.mapToSendNotificationDTO(notification), legalFactId, accessToken);
   }
 
   private LegalFactDownloadMetadataDTO retrieveLegalFactDownloadMetadata(SendNotificationDTO sendNotification,

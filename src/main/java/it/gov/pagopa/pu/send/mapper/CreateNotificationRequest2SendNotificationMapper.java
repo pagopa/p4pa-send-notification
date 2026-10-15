@@ -117,10 +117,10 @@ public class CreateNotificationRequest2SendNotificationMapper {
       return optionalOrganizationManagedByPU
         .map(Organization::getOrganizationId)
         .map(organizationId -> getPuPaymentWithDebtPositionId(p, nav, organizationId, accessToken))
-        .orElseGet(() -> new PuPayment(null, p, null));
+        .orElseGet(() -> new PuPayment(null, p, null, null));
     }
     if (p.getF24() != null) {
-      return new PuPayment(null, p, null);
+      return new PuPayment(null, p, null, null);
     }
     return null;
   }
@@ -130,7 +130,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
     if (debtPosition == null) {
       throw new UnknownDebtPositionException("Cannot find debtPosition related to organizationId " + organizationId + " and having an Installment with NAV " + nav);
     } else {
-      return new PuPayment(debtPosition.getDebtPositionId(), p, null);
+      return new PuPayment(debtPosition.getDebtPositionId(), p, null, null);
     }
   }
 

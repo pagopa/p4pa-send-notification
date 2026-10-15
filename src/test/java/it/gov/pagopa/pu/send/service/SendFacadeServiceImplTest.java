@@ -346,7 +346,7 @@ class SendFacadeServiceImplTest {
 
     when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
 
-    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -382,7 +382,7 @@ class SendFacadeServiceImplTest {
 
     when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
 
-    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -447,7 +447,7 @@ class SendFacadeServiceImplTest {
 
     when(sendServiceMock.notificationStatus(notificationRequestId, orgId, accessToken)).thenReturn(response);
 
-    when(sendNotificationDTOMapperMock.apply(Mockito.same(notification)))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
     when(sendNotificationNoPIIRepositoryMock.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED))
@@ -489,7 +489,7 @@ class SendFacadeServiceImplTest {
     if (isPagoPaNull) {
       payment = new Payment(null, F24Payment.builder().title("F24").build());
     }
-    PuPayment puPayment = new PuPayment(1L, payment, null);
+    PuPayment puPayment = new PuPayment(1L, payment, null, null);
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
@@ -506,7 +506,7 @@ class SendFacadeServiceImplTest {
       when(sendServiceMock.retrieveNotificationPrice(creditorTaxId, noticeCode, orgId, accessToken))
         .thenReturn(response);
     }
-    when(sendNotificationDTOMapperMock.apply(Mockito.any()))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(Mockito.any()))
       .thenReturn(expectedDTO);
 
     // When
@@ -522,7 +522,7 @@ class SendFacadeServiceImplTest {
       verify(sendNotificationNoPIIRepositoryMock, never())
         .updateNotificationDate(any(), any(), any());
     }
-    verify(sendNotificationDTOMapperMock).apply(Mockito.any());
+    verify(sendNotificationDTOMapperMock).mapToSendNotificationDTO(Mockito.any());
   }
 
   @Test
@@ -546,14 +546,14 @@ class SendFacadeServiceImplTest {
     when(sendServiceMock.notificationStatus("REQUESTID", orgId, accessToken))
       .thenReturn(null);
 
-    when(sendNotificationDTOMapperMock.apply(notification))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(notification))
       .thenReturn(expectedDTO);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
 
     assertNotNull(result);
     assertEquals(expectedDTO, result);
-    verify(sendNotificationDTOMapperMock).apply(notification);
+    verify(sendNotificationDTOMapperMock).mapToSendNotificationDTO(notification);
   }
 
   @Test
@@ -581,14 +581,14 @@ class SendFacadeServiceImplTest {
     when(sendServiceMock.notificationStatus("REQUESTID", orgId, accessToken))
       .thenReturn(response);
 
-    when(sendNotificationDTOMapperMock.apply(notification))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(notification))
       .thenReturn(expectedDTO);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
 
     assertNotNull(result);
     assertEquals(expectedDTO, result);
-    verify(sendNotificationDTOMapperMock).apply(notification);
+    verify(sendNotificationDTOMapperMock).mapToSendNotificationDTO(notification);
     verify(sendNotificationNoPIIRepositoryMock).updateNotificationIun(sendNotificationId, "IUN");
   }
 
@@ -602,7 +602,7 @@ class SendFacadeServiceImplTest {
     String creditorTaxId = "123456789";
 
     Payment payment = new Payment(new PagoPa().noticeCode(nav).creditorTaxId(creditorTaxId), null);
-    PuPayment puPayment = new PuPayment(1L, payment, OffsetDateTime.now());
+    PuPayment puPayment = new PuPayment(1L, payment, OffsetDateTime.now(), null);
     PuRecipientNoPIIDTO recipient = new PuRecipientNoPIIDTO(null, List.of(puPayment));
 
     SendNotificationNoPII notification = SendNotificationNoPII.builder()
@@ -1050,7 +1050,7 @@ class SendFacadeServiceImplTest {
       .thenReturn(Optional.of(notification));
     when(sendServiceMock.getLegalFactDownloadMetadata(iun, legalFactId, organizationId, accessToken))
       .thenReturn(mockedResponse);
-    when(sendNotificationDTOMapperMock.apply(notification))
+    when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(notification))
       .thenReturn(notificationDTO);
 
     // WHEN
