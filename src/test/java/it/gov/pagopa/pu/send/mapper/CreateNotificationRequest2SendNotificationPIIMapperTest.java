@@ -1,6 +1,9 @@
 package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentDTO;
+import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
+import it.gov.pagopa.pu.debtpositions.dto.generated.PaymentOptionDTO;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
@@ -34,6 +37,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static it.gov.pagopa.pu.send.util.faker.DocumentFaker.buildDocument;
@@ -89,6 +93,15 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Organization organization = new Organization();
     organization.setOrganizationId(request.getOrganizationId());
 
+    PaymentOptionDTO paymentOptionDTO = new PaymentOptionDTO();
+
+    InstallmentDTO installmentDTO = new InstallmentDTO();
+    installmentDTO.setStatus(InstallmentStatus.PAID);
+    installmentDTO.setNav(nav);
+    paymentOptionDTO.setInstallments(List.of(installmentDTO));
+
+    debtPosition.setPaymentOptions(List.of(paymentOptionDTO));
+
     when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
       .thenReturn(debtPosition);
 
@@ -137,9 +150,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       .getPayments().getFirst().getPagoPa().getCreditorTaxId();
     String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
 
-    DebtPositionDTO debtPosition = new DebtPositionDTO();
-    debtPosition.setDebtPositionId(null);
-
     when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
       .thenReturn(Optional.empty());
 
@@ -152,7 +162,6 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertNotNull(result);
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
     Assertions.assertEquals("ROSSI MARIO", result.getPuRecipients().getFirst().getRecipient().getDenomination());
-    checkPayments(debtPosition, result);
     checkDocuments(result);
     Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
     Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
@@ -208,6 +217,15 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       String orgFiscalCode = request.getRecipients().getFirst()
         .getPayments().getFirst().getPagoPa().getCreditorTaxId();
       String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
+
+      PaymentOptionDTO paymentOptionDTO = new PaymentOptionDTO();
+
+      InstallmentDTO installmentDTO = new InstallmentDTO();
+      installmentDTO.setStatus(InstallmentStatus.PAID);
+      installmentDTO.setNav(nav);
+      paymentOptionDTO.setInstallments(List.of(installmentDTO));
+
+      debtPosition.setPaymentOptions(List.of(paymentOptionDTO));
 
       when(debtPositionServiceMock.findDebtPositionByInstallment(organization.getOrganizationId(), nav, accessToken))
         .thenReturn(debtPosition);
@@ -311,6 +329,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
       Assertions.assertEquals("CREDITORTAXID", result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getCreditorTaxId());
       Assertions.assertEquals("NOTICECODE", result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getNoticeCode());
       Assertions.assertEquals(true, result.getPuRecipients().getFirst().getPuPayments().getFirst().getPayment().getPagoPa().getApplyCost());
+      Assertions.assertEquals(InstallmentStatus.PAID, result.getPuRecipients().getFirst().getPuPayments().getFirst().getStatus());
     }
   }
 
