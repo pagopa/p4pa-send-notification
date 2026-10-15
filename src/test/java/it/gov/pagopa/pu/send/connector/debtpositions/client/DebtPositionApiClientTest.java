@@ -1,7 +1,6 @@
 package it.gov.pagopa.pu.send.connector.debtpositions.client;
 
 import it.gov.pagopa.pu.debtpositions.client.generated.DebtPositionApi;
-import it.gov.pagopa.pu.debtpositions.client.generated.InstallmentApi;
 import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.send.connector.debtpositions.config.DebtPositionApisHolder;
 import it.gov.pagopa.pu.send.util.Constants;
@@ -24,8 +23,6 @@ class DebtPositionApiClientTest {
   private DebtPositionApisHolder apisHolder;
   @Mock
   private DebtPositionApi debtPositionApiMock;
-  @Mock
-  private InstallmentApi installmentApiMock;
 
   private DebtPositionApiClient debtPositionApiClient;
 

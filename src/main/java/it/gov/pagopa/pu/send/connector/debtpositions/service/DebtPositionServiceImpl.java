@@ -4,8 +4,6 @@ import it.gov.pagopa.pu.debtpositions.dto.generated.DebtPositionDTO;
 import it.gov.pagopa.pu.send.connector.debtpositions.client.DebtPositionApiClient;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class DebtPositionServiceImpl implements DebtPositionService {
 
