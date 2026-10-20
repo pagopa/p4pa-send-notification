@@ -4,8 +4,8 @@ import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.send.dto.generated.NewNotificationRequestV25DTO;
 import it.gov.pagopa.send.dto.generated.NotificationFeePolicyDTO;
-import it.gov.pagopa.send.dto.generated.SentNotificationV25DTO;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class SendNotificationFaker {
       .paProtocolNumber("Prot_001")
       .documents(List.of(buildDocumentAttachment(), buildDocumentDTO()))
       .notificationFeePolicy(NotificationFeePolicyDTO.DELIVERY_MODE)
-      .physicalCommunicationType(SentNotificationV25DTO.PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER)
+      .physicalCommunicationType(NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER)
       .subject("Test Notifica Piattaforma Unitaria")
       .senderDenomination("Ente Intermediario 2")
       .senderTaxId("00000000018")

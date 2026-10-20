@@ -221,7 +221,7 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
       "NotificationStatusV26DTO" to "it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO",
       "SendNotificationNoPII" to "it.gov.pagopa.pu.send.model.SendNotificationNoPII",
       "NotificationFeePolicyDTO" to "it.gov.pagopa.send.dto.generated.NotificationFeePolicyDTO",
-      "PhysicalCommunicationTypeEnum" to "it.gov.pagopa.send.dto.generated.SentNotificationV25DTO.PhysicalCommunicationTypeEnum"
+      "PhysicalCommunicationTypeEnum" to "it.gov.pagopa.send.dto.generated.NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum"
     )
   )
   configOptions.set(
