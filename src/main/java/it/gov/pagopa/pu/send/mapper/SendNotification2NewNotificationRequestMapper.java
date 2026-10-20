@@ -42,8 +42,8 @@ public class SendNotification2NewNotificationRequestMapper {
     newNotification.setDocuments(setDocuments(sendNotification));
 
     //fee domain
-    newNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.valueOf(sendNotification.getNotificationFeePolicy()));
-    newNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.valueOf(sendNotification.getPhysicalCommunicationType()));
+    newNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.valueOf(sendNotification.getNotificationFeePolicy().getValue()));
+    newNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.valueOf(sendNotification.getPhysicalCommunicationType().getValue()));
     newNotification.senderDenomination(sendNotification.getSenderDenomination());
     newNotification.senderTaxId(sendNotification.getSenderTaxId());
     newNotification.setTaxonomyCode(sendNotification.getTaxonomyCode());

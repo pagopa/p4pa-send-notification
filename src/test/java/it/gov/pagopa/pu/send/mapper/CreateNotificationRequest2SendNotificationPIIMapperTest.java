@@ -10,11 +10,7 @@ import it.gov.pagopa.pu.organization.dto.generated.PagoPaInteractionModel;
 import it.gov.pagopa.pu.send.connector.debtpositions.service.DebtPositionService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.dto.SendNotification;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.NotificationFeePolicyEnum;
-import it.gov.pagopa.pu.send.dto.generated.CreateNotificationRequest.PhysicalCommunicationTypeEnum;
-import it.gov.pagopa.pu.send.dto.generated.Document;
-import it.gov.pagopa.pu.send.dto.generated.Recipient;
+import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.dto.generated.Recipient.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
@@ -22,6 +18,8 @@ import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
 import it.gov.pagopa.pu.send.util.DebtPositionUtils;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.NotificationFeePolicyDTO;
+import it.gov.pagopa.send.dto.generated.SentNotificationV25DTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,8 +117,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals("ROSSI MARIO", result.getPuRecipients().getFirst().getRecipient().getDenomination());
     checkPayments(debtPosition, result);
     checkDocuments(result);
-    Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
-    Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
+    Assertions.assertEquals(NotificationFeePolicyDTO.DELIVERY_MODE, result.getNotificationFeePolicy());
+    Assertions.assertEquals(SentNotificationV25DTO.PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER, result.getPhysicalCommunicationType());
     Assertions.assertEquals("Test Notifica Piattaforma Unitaria", result.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
@@ -163,8 +161,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals(RecipientTypeEnum.PF, result.getPuRecipients().getFirst().getRecipient().getRecipientType());
     Assertions.assertEquals("ROSSI MARIO", result.getPuRecipients().getFirst().getRecipient().getDenomination());
     checkDocuments(result);
-    Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
-    Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
+    Assertions.assertEquals(NotificationFeePolicyDTO.DELIVERY_MODE, result.getNotificationFeePolicy());
+    Assertions.assertEquals(SentNotificationV25DTO.PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER, result.getPhysicalCommunicationType());
     Assertions.assertEquals("Test Notifica Piattaforma Unitaria", result.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
@@ -248,8 +246,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     } else if (paymentNull.equals("f24null")) {
       checkPayments(debtPosition, result);
     }
-    Assertions.assertEquals(NotificationFeePolicyEnum.DELIVERY_MODE.getValue(), result.getNotificationFeePolicy());
-    Assertions.assertEquals(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER.getValue(), result.getPhysicalCommunicationType());
+    Assertions.assertEquals(NotificationFeePolicyDTO.DELIVERY_MODE, result.getNotificationFeePolicy());
+    Assertions.assertEquals(SentNotificationV25DTO.PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER, result.getPhysicalCommunicationType());
     Assertions.assertEquals("Test Notifica Piattaforma Unitaria", request.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
@@ -308,8 +306,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setPaProtocolNumber("Prot_001");
     request.setRecipients(Collections.singletonList(recipient));
     request.setDocuments(Collections.singletonList(document));
-    request.setNotificationFeePolicy(NotificationFeePolicyEnum.DELIVERY_MODE);
-    request.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER);
+    request.setNotificationFeePolicy(NotificationFeePolicyDTO.DELIVERY_MODE);
+    request.setPhysicalCommunicationType(SentNotificationV25DTO.PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER);
     request.setSubject("Test Notifica Piattaforma Unitaria");
     request.setSenderDenomination("SENDERDENOMINATION");
     request.setSenderTaxId("SENDERTAXID");
