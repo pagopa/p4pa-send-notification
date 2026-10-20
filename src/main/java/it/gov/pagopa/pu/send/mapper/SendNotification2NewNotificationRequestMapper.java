@@ -42,7 +42,7 @@ public class SendNotification2NewNotificationRequestMapper {
 
     //fee domain
     newNotification.setNotificationFeePolicy(sendNotification.getNotificationFeePolicy());
-    newNotification.setPhysicalCommunicationType(sendNotification.getPhysicalCommunicationType());
+    newNotification.setPhysicalCommunicationType(NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum.valueOf(sendNotification.getPhysicalCommunicationType().getValue()));
     newNotification.senderDenomination(sendNotification.getSenderDenomination());
     newNotification.senderTaxId(sendNotification.getSenderTaxId());
     newNotification.setTaxonomyCode(sendNotification.getTaxonomyCode());

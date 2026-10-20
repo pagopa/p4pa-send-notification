@@ -21,6 +21,7 @@ import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.exception.UnknownDebtPositionException;
 import it.gov.pagopa.pu.send.util.DebtPositionUtils;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
+import it.gov.pagopa.send.dto.generated.SentNotificationV25DTO;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -58,7 +59,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
 
     sendNotification.setOrganizationId(organizationId);
     sendNotification.setNotificationFeePolicy(request.getNotificationFeePolicy());
-    sendNotification.setPhysicalCommunicationType(request.getPhysicalCommunicationType());
+    sendNotification.setPhysicalCommunicationType(SentNotificationV25DTO.PhysicalCommunicationTypeEnum.valueOf(request.getPhysicalCommunicationType().getValue()));
     sendNotification.setSubject(request.getSubject());
     sendNotification.setSenderDenomination(request.getSenderDenomination());
     sendNotification.setSenderTaxId(request.getSenderTaxId());

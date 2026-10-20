@@ -13,8 +13,8 @@ import it.gov.pagopa.pu.send.model.SendTaxonomy;
 import it.gov.pagopa.pu.send.service.SendTaxonomyService;
 import it.gov.pagopa.pu.send.util.TestUtils;
 import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
-import it.gov.pagopa.send.dto.generated.NewNotificationRequestV25DTO;
 import it.gov.pagopa.send.dto.generated.NotificationFeePolicyDTO;
+import it.gov.pagopa.send.dto.generated.SentNotificationV25DTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -151,7 +151,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     noPii.setNotificationRequestId("REQ001");
     noPii.setIun("IUN123");
     noPii.setNotificationFeePolicy(NotificationFeePolicyDTO.DELIVERY_MODE);
-    noPii.setPhysicalCommunicationType(NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER);
+    noPii.setPhysicalCommunicationType(SentNotificationV25DTO.PhysicalCommunicationTypeEnum.AR_REGISTERED_LETTER);
     noPii.setSubject("Test Notifica Piattaforma Unitaria");
     noPii.setSenderDenomination("Sender Org");
     noPii.setSenderTaxId("TAX001");
