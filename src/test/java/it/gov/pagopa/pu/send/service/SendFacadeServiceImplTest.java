@@ -895,7 +895,7 @@ class SendFacadeServiceImplTest {
     when(sendNotificationMapperMock.apply(notification))
       .thenReturn(request);
     when(sendServiceMock.deliveryNotification(request, orgId, accessToken))
-      .thenThrow(new RestInvokeConflictException("APPNAME", HttpStatus.CONFLICT, "ERROR", "ERRORCODE", "ERRORMESSAGE", null));
+      .thenThrow(new RestInvokeConflictException("APPNAME", HttpStatus.CONFLICT, "ERROR", "ERRORCODE", "ERRORMESSAGE", null, "BODY"));
 
     //WHEN
     Assertions.assertThrows(ResponseStatusException.class, () -> sendService.deliveryNotification(sendNotificationId, accessToken));

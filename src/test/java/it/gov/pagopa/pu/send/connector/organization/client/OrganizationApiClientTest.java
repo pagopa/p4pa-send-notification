@@ -72,7 +72,7 @@ class OrganizationApiClientTest {
     when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
     when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     OrganizationApiKeys result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
@@ -110,7 +110,7 @@ class OrganizationApiClientTest {
     when(apisHolder.getOrganizationEntityControllerApi(accessToken))
       .thenReturn(organizationEntityControllerApiMock);
     when(organizationEntityControllerApiMock.crudGetOrganization(orgId))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     Organization result = organizationApiClient.findByOrganizationId(Long.valueOf(orgId), accessToken);
@@ -149,7 +149,7 @@ class OrganizationApiClientTest {
     when(apisHolder.getOrganizationSearchControllerApi(accessToken))
       .thenReturn(organizationSearchControllerApiMock);
     when(organizationSearchControllerApiMock.crudOrganizationsFindByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     Optional<Organization> result = organizationApiClient.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken);
@@ -188,7 +188,7 @@ class OrganizationApiClientTest {
     when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
     when(organizationApiMock.getOrganizationStation(organizationId, stationId))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     OrganizationStationDTO result = organizationApiClient.findOrganizationStation(organizationId, stationId, accessToken);

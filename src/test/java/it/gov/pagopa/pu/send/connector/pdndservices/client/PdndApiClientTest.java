@@ -62,7 +62,7 @@ class PdndApiClientTest {
     when(apisHolder.getP4paPdndApiByApiKey(accessToken))
       .thenReturn(p4paPdndApiMock);
     when(p4paPdndApiMock.getVoucherToken(PdndServiceType.SEND, organizationId, subUnitCode))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
     PdndAuthData result = pdndApiClient.getVoucherToken(accessToken, organizationId, subUnitCode);

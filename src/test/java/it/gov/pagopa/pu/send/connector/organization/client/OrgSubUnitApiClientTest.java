@@ -65,7 +65,7 @@ class OrgSubUnitApiClientTest {
     when(organizationApisHolder.getOrgSubUnitEntityControllerApi(accessToken))
       .thenReturn(orgSubUnitEntityControllerApiMock);
     when(orgSubUnitEntityControllerApiMock.crudGetOrgsubunit(organizationId + "-" + orgSubUnitCode))
-      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE"));
+      .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     OrgSubUnit result = orgSubUnitApiClient.getOrgSubUnitById(organizationId, orgSubUnitCode, accessToken);
 
