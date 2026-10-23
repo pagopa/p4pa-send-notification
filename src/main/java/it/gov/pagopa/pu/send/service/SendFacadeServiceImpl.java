@@ -259,7 +259,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
     // Validate status
-    if(!NotificationStatus.ACCEPTED.equals(notification.getStatus())){
+    if(notification.getStatus().compareTo(NotificationStatus.ACCEPTED) < 0) {
       throw new InvalidStatusException(ErrorCodeConstants.ERROR_CODE_INVALID_NOTIFICATION_STATUS, NotificationStatus.ACCEPTED, notification.getStatus());
     }
 
