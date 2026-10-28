@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.send.config.BaseEntityListener;
+import it.gov.pagopa.send.dto.generated.NotificationRefusedErrorV27DTO;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
@@ -79,6 +80,14 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
     return updateFirst(
       Query.query(Criteria.where(Fields.notificationRequestId).is(notificationRequestId)),
       new Update().set(Fields.status, newStatus)
+    );
+  }
+
+  @Override
+  public UpdateResult updateNotificationRefusalReasons(String notificationRequestId, List<NotificationRefusedErrorV27DTO> refusalReasons) {
+    return updateFirst(
+      Query.query(Criteria.where(Fields.notificationRequestId).is(notificationRequestId)),
+      new Update().set(Fields.refusalReasons, refusalReasons)
     );
   }
 

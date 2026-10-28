@@ -5,6 +5,7 @@ import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.send.dto.generated.NotificationRefusedErrorV27DTO;
 
 import java.io.InputStream;
 import java.util.List;
@@ -18,6 +19,7 @@ public interface SendNotificationService {
   SendNotificationDTO findSendNotificationDTOByNotificationRequestId(String notificationRequestId);
   SendNotificationDTO findSendNotificationByOrgIdAndNav(Long organizationId, String nav);
   UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus);
+  UpdateResult updateNotificationRefusalReasons(String notificationRequestId, List<NotificationRefusedErrorV27DTO> refusalReasons);
   void downloadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream);
   List<LegalFactDTO> getLegalFacts(String sendNotificationId);
   SendNotificationNoPII findSendNotification(String sendNotificationId);

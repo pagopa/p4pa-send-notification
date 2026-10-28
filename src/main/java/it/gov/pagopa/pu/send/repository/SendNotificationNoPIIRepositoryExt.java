@@ -9,6 +9,7 @@ import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.send.dto.generated.NotificationRefusedErrorV27DTO;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import java.util.Optional;
 public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult updateFilePreloadInformation(String sendNotificationId, PreLoadResponseDTO preLoad);
   UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus);
+  UpdateResult updateNotificationRefusalReasons(String notificationRequestId, List<NotificationRefusedErrorV27DTO> refusalReasons);
   UpdateResult updateNotificationStatusById(String sendNotificationId, NotificationStatus newStatus);
   UpdateResult updateNotificationRequestId(String sendNotificationId, String notificationRequestId);
   UpdateResult updateFileStatus(String sendNotificationId, String fileName, FileStatus newStatus);
