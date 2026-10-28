@@ -26,16 +26,34 @@ class DataIntegrityViolationExceptionMessageTranscoderTest {
     // Then
     Assertions.assertEquals(
       new ExceptionMessageTranscoded(
-        "SEND_NOTIFICATION_CONFLICT",
-        "Conflict.",
+        "SEND_NOTIFICATION_BAD_REQUEST",
+        "Data integrity violation.",
         null),
       result);
   }
 
   @Test
-  void givenHibernateConstraintViolationExceptionCauseWhenTranscodeThenOk() {
+  void givenSQLConstraintViolationExceptionCauseWhenTranscodeThenBadRequest() {
     // Given
-    SQLException sqlException = new SQLException("sqlErrorMessage");
+    SQLException sqlException = new SQLException("sqlErrorMessage", "22001");
+    DataIntegrityViolationException exception = new DataIntegrityViolationException("message", new ConstraintViolationException("message", sqlException, "constraintName"));
+
+    // When
+    ExceptionMessageTranscoded result = transcoder.transcode(exception);
+
+    // Then
+    Assertions.assertEquals(
+      new ExceptionMessageTranscoded(
+        "SEND_NOTIFICATION_BAD_REQUEST",
+        "Data integrity violation. "+sqlException.getMessage(),
+        null),
+      result);
+  }
+
+  @Test
+  void givenUniqueConstraintViolationExceptionCauseWhenTranscodeThenConflict() {
+    // Given
+    SQLException sqlException = new SQLException("uniqueViolationMessage", "23505");
     DataIntegrityViolationException exception = new DataIntegrityViolationException("message", new ConstraintViolationException("message", sqlException, "constraintName"));
 
     // When
