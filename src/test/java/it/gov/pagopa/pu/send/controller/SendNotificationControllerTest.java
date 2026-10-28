@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.NotificationRefusedErrorV27DTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -305,6 +306,24 @@ class SendNotificationControllerTest {
 
     // When
     ResponseEntity<Void> response = sendNotificationController.updateNotificationStatus(notificationRequestId, NotificationStatus.REFUSED);
+
+    // Then
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  @Test
+  void whenUpdateNotificationRefusalReasonsThenReturnOk() {
+    // Given
+    String notificationRequestId = "REQUESTID";
+    UpdateResult updateResult = UpdateResult.acknowledged(1, 1L, null);
+    List<NotificationRefusedErrorV27DTO> refusalReasons = List.of(new NotificationRefusedErrorV27DTO());
+
+    when(sendNotificationServiceMock.updateNotificationRefusalReasons(notificationRequestId, refusalReasons))
+      .thenReturn(updateResult);
+
+    // When
+    ResponseEntity<Void> response = sendNotificationController.updateNotificationRefusalReasons(notificationRequestId, refusalReasons);
 
     // Then
     Assertions.assertNotNull(response);
