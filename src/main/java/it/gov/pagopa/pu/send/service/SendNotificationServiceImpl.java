@@ -26,7 +26,6 @@ import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
-import it.gov.pagopa.send.dto.generated.NotificationRefusedErrorV27DTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -145,7 +144,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .allMatch(doc -> doc.getStatus().equals(FileStatus.READY));
 
     if (allFilesReady) {
-      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING);
+      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING, null);
       WorkflowCreatedDTO workflow = workflowService.sendNotificationProcess(sendNotificationId, accessToken);
       return StartNotificationResponse.builder()
         .workflowId(workflow.getWorkflowId())
@@ -192,11 +191,6 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   @Override
   public UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus) {
     return sendNotificationNoPIIRepository.updateNotificationStatus(notificationRequestId, newStatus);
-  }
-
-  @Override
-  public  UpdateResult updateNotificationRefusalReasons(String notificationRequestId, List<NotificationRefusedErrorV27DTO> refusalReasons) {
-    return sendNotificationNoPIIRepository.updateNotificationRefusalReasons(notificationRequestId, refusalReasons);
   }
 
   @Override

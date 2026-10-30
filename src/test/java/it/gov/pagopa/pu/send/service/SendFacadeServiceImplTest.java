@@ -146,7 +146,7 @@ class SendFacadeServiceImplTest {
     sendService.preloadFiles(sendNotificationId, accessToken);
 
     verify(sendNotificationNoPIIRepositoryMock, times(1)).updateFilePreloadInformation(eq(sendNotificationId), any(PreLoadResponseDTO.class));
-    verify(sendNotificationNoPIIRepositoryMock, times(1)).updateNotificationStatusById(sendNotificationId, NotificationStatus.REGISTERED);
+    verify(sendNotificationNoPIIRepositoryMock, times(1)).updateNotificationStatusById(sendNotificationId, NotificationStatus.REGISTERED, null);
   }
 
   @Test
@@ -193,7 +193,7 @@ class SendFacadeServiceImplTest {
     sendService.uploadFiles(sendNotificationId);
     verify(sendNotificationNoPIIRepositoryMock).updateFileVersionId(sendNotificationId, fileName, versionId);
     verify(sendNotificationNoPIIRepositoryMock).updateFileStatus(sendNotificationId, fileName, FileStatus.UPLOADED);
-    verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.UPLOADED);
+    verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.UPLOADED, null);
   }
 
   @Test
@@ -265,7 +265,7 @@ class SendFacadeServiceImplTest {
     verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
     verify(sendNotificationNoPIIRepositoryMock, times(1))
-      .updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
+      .updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION, null);
     Assertions.assertEquals(EventTypeEnum.TIMELINE, streamMetadataResponseArgumentCaptor.getValue().getEventType());
   }
 
@@ -319,7 +319,7 @@ class SendFacadeServiceImplTest {
     verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationRequestId(sendNotificationId, response.getNotificationRequestId());
     verify(sendNotificationNoPIIRepositoryMock, times(1))
-      .updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
+      .updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION, null);
   }
 
   @Test
@@ -450,7 +450,7 @@ class SendFacadeServiceImplTest {
     when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(Mockito.same(notification)))
       .thenReturn(expectedResult);
 
-    when(sendNotificationNoPIIRepositoryMock.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED))
+    when(sendNotificationNoPIIRepositoryMock.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED, List.of(error)))
       .thenReturn(updateResult);
 
     SendNotificationDTO result = sendService.notificationStatus(sendNotificationId, accessToken);
@@ -460,7 +460,7 @@ class SendFacadeServiceImplTest {
     verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationIun(sendNotificationId, response.getIun());
     verify(sendNotificationNoPIIRepositoryMock, times(1))
-      .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
+      .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED, List.of(error));
   }
 
   @ParameterizedTest
@@ -902,7 +902,7 @@ class SendFacadeServiceImplTest {
 
     //THEN
     verify(sendNotificationNoPIIRepositoryMock, times(1))
-      .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
+      .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED, null);
     verify(sendNotificationNoPIIRepositoryMock, never())
       .updateNotificationRequestId(Mockito.anyString(), Mockito.anyString());
     Assertions.assertEquals(EventTypeEnum.TIMELINE, streamMetadataResponseArgumentCaptor.getValue().getEventType());

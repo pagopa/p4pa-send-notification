@@ -113,7 +113,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     preLoadResponseDTO.forEach(response ->
       sendNotificationNoPIIRepository.updateFilePreloadInformation(sendNotificationId, response));
 
-    sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REGISTERED);
+    sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REGISTERED, null);
   }
 
   @Transactional
@@ -132,7 +132,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
         sendNotificationNoPIIRepository.updateFileVersionId(sendNotificationId, doc.getFileName(), versionId.get());
       }
     }
-    sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.UPLOADED);
+    sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.UPLOADED, null);
   }
 
   @Transactional
@@ -149,10 +149,10 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       NewNotificationResponseDTO responseDTO = sendService.deliveryNotification(sendNotificationMapper.apply(notification), notification.getOrganizationId(), accessToken);
       if (responseDTO != null) {
         sendNotificationNoPIIRepository.updateNotificationRequestId(sendNotificationId, responseDTO.getNotificationRequestId());
-        sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION);
+        sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.IN_VALIDATION, null);
       }
     }  catch (RestInvokeConflictException ex) {
-      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
+      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED, null);
       throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
     }
   }
@@ -180,6 +180,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
+  @Transactional
   public SendNotificationDTO notificationStatus(String sendNotificationId, String accessToken) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
@@ -198,7 +199,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
     if (notificationStatus != null && notificationStatus.getErrors() != null && !notificationStatus.getErrors().isEmpty()) {
       sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
         .map(NotificationRequestRefusedProblemErrorDTO::getDetail).toList());
-      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
+      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED, notificationStatus.getErrors());
       sendNotificationDTO.setStatus(NotificationStatus.REFUSED);
     }
 
