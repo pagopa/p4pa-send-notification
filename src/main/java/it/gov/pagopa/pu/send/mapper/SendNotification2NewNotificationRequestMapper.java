@@ -2,7 +2,6 @@ package it.gov.pagopa.pu.send.mapper;
 
 import it.gov.pagopa.send.dto.generated.*;
 import it.gov.pagopa.send.dto.generated.NewNotificationRequestV25DTO.PagoPaIntModeEnum;
-import it.gov.pagopa.send.dto.generated.NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum;
 import it.gov.pagopa.send.dto.generated.NotificationRecipientV24DTO.RecipientTypeEnum;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.PuRecipient;
@@ -42,8 +41,8 @@ public class SendNotification2NewNotificationRequestMapper {
     newNotification.setDocuments(setDocuments(sendNotification));
 
     //fee domain
-    newNotification.setNotificationFeePolicy(NotificationFeePolicyDTO.valueOf(sendNotification.getNotificationFeePolicy()));
-    newNotification.setPhysicalCommunicationType(PhysicalCommunicationTypeEnum.valueOf(sendNotification.getPhysicalCommunicationType()));
+    newNotification.setNotificationFeePolicy(sendNotification.getNotificationFeePolicy());
+    newNotification.setPhysicalCommunicationType(NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum.valueOf(sendNotification.getPhysicalCommunicationType().getValue()));
     newNotification.senderDenomination(sendNotification.getSenderDenomination());
     newNotification.senderTaxId(sendNotification.getSenderTaxId());
     newNotification.setTaxonomyCode(sendNotification.getTaxonomyCode());

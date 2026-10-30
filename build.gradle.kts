@@ -7,12 +7,12 @@ import java.util.*
 
 plugins {
   java
-  id("org.springframework.boot") version "4.1.1"
+  id("org.springframework.boot") version "4.1.2"
   id("io.spring.dependency-management") version "1.1.7"
   jacoco
-  id("org.sonarqube") version "7.4.0.8496"
-  id("org.openapi.generator") version "7.25.0"
-  id("org.ajoberstar.grgit") version "5.3.2"
+  id("org.sonarqube") version "7.5.0.8588"
+  id("org.openapi.generator") version "7.26.0"
+  id("org.ajoberstar.grgit") version "5.3.3"
   id("com.gorylenko.gradle-git-properties") version "4.0.1"
   id("com.github.jk1.dependency-license-report") version "3.1.4"
 }
@@ -51,23 +51,22 @@ repositories {
 }
 
 val springDocOpenApiVersion = "3.1.1"
-val openApiToolsVersion = "0.2.11"
-val micrometerVersion = "1.7.1"
+val openApiToolsVersion = "0.2.12"
+val micrometerOtelBridgeVersion = "1.7.2"
+val micrometerPrometheusVersion = "1.17.2"
 val bouncycastleVersion = "1.86"
-val httpClientVersion = "5.6.4"
+val httpClientVersion = "5.6.5"
 val httpCoreVersion = "5.4.4"
 val kafkaAppender = "0.2.0-RC2"
-val lz4JavaVersion = "1.12.0"
-val postgresJdbcVersion = "42.7.13"
-val caffeineVersion = "3.3.0"
-val commonsLang3Version = "3.20.0"
+val lz4JavaVersion = "1.12.1"
+val postgresJdbcVersion = "42.7.14"
+val caffeineVersion = "3.3.1"
+val commonsLang3Version = "3.21.0"
 val podamVersion = "8.0.2.RELEASE"
 val mapStructVersion = "1.6.3"
 
 // CVE Security dependencies
-val tomcatEmbedCoreVersion = "11.0.26"
 val jackson2DatabindVersion = "2.22.3"
-val jackson3DatabindVersion = "3.1.7"
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -80,8 +79,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
-  implementation("io.micrometer:micrometer-tracing-bridge-otel:$micrometerVersion")
-  implementation("io.micrometer:micrometer-registry-prometheus")
+  implementation("io.micrometer:micrometer-tracing-bridge-otel:$micrometerOtelBridgeVersion")
+  implementation("io.micrometer:micrometer-registry-prometheus:$micrometerPrometheusVersion")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenApiVersion") {
     exclude(group = "org.apache.commons", module = "commons-lang3")
   }
@@ -99,9 +98,7 @@ dependencies {
   implementation("org.mapstruct:mapstruct:$mapStructVersion")
 
   // CVE Security dependencies
-  implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion")
   implementation("com.fasterxml.jackson.core:jackson-databind:$jackson2DatabindVersion")
-  implementation("tools.jackson.core:jackson-databind:$jackson3DatabindVersion")
 
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")
@@ -219,7 +216,9 @@ tasks.register<GenerateTask>("openApiGenerateP4PASend") {
       "Campaign" to "it.gov.pagopa.pu.send.model.Campaign",
       "SendNotification" to "it.gov.pagopa.pu.send.dto.SendNotification",
       "NotificationStatusV26DTO" to "it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO",
-      "SendNotificationNoPII" to "it.gov.pagopa.pu.send.model.SendNotificationNoPII"
+      "SendNotificationNoPII" to "it.gov.pagopa.pu.send.model.SendNotificationNoPII",
+      "NotificationFeePolicyDTO" to "it.gov.pagopa.send.dto.generated.NotificationFeePolicyDTO",
+      "PhysicalCommunicationTypeEnum" to "it.gov.pagopa.send.dto.generated.NewNotificationRequestV25DTO.PhysicalCommunicationTypeEnum"
     )
   )
   configOptions.set(

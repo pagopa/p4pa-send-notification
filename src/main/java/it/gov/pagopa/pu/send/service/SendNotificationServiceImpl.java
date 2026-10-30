@@ -144,7 +144,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .allMatch(doc -> doc.getStatus().equals(FileStatus.READY));
 
     if (allFilesReady) {
-      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING);
+      sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING, null);
       WorkflowCreatedDTO workflow = workflowService.sendNotificationProcess(sendNotificationId, accessToken);
       return StartNotificationResponse.builder()
         .workflowId(workflow.getWorkflowId())

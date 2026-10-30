@@ -97,7 +97,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       .thenReturn(updateResult);
     when(updateResult.getModifiedCount()).thenReturn(1L);
 
-    UpdateResult result = repository.updateNotificationStatusById(sendNotificationId, newStatus);
+    UpdateResult result = repository.updateNotificationStatusById(sendNotificationId, newStatus, null);
 
     assertEquals(1L, result.getModifiedCount());
   }

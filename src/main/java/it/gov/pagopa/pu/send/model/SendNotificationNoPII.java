@@ -7,6 +7,11 @@ import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
+import it.gov.pagopa.send.dto.generated.NotificationFeePolicyDTO;
+import it.gov.pagopa.send.dto.generated.NotificationRequestRefusedProblemErrorDTO;
+import it.gov.pagopa.send.dto.generated.SentNotificationV25DTO;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,8 +45,10 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   private List<StreamEventSummaryDTO> history;
   private String notificationRequestId;
   private String iun;
-  private String notificationFeePolicy;
-  private String physicalCommunicationType;
+  @Enumerated(EnumType.STRING)
+  private NotificationFeePolicyDTO notificationFeePolicy;
+  @Enumerated(EnumType.STRING)
+  private SentNotificationV25DTO.PhysicalCommunicationTypeEnum physicalCommunicationType;
   private String subject;
   private String senderDenomination;
   private String senderTaxId;
@@ -52,6 +59,7 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   private int vat;
   private String pagoPaIntMode;
   private List<LegalFactDTO> legalFacts;
+  private List<NotificationRequestRefusedProblemErrorDTO> errors;
   @NotNull
   private Long personalDataId;
 }

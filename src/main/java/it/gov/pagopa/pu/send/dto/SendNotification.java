@@ -7,6 +7,11 @@ import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import java.util.List;
+
+import it.gov.pagopa.send.dto.generated.NotificationFeePolicyDTO;
+import it.gov.pagopa.send.dto.generated.SentNotificationV25DTO;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,8 +31,10 @@ public class SendNotification implements FullEntityPIIDTO<SendNotificationNoPII,
   private NotificationStatus status;
   private String notificationRequestId;
   private String iun;
-  private String notificationFeePolicy;
-  private String physicalCommunicationType;
+  @Enumerated(EnumType.STRING)
+  private NotificationFeePolicyDTO notificationFeePolicy;
+  @Enumerated(EnumType.STRING)
+  private SentNotificationV25DTO.PhysicalCommunicationTypeEnum physicalCommunicationType;
   private String subject;
   private String senderDenomination;
   private String senderTaxId;
