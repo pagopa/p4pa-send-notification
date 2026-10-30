@@ -249,7 +249,7 @@ class SendNotificationServiceImplTest {
 
       Assertions.assertEquals(new StartNotificationResponse("workflowId", "runId"), result);
 
-      verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING);
+      verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatusById(sendNotificationId, NotificationStatus.SENDING, null);
       verify(workflowServiceMock).sendNotificationProcess(sendNotificationId, null);
     }
   }

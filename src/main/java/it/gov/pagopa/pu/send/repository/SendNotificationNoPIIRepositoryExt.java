@@ -21,8 +21,7 @@ import java.util.Optional;
 public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult updateFilePreloadInformation(String sendNotificationId, PreLoadResponseDTO preLoad);
   UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus);
-  UpdateResult updateNotificationErrors(String sendNotificationId, List<NotificationRequestRefusedProblemErrorDTO> errors);
-  UpdateResult updateNotificationStatusById(String sendNotificationId, NotificationStatus newStatus);
+  UpdateResult updateNotificationStatusById(String sendNotificationId, NotificationStatus newStatus, List<NotificationRequestRefusedProblemErrorDTO> errors);
   UpdateResult updateNotificationRequestId(String sendNotificationId, String notificationRequestId);
   UpdateResult updateFileStatus(String sendNotificationId, String fileName, FileStatus newStatus);
   UpdateResult updateFileStatusAndUploadDate(String sendNotificationId, String fileName, FileStatus newStatus, OffsetDateTime uploadDate);

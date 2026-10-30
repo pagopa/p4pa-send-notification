@@ -88,23 +88,6 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   }
 
   @Test
-  void givenUpdateNotificationRefusalReasonsThenVerify() {
-    //Given
-    String sendNotificationId = "sendNotificationId";
-    List<NotificationRequestRefusedProblemErrorDTO> refusalReasons = List.of(new NotificationRequestRefusedProblemErrorDTO());
-
-    when(mongoTemplateMock.updateFirst(
-      Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
-        SendNotificationNoPII.class)))
-      .thenReturn(updateResult);
-    when(updateResult.getModifiedCount()).thenReturn(1L);
-    //When
-    UpdateResult result = repository.updateNotificationErrors(sendNotificationId, refusalReasons);
-    //Then
-    assertEquals(1L, result.getModifiedCount());
-  }
-
-  @Test
   void givenUpdateNotificationStatusByIdThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
     NotificationStatus newStatus = NotificationStatus.SENDING;
@@ -115,7 +98,7 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       .thenReturn(updateResult);
     when(updateResult.getModifiedCount()).thenReturn(1L);
 
-    UpdateResult result = repository.updateNotificationStatusById(sendNotificationId, newStatus);
+    UpdateResult result = repository.updateNotificationStatusById(sendNotificationId, newStatus, null);
 
     assertEquals(1L, result.getModifiedCount());
   }
