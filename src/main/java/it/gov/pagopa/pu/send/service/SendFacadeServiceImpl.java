@@ -180,6 +180,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
   }
 
   @Override
+  @Transactional
   public SendNotificationDTO notificationStatus(String sendNotificationId, String accessToken) {
     SendNotificationNoPII notification = findSendNotification(sendNotificationId);
 
@@ -199,6 +200,7 @@ public class SendFacadeServiceImpl implements SendFacadeService {
       sendNotificationDTO.setErrors(notificationStatus.getErrors().stream()
         .map(NotificationRequestRefusedProblemErrorDTO::getDetail).toList());
       sendNotificationNoPIIRepository.updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
+      sendNotificationNoPIIRepository.updateNotificationErrors(sendNotificationId, notificationStatus.getErrors());
       sendNotificationDTO.setStatus(NotificationStatus.REFUSED);
     }
 

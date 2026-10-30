@@ -8,7 +8,7 @@ import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.dto.pii.SendNotificationPIIDTO;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.send.dto.generated.NotificationFeePolicyDTO;
-import it.gov.pagopa.send.dto.generated.NotificationRefusedErrorV27DTO;
+import it.gov.pagopa.send.dto.generated.NotificationRequestRefusedProblemErrorDTO;
 import it.gov.pagopa.send.dto.generated.SentNotificationV25DTO;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -59,7 +59,7 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   private int vat;
   private String pagoPaIntMode;
   private List<LegalFactDTO> legalFacts;
-  private List<NotificationRefusedErrorV27DTO> refusalReasons;
+  private List<NotificationRequestRefusedProblemErrorDTO> errors;
   @NotNull
   private Long personalDataId;
 }

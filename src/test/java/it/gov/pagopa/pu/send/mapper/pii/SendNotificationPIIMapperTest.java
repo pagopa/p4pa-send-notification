@@ -115,7 +115,7 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
 
     SendNotificationNoPII result = mapper.extractNoPiiEntity(sendNotification);
 
-    TestUtils.checkNotNullFields(result, "personalDataId", "creationDate", "updateDate", "updateOperatorExternalId", "updateTraceId", "lastEventOfInterest", "history", "refusalReasons");
+    TestUtils.checkNotNullFields(result, "personalDataId", "creationDate", "updateDate", "updateOperatorExternalId", "updateTraceId", "lastEventOfInterest", "history", "errors");
     assertNotNull(result);
     assertEquals(sendNotification.getSendNotificationId(), result.getSendNotificationId());
     assertEquals(sendNotification.getSubject(), result.getSubject());

@@ -26,7 +26,6 @@ import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
 import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
-import it.gov.pagopa.send.dto.generated.NotificationRefusedErrorV27DTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -528,29 +527,6 @@ class SendNotificationServiceImplTest {
     Assertions.assertSame(expectedResult, result);
 
     verify(sendNotificationNoPIIRepositoryMock).updateNotificationStatus(requestId, status);
-  }
-
-  @Test
-  void whenUpdateNotificationRefusalReasons_thenInvokeRepositoryAndReturnResult() {
-    // Given
-    String requestId = "REQUESTID";
-    List<NotificationRefusedErrorV27DTO> refusalReasons = List.of(new NotificationRefusedErrorV27DTO());
-    UpdateResult expectedResult = UpdateResult.acknowledged(1, 1L, null);
-
-    when(sendNotificationNoPIIRepositoryMock.updateNotificationRefusalReasons(requestId, refusalReasons))
-      .thenReturn(expectedResult);
-
-    // When
-    UpdateResult result = sendNotificationService.updateNotificationRefusalReasons(requestId, refusalReasons);
-
-    // Then
-    Assertions.assertNotNull(result);
-    Assertions.assertTrue(result.wasAcknowledged());
-    Assertions.assertEquals(1, result.getMatchedCount());
-    Assertions.assertEquals(1, result.getModifiedCount());
-    Assertions.assertSame(expectedResult, result);
-
-    verify(sendNotificationNoPIIRepositoryMock).updateNotificationRefusalReasons(requestId, refusalReasons);
   }
 
   @Test

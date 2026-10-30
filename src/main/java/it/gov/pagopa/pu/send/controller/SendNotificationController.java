@@ -8,7 +8,6 @@ import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
 import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
-import it.gov.pagopa.send.dto.generated.NotificationRefusedErrorV27DTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -111,13 +110,6 @@ public class SendNotificationController implements NotificationApi {
   public ResponseEntity<Void> updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus) {
     log.info("Updating status to {} for notification having notificationRequestId {}", newStatus, notificationRequestId);
     sendNotificationService.updateNotificationStatus(notificationRequestId, newStatus);
-    return ResponseEntity.ok().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> updateNotificationRefusalReasons(String notificationRequestId, List<NotificationRefusedErrorV27DTO> refusalReasons) {
-    log.info("Updating notification refusal reasons for notification having notificationRequestId {}", notificationRequestId);
-    sendNotificationService.updateNotificationRefusalReasons(notificationRequestId, refusalReasons);
     return ResponseEntity.ok().build();
   }
 

@@ -461,6 +461,8 @@ class SendFacadeServiceImplTest {
       .updateNotificationIun(sendNotificationId, response.getIun());
     verify(sendNotificationNoPIIRepositoryMock, times(1))
       .updateNotificationStatusById(sendNotificationId, NotificationStatus.REFUSED);
+    verify(sendNotificationNoPIIRepositoryMock, times(1))
+      .updateNotificationErrors(sendNotificationId, List.of(error));
   }
 
   @ParameterizedTest
