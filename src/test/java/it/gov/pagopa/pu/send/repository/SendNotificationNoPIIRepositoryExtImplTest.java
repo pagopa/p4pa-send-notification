@@ -10,6 +10,7 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.NotificationRequestRefusedProblemErrorDTO;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO.HttpMethodEnum;
 import org.bson.Document;
@@ -87,13 +88,31 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
   }
 
   @Test
-  void givenUpdateNotificationStatusByIdThenVerify() {
+  void givenErrorListWhenUpdateNotificationStatusByIdThenVerify() {
     String sendNotificationId = "SENDNOTIFICATIONID";
     NotificationStatus newStatus = NotificationStatus.SENDING;
+
+    List<NotificationRequestRefusedProblemErrorDTO> errors = List.of(new NotificationRequestRefusedProblemErrorDTO());
 
     when(mongoTemplateMock.updateFirst(
         Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
           SendNotificationNoPII.class)))
+      .thenReturn(updateResult);
+    when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    UpdateResult result = repository.updateNotificationStatusById(sendNotificationId, newStatus, errors);
+
+    assertEquals(1L, result.getModifiedCount());
+  }
+
+  @Test
+  void givenNullErrorListWhenUpdateNotificationStatusByIdThenVerify() {
+    String sendNotificationId = "SENDNOTIFICATIONID";
+    NotificationStatus newStatus = NotificationStatus.SENDING;
+
+    when(mongoTemplateMock.updateFirst(
+      Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(
+        SendNotificationNoPII.class)))
       .thenReturn(updateResult);
     when(updateResult.getModifiedCount()).thenReturn(1L);
 
