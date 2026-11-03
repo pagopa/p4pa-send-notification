@@ -38,11 +38,11 @@ public class SendNotification implements FullEntityPIIDTO<SendNotificationNoPII,
   private String subject;
   private String senderDenomination;
   private String senderTaxId;
-  private int amount;
+  private int amountCents;
   private String paymentExpirationDate;
   private String taxonomyCode;
   private String taxonomyDescription;
-  private int paFee;
+  private int paFeeCents;
   private int vat;
   private String pagoPaIntMode;
   private List<LegalFactDTO> legalFacts;

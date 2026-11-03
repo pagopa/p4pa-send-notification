@@ -1474,14 +1474,16 @@ components:
         senderTaxId:
           type: string
         amountCents:
-          type: number
+          type: integer
+          format: int32
         paymentExpirationDate:
           type: string
           format: date
         taxonomyCode:
           type: string
         paFeeCents:
-          type: number
+          type: integer
+          format: int32
           minimum: 0
           maximum: 100
         vat:

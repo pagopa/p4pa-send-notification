@@ -47,11 +47,11 @@ public class SendNotification2NewNotificationRequestMapper {
     newNotification.senderTaxId(sendNotification.getSenderTaxId());
     newNotification.setTaxonomyCode(sendNotification.getTaxonomyCode());
 
-    if (sendNotification.getAmount() != 0) {
-      newNotification.setAmount(sendNotification.getAmount());
+    if (sendNotification.getAmountCents() != 0) {
+      newNotification.setAmount(sendNotification.getAmountCents());
     }
-    if (sendNotification.getPaFee() != 0) {
-      newNotification.setPaFee(sendNotification.getPaFee());
+    if (sendNotification.getPaFeeCents() != 0) {
+      newNotification.setPaFee(sendNotification.getPaFeeCents());
     }
     if (sendNotification.getVat() != 0) {
       newNotification.setVat(sendNotification.getVat());

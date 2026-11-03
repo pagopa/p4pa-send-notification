@@ -2665,7 +2665,8 @@
             "nullable" : true
           },
           "amountCents" : {
-            "type" : "number",
+            "type" : "integer",
+            "format" : "int32",
             "nullable" : true
           },
           "paymentExpirationDate" : {
@@ -2679,10 +2680,9 @@
           },
           "paFeeCents" : {
             "maximum" : 100,
-            "exclusiveMaximum" : false,
             "minimum" : 0,
-            "exclusiveMinimum" : false,
-            "type" : "number",
+            "type" : "integer",
+            "format" : "int32",
             "nullable" : true
           },
           "vat" : {
@@ -3759,7 +3759,7 @@
           "senderTaxId" : {
             "type" : "string"
           },
-          "amount" : {
+          "amountCents" : {
             "type" : "integer",
             "format" : "int32"
           },
@@ -3772,7 +3772,7 @@
           "taxonomyDescription" : {
             "type" : "string"
           },
-          "paFee" : {
+          "paFeeCents" : {
             "type" : "integer",
             "format" : "int32"
           },
@@ -4073,7 +4073,7 @@
           "senderTaxId" : {
             "type" : "string"
           },
-          "amount" : {
+          "amountCents" : {
             "type" : "integer",
             "format" : "int32"
           },
@@ -4083,7 +4083,7 @@
           "taxonomyCode" : {
             "type" : "string"
           },
-          "paFee" : {
+          "paFeeCents" : {
             "type" : "integer",
             "format" : "int32"
           },

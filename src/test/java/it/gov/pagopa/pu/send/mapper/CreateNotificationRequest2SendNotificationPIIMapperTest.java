@@ -123,9 +123,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals("Test Notifica Piattaforma Unitaria", result.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
-    Assertions.assertEquals(99999999, result.getAmount());
+    Assertions.assertEquals(99999999, result.getAmountCents());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
-    Assertions.assertEquals(100, result.getPaFee());
+    Assertions.assertEquals(100, result.getPaFeeCents());
     Assertions.assertEquals(22, result.getVat());
     Assertions.assertEquals(LocalDate.now().toString(), result.getPaymentExpirationDate());
     Assertions.assertEquals("SYNC", result.getPagoPaIntMode());
@@ -167,9 +167,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals("Test Notifica Piattaforma Unitaria", result.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
-    Assertions.assertEquals(99999999, result.getAmount());
+    Assertions.assertEquals(99999999, result.getAmountCents());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
-    Assertions.assertEquals(100, result.getPaFee());
+    Assertions.assertEquals(100, result.getPaFeeCents());
     Assertions.assertEquals(22, result.getVat());
     Assertions.assertEquals(LocalDate.now().toString(), result.getPaymentExpirationDate());
     Assertions.assertEquals("SYNC", result.getPagoPaIntMode());
@@ -312,9 +312,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setSubject("Test Notifica Piattaforma Unitaria");
     request.setSenderDenomination("SENDERDENOMINATION");
     request.setSenderTaxId("SENDERTAXID");
-    request.setAmountCents(BigDecimal.valueOf(99999999));
+    request.setAmountCents(99999999);
     request.setTaxonomyCode("TAXONOMYCODE");
-    request.setPaFeeCents(BigDecimal.valueOf(100));
+    request.setPaFeeCents(100);
     request.setVat(22);
     request.setPaymentExpirationDate(LocalDate.now());
     request.setExternalCampaignId("CAMPAIGN_ID123");

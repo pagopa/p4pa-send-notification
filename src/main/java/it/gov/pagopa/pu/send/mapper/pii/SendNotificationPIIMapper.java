@@ -42,10 +42,10 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
     noPII.setSubject(fullDTO.getSubject());
     noPII.setSenderDenomination(fullDTO.getSenderDenomination());
     noPII.setSenderTaxId(fullDTO.getSenderTaxId());
-    noPII.setAmount(fullDTO.getAmount());
+    noPII.setAmountCents(fullDTO.getAmountCents());
     noPII.setPaymentExpirationDate(fullDTO.getPaymentExpirationDate());
     noPII.setTaxonomyCode(fullDTO.getTaxonomyCode());
-    noPII.setPaFee(fullDTO.getPaFee());
+    noPII.setPaFeeCents(fullDTO.getPaFeeCents());
     noPII.setVat(fullDTO.getVat());
     noPII.setPagoPaIntMode(fullDTO.getPagoPaIntMode());
     noPII.setLegalFacts(fullDTO.getLegalFacts());
@@ -87,11 +87,11 @@ public class SendNotificationPIIMapper extends BaseEntityPIIMapper<SendNotificat
     sendNotification.setSubject(noPii.getSubject());
     sendNotification.setSenderDenomination(noPii.getSenderDenomination());
     sendNotification.setSenderTaxId(noPii.getSenderTaxId());
-    sendNotification.setAmount(noPii.getAmount());
+    sendNotification.setAmountCents(noPii.getAmountCents());
     sendNotification.setPaymentExpirationDate(noPii.getPaymentExpirationDate());
     sendNotification.setTaxonomyCode(noPii.getTaxonomyCode());
     sendNotification.setTaxonomyDescription(findTaxonomyDescription(noPii.getTaxonomyCode()));
-    sendNotification.setPaFee(noPii.getPaFee());
+    sendNotification.setPaFeeCents(noPii.getPaFeeCents());
     sendNotification.setVat(noPii.getVat());
     sendNotification.setPagoPaIntMode(noPii.getPagoPaIntMode());
     sendNotification.setLegalFacts(noPii.getLegalFacts());

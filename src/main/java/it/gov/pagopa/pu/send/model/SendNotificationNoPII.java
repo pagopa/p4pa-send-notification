@@ -52,10 +52,10 @@ public class SendNotificationNoPII extends BaseEntity implements NoPIIEntity<Sen
   private String subject;
   private String senderDenomination;
   private String senderTaxId;
-  private int amount;
+  private int amountCents;
   private String paymentExpirationDate;
   private String taxonomyCode;
-  private int paFee;
+  private int paFeeCents;
   private int vat;
   private String pagoPaIntMode;
   private List<LegalFactDTO> legalFacts;
