@@ -2679,9 +2679,10 @@
           },
           "paFee" : {
             "maximum" : 100,
+            "exclusiveMaximum" : false,
             "minimum" : 0,
-            "type" : "integer",
-            "format" : "int32",
+            "exclusiveMinimum" : false,
+            "type" : "number",
             "nullable" : true
           },
           "vat" : {

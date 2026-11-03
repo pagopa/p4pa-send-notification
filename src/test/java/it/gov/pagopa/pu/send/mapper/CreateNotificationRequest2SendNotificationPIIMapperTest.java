@@ -314,7 +314,7 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setSenderTaxId("SENDERTAXID");
     request.setAmount(BigDecimal.valueOf(99999999));
     request.setTaxonomyCode("TAXONOMYCODE");
-    request.setPaFee(100);
+    request.setPaFee(BigDecimal.valueOf(100));
     request.setVat(22);
     request.setPaymentExpirationDate(LocalDate.now());
     request.setExternalCampaignId("CAMPAIGN_ID123");

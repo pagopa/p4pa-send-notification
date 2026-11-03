@@ -68,7 +68,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
       sendNotification.setAmount(request.getAmount().intValue());
     }
     if (request.getPaFee() != null) {
-      sendNotification.setPaFee(request.getPaFee());
+      sendNotification.setPaFee(request.getPaFee().intValue());
     }
     if (request.getVat() != null) {
       sendNotification.setVat(request.getVat());

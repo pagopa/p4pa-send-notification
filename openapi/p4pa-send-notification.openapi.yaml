@@ -1481,7 +1481,7 @@ components:
         taxonomyCode:
           type: string
         paFee:
-          type: integer
+          type: number
           minimum: 0
           maximum: 100
         vat:
