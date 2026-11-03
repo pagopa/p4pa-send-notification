@@ -1473,14 +1473,14 @@ components:
           type: string
         senderTaxId:
           type: string
-        amount:
+        amountCents:
           type: number
         paymentExpirationDate:
           type: string
           format: date
         taxonomyCode:
           type: string
-        paFee:
+        paFeeCents:
           type: number
           minimum: 0
           maximum: 100

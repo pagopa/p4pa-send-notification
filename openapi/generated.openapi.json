@@ -2664,7 +2664,7 @@
             "type" : "string",
             "nullable" : true
           },
-          "amount" : {
+          "amountCents" : {
             "type" : "number",
             "nullable" : true
           },
@@ -2677,7 +2677,7 @@
             "type" : "string",
             "nullable" : true
           },
-          "paFee" : {
+          "paFeeCents" : {
             "maximum" : 100,
             "exclusiveMaximum" : false,
             "minimum" : 0,

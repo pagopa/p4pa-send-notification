@@ -183,8 +183,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     // Given
     CreateNotificationRequest request = buildRequest();
     request.setDocuments(new ArrayList<>());
-    request.setAmount(null);
-    request.setPaFee(null);
+    request.setAmountCents(null);
+    request.setPaFeeCents(null);
     request.setPaymentExpirationDate(null);
     request.setVat(null);
     request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().setAttachment(null);
@@ -312,9 +312,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setSubject("Test Notifica Piattaforma Unitaria");
     request.setSenderDenomination("SENDERDENOMINATION");
     request.setSenderTaxId("SENDERTAXID");
-    request.setAmount(BigDecimal.valueOf(99999999));
+    request.setAmountCents(BigDecimal.valueOf(99999999));
     request.setTaxonomyCode("TAXONOMYCODE");
-    request.setPaFee(BigDecimal.valueOf(100));
+    request.setPaFeeCents(BigDecimal.valueOf(100));
     request.setVat(22);
     request.setPaymentExpirationDate(LocalDate.now());
     request.setExternalCampaignId("CAMPAIGN_ID123");

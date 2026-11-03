@@ -64,11 +64,11 @@ public class CreateNotificationRequest2SendNotificationMapper {
     sendNotification.setSenderDenomination(request.getSenderDenomination());
     sendNotification.setSenderTaxId(request.getSenderTaxId());
     sendNotification.setTaxonomyCode(request.getTaxonomyCode());
-    if (request.getAmount() != null) {
-      sendNotification.setAmount(request.getAmount().intValue());
+    if (request.getAmountCents() != null) {
+      sendNotification.setAmount(request.getAmountCents().intValue());
     }
-    if (request.getPaFee() != null) {
-      sendNotification.setPaFee(request.getPaFee().intValue());
+    if (request.getPaFeeCents() != null) {
+      sendNotification.setPaFee(request.getPaFeeCents().intValue());
     }
     if (request.getVat() != null) {
       sendNotification.setVat(request.getVat());
