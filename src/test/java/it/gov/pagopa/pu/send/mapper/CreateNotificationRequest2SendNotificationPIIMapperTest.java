@@ -32,7 +32,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -123,9 +122,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals("Test Notifica Piattaforma Unitaria", result.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
-    Assertions.assertEquals(99999999, result.getAmount());
+    Assertions.assertEquals(99999999, result.getAmountCents());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
-    Assertions.assertEquals(100, result.getPaFee());
+    Assertions.assertEquals(100, result.getPaFeeCents());
     Assertions.assertEquals(22, result.getVat());
     Assertions.assertEquals(LocalDate.now().toString(), result.getPaymentExpirationDate());
     Assertions.assertEquals("SYNC", result.getPagoPaIntMode());
@@ -167,9 +166,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertEquals("Test Notifica Piattaforma Unitaria", result.getSubject());
     Assertions.assertEquals("SENDERDENOMINATION", result.getSenderDenomination());
     Assertions.assertEquals("SENDERTAXID", result.getSenderTaxId());
-    Assertions.assertEquals(99999999, result.getAmount());
+    Assertions.assertEquals(99999999, result.getAmountCents());
     Assertions.assertEquals("TAXONOMYCODE", result.getTaxonomyCode());
-    Assertions.assertEquals(100, result.getPaFee());
+    Assertions.assertEquals(100, result.getPaFeeCents());
     Assertions.assertEquals(22, result.getVat());
     Assertions.assertEquals(LocalDate.now().toString(), result.getPaymentExpirationDate());
     Assertions.assertEquals("SYNC", result.getPagoPaIntMode());
@@ -183,8 +182,8 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     // Given
     CreateNotificationRequest request = buildRequest();
     request.setDocuments(new ArrayList<>());
-    request.setAmount(null);
-    request.setPaFee(null);
+    request.setAmountCents(null);
+    request.setPaFeeCents(null);
     request.setPaymentExpirationDate(null);
     request.setVat(null);
     request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().setAttachment(null);
@@ -312,9 +311,9 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     request.setSubject("Test Notifica Piattaforma Unitaria");
     request.setSenderDenomination("SENDERDENOMINATION");
     request.setSenderTaxId("SENDERTAXID");
-    request.setAmount(BigDecimal.valueOf(99999999));
+    request.setAmountCents(99999999);
     request.setTaxonomyCode("TAXONOMYCODE");
-    request.setPaFee(100);
+    request.setPaFeeCents(100);
     request.setVat(22);
     request.setPaymentExpirationDate(LocalDate.now());
     request.setExternalCampaignId("CAMPAIGN_ID123");

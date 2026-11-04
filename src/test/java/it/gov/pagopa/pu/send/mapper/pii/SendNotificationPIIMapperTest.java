@@ -93,10 +93,10 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     assertEquals(noPii.getSubject(), result.getSubject());
     assertEquals(noPii.getSenderDenomination(), result.getSenderDenomination());
     assertEquals(noPii.getSenderTaxId(), result.getSenderTaxId());
-    assertEquals(noPii.getAmount(), result.getAmount());
+    assertEquals(noPii.getAmountCents(), result.getAmountCents());
     assertEquals(noPii.getPaymentExpirationDate(), result.getPaymentExpirationDate());
     assertEquals(noPii.getTaxonomyCode(), result.getTaxonomyCode());
-    assertEquals(noPii.getPaFee(), result.getPaFee());
+    assertEquals(noPii.getPaFeeCents(), result.getPaFeeCents());
     assertEquals(noPii.getVat(), result.getVat());
     assertEquals(noPii.getPagoPaIntMode(), result.getPagoPaIntMode());
     assertSame(noPii.getCampaignId(), result.getCampaignId());
@@ -155,10 +155,10 @@ class SendNotificationPIIMapperTest extends BasePIIMapperTest<SendNotification, 
     noPii.setSubject("Test Notifica Piattaforma Unitaria");
     noPii.setSenderDenomination("Sender Org");
     noPii.setSenderTaxId("TAX001");
-    noPii.setAmount(100);
+    noPii.setAmountCents(100);
     noPii.setPaymentExpirationDate("2026-01-01");
     noPii.setTaxonomyCode("CODE001");
-    noPii.setPaFee(0);
+    noPii.setPaFeeCents(0);
     noPii.setVat(22);
     noPii.setPagoPaIntMode("PA");
     noPii.setLegalFacts(List.of(LegalFactDTO.builder()
