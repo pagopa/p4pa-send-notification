@@ -297,6 +297,24 @@ class CreateNotificationRequest2SendNotificationPIIMapperTest {
     Assertions.assertThrows(NotFoundException.class, () -> mapper.mapToModel(request, null, accessToken));
   }
 
+  @Test
+  void givenRequestWithPagoPaIntModeAndExternalPaymentsWhenMapToModelThenUseRequestMode() {
+    CreateNotificationRequest request = buildRequest();
+    request.setPagoPaIntMode(NewNotificationRequestV25DTO.PagoPaIntModeEnum.ASYNC);
+    String accessToken = "ACCESSTOKEN";
+
+    String nav = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getNoticeCode();
+    String orgFiscalCode = request.getRecipients().getFirst().getPayments().getFirst().getPagoPa().getCreditorTaxId();
+    String segregationCode = DebtPositionUtils.extractSegregationCodeFromNav(nav);
+
+    when(organizationServiceMock.findByOrgFiscalCodeAndSegregationCode(orgFiscalCode, segregationCode, accessToken))
+      .thenReturn(Optional.empty());
+
+    SendNotification result = mapper.mapToModel(request, null, accessToken);
+
+    Assertions.assertEquals("ASYNC", result.getPagoPaIntMode());
+  }
+
   private CreateNotificationRequest buildRequest() {
     Recipient recipient = buildRecipient();
     Document document = buildDocument();
