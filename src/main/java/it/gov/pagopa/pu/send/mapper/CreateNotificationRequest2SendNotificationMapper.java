@@ -77,16 +77,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
       sendNotification.setPaymentExpirationDate(request.getPaymentExpirationDate().toString());
     }
 
-    PagoPaInteractionModel pagoPaInteractionModel = organizationService
-      .findOrganizationStation(organizationId, null, accessToken)
-      .map(OrganizationStationDTO::getPagoPaInteractionModel)
-      .orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_STATION_NOT_FOUND,
-      String.format("Cannot find a Station for organizationId %s",  organizationId)));
-
-    sendNotification.setPagoPaIntMode(
-      pagoPaInteractionModel.getValue().contains("ASYNC")
-      ? "ASYNC"
-      : "SYNC");
+    sendNotification.setPagoPaIntMode(resolvePagoPaIntMode(request, sendNotification.getPuRecipients(), accessToken));
 
     sendNotification.setOrgSubUnitCode(request.getSubUnitCode());
     sendNotification.setCampaignId(campaignId);
@@ -172,5 +163,33 @@ public class CreateNotificationRequest2SendNotificationMapper {
       .toList());
 
     return documents;
+  }
+
+  private String resolvePagoPaIntMode(CreateNotificationRequest request, List<PuRecipient> puRecipients, String accessToken) {
+    if (request.getPagoPaIntMode() != null && areAllPaymentsExternalToPu(puRecipients)) {
+      return request.getPagoPaIntMode().getValue();
+    }
+    return retrievePagoPaIntModeFromStation(request.getOrganizationId(), accessToken);
+  }
+
+  private boolean areAllPaymentsExternalToPu(List<PuRecipient> puRecipients) {
+    List<PuPayment> pagoPaPayments = puRecipients.stream()
+      .flatMap(r -> r.getPuPayments().stream())
+      .filter(p -> p != null && p.getPayment().getPagoPa() != null)
+      .toList();
+    return !pagoPaPayments.isEmpty()
+      && pagoPaPayments.stream().allMatch(p -> p.getDebtPositionId() == null);
+  }
+
+  private String retrievePagoPaIntModeFromStation(Long organizationId, String accessToken) {
+    PagoPaInteractionModel pagoPaInteractionModel = organizationService
+      .findOrganizationStation(organizationId, null, accessToken)
+      .map(OrganizationStationDTO::getPagoPaInteractionModel)
+      .orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_STATION_NOT_FOUND,
+        String.format("Cannot find a Station for organizationId %s", organizationId)));
+
+    return pagoPaInteractionModel.getValue().contains("ASYNC")
+      ? "ASYNC"
+      : "SYNC";
   }
 }
