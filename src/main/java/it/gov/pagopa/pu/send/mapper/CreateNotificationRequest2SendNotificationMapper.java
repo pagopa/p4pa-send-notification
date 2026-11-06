@@ -166,19 +166,18 @@ public class CreateNotificationRequest2SendNotificationMapper {
   }
 
   private String resolvePagoPaIntMode(CreateNotificationRequest request, List<PuRecipient> puRecipients, String accessToken) {
-    if (request.getPagoPaIntMode() != null && areAllPaymentsExternalToPu(puRecipients)) {
+    // External intMode wins only if at least one notice is not managed by PU, otherwise resolve from pu station
+    if (request.getPagoPaIntMode() != null && isAnyPaymentExternalToPu(puRecipients)) {
       return request.getPagoPaIntMode().getValue();
     }
     return retrievePagoPaIntModeFromStation(request.getOrganizationId(), accessToken);
   }
 
-  private boolean areAllPaymentsExternalToPu(List<PuRecipient> puRecipients) {
-    List<PuPayment> pagoPaPayments = puRecipients.stream()
+  private boolean isAnyPaymentExternalToPu(List<PuRecipient> puRecipients) {
+    return puRecipients.stream()
       .flatMap(r -> r.getPuPayments().stream())
       .filter(p -> p != null && p.getPayment().getPagoPa() != null)
-      .toList();
-    return !pagoPaPayments.isEmpty()
-      && pagoPaPayments.stream().allMatch(p -> p.getDebtPositionId() == null);
+      .anyMatch(p -> p.getDebtPositionId() == null);
   }
 
   private String retrievePagoPaIntModeFromStation(Long organizationId, String accessToken) {
