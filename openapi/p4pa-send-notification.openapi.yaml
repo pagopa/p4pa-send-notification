@@ -43,7 +43,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SendNotificationErrorDTO'
-  /notification/findByOrgIdAndNav:
+  /notification/by-org-id-and-nav:
     get:
       tags:
         - Notification
