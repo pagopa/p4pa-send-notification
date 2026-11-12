@@ -5,6 +5,7 @@ import it.gov.pagopa.pu.send.dto.SendNotification;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
@@ -107,9 +108,9 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
-  public ResponseEntity<SendNotification> getSendNotificationDetailsByOrgIdAndNav(Long orgId, String nav) {
+  public ResponseEntity<SendNotificationNoPII> findSendNotificationNoPIIByOrgIdAndNav(Long orgId, String nav) {
     log.info("Retrieving notification details by orgId {} and nav {}", orgId, nav);
-    return ResponseEntity.ok(notificatioMapper.map(sendNotificationService.findSendNotificationNoPIIByOrgIdAndNav(orgId, nav)));
+    return ResponseEntity.ok(sendNotificationService.findSendNotificationNoPIIByOrgIdAndNav(orgId, nav));
   }
 
   @Override
