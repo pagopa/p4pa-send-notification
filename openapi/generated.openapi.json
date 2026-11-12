@@ -1724,14 +1724,12 @@
         } ]
       }
     },
-    "/p4pasend/notification/findByOrgIdAndNav" : {
+    "/p4pasend/notification/details/findByOrgIdAndNav" : {
       "get" : {
         "tags" : [ "Notification" ],
-        "summary" : "get send notification by orgid and nav",
-        "description" : "get send notification by orgid and nav",
-        "operationId" : "findSendNotificationByOrgIdAndNav",
+        "operationId" : "getSendNotificationByOrgIdAndNav",
         "parameters" : [ {
-          "name" : "organizationId",
+          "name" : "orgId",
           "in" : "query",
           "required" : true,
           "schema" : {
@@ -1752,7 +1750,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                  "$ref" : "#/components/schemas/SendNotification"
                 }
               }
             }
@@ -1803,12 +1801,14 @@
         } ]
       }
     },
-    "/p4pasend/notification/details/findByOrgIdAndNav" : {
+    "/p4pasend/notification/by-org-id-and-nav" : {
       "get" : {
         "tags" : [ "Notification" ],
-        "operationId" : "getSendNotificationByOrgIdAndNav",
+        "summary" : "get send notification by orgid and nav",
+        "description" : "get send notification by orgid and nav",
+        "operationId" : "findSendNotificationByOrgIdAndNav",
         "parameters" : [ {
-          "name" : "orgId",
+          "name" : "organizationId",
           "in" : "query",
           "required" : true,
           "schema" : {
@@ -1829,7 +1829,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SendNotification"
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
                 }
               }
             }
