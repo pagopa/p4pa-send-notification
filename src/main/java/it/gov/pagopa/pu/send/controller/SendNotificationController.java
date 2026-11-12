@@ -108,9 +108,9 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
-  public ResponseEntity<SendNotificationNoPII> findSendNotificationNoPIIByOrgIdAndNav(Long orgId, String nav) {
+  public ResponseEntity<SendNotification> getSendNotificationByOrgIdAndNav(Long orgId, String nav) {
     log.info("Retrieving notification details by orgId {} and nav {}", orgId, nav);
-    return ResponseEntity.ok(sendNotificationService.findSendNotificationNoPIIByOrgIdAndNav(orgId, nav));
+    return ResponseEntity.ok(notificatioMapper.map(sendNotificationService.findSendNotificationNoPIIByOrgIdAndNav(orgId, nav)));
   }
 
   @Override

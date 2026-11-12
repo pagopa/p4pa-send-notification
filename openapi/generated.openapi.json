@@ -1803,15 +1803,21 @@
         } ]
       }
     },
-    "/p4pasend/notification/by-notification-request-id/{notificationRequestId}" : {
+    "/p4pasend/notification/details/findByOrgIdAndNav" : {
       "get" : {
         "tags" : [ "Notification" ],
-        "summary" : "get send notification by notificationRequestId",
-        "description" : "get send notification by notificationRequestId",
-        "operationId" : "getSendNotificationByNotificationRequestId",
+        "operationId" : "getSendNotificationByOrgIdAndNav",
         "parameters" : [ {
-          "name" : "notificationRequestId",
-          "in" : "path",
+          "name" : "orgId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "nav",
+          "in" : "query",
           "required" : true,
           "schema" : {
             "type" : "string"
@@ -1823,17 +1829,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SendNotificationDTO"
-                }
-              }
-            }
-          },
-          "204" : {
-            "description" : "NotificationDate not found",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                  "$ref" : "#/components/schemas/SendNotification"
                 }
               }
             }
@@ -1884,21 +1880,15 @@
         } ]
       }
     },
-    "/p4pasend/crud/notification/search/findSendNotificationNoPIIByOrgIdAndNav" : {
+    "/p4pasend/notification/by-notification-request-id/{notificationRequestId}" : {
       "get" : {
         "tags" : [ "Notification" ],
-        "operationId" : "findSendNotificationNoPIIByOrgIdAndNav",
+        "summary" : "get send notification by notificationRequestId",
+        "description" : "get send notification by notificationRequestId",
+        "operationId" : "getSendNotificationByNotificationRequestId",
         "parameters" : [ {
-          "name" : "orgId",
-          "in" : "query",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "name" : "nav",
-          "in" : "query",
+          "name" : "notificationRequestId",
+          "in" : "path",
           "required" : true,
           "schema" : {
             "type" : "string"
@@ -1910,7 +1900,17 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SendNotificationNoPII"
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "NotificationDate not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SendNotificationDTO"
                 }
               }
             }
@@ -3881,160 +3881,6 @@
           }
         }
       },
-      "NotificationRequestRefusedProblemErrorDTO" : {
-        "required" : [ "code" ],
-        "type" : "object",
-        "properties" : {
-          "code" : {
-            "type" : "string"
-          },
-          "element" : {
-            "type" : "string",
-            "nullable" : true
-          },
-          "detail" : {
-            "maxLength" : 1024,
-            "minLength" : 0,
-            "type" : "string",
-            "nullable" : true
-          },
-          "recIndex" : {
-            "type" : "integer",
-            "format" : "int32",
-            "nullable" : true
-          }
-        }
-      },
-      "PuRecipientNoPIIDTO" : {
-        "type" : "object",
-        "properties" : {
-          "fiscalCodeHash" : {
-            "type" : "string",
-            "format" : "byte"
-          },
-          "puPayments" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/PuPayment"
-            }
-          }
-        }
-      },
-      "SendNotificationNoPII" : {
-        "required" : [ "campaignId", "personalDataId" ],
-        "type" : "object",
-        "properties" : {
-          "creationDate" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "updateDate" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "updateOperatorExternalId" : {
-            "type" : "string"
-          },
-          "updateTraceId" : {
-            "type" : "string"
-          },
-          "sendNotificationId" : {
-            "type" : "string"
-          },
-          "organizationId" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "orgSubUnitCode" : {
-            "type" : "string"
-          },
-          "campaignId" : {
-            "type" : "string"
-          },
-          "paProtocolNumber" : {
-            "type" : "string"
-          },
-          "recipients" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/PuRecipientNoPIIDTO"
-            }
-          },
-          "documents" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/DocumentDTO"
-            }
-          },
-          "status" : {
-            "$ref" : "#/components/schemas/NotificationStatus"
-          },
-          "history" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/StreamEventSummaryDTO"
-            }
-          },
-          "notificationRequestId" : {
-            "type" : "string"
-          },
-          "iun" : {
-            "type" : "string"
-          },
-          "notificationFeePolicy" : {
-            "$ref" : "#/components/schemas/NotificationFeePolicyDTO"
-          },
-          "physicalCommunicationType" : {
-            "$ref" : "#/components/schemas/PhysicalCommunicationTypeEnum"
-          },
-          "subject" : {
-            "type" : "string"
-          },
-          "senderDenomination" : {
-            "type" : "string"
-          },
-          "senderTaxId" : {
-            "type" : "string"
-          },
-          "amountCents" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "paymentExpirationDate" : {
-            "type" : "string"
-          },
-          "taxonomyCode" : {
-            "type" : "string"
-          },
-          "paFeeCents" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "vat" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "pagoPaIntMode" : {
-            "type" : "string"
-          },
-          "legalFacts" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/LegalFactDTO"
-            }
-          },
-          "errors" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/NotificationRequestRefusedProblemErrorDTO"
-            }
-          },
-          "personalDataId" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }
-      },
       "Campaign" : {
         "required" : [ "counters", "endDate", "externalId", "organizationId", "startDate" ],
         "type" : "object",
@@ -4168,6 +4014,30 @@
           }
         }
       },
+      "NotificationRequestRefusedProblemErrorDTO" : {
+        "required" : [ "code" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "element" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "detail" : {
+            "maxLength" : 1024,
+            "minLength" : 0,
+            "type" : "string",
+            "nullable" : true
+          },
+          "recIndex" : {
+            "type" : "integer",
+            "format" : "int32",
+            "nullable" : true
+          }
+        }
+      },
       "PagedSendNotifications" : {
         "required" : [ "content", "number", "size", "totalElements", "totalPages" ],
         "type" : "object",
@@ -4193,6 +4063,136 @@
           "number" : {
             "type" : "integer",
             "format" : "int32"
+          }
+        }
+      },
+      "PuRecipientNoPIIDTO" : {
+        "type" : "object",
+        "properties" : {
+          "fiscalCodeHash" : {
+            "type" : "string",
+            "format" : "byte"
+          },
+          "puPayments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PuPayment"
+            }
+          }
+        }
+      },
+      "SendNotificationNoPII" : {
+        "required" : [ "campaignId", "personalDataId" ],
+        "type" : "object",
+        "properties" : {
+          "creationDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updateDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updateOperatorExternalId" : {
+            "type" : "string"
+          },
+          "updateTraceId" : {
+            "type" : "string"
+          },
+          "sendNotificationId" : {
+            "type" : "string"
+          },
+          "organizationId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "orgSubUnitCode" : {
+            "type" : "string"
+          },
+          "campaignId" : {
+            "type" : "string"
+          },
+          "paProtocolNumber" : {
+            "type" : "string"
+          },
+          "recipients" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PuRecipientNoPIIDTO"
+            }
+          },
+          "documents" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DocumentDTO"
+            }
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/NotificationStatus"
+          },
+          "history" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StreamEventSummaryDTO"
+            }
+          },
+          "notificationRequestId" : {
+            "type" : "string"
+          },
+          "iun" : {
+            "type" : "string"
+          },
+          "notificationFeePolicy" : {
+            "$ref" : "#/components/schemas/NotificationFeePolicyDTO"
+          },
+          "physicalCommunicationType" : {
+            "$ref" : "#/components/schemas/PhysicalCommunicationTypeEnum"
+          },
+          "subject" : {
+            "type" : "string"
+          },
+          "senderDenomination" : {
+            "type" : "string"
+          },
+          "senderTaxId" : {
+            "type" : "string"
+          },
+          "amountCents" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "paymentExpirationDate" : {
+            "type" : "string"
+          },
+          "taxonomyCode" : {
+            "type" : "string"
+          },
+          "paFeeCents" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "vat" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pagoPaIntMode" : {
+            "type" : "string"
+          },
+          "legalFacts" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/LegalFactDTO"
+            }
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NotificationRequestRefusedProblemErrorDTO"
+            }
+          },
+          "personalDataId" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },

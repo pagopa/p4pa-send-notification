@@ -234,11 +234,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SendNotificationErrorDTO'
-  /crud/notification/search/findSendNotificationNoPIIByOrgIdAndNav:
+  /notification/details/findByOrgIdAndNav:
     get:
       tags:
         - Notification
-      operationId: findSendNotificationNoPIIByOrgIdAndNav
+      operationId: getSendNotificationByOrgIdAndNav
       parameters:
         - name: orgId
           in: query
@@ -257,7 +257,7 @@ paths:
           content:
             application/json:
               schema:
-                type: 'SendNotificationNoPII'
+                type: 'SendNotification'
         '400':
           description: Invalid request
           content:
