@@ -189,6 +189,12 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
+  public SendNotificationNoPII findSendNotificationNoPIIByOrgIdAndNav(Long organizationId, String nav) {
+    return sendNotificationNoPIIRepository.findByOrganizationIdAndNav(organizationId, nav)
+      .orElseThrow(() ->  new SendNotificationNotFoundException("Notification not found with orgId "+organizationId+" and nav " + nav));
+  }
+
+  @Override
   public UpdateResult updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus) {
     return sendNotificationNoPIIRepository.updateNotificationStatus(notificationRequestId, newStatus);
   }

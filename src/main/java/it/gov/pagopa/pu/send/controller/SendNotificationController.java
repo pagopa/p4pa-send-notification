@@ -107,6 +107,12 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
+  public ResponseEntity<SendNotification> getSendNotificationDetailsByOrgIdAndNav(Long orgId, String nav) {
+    log.info("Retrieving notification details by orgId {} and nav {}", orgId, nav);
+    return ResponseEntity.ok(notificatioMapper.map(sendNotificationService.findSendNotificationNoPIIByOrgIdAndNav(orgId, nav)));
+  }
+
+  @Override
   public ResponseEntity<Void> updateNotificationStatus(String notificationRequestId, NotificationStatus newStatus) {
     log.info("Updating status to {} for notification having notificationRequestId {}", newStatus, notificationRequestId);
     sendNotificationService.updateNotificationStatus(notificationRequestId, newStatus);
