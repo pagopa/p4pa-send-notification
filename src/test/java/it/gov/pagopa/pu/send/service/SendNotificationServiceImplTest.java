@@ -507,6 +507,34 @@ class SendNotificationServiceImplTest {
   }
 
   @Test
+  void givenExistentNotificationWhenFindSendNotificationNoPIIByOrgIdAndNavThenReturnOk(){
+    Long organizationId = 1L;
+    String nav = "NAV";
+    SendNotificationNoPII expectedResult = new SendNotificationNoPII();
+
+    when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+      .thenReturn(Optional.of(expectedResult));
+
+    SendNotificationNoPII result = sendNotificationService.findSendNotificationNoPIIByOrgIdAndNav(organizationId, nav);
+
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNotExistentNotificationWhenFindSendNotificationNoPIIByOrgIdAndNavThenThrowNotFoundException(){
+    Long organizationId = 1L;
+    String nav = "NAV";
+
+    when(sendNotificationNoPIIRepositoryMock.findByOrganizationIdAndNav(organizationId, nav))
+      .thenReturn(Optional.empty());
+
+    SendNotificationNotFoundException exception = Assertions.assertThrows(SendNotificationNotFoundException.class, () ->
+      sendNotificationService.findSendNotificationNoPIIByOrgIdAndNav(organizationId, nav));
+
+    Assertions.assertEquals("Notification not found with orgId " + organizationId + " and nav " + nav, exception.getMessage());
+  }
+
+  @Test
   void whenUpdateNotificationStatus_thenInvokeRepositoryAndReturnResult() {
     // Given
     String requestId = "REQUESTID";

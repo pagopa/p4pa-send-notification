@@ -377,4 +377,23 @@ class SendNotificationControllerTest {
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertSame(expectedResult, response.getBody());
   }
+
+  @Test
+  void whenGetSendNotificationDetailsByOrgIdAndNavThenOk() {
+    Long orgId = 1L;
+    String nav = "nav";
+    SendNotification expectedResult = podamFactory.manufacturePojo(SendNotification.class);
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+
+    when(sendNotificationServiceMock.findSendNotificationNoPIIByOrgIdAndNav(orgId, nav))
+      .thenReturn(sendNotificationNoPII);
+
+    when(sendNotificationPIIMapperMock.map(sendNotificationNoPII))
+      .thenReturn(expectedResult);
+
+    ResponseEntity<SendNotification> response = sendNotificationController.getSendNotificationDetailsByOrgIdAndNav(orgId, nav);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
+  }
 }
