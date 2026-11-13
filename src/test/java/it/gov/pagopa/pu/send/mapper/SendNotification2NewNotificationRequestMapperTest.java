@@ -69,8 +69,8 @@ class SendNotification2NewNotificationRequestMapperTest {
     //given
     SendNotification sendNotification = buildSendNotification();
     sendNotification.setVat(0);
-    sendNotification.setPaFee(0);
-    sendNotification.setAmount(0);
+    sendNotification.setPaFeeCents(0);
+    sendNotification.setAmountCents(0);
     sendNotification.setPaymentExpirationDate(null);
     sendNotification.setPagoPaIntMode(null);
     sendNotification.getPuRecipients().getFirst().getRecipient().setDigitalDomicile(null);
@@ -106,8 +106,8 @@ class SendNotification2NewNotificationRequestMapperTest {
     //given
     SendNotification sendNotification = buildSendNotification();
     sendNotification.setVat(0);
-    sendNotification.setPaFee(0);
-    sendNotification.setAmount(0);
+    sendNotification.setPaFeeCents(0);
+    sendNotification.setAmountCents(0);
     sendNotification.setPaymentExpirationDate(null);
     sendNotification.setPagoPaIntMode(null);
     sendNotification.getPuRecipients().getFirst().getRecipient().setDigitalDomicile(null);

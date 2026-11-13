@@ -64,11 +64,11 @@ public class CreateNotificationRequest2SendNotificationMapper {
     sendNotification.setSenderDenomination(request.getSenderDenomination());
     sendNotification.setSenderTaxId(request.getSenderTaxId());
     sendNotification.setTaxonomyCode(request.getTaxonomyCode());
-    if (request.getAmount() != null) {
-      sendNotification.setAmount(request.getAmount().intValue());
+    if (request.getAmountCents() != null) {
+      sendNotification.setAmountCents(request.getAmountCents());
     }
-    if (request.getPaFee() != null) {
-      sendNotification.setPaFee(request.getPaFee());
+    if (request.getPaFeeCents() != null) {
+      sendNotification.setPaFeeCents(request.getPaFeeCents());
     }
     if (request.getVat() != null) {
       sendNotification.setVat(request.getVat());
@@ -77,16 +77,7 @@ public class CreateNotificationRequest2SendNotificationMapper {
       sendNotification.setPaymentExpirationDate(request.getPaymentExpirationDate().toString());
     }
 
-    PagoPaInteractionModel pagoPaInteractionModel = organizationService
-      .findOrganizationStation(organizationId, null, accessToken)
-      .map(OrganizationStationDTO::getPagoPaInteractionModel)
-      .orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_STATION_NOT_FOUND,
-      String.format("Cannot find a Station for organizationId %s",  organizationId)));
-
-    sendNotification.setPagoPaIntMode(
-      pagoPaInteractionModel.getValue().contains("ASYNC")
-      ? "ASYNC"
-      : "SYNC");
+    sendNotification.setPagoPaIntMode(resolvePagoPaIntMode(request, sendNotification.getPuRecipients(), accessToken));
 
     sendNotification.setOrgSubUnitCode(request.getSubUnitCode());
     sendNotification.setCampaignId(campaignId);
@@ -172,5 +163,32 @@ public class CreateNotificationRequest2SendNotificationMapper {
       .toList());
 
     return documents;
+  }
+
+  private String resolvePagoPaIntMode(CreateNotificationRequest request, List<PuRecipient> puRecipients, String accessToken) {
+    // External intMode wins only if at least one notice is not managed by PU, otherwise resolve from pu station
+    if (request.getPagoPaIntMode() != null && isAnyPaymentExternalToPu(puRecipients)) {
+      return request.getPagoPaIntMode().getValue();
+    }
+    return retrievePagoPaIntModeFromStation(request.getOrganizationId(), accessToken);
+  }
+
+  private boolean isAnyPaymentExternalToPu(List<PuRecipient> puRecipients) {
+    return puRecipients.stream()
+      .flatMap(r -> r.getPuPayments().stream())
+      .filter(p -> p != null && p.getPayment().getPagoPa() != null)
+      .anyMatch(p -> p.getDebtPositionId() == null);
+  }
+
+  private String retrievePagoPaIntModeFromStation(Long organizationId, String accessToken) {
+    PagoPaInteractionModel pagoPaInteractionModel = organizationService
+      .findOrganizationStation(organizationId, null, accessToken)
+      .map(OrganizationStationDTO::getPagoPaInteractionModel)
+      .orElseThrow(() -> new NotFoundException(ErrorCodeConstants.ERROR_CODE_STATION_NOT_FOUND,
+        String.format("Cannot find a Station for organizationId %s", organizationId)));
+
+    return pagoPaInteractionModel.getValue().contains("ASYNC")
+      ? "ASYNC"
+      : "SYNC";
   }
 }
