@@ -47,6 +47,17 @@ public class CampaignCounterRules {
     ).toList();
   }
 
+  private static CounterRule failedByRefusalCode(String refusalCode) {
+    return CounterRule.builder()
+      .activationPredicate(notification -> {
+        List<NotificationRequestRefusedProblemErrorDTO> errors = notification.getErrors();
+        return errors != null && !errors.isEmpty() && refusalCode.equals(errors.getFirst().getCode());
+      })
+      .activationCriteriaFunction(notification ->
+        Criteria.where(SendNotificationNoPII.Fields.errors + ".0.code").is(refusalCode))
+      .build();
+  }
+
   public static final Map<String, CounterRule> COUNTER_RULES = Map.ofEntries(
     Map.entry(Counters.Fields.accepted, CounterRule.builder()
       .activationConditions(List.of(
@@ -116,15 +127,19 @@ public class CampaignCounterRules {
       .build()
     ),
 
-    Map.entry(Counters.Fields.failedNotValidAddress, CounterRule.builder()
-      .activationPredicate(notification -> {
-        List<NotificationRequestRefusedProblemErrorDTO> errors = notification.getErrors();
-        return errors != null && !errors.isEmpty() && SendRefusalReasonsCode.NOT_VALID_ADDRESS.equals(errors.getFirst().getCode());
-      })
-      .activationCriteriaFunction(notification ->
-        Criteria.where(SendNotificationNoPII.Fields.errors + ".0.code").is(SendRefusalReasonsCode.NOT_VALID_ADDRESS))
-      .build()
-    ),
+    Map.entry(Counters.Fields.failedFileNotFound, failedByRefusalCode(SendRefusalReasonsCode.FILE_NOTFOUND)),
+    Map.entry(Counters.Fields.failedFileGone, failedByRefusalCode(SendRefusalReasonsCode.FILE_GONE)),
+    Map.entry(Counters.Fields.failedFileShaError, failedByRefusalCode(SendRefusalReasonsCode.FILE_SHA_ERROR)),
+    Map.entry(Counters.Fields.failedFilePdfInvalidError, failedByRefusalCode(SendRefusalReasonsCode.FILE_PDF_INVALID_ERROR)),
+    Map.entry(Counters.Fields.failedFilePdfTooBigError, failedByRefusalCode(SendRefusalReasonsCode.FILE_PDF_TOOBIG_ERROR)),
+    Map.entry(Counters.Fields.failedF24MetadataNotValid, failedByRefusalCode(SendRefusalReasonsCode.F24_METADATA_NOT_VALID)),
+    Map.entry(Counters.Fields.failedTaxIdNotValid, failedByRefusalCode(SendRefusalReasonsCode.TAXID_NOT_VALID)),
+    Map.entry(Counters.Fields.failedRecipientIdNotValid, failedByRefusalCode(SendRefusalReasonsCode.RECIPIENT_ID_NOT_VALID)),
+    Map.entry(Counters.Fields.failedNotValidAddress, failedByRefusalCode(SendRefusalReasonsCode.NOT_VALID_ADDRESS)),
+    Map.entry(Counters.Fields.failedPaymentNotValid, failedByRefusalCode(SendRefusalReasonsCode.PAYMENT_NOT_VALID)),
+    Map.entry(Counters.Fields.failedServiceUnavailable, failedByRefusalCode(SendRefusalReasonsCode.SERVICE_UNAVAILABLE)),
+    Map.entry(Counters.Fields.failedAddressNotFound, failedByRefusalCode(SendRefusalReasonsCode.ADDRESS_NOT_FOUND)),
+    Map.entry(Counters.Fields.failedAddressSearchFailed, failedByRefusalCode(SendRefusalReasonsCode.ADDRESS_SEARCH_FAILED)),
 
     Map.entry(Counters.Fields.deceasedRecipient, CounterRule.builder()
       .activationConditions(List.of(
