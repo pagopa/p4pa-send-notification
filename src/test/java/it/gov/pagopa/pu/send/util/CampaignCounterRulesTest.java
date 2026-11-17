@@ -20,6 +20,16 @@ class CampaignCounterRulesTest {
   }
 
   @Test
+  void checkMutuallyExclusiveActivationLogic() {
+    CampaignCounterRules.COUNTER_RULES.forEach((counterName, rule) -> {
+      boolean hasActivationConditions = !rule.getActivationConditions().isEmpty();
+      boolean hasActivationCallbacks = rule.getActivationPredicate() != null || rule.getActivationCriteriaFunction() != null;
+
+      assertFalse(hasActivationConditions && hasActivationCallbacks);
+    });
+  }
+
+  @Test
   void checkMutuallyExclusiveDeactivationLogic() {
     CampaignCounterRules.COUNTER_RULES.forEach((counterName, rule) -> {
       boolean hasDeactivatingCounters = !rule.getDeactivatingCounters().isEmpty();
