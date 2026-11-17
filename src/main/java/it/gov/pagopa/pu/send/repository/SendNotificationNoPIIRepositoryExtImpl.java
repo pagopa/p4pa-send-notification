@@ -304,7 +304,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   @Override
-  public List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
+  public SendNotificationNoPII pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
     Query query = new Query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
     Update update = BaseEntityListener.setTechFieldsOnDocumentUpdate(new Update().push(Fields.history).each(streamEvents));
     SendNotificationNoPII updatedDoc = mongoTemplate.findAndModify(
@@ -313,7 +313,7 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
       FindAndModifyOptions.options().returnNew(true),
       SendNotificationNoPII.class
     );
-    return updatedDoc.getHistory();
+    return updatedDoc;
   }
 
   @Override

@@ -25,13 +25,13 @@ public class CampaignCounterRules {
     @Builder.Default
     private List<String> deactivatingCounters = List.of();
 
-    // To be configured if deactivation logic is needed and a deactivation counter is missing, otherwise configuring the counter itself is preferred
-    @Builder.Default
-    private List<StreamEventSummaryDTO> deactivationConditions = List.of();
-
     // Configure both callbacks only when activation cannot be expressed through activationConditions
     private Predicate<SendNotificationNoPII> activationPredicate;
     private Function<SendNotificationNoPII, Criteria> activationCriteriaFunction;
+
+    // To be configured if deactivation logic is needed and a deactivation counter is missing, otherwise configuring the counter itself is preferred
+    @Builder.Default
+    private List<StreamEventSummaryDTO> deactivationConditions = List.of();
   }
 
   private static final List<String> TERMINAL_COUNTERS = List.of(

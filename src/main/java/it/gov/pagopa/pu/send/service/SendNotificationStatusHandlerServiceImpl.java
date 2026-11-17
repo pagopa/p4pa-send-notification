@@ -43,27 +43,26 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
 
   @Transactional
   @Override
-  public void handleSendNotificationStatusUpdate(String sendNotificationId, String campaignId, List<StreamEventSummaryDTO> oldHistory, List<StreamEventSummaryDTO> eventsToPush) {
-    List<StreamEventSummaryDTO> newHistory = sendNotificationNoPIIRepository.pushStreamEventsHistory(sendNotificationId, eventsToPush);
-    NotificationStatusChangeDTO notificationStatusChangeDTO = handleHistoryChange(oldHistory, newHistory);
-    campaignService.handleStatusChange(campaignId, notificationStatusChangeDTO);
-  }
-
-  private NotificationStatusChangeDTO handleHistoryChange(List<StreamEventSummaryDTO> oldHistory, List<StreamEventSummaryDTO> newHistory) {
-    Set<String> oldCounters = campaignCountersService.calculateActiveCounters(oldHistory);
-    Set<String> newCounters = campaignCountersService.calculateActiveCounters(newHistory);
+  public void handleSendNotificationStatusUpdate(SendNotificationNoPII notification, List<StreamEventSummaryDTO> eventsToPush) {
+    Set<String> oldCounters = campaignCountersService.calculateActiveCounters(notification);
+    SendNotificationNoPII updatedNotification = sendNotificationNoPIIRepository.pushStreamEventsHistory(notification.getSendNotificationId(), eventsToPush);
+    Set<String> newCounters = campaignCountersService.calculateActiveCounters(updatedNotification);
 
     log.debug("Counters diff - oldCounters: {}, newCounters: {}", oldCounters, newCounters);
 
-    return NotificationStatusChangeDTO.builder()
+    NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .incrFields(newCounters.stream().filter(c -> !oldCounters.contains(c)).collect(Collectors.toSet()))
       .decrFields(oldCounters.stream().filter(c -> !newCounters.contains(c)).collect(Collectors.toSet()))
       .build();
+
+    campaignService.handleStatusChange(notification.getCampaignId(), notificationStatusChangeDTO);
   }
 
   @Transactional
   @Override
-  public void handleDeletedSendNotification(String campaignId, LocalDate notificationCreationDate, List<StreamEventSummaryDTO> history) {
+  public void handleDeletedSendNotification(SendNotificationNoPII notification) {
+    String campaignId = notification.getCampaignId();
+    LocalDate notificationCreationDate = notification.getCreationDate().toLocalDate();
     Campaign campaign = campaignService.getCampaignById(campaignId);
     if(campaign.getCounters()!=null && Objects.equals(campaign.getCounters().getTotal(),1L)){
       log.info("Deleting campaign having id {}", campaignId);
@@ -71,9 +70,7 @@ public class SendNotificationStatusHandlerServiceImpl implements SendNotificatio
       return;
     }
 
-    Set<String> activeCounters = history == null
-      ? new HashSet<>()
-      : campaignCountersService.calculateActiveCounters(history);
+    Set<String> activeCounters = new HashSet<>(campaignCountersService.calculateActiveCounters(notification));
 
     activeCounters.add(Counters.Fields.total);
 

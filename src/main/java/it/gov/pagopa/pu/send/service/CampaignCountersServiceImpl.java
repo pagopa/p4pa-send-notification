@@ -1,6 +1,7 @@
 package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.CampaignCounterRules;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,9 @@ import static it.gov.pagopa.pu.send.util.CampaignCounterRules.COUNTER_RULES;
 @RequiredArgsConstructor
 public class CampaignCountersServiceImpl implements CampaignCountersService {
   @Override
-  public Set<String> calculateActiveCounters(List<StreamEventSummaryDTO> history) {
+  public Set<String> calculateActiveCounters(SendNotificationNoPII notification) {
+    List<StreamEventSummaryDTO> history = notification.getHistory();
+
     if (history == null || history.isEmpty()) {
       return Collections.emptySet();
     }
@@ -24,7 +27,7 @@ public class CampaignCountersServiceImpl implements CampaignCountersService {
     log.trace("Evaluating candidate counters from COUNTER_RULES based on history events: {}", history);
 
     Set<String> candidateCounters = COUNTER_RULES.entrySet().stream()
-      .filter(entry -> isCounterEligibleForActivation(entry.getKey(), entry.getValue(), history))
+      .filter(entry -> isCounterEligibleForActivation(entry.getKey(), entry.getValue(), notification))
       .map(Map.Entry::getKey)
       .collect(Collectors.toSet());
 
@@ -42,12 +45,15 @@ public class CampaignCountersServiceImpl implements CampaignCountersService {
     return finalCounters;
   }
 
-  private boolean isCounterEligibleForActivation(String counterName, CampaignCounterRules.CounterRule rule, List<StreamEventSummaryDTO> history) {
-    boolean matchesActivation = rule.getActivationConditions().stream()
-      .anyMatch(condition -> hasMatchingEventInHistory(condition, history));
+  private boolean isCounterEligibleForActivation(String counterName, CampaignCounterRules.CounterRule rule, SendNotificationNoPII notification) {
+    List<StreamEventSummaryDTO> history = notification.getHistory();
+
+    boolean matchesActivation = rule.getActivationPredicate() != null
+      ? rule.getActivationPredicate().test(notification)
+      : rule.getActivationConditions().stream().anyMatch(condition -> hasMatchingEventInHistory(condition, history));
 
     if (!matchesActivation) {
-      log.trace("Counter '{}' discarded: no matching activation conditions found.", counterName);
+      log.trace("Counter '{}' discarded: activation rule did not match.", counterName);
       return false;
     }
 

@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -17,13 +16,6 @@ public class SendNotificationStreamEventServiceImpl implements SendNotificationS
 
   @Override
   public void notifySendNotificationStreamEvents(SendNotificationNoPII notification, List<StreamEventSummaryDTO> streamEvents) {
-    List<StreamEventSummaryDTO> history = notification.getHistory();
-
-    sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-      notification.getSendNotificationId(),
-      notification.getCampaignId(),
-      history != null ? history : Collections.emptyList(),
-      streamEvents
-    );
+    sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(notification, streamEvents);
   }
 }
