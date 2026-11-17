@@ -24,6 +24,7 @@ public class Counters implements Serializable {
   private Long digitalCompletionDigitalDomicile = 0L;
   private Long digitalCompletionCourtesyMessage = 0L;
   private Long failed = 0L;
+  private Long failedNotValidAddress = 0L;
   private Long deceasedRecipient = 0L;
   private Long recipientNotFound = 0L;
   private Long paid = 0L;

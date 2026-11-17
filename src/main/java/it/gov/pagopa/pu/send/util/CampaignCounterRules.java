@@ -1,12 +1,17 @@
 package it.gov.pagopa.pu.send.util;
 
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.send.dto.generated.NotificationRequestRefusedProblemErrorDTO;
 import it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO;
 import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import lombok.*;
+import org.springframework.data.mongodb.core.query.Criteria;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class CampaignCounterRules {
@@ -19,8 +24,14 @@ public class CampaignCounterRules {
     private List<StreamEventSummaryDTO> activationConditions = List.of();
     @Builder.Default
     private List<String> deactivatingCounters = List.of();
+
+    // To be configured if deactivation logic is needed and a deactivation counter is missing, otherwise configuring the counter itself is preferred
     @Builder.Default
-    private List<StreamEventSummaryDTO> deactivationConditions = List.of(); // To be configured if deactivation logic is needed and a deactivation counter is missing, otherwise configuring the counter itself is preferred
+    private List<StreamEventSummaryDTO> deactivationConditions = List.of();
+
+    // Configure both callbacks only when activation cannot be expressed through activationConditions
+    private Predicate<SendNotificationNoPII> activationPredicate;
+    private Function<SendNotificationNoPII, Criteria> activationCriteriaFunction;
   }
 
   private static final List<String> TERMINAL_COUNTERS = List.of(
@@ -38,70 +49,102 @@ public class CampaignCounterRules {
 
   public static final Map<String, CounterRule> COUNTER_RULES = Map.ofEntries(
     Map.entry(Counters.Fields.accepted, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, null)))
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.ACCEPTED, null)
+      ))
       .build()
     ),
 
     Map.entry(Counters.Fields.delivered, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, null)))
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, null)
+      ))
       .build()
     ),
 
     Map.entry(Counters.Fields.completed, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.EFFECTIVE_DATE, null)))
+      .activationConditions(
+        List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.EFFECTIVE_DATE, null))
+      )
       .build()
     ),
 
     Map.entry(Counters.Fields.analogicCompletionPreOutcome, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_ANALOG_FEEDBACK)))
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS),
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_ANALOG_FEEDBACK)
+      ))
       .deactivatingCounters(withTerminalCounters(Counters.Fields.analogicCompletion))
       .build()
     ),
 
     Map.entry(Counters.Fields.analogicCompletion, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.ANALOG_FAILURE_WORKFLOW),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, TimelineElementCategoryV27DTO.ANALOG_SUCCESS_WORKFLOW)))
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.ANALOG_FAILURE_WORKFLOW),
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, TimelineElementCategoryV27DTO.ANALOG_SUCCESS_WORKFLOW)
+      ))
       .deactivatingCounters(TERMINAL_COUNTERS)
       .build()
     ),
 
     Map.entry(Counters.Fields.digitalCompletionDigitalDomicile, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.DIGITAL_FAILURE_WORKFLOW),
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.DIGITAL_FAILURE_WORKFLOW),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_SIMPLE_REGISTERED_LETTER),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, TimelineElementCategoryV27DTO.DIGITAL_SUCCESS_WORKFLOW)))
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERED, TimelineElementCategoryV27DTO.DIGITAL_SUCCESS_WORKFLOW)
+      ))
       .deactivatingCounters(TERMINAL_COUNTERS)
       .build()
     ),
 
     Map.entry(Counters.Fields.digitalCompletionCourtesyMessage, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.PROBABLE_SCHEDULING_ANALOG_DATE),
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.PROBABLE_SCHEDULING_ANALOG_DATE),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SCHEDULE_ANALOG_WORKFLOW),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_COURTESY_MESSAGE),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.VIEWED, TimelineElementCategoryV27DTO.NOTIFICATION_VIEWED)))
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.VIEWED, TimelineElementCategoryV27DTO.NOTIFICATION_VIEWED)
+      ))
       // if it's not completed via courtesy message, the notification moves to a digital or analog domicile
       .deactivatingCounters(withTerminalCounters(Counters.Fields.digitalCompletionDigitalDomicile, Counters.Fields.analogicCompletion))
       .build()
     ),
 
     Map.entry(Counters.Fields.failed, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.REFUSED, null)))
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.REFUSED, null)
+      ))
+      .build()
+    ),
+
+    Map.entry(Counters.Fields.failedNotValidAddress, CounterRule.builder()
+      .activationPredicate(notification -> {
+        List<NotificationRequestRefusedProblemErrorDTO> errors = notification.getErrors();
+        return errors != null && !errors.isEmpty() && SendRefusalReasonsCode.NOT_VALID_ADDRESS.equals(errors.getFirst().getCode());
+      })
+      .activationCriteriaFunction(notification ->
+        Criteria.where(SendNotificationNoPII.Fields.errors + ".0.code").is(SendRefusalReasonsCode.NOT_VALID_ADDRESS))
       .build()
     ),
 
     Map.entry(Counters.Fields.deceasedRecipient, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.RETURNED_TO_SENDER, null)))
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.RETURNED_TO_SENDER, null)
+      ))
       .build()
     ),
 
     Map.entry(Counters.Fields.recipientNotFound, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.UNREACHABLE, null)))
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.UNREACHABLE, null)
+      ))
       .deactivatingCounters(List.of(Counters.Fields.completed))
       .build()
     ),
 
     Map.entry(Counters.Fields.paid, CounterRule.builder()
-      .activationConditions(List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.PU_PAID, TimelineElementCategoryV27DTO.PU_PAYMENT)))
+      .activationConditions(List.of(
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.PU_PAID, TimelineElementCategoryV27DTO.PU_PAYMENT)
+      ))
       .build()
     )
   );

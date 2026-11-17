@@ -3891,6 +3891,10 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "failedNotValidAddress" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
           "deceasedRecipient" : {
             "type" : "integer",
             "format" : "int64"
