@@ -255,7 +255,9 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   private AggregationExpression buildIsEligibleExpression(CampaignCounterRules.CounterRule rule) {
-    AggregationExpression matchesActivation = buildAnyMatchExpression(rule.getActivationConditions());
+    AggregationExpression matchesActivation = rule.getActivationConditions().isEmpty()
+      ? rule.getActivationExpressionSupplier().get()
+      : buildAnyMatchExpression(rule.getActivationConditions());
 
     if (rule.getDeactivationConditions().isEmpty()) {
       return matchesActivation;
