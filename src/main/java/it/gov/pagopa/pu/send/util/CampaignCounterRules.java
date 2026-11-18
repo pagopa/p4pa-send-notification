@@ -20,13 +20,23 @@ public class CampaignCounterRules {
   @Getter
   @Builder
   public static class CounterRule {
+    // Ignored when activationPredicate and activationCriteriaFunction are configured, as they take precedence and replace these conditions
     @Builder.Default
     private List<StreamEventSummaryDTO> activationConditions = List.of();
     @Builder.Default
     private List<String> deactivatingCounters = List.of();
 
-    // Configure both callbacks only when activation cannot be expressed through activationConditions
+    /**
+     * Java check of the activation logic, equivalent to the Mongo expression built by {@link #activationCriteriaFunction}.
+     * Takes precedence over and replaces {@link #activationConditions}.
+     * Configure both callbacks only when activation cannot be expressed through activationConditions.
+     */
     private Predicate<SendNotificationNoPII> activationPredicate;
+
+    /**
+     * Mongo expression of the activation logic, equivalent to the check performed by {@link #activationPredicate}.
+     * Takes precedence over and replaces {@link #activationConditions}.
+     */
     private Function<SendNotificationNoPII, Criteria> activationCriteriaFunction;
 
     // To be configured if deactivation logic is needed and a deactivation counter is missing, otherwise configuring the counter itself is preferred
