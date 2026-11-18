@@ -1,5 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO;
 import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
@@ -23,14 +24,20 @@ class CampaignCountersServiceImplTest {
 
   @Test
   void givenNullHistoryWhenCalculateActiveCountersThenReturnEmptySet() {
-    Set<String> result = campaignCountersService.calculateActiveCounters(null);
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+    sendNotificationNoPII.setHistory(null);
+
+    Set<String> result = campaignCountersService.calculateActiveCounters(sendNotificationNoPII);
 
     assertEquals(Collections.emptySet(), result);
   }
 
   @Test
   void givenEmptyHistoryWhenCalculateActiveCountersThenReturnEmptySet() {
-    Set<String> result = campaignCountersService.calculateActiveCounters(List.of());
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+    sendNotificationNoPII.setHistory(List.of());
+
+    Set<String> result = campaignCountersService.calculateActiveCounters(sendNotificationNoPII);
 
     assertEquals(Collections.emptySet(), result);
   }
@@ -42,7 +49,10 @@ class CampaignCountersServiceImplTest {
       TimelineElementCategoryV27DTO.SEND_SIMPLE_REGISTERED_LETTER
     );
 
-    Set<String> result = campaignCountersService.calculateActiveCounters(List.of(event));
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+    sendNotificationNoPII.setHistory(List.of(event));
+
+    Set<String> result = campaignCountersService.calculateActiveCounters(sendNotificationNoPII);
 
     assertEquals(Set.of(Counters.Fields.accepted), result);
   }
@@ -58,7 +68,10 @@ class CampaignCountersServiceImplTest {
       null
     );
 
-    Set<String> result = campaignCountersService.calculateActiveCounters(List.of(event1, event2));
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+    sendNotificationNoPII.setHistory(List.of(event1, event2));
+
+    Set<String> result = campaignCountersService.calculateActiveCounters(sendNotificationNoPII);
 
     assertEquals(Set.of(Counters.Fields.accepted, Counters.Fields.delivered), result);
     assertEquals(2, result.size());
@@ -77,7 +90,10 @@ class CampaignCountersServiceImplTest {
       TimelineElementCategoryV27DTO.SEND_ANALOG_PROGRESS
     );
 
-    Set<String> result = campaignCountersService.calculateActiveCounters(List.of(event1, event2));
+    SendNotificationNoPII sendNotificationNoPII = new SendNotificationNoPII();
+    sendNotificationNoPII.setHistory(List.of(event1, event2));
+
+    Set<String> result = campaignCountersService.calculateActiveCounters(sendNotificationNoPII);
 
     assertEquals(Set.of(Counters.Fields.completed), result);
   }

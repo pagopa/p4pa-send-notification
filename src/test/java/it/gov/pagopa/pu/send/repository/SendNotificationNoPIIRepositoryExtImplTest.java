@@ -341,9 +341,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       Mockito.eq(SendNotificationNoPII.class))
     ).thenReturn(updatedSendNotification);
 
-    List<StreamEventSummaryDTO> result = repository.pushStreamEventsHistory(sendNotificationId, streamEvents);
+    SendNotificationNoPII result = repository.pushStreamEventsHistory(sendNotificationId, streamEvents);
 
-    assertEquals(streamEvents, result);
+    assertSame(updatedSendNotification, result);
   }
 
   @Test

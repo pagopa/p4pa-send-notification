@@ -7,10 +7,28 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class CampaignCounterRulesTest {
+  @Test
+  void checkCustomActivationCallbacksBothConfigured() {
+    CampaignCounterRules.COUNTER_RULES.forEach((counterName, rule) ->
+      assertEquals(rule.getActivationPredicate() != null, rule.getActivationCriteriaFunction() != null)
+    );
+  }
+
+  @Test
+  void checkMutuallyExclusiveActivationLogic() {
+    CampaignCounterRules.COUNTER_RULES.forEach((counterName, rule) -> {
+      boolean hasActivationConditions = !rule.getActivationConditions().isEmpty();
+      boolean hasActivationCallbacks = rule.getActivationPredicate() != null || rule.getActivationCriteriaFunction() != null;
+
+      assertFalse(hasActivationConditions && hasActivationCallbacks);
+    });
+  }
+
   @Test
   void checkMutuallyExclusiveDeactivationLogic() {
     CampaignCounterRules.COUNTER_RULES.forEach((counterName, rule) -> {
