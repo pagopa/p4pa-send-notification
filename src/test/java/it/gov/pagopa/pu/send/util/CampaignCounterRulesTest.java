@@ -15,7 +15,7 @@ class CampaignCounterRulesTest {
   @Test
   void checkCustomActivationCallbacksBothConfigured() {
     CampaignCounterRules.COUNTER_RULES.forEach((counterName, rule) ->
-      assertEquals(rule.getActivationPredicate() != null, rule.getActivationCriteriaFunction() != null)
+      assertEquals(rule.getActivationPredicate() != null, rule.getActivationExpressionSupplier() != null)
     );
   }
 
@@ -23,7 +23,7 @@ class CampaignCounterRulesTest {
   void checkMutuallyExclusiveActivationLogic() {
     CampaignCounterRules.COUNTER_RULES.forEach((counterName, rule) -> {
       boolean hasActivationConditions = !rule.getActivationConditions().isEmpty();
-      boolean hasActivationCallbacks = rule.getActivationPredicate() != null || rule.getActivationCriteriaFunction() != null;
+      boolean hasActivationCallbacks = rule.getActivationPredicate() != null || rule.getActivationExpressionSupplier() != null;
 
       assertFalse(hasActivationConditions && hasActivationCallbacks);
     });

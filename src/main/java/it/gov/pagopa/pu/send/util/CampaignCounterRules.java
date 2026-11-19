@@ -7,10 +7,12 @@ import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
 import it.gov.pagopa.pu.send.dto.Counters;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import lombok.*;
-import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.aggregation.AggregationExpression;
+import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
+import org.springframework.data.mongodb.core.aggregation.ComparisonOperators;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -20,24 +22,24 @@ public class CampaignCounterRules {
   @Getter
   @Builder
   public static class CounterRule {
-    // Ignored when activationPredicate and activationCriteriaFunction are configured, as they take precedence and replace these conditions
+    // Ignored when activationPredicate and activationExpressionSupplier are configured, as they take precedence and replace these conditions
     @Builder.Default
     private List<StreamEventSummaryDTO> activationConditions = List.of();
     @Builder.Default
     private List<String> deactivatingCounters = List.of();
 
     /**
-     * Java check of the activation logic, equivalent to the Mongo expression built by {@link #activationCriteriaFunction}.
+     * Java check of the activation logic, equivalent to the Mongo expression built by {@link #activationExpressionSupplier}.
      * Takes precedence over and replaces {@link #activationConditions}.
      * Configure both callbacks only when activation cannot be expressed through activationConditions.
      */
     private Predicate<SendNotificationNoPII> activationPredicate;
 
     /**
-     * Mongo expression of the activation logic, equivalent to the check performed by {@link #activationPredicate}.
+     * Mongo aggregation expression of the activation logic, equivalent to the check performed by {@link #activationPredicate}.
      * Takes precedence over and replaces {@link #activationConditions}.
      */
-    private Function<SendNotificationNoPII, Criteria> activationCriteriaFunction;
+    private Supplier<AggregationExpression> activationExpressionSupplier;
 
     // To be configured if deactivation logic is needed and a deactivation counter is missing, otherwise configuring the counter itself is preferred
     @Builder.Default
@@ -63,8 +65,10 @@ public class CampaignCounterRules {
         List<NotificationRequestRefusedProblemErrorDTO> errors = notification.getErrors();
         return errors != null && !errors.isEmpty() && refusalCode.equals(errors.getFirst().getCode());
       })
-      .activationCriteriaFunction(notification ->
-        Criteria.where(SendNotificationNoPII.Fields.errors + ".0.code").is(refusalCode))
+      .activationExpressionSupplier(() ->
+        ComparisonOperators.Eq.valueOf(
+          ArrayOperators.ArrayElemAt.arrayOf(SendNotificationNoPII.Fields.errors + ".code").elementAt(0)
+        ).equalToValue(refusalCode))
       .build();
   }
 
