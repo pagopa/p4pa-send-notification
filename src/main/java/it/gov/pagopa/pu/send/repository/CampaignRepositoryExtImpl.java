@@ -8,6 +8,7 @@ import it.gov.pagopa.pu.send.dto.NotificationStatusChangeDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.Campaign.Fields;
 import it.gov.pagopa.pu.send.util.DateUtils;
+import it.gov.pagopa.pu.send.util.OrgSubUnitCriteriaUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,6 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -99,18 +99,7 @@ public class CampaignRepositoryExtImpl implements CampaignRepositoryExt {
       query.addCriteria(Criteria.where(Fields.startDate).lte(campaignFiltersDTO.getDateTo())
         .and(Fields.endDate).gte(campaignFiltersDTO.getDateFrom()));
     }
-    if(!CollectionUtils.isEmpty(campaignFiltersDTO.getOrgSubUnitCodes())){
-      if(Boolean.TRUE.equals(campaignFiltersDTO.getFetchAll())){
-        query.addCriteria(new Criteria().orOperator(
-          Criteria.where(Fields.orgSubUnitCode).in(campaignFiltersDTO.getOrgSubUnitCodes()),
-          Criteria.where(Fields.orgSubUnitCode).isNull()
-        ));
-      }else {
-        query.addCriteria(Criteria.where(Fields.orgSubUnitCode).in(campaignFiltersDTO.getOrgSubUnitCodes()));
-      }
-    }else{
-      query.addCriteria(Criteria.where(Fields.orgSubUnitCode).isNull());
-    }
+    OrgSubUnitCriteriaUtils.addOrgSubUnitCriteria(query, Fields.orgSubUnitCode, campaignFiltersDTO.getOrgSubUnitCodes(), campaignFiltersDTO.getFetchAll());
     if(StringUtils.isNotBlank(campaignFiltersDTO.getCampaignName())){
       query.addCriteria(Criteria.where(Fields.campaignName).regex(Pattern.quote(campaignFiltersDTO.getCampaignName()), "i"));
     }

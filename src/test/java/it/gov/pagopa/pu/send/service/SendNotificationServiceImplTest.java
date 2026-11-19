@@ -2,30 +2,31 @@ package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
+import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
-import it.gov.pagopa.pu.send.model.Campaign;
-import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
-import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.PuPayment;
-import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.SendNotification;
+import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
+import it.gov.pagopa.pu.send.mapper.PagedSendNotificationAndCampaignViewDTOMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
 import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
+import it.gov.pagopa.pu.send.util.TestUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,11 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import uk.co.jemos.podam.api.PodamFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,17 +50,14 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationServiceImplTest {
+  public static final PodamFactory podamFactory = TestUtils.getPodamFactory();
   @Mock
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
   @Mock
@@ -77,6 +80,12 @@ class SendNotificationServiceImplTest {
   private SendNotificationStatusHandlerService sendNotificationStatusHandlerServiceMock;
   @Mock
   private SendNotificationPaidService sendNotificationPaidServiceMock;
+  @Mock
+  private DataCipherService dataCipherServiceMock;
+  @Mock
+  private PagedSendNotificationAndCampaignViewDTOMapper pagedSendNotificationAndCampaignViewDTOMapperMock;
+  @Mock
+  private CampaignRepository campaignRepositoryMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -94,7 +103,10 @@ class SendNotificationServiceImplTest {
       organizationServiceMock,
       orgSubUnitServiceMock,
       sendNotificationStatusHandlerServiceMock,
-      sendNotificationPaidServiceMock
+      sendNotificationPaidServiceMock,
+      dataCipherServiceMock,
+      pagedSendNotificationAndCampaignViewDTOMapperMock,
+      campaignRepositoryMock
     );
   }
 
@@ -689,5 +701,79 @@ class SendNotificationServiceImplTest {
     SendNotificationNotFoundException sendNotificationNotFoundException = Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotification(sendNotificationId));
 
     Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_NOTIFICATION_NOT_FOUND, sendNotificationNotFoundException.getCode());
+  }
+
+  @Test
+  void whenGetSendNotificationsThenOk() {
+    // Given
+    String fiscalCode = "fiscalCode";
+    byte[] fiscalCodeHash = fiscalCode.getBytes();
+    SendNotificationRowFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationRowFiltersDTO.class);
+    Pageable pageable = PageRequest.of(0, 10);
+    Campaign campaign1 = podamFactory.manufacturePojo(Campaign.class);
+    Campaign campaign2 = podamFactory.manufacturePojo(Campaign.class);
+    Map<String,Campaign> campaignMap = Map.of(campaign1.getCampaignId(), campaign1, campaign2.getCampaignId(), campaign2);
+    SendNotificationNoPII notification1 = podamFactory.manufacturePojo(SendNotificationNoPII.class);
+    notification1.setCampaignId(campaign1.getCampaignId());
+    SendNotificationNoPII notification2 = podamFactory.manufacturePojo(SendNotificationNoPII.class);
+    notification2.setCampaignId(campaign1.getCampaignId());
+    SendNotificationNoPII notification3 = podamFactory.manufacturePojo(SendNotificationNoPII.class);
+    notification3.setCampaignId(campaign2.getCampaignId());
+    Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(notification1, notification2, notification3), pageable, 3L);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
+
+    when(dataCipherServiceMock.hash(fiscalCode)).thenReturn(fiscalCodeHash);
+    when(sendNotificationNoPIIRepositoryMock.findOrganizationSendNotificationsByFilters(filters, pageable)).thenReturn(notificationsPage);
+    when(campaignRepositoryMock.findAllById(campaignMap.keySet())).thenReturn(List.of(campaign1, campaign2));
+    when(pagedSendNotificationAndCampaignViewDTOMapperMock.map(notificationsPage, campaignMap)).thenReturn(expectedResult);
+
+    // When
+    PagedSendNotificationAndCampaignViewDTO result = sendNotificationService.getSendNotifications(filters, fiscalCode, pageable);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+    Assertions.assertArrayEquals(fiscalCodeHash, filters.getFiscalCodeHash());
+  }
+
+  @Test
+  void givenMissingCampaignWhenGetSendNotificationsThenOk() {
+    // Given
+    SendNotificationRowFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationRowFiltersDTO.class);
+    filters.setFiscalCodeHash(null);
+    Pageable pageable = PageRequest.of(0, 10);
+    SendNotificationNoPII notification = podamFactory.manufacturePojo(SendNotificationNoPII.class);
+    Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(notification), pageable, 1L);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
+
+    when(sendNotificationNoPIIRepositoryMock.findOrganizationSendNotificationsByFilters(filters, pageable)).thenReturn(notificationsPage);
+    when(campaignRepositoryMock.findAllById(Set.of(notification.getCampaignId()))).thenReturn(List.of());
+    when(pagedSendNotificationAndCampaignViewDTOMapperMock.map(notificationsPage, Map.of())).thenReturn(expectedResult);
+
+    // When
+    PagedSendNotificationAndCampaignViewDTO result = sendNotificationService.getSendNotifications(filters, null, pageable);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+    Assertions.assertNull(filters.getFiscalCodeHash());
+  }
+
+  @Test
+  void givenEmptyPageWhenGetSendNotificationsThenNoCampaignSearch() {
+    // Given
+    SendNotificationRowFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationRowFiltersDTO.class);
+    filters.setFiscalCodeHash(null);
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(), pageable, 0L);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
+
+    when(sendNotificationNoPIIRepositoryMock.findOrganizationSendNotificationsByFilters(filters, pageable)).thenReturn(notificationsPage);
+    when(pagedSendNotificationAndCampaignViewDTOMapperMock.map(notificationsPage, Map.of())).thenReturn(expectedResult);
+
+    // When
+    PagedSendNotificationAndCampaignViewDTO result = sendNotificationService.getSendNotifications(filters, null, pageable);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+    Assertions.assertNull(filters.getFiscalCodeHash());
   }
 }
