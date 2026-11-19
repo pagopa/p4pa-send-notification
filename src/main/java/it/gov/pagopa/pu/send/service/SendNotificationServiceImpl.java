@@ -1,24 +1,27 @@
 package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
+import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
-import it.gov.pagopa.pu.send.model.Campaign;
-import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
 import it.gov.pagopa.pu.send.dto.DocumentDTO;
 import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.SendNotification;
+import it.gov.pagopa.pu.send.dto.SendNotificationRowFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
+import it.gov.pagopa.pu.send.mapper.PagedSendNotificationRowDTOMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
 import it.gov.pagopa.pu.send.util.AESUtils;
@@ -26,18 +29,25 @@ import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.pu.send.util.FileUtils;
 import it.gov.pagopa.pu.send.util.NotificationUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static it.gov.pagopa.pu.send.util.Constants.ZONEID;
 
@@ -57,6 +67,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final OrgSubUnitService orgSubUnitService;
   private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
   private final SendNotificationPaidService sendNotificationPaidService;
+  private final DataCipherService dataCipherService;
+  private final PagedSendNotificationRowDTOMapper pagedSendNotificationRowDTOMapper;
+  private final CampaignRepository campaignRepository;
 
   public SendNotificationServiceImpl(
     @Value("${fileshare-public-base-url}") String fileShareBaseUrl,
@@ -70,7 +83,10 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     OrganizationService organizationService,
     OrgSubUnitService orgSubUnitService,
     SendNotificationStatusHandlerService sendNotificationStatusHandlerService,
-    SendNotificationPaidService sendNotificationPaidService
+    SendNotificationPaidService sendNotificationPaidService,
+    DataCipherService dataCipherService,
+    PagedSendNotificationRowDTOMapper pagedSendNotificationRowDTOMapper,
+    CampaignRepository campaignRepository
   ) {
     this.fileShareBaseUrl = fileShareBaseUrl;
     this.sendNotificationPIIRepository = sendNotificationPIIRepository;
@@ -84,6 +100,9 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.orgSubUnitService = orgSubUnitService;
     this.sendNotificationStatusHandlerService = sendNotificationStatusHandlerService;
     this.sendNotificationPaidService = sendNotificationPaidService;
+    this.dataCipherService = dataCipherService;
+    this.pagedSendNotificationRowDTOMapper = pagedSendNotificationRowDTOMapper;
+    this.campaignRepository = campaignRepository;
   }
 
   @Transactional
@@ -219,6 +238,22 @@ public class SendNotificationServiceImpl implements SendNotificationService {
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with id: " + sendNotificationId));
   }
 
+  @Override
+  public PagedSendNotificationRowDTO getSendNotifications(SendNotificationRowFiltersDTO filters, String fiscalCode, Pageable pageable) {
+    if(StringUtils.isNotBlank(fiscalCode)){
+      filters.setFiscalCodeHash(dataCipherService.hash(fiscalCode));
+    }
+    Page<SendNotificationNoPII> sendNotificationsPage = sendNotificationNoPIIRepository.findOrganizationSendNotificationsByFilters(filters, pageable);
+
+    Set<String> campaignIds = sendNotificationsPage.getContent().stream()
+      .map(SendNotificationNoPII::getCampaignId)
+      .filter(Objects::nonNull)
+      .collect(Collectors.toSet());
+    Map<String, Campaign> campaignMap = CollectionUtils.isEmpty(campaignIds)? Map.of() : campaignRepository.findAllById(campaignIds).stream()
+        .collect(Collectors.toMap(Campaign::getCampaignId, Function.identity()));
+
+    return pagedSendNotificationRowDTOMapper.map(sendNotificationsPage, campaignMap);
+  }
 
   private void updateFileStatusAndDownloadDate(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest, Long organizationId) {
     NotificationUtils.validateStatus(FileStatus.WAITING, doc.getStatus());

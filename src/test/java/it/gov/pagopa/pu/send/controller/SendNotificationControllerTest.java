@@ -1,8 +1,8 @@
 package it.gov.pagopa.pu.send.controller;
 
 import com.mongodb.client.result.UpdateResult;
-import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.dto.SendNotification;
+import it.gov.pagopa.pu.send.dto.SendNotificationRowFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
@@ -11,6 +11,7 @@ import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtilsTest;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.co.jemos.podam.api.PodamFactory;
@@ -373,6 +376,28 @@ class SendNotificationControllerTest {
     // When
     //Then
     ResponseEntity<SendNotification> response = sendNotificationController.getSendNotificationDetails(sendNotificationId);
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    Assertions.assertSame(expectedResult, response.getBody());
+  }
+
+  @Test
+  void whenGetSendNotificationsThenOk(){
+    // Given
+    String fiscalCode = "fiscalCode";
+    Pageable pageable = PageRequest.of(0, 10);
+    SendNotificationRowFiltersDTO expectedFilters = podamFactory.manufacturePojo(SendNotificationRowFiltersDTO.class);
+    expectedFilters.setFiscalCodeHash(null);
+    PagedSendNotificationRowDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationRowDTO.class);
+
+    when(sendNotificationServiceMock.getSendNotifications(expectedFilters, fiscalCode, pageable)).thenReturn(expectedResult);
+
+    // When
+    ResponseEntity<PagedSendNotificationRowDTO> response = sendNotificationController.getSendNotifications(expectedFilters.getOrganizationId(),
+      expectedFilters.getOrgSubUnitCodes(), expectedFilters.getFetchAll(), expectedFilters.getIun(), fiscalCode,
+      expectedFilters.getDateFrom(), expectedFilters.getDateTo(), expectedFilters.getStatuses(), pageable);
+
+    // Then
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     Assertions.assertSame(expectedResult, response.getBody());
