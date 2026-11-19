@@ -4281,7 +4281,7 @@
         }
       },
       "SendNotificationNoPII" : {
-        "required" : [ "campaignId", "organizationId", "personalDataId", "status", "subject" ],
+        "required" : [ "campaignId", "personalDataId" ],
         "type" : "object",
         "properties" : {
           "creationDate" : {
