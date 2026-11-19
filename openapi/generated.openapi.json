@@ -673,7 +673,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PagedSendNotificationRowDTO"
+                  "$ref" : "#/components/schemas/PagedSendNotificationAndCampaignViewDTO"
                 }
               }
             }
@@ -3771,14 +3771,14 @@
           }
         }
       },
-      "PagedSendNotificationRowDTO" : {
+      "PagedSendNotificationAndCampaignViewDTO" : {
         "required" : [ "content", "number", "size", "totalElements", "totalPages" ],
         "type" : "object",
         "properties" : {
           "content" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/SendNotificationRowDTO"
+              "$ref" : "#/components/schemas/SendNotificationAndCampaignViewDTO"
             }
           },
           "size" : {
@@ -3799,7 +3799,7 @@
           }
         }
       },
-      "SendNotificationRowDTO" : {
+      "SendNotificationAndCampaignViewDTO" : {
         "required" : [ "campaignId", "creationDate", "externalCampaignId", "organizationId", "sendNotificationId", "status", "subject" ],
         "type" : "object",
         "properties" : {

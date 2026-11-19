@@ -60,7 +60,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedSendNotificationRowDTO'
+                $ref: '#/components/schemas/PagedSendNotificationAndCampaignViewDTO'
         '400':
           description: Invalid request
           content:
@@ -1975,7 +1975,7 @@ components:
         number:
           type: integer
           format: int64
-    PagedSendNotificationRowDTO:
+    PagedSendNotificationAndCampaignViewDTO:
       type: object
       required:
         - content
@@ -1987,7 +1987,7 @@ components:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/SendNotificationRowDTO'
+            $ref: '#/components/schemas/SendNotificationAndCampaignViewDTO'
         size:
           type: integer
           format: int64
@@ -2000,7 +2000,7 @@ components:
         number:
           type: integer
           format: int64
-    SendNotificationRowDTO:
+    SendNotificationAndCampaignViewDTO:
       type: object
       required:
         - sendNotificationId

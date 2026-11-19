@@ -15,7 +15,7 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
-import it.gov.pagopa.pu.send.mapper.PagedSendNotificationRowDTOMapper;
+import it.gov.pagopa.pu.send.mapper.PagedSendNotificationAndCampaignViewDTOMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -83,7 +83,7 @@ class SendNotificationServiceImplTest {
   @Mock
   private DataCipherService dataCipherServiceMock;
   @Mock
-  private PagedSendNotificationRowDTOMapper pagedSendNotificationRowDTOMapperMock;
+  private PagedSendNotificationAndCampaignViewDTOMapper pagedSendNotificationAndCampaignViewDTOMapperMock;
   @Mock
   private CampaignRepository campaignRepositoryMock;
 
@@ -105,7 +105,7 @@ class SendNotificationServiceImplTest {
       sendNotificationStatusHandlerServiceMock,
       sendNotificationPaidServiceMock,
       dataCipherServiceMock,
-      pagedSendNotificationRowDTOMapperMock,
+      pagedSendNotificationAndCampaignViewDTOMapperMock,
       campaignRepositoryMock
     );
   }
@@ -720,15 +720,15 @@ class SendNotificationServiceImplTest {
     SendNotificationNoPII notification3 = podamFactory.manufacturePojo(SendNotificationNoPII.class);
     notification3.setCampaignId(campaign2.getCampaignId());
     Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(notification1, notification2, notification3), pageable, 3L);
-    PagedSendNotificationRowDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationRowDTO.class);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
 
     when(dataCipherServiceMock.hash(fiscalCode)).thenReturn(fiscalCodeHash);
     when(sendNotificationNoPIIRepositoryMock.findOrganizationSendNotificationsByFilters(filters, pageable)).thenReturn(notificationsPage);
     when(campaignRepositoryMock.findAllById(campaignMap.keySet())).thenReturn(List.of(campaign1, campaign2));
-    when(pagedSendNotificationRowDTOMapperMock.map(notificationsPage, campaignMap)).thenReturn(expectedResult);
+    when(pagedSendNotificationAndCampaignViewDTOMapperMock.map(notificationsPage, campaignMap)).thenReturn(expectedResult);
 
     // When
-    PagedSendNotificationRowDTO result = sendNotificationService.getSendNotifications(filters, fiscalCode, pageable);
+    PagedSendNotificationAndCampaignViewDTO result = sendNotificationService.getSendNotifications(filters, fiscalCode, pageable);
 
     // Then
     Assertions.assertSame(expectedResult, result);
@@ -743,14 +743,14 @@ class SendNotificationServiceImplTest {
     Pageable pageable = PageRequest.of(0, 10);
     SendNotificationNoPII notification = podamFactory.manufacturePojo(SendNotificationNoPII.class);
     Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(notification), pageable, 1L);
-    PagedSendNotificationRowDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationRowDTO.class);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
 
     when(sendNotificationNoPIIRepositoryMock.findOrganizationSendNotificationsByFilters(filters, pageable)).thenReturn(notificationsPage);
     when(campaignRepositoryMock.findAllById(Set.of(notification.getCampaignId()))).thenReturn(List.of());
-    when(pagedSendNotificationRowDTOMapperMock.map(notificationsPage, Map.of())).thenReturn(expectedResult);
+    when(pagedSendNotificationAndCampaignViewDTOMapperMock.map(notificationsPage, Map.of())).thenReturn(expectedResult);
 
     // When
-    PagedSendNotificationRowDTO result = sendNotificationService.getSendNotifications(filters, null, pageable);
+    PagedSendNotificationAndCampaignViewDTO result = sendNotificationService.getSendNotifications(filters, null, pageable);
 
     // Then
     Assertions.assertSame(expectedResult, result);
@@ -764,13 +764,13 @@ class SendNotificationServiceImplTest {
     filters.setFiscalCodeHash(null);
     Pageable pageable = PageRequest.of(0, 10);
     Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(), pageable, 0L);
-    PagedSendNotificationRowDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationRowDTO.class);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
 
     when(sendNotificationNoPIIRepositoryMock.findOrganizationSendNotificationsByFilters(filters, pageable)).thenReturn(notificationsPage);
-    when(pagedSendNotificationRowDTOMapperMock.map(notificationsPage, Map.of())).thenReturn(expectedResult);
+    when(pagedSendNotificationAndCampaignViewDTOMapperMock.map(notificationsPage, Map.of())).thenReturn(expectedResult);
 
     // When
-    PagedSendNotificationRowDTO result = sendNotificationService.getSendNotifications(filters, null, pageable);
+    PagedSendNotificationAndCampaignViewDTO result = sendNotificationService.getSendNotifications(filters, null, pageable);
 
     // Then
     Assertions.assertSame(expectedResult, result);

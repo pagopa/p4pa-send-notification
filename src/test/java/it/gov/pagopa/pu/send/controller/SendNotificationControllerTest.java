@@ -388,12 +388,12 @@ class SendNotificationControllerTest {
     Pageable pageable = PageRequest.of(0, 10);
     SendNotificationRowFiltersDTO expectedFilters = podamFactory.manufacturePojo(SendNotificationRowFiltersDTO.class);
     expectedFilters.setFiscalCodeHash(null);
-    PagedSendNotificationRowDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationRowDTO.class);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
 
     when(sendNotificationServiceMock.getSendNotifications(expectedFilters, fiscalCode, pageable)).thenReturn(expectedResult);
 
     // When
-    ResponseEntity<PagedSendNotificationRowDTO> response = sendNotificationController.getSendNotifications(expectedFilters.getOrganizationId(),
+    ResponseEntity<PagedSendNotificationAndCampaignViewDTO> response = sendNotificationController.getSendNotifications(expectedFilters.getOrganizationId(),
       expectedFilters.getOrgSubUnitCodes(), expectedFilters.getFetchAll(), expectedFilters.getIun(), fiscalCode,
       expectedFilters.getDateFrom(), expectedFilters.getDateTo(), expectedFilters.getStatuses(), pageable);
 

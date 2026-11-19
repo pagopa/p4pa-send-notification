@@ -129,7 +129,7 @@ public class SendNotificationController implements NotificationApi {
   }
 
   @Override
-  public ResponseEntity<PagedSendNotificationRowDTO> getSendNotifications(Long organizationId, List<String> orgSubUnitCodes, Boolean fetchAll, String iun, String fiscalCode, LocalDate dateFrom, LocalDate dateTo, List<NotificationStatus> statuses, Pageable pageable) {
+  public ResponseEntity<PagedSendNotificationAndCampaignViewDTO> getSendNotifications(Long organizationId, List<String> orgSubUnitCodes, Boolean fetchAll, String iun, String fiscalCode, LocalDate dateFrom, LocalDate dateTo, List<NotificationStatus> statuses, Pageable pageable) {
     log.info("Retrieving send notifications having organizationId {}", organizationId);
     return ResponseEntity.ok(sendNotificationService.getSendNotifications(
       SendNotificationRowFiltersDTO.builder()

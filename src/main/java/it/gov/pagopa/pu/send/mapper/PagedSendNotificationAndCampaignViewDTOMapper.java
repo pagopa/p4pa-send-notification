@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.send.dto.generated.PagedSendNotificationRowDTO;
-import it.gov.pagopa.pu.send.dto.generated.SendNotificationRowDTO;
+import it.gov.pagopa.pu.send.dto.generated.PagedSendNotificationAndCampaignViewDTO;
+import it.gov.pagopa.pu.send.dto.generated.SendNotificationAndCampaignViewDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import org.springframework.data.domain.Page;
@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class PagedSendNotificationRowDTOMapper {
+public class PagedSendNotificationAndCampaignViewDTOMapper {
 
-  public PagedSendNotificationRowDTO map(Page<SendNotificationNoPII> sendNotificationsPage, Map<String, Campaign> campaignMap) {
-    return PagedSendNotificationRowDTO.builder()
+  public PagedSendNotificationAndCampaignViewDTO map(Page<SendNotificationNoPII> sendNotificationsPage, Map<String, Campaign> campaignMap) {
+    return PagedSendNotificationAndCampaignViewDTO.builder()
       .content(sendNotificationsPage.getContent().stream()
         .map(sendNotification -> map(sendNotification, campaignMap.get(sendNotification.getCampaignId())))
         .toList())
@@ -26,12 +26,12 @@ public class PagedSendNotificationRowDTOMapper {
       .build();
   }
 
-  private SendNotificationRowDTO map(SendNotificationNoPII sendNotification, Campaign campaign) {
+  private SendNotificationAndCampaignViewDTO map(SendNotificationNoPII sendNotification, Campaign campaign) {
     if (campaign == null) {
       throw new IllegalStateException("[CAMPAIGN_NOT_FOUND] No Campaign found with campaignId %s for sendNotification with Id %s"
         .formatted(sendNotification.getCampaignId(), sendNotification.getSendNotificationId()));
     }
-    return SendNotificationRowDTO.builder()
+    return SendNotificationAndCampaignViewDTO.builder()
       .sendNotificationId(sendNotification.getSendNotificationId())
       .organizationId(sendNotification.getOrganizationId())
       .orgSubUnitCode(sendNotification.getOrgSubUnitCode())

@@ -1,7 +1,7 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.pu.send.dto.generated.PagedSendNotificationRowDTO;
-import it.gov.pagopa.pu.send.dto.generated.SendNotificationRowDTO;
+import it.gov.pagopa.pu.send.dto.generated.PagedSendNotificationAndCampaignViewDTO;
+import it.gov.pagopa.pu.send.dto.generated.SendNotificationAndCampaignViewDTO;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.util.TestUtils;
@@ -15,10 +15,10 @@ import uk.co.jemos.podam.api.PodamFactory;
 import java.util.List;
 import java.util.Map;
 
-class PagedSendNotificationRowDTOMapperTest {
+class PagedSendNotificationAndCampaignViewDTOMapperTest {
   private final PodamFactory podamFactory = TestUtils.getPodamFactory();
 
-  private final PagedSendNotificationRowDTOMapper mapper = new PagedSendNotificationRowDTOMapper();
+  private final PagedSendNotificationAndCampaignViewDTOMapper mapper = new PagedSendNotificationAndCampaignViewDTOMapper();
 
   @Test
   void whenMapThenOk() {
@@ -28,7 +28,7 @@ class PagedSendNotificationRowDTOMapperTest {
     Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(notification), PageRequest.of(1, 1), 5L);
 
     // When
-    PagedSendNotificationRowDTO result = mapper.map(notificationsPage, Map.of(notification.getCampaignId(), campaign));
+    PagedSendNotificationAndCampaignViewDTO result = mapper.map(notificationsPage, Map.of(notification.getCampaignId(), campaign));
 
     // Then
     TestUtils.checkNotNullFields(result);
@@ -37,7 +37,7 @@ class PagedSendNotificationRowDTOMapperTest {
     Assertions.assertEquals(5L, result.getTotalElements());
     Assertions.assertEquals(1L, result.getNumber());
     Assertions.assertEquals(1, result.getContent().size());
-    SendNotificationRowDTO item = result.getContent().getFirst();
+    SendNotificationAndCampaignViewDTO item = result.getContent().getFirst();
     TestUtils.checkNotNullFields(item);
     Assertions.assertEquals(notification.getSendNotificationId(), item.getSendNotificationId());
     Assertions.assertEquals(notification.getOrganizationId(), item.getOrganizationId());

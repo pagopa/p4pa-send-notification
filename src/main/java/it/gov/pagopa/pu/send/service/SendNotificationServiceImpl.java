@@ -17,7 +17,7 @@ import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
-import it.gov.pagopa.pu.send.mapper.PagedSendNotificationRowDTOMapper;
+import it.gov.pagopa.pu.send.mapper.PagedSendNotificationAndCampaignViewDTOMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
 import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
@@ -68,7 +68,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   private final SendNotificationStatusHandlerService sendNotificationStatusHandlerService;
   private final SendNotificationPaidService sendNotificationPaidService;
   private final DataCipherService dataCipherService;
-  private final PagedSendNotificationRowDTOMapper pagedSendNotificationRowDTOMapper;
+  private final PagedSendNotificationAndCampaignViewDTOMapper pagedSendNotificationAndCampaignViewDTOMapper;
   private final CampaignRepository campaignRepository;
 
   public SendNotificationServiceImpl(
@@ -85,7 +85,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     SendNotificationStatusHandlerService sendNotificationStatusHandlerService,
     SendNotificationPaidService sendNotificationPaidService,
     DataCipherService dataCipherService,
-    PagedSendNotificationRowDTOMapper pagedSendNotificationRowDTOMapper,
+    PagedSendNotificationAndCampaignViewDTOMapper pagedSendNotificationAndCampaignViewDTOMapper,
     CampaignRepository campaignRepository
   ) {
     this.fileShareBaseUrl = fileShareBaseUrl;
@@ -101,7 +101,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     this.sendNotificationStatusHandlerService = sendNotificationStatusHandlerService;
     this.sendNotificationPaidService = sendNotificationPaidService;
     this.dataCipherService = dataCipherService;
-    this.pagedSendNotificationRowDTOMapper = pagedSendNotificationRowDTOMapper;
+    this.pagedSendNotificationAndCampaignViewDTOMapper = pagedSendNotificationAndCampaignViewDTOMapper;
     this.campaignRepository = campaignRepository;
   }
 
@@ -239,7 +239,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
   }
 
   @Override
-  public PagedSendNotificationRowDTO getSendNotifications(SendNotificationRowFiltersDTO filters, String fiscalCode, Pageable pageable) {
+  public PagedSendNotificationAndCampaignViewDTO getSendNotifications(SendNotificationRowFiltersDTO filters, String fiscalCode, Pageable pageable) {
     if(StringUtils.isNotBlank(fiscalCode)){
       filters.setFiscalCodeHash(dataCipherService.hash(fiscalCode));
     }
@@ -252,7 +252,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     Map<String, Campaign> campaignMap = CollectionUtils.isEmpty(campaignIds)? Map.of() : campaignRepository.findAllById(campaignIds).stream()
         .collect(Collectors.toMap(Campaign::getCampaignId, Function.identity()));
 
-    return pagedSendNotificationRowDTOMapper.map(sendNotificationsPage, campaignMap);
+    return pagedSendNotificationAndCampaignViewDTOMapper.map(sendNotificationsPage, campaignMap);
   }
 
   private void updateFileStatusAndDownloadDate(String sendNotificationId, DocumentDTO doc, LoadFileRequest loadFileRequest, Long organizationId) {

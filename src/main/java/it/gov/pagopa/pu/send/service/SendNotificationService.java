@@ -23,5 +23,5 @@ public interface SendNotificationService {
   void downloadSendLegalFact(String sendNotificationId, LegalFactCategoryDTO category, String fileName, InputStream inputStream);
   List<LegalFactDTO> getLegalFacts(String sendNotificationId);
   SendNotificationNoPII findSendNotification(String sendNotificationId);
-  PagedSendNotificationRowDTO getSendNotifications(SendNotificationRowFiltersDTO filters, String fiscalCode, Pageable pageable);
+  PagedSendNotificationAndCampaignViewDTO getSendNotifications(SendNotificationRowFiltersDTO filters, String fiscalCode, Pageable pageable);
 }
