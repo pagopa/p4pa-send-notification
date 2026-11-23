@@ -137,7 +137,7 @@ class SendNotificationServiceImplTest {
     when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
     doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
     when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
-    when(sendNotificationPaidServiceMock.handlePaidNotification(sendNotification.getNoPII())).thenReturn(sendNotification.getNoPII());
+    when(sendNotificationPaidServiceMock.handlePaidNotification(sendNotification.getNoPII())).thenReturn(Optional.ofNullable(sendNotification.getNoPII()));
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
       localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
@@ -222,7 +222,7 @@ class SendNotificationServiceImplTest {
     when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
       .thenReturn(sendNotification);
     when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
-    when(sendNotificationPaidServiceMock.handlePaidNotification(sendNotification.getNoPII())).thenReturn(sendNotification.getNoPII());
+    when(sendNotificationPaidServiceMock.handlePaidNotification(sendNotification.getNoPII())).thenReturn(Optional.ofNullable(sendNotification.getNoPII()));
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
       localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
