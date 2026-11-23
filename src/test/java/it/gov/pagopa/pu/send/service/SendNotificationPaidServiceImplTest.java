@@ -7,20 +7,19 @@ import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO;
 import it.gov.pagopa.send.dto.generated.TimelineElementCategoryV27DTO;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationPaidServiceImplTest {
@@ -31,47 +30,25 @@ class SendNotificationPaidServiceImplTest {
   @InjectMocks
   private SendNotificationPaidServiceImpl sendNotificationPaidService;
 
-  @Test
-  void givenNotAllPaymentsPaidWhenHandlePaidNotificationThenDoNothing() {
-    // Given
-    PuPayment paidPayment = PuPayment.builder()
-      .status(InstallmentStatus.PAID)
-      .build();
-
-    PuPayment notPaidPayment = PuPayment.builder()
-      .status(null)
-      .build();
-
-    SendNotificationNoPII notification = createNotification(List.of(paidPayment, notPaidPayment), null);
-
-    // When
-    SendNotificationNoPII result = sendNotificationPaidService.handlePaidNotification(notification);
-
-    // Then
-    assertSame(notification, result);
-    assertNull(result.getHistory());
-
-    verify(sendNotificationStreamEventServiceMock, never())
-      .notifySendNotificationStreamEvents(Mockito.any(), Mockito.anyList());
+  @AfterEach
+  void tearDown() {
+    verifyNoMoreInteractions(sendNotificationStreamEventServiceMock);
   }
 
   @Test
-  void givenNoPaymentsWhenHandlePaidNotificationThenDoNothing() {
+  void givenNoPaymentsWhenHandlePaidNotificationThenReturnEmpty() {
     // Given
     SendNotificationNoPII notification = createNotification(List.of(), null);
 
     // When
-    SendNotificationNoPII result = sendNotificationPaidService.handlePaidNotification(notification);
+    Optional<SendNotificationNoPII> result = sendNotificationPaidService.handlePaidNotification(notification);
 
     // Then
-    assertSame(notification, result);
-
-    verify(sendNotificationStreamEventServiceMock, never())
-      .notifySendNotificationStreamEvents(Mockito.any(), Mockito.anyList());
+    assertTrue(result.isEmpty());
   }
 
   @Test
-  void givenAllPaymentsPaidAndPuPaidHistoryAlreadyExistsWhenHandlePaidNotificationThenDoNothing() {
+  void givenAllPaymentsPaidAndPuPaidHistoryAlreadyExistsWhenHandlePaidNotificationThenReturnEmpty() {
     // Given
     PuPayment paidPayment1 = PuPayment.builder()
       .status(InstallmentStatus.PAID)
@@ -89,96 +66,89 @@ class SendNotificationPaidServiceImplTest {
     SendNotificationNoPII notification = createNotification(List.of(paidPayment1, paidPayment2), new ArrayList<>(List.of(existingPuPaidEvent)));
 
     // When
-    SendNotificationNoPII result = sendNotificationPaidService.handlePaidNotification(notification);
+    Optional<SendNotificationNoPII> result = sendNotificationPaidService.handlePaidNotification(notification);
 
     // Then
-    assertSame(notification, result);
-    assertEquals(1, result.getHistory().size());
-    assertSame(existingPuPaidEvent, result.getHistory().getFirst());
-
-    verify(sendNotificationStreamEventServiceMock, never())
-      .notifySendNotificationStreamEvents(Mockito.any(), Mockito.anyList());
+    assertTrue(result.isEmpty());
   }
 
   @Test
-  void givenAllPaymentsPaidAndNullHistoryWhenHandlePaidNotificationThenNotifyAndAppendPuPaidEvent() {
+  void givenOnePaymentPaidAndNullHistoryWhenHandlePaidNotificationThenNotifyAndAppendPuPaidEvent() {
     // Given
     PuPayment paidPayment1 = PuPayment.builder()
       .status(InstallmentStatus.PAID)
       .build();
 
     PuPayment paidPayment2 = PuPayment.builder()
-      .status(InstallmentStatus.PAID)
+      .status(null)
       .build();
 
     SendNotificationNoPII notification = createNotification(List.of(paidPayment1, paidPayment2), null);
 
+    doNothing()
+      .when(sendNotificationStreamEventServiceMock)
+      .notifySendNotificationStreamEvents(
+        notification, List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.PU_PAID, TimelineElementCategoryV27DTO.PU_PAYMENT))
+      );
+
     // When
-    SendNotificationNoPII result = sendNotificationPaidService.handlePaidNotification(notification);
+    Optional<SendNotificationNoPII> result = sendNotificationPaidService.handlePaidNotification(notification);
 
     // Then
-    assertSame(notification, result);
+    assertFalse(result.isEmpty());
 
-    assertNotNull(result.getHistory());
-    assertEquals(1, result.getHistory().size());
+    SendNotificationNoPII resultNotification = result.get();
 
-    StreamEventSummaryDTO addedEvent = result.getHistory().getFirst();
+    assertSame(notification, resultNotification);
+    assertNotNull(resultNotification.getHistory());
+    assertEquals(1, resultNotification.getHistory().size());
+
+    StreamEventSummaryDTO addedEvent = resultNotification.getHistory().getFirst();
 
     assertEquals(NotificationStatusV26DTO.PU_PAID, addedEvent.getNewNotificationStatus());
     assertEquals(TimelineElementCategoryV27DTO.PU_PAYMENT, addedEvent.getTimelineElementCategory());
-
-    @SuppressWarnings("unchecked")
-    ArgumentCaptor<List<StreamEventSummaryDTO>> eventsCaptor = ArgumentCaptor.forClass(List.class);
-
-    verify(sendNotificationStreamEventServiceMock)
-      .notifySendNotificationStreamEvents(Mockito.same(notification), eventsCaptor.capture());
-
-    List<StreamEventSummaryDTO> notifiedEvents = eventsCaptor.getValue();
-
-    assertEquals(1, notifiedEvents.size());
-    assertSame(addedEvent, notifiedEvents.getFirst());
   }
 
   @Test
-  void givenAllPaymentsPaidAndHistoryWithoutPuPaidWhenHandlePaidNotificationThenAppendEventAsLast() {
+  void givenOnePaymentPaidAndHistoryWithoutPuPaidWhenHandlePaidNotificationThenAppendPuPaidEvent() {
     // Given
-    PuPayment paidPayment = PuPayment.builder()
+    PuPayment paidPayment1 = PuPayment.builder()
       .status(InstallmentStatus.PAID)
+      .build();
+
+    PuPayment paidPayment2 = PuPayment.builder()
+      .status(null)
       .build();
 
     StreamEventSummaryDTO existingEvent = new StreamEventSummaryDTO();
 
     existingEvent.setNewNotificationStatus(NotificationStatusV26DTO.ACCEPTED);
 
-    SendNotificationNoPII notification = createNotification(List.of(paidPayment), new ArrayList<>(List.of(existingEvent)));
+    SendNotificationNoPII notification = createNotification(List.of(paidPayment1, paidPayment2), new ArrayList<>(List.of(existingEvent)));
+
+    doNothing()
+      .when(sendNotificationStreamEventServiceMock)
+      .notifySendNotificationStreamEvents(
+        notification, List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.PU_PAID, TimelineElementCategoryV27DTO.PU_PAYMENT))
+      );
 
     // When
-    SendNotificationNoPII result = sendNotificationPaidService.handlePaidNotification(notification);
+    Optional<SendNotificationNoPII> result = sendNotificationPaidService.handlePaidNotification(notification);
 
     // Then
-    assertSame(notification, result);
-    assertEquals(2, result.getHistory().size());
+    assertFalse(result.isEmpty());
 
-    assertSame(existingEvent, result.getHistory().get(0));
+    SendNotificationNoPII resultNotification = result.get();
 
-    StreamEventSummaryDTO addedEvent = result.getHistory().get(1);
+    assertSame(notification, resultNotification);
+    assertEquals(2, resultNotification.getHistory().size());
+
+    assertSame(existingEvent, resultNotification.getHistory().get(0));
+
+    StreamEventSummaryDTO addedEvent = resultNotification.getHistory().get(1);
 
     assertEquals(NotificationStatusV26DTO.PU_PAID, addedEvent.getNewNotificationStatus());
     assertEquals(TimelineElementCategoryV27DTO.PU_PAYMENT, addedEvent.getTimelineElementCategory());
-
-    verify(sendNotificationStreamEventServiceMock)
-      .notifySendNotificationStreamEvents(
-        Mockito.same(notification),
-        Mockito.argThat(events ->
-          events.size() == 1
-            && NotificationStatusV26DTO.PU_PAID.equals(
-            events.getFirst().getNewNotificationStatus()
-          )
-            && TimelineElementCategoryV27DTO.PU_PAYMENT.equals(
-            events.getFirst().getTimelineElementCategory()
-          )
-        )
-      );
   }
 
   private SendNotificationNoPII createNotification(List<PuPayment> payments, List<StreamEventSummaryDTO> history) {

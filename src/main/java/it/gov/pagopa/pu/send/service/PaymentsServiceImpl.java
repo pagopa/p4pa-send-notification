@@ -26,8 +26,8 @@ public class PaymentsServiceImpl implements PaymentsService {
     SendNotificationNoPII notification = sendNotificationNoPIIRepository.updatePaymentStatusByOrganizationIdAndNav(organizationId, nav, InstallmentStatus.PAID)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with orgId %s and nav %s".formatted(organizationId, nav)));
 
-    notification = sendNotificationPaidService.handlePaidNotification(notification);
-
-    return sendNotificationDTOMapper.mapToSendNotificationDTO(notification);
+    return sendNotificationPaidService.handlePaidNotification(notification)
+      .map(sendNotificationDTOMapper::mapToSendNotificationDTO)
+      .orElse(null);
   }
 }
