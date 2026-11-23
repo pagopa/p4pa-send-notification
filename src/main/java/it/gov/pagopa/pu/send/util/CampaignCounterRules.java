@@ -89,7 +89,10 @@ public class CampaignCounterRules {
 
     Map.entry(Counters.Fields.completed, CounterRule.builder()
       .activationConditions(
-        List.of(new StreamEventSummaryDTO(NotificationStatusV26DTO.EFFECTIVE_DATE, null))
+        List.of(
+          new StreamEventSummaryDTO(NotificationStatusV26DTO.VIEWED, null),
+          new StreamEventSummaryDTO(NotificationStatusV26DTO.EFFECTIVE_DATE, null)
+        )
       )
       .build()
     ),
@@ -126,8 +129,7 @@ public class CampaignCounterRules {
       .activationConditions(List.of(
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.PROBABLE_SCHEDULING_ANALOG_DATE),
         new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SCHEDULE_ANALOG_WORKFLOW),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_COURTESY_MESSAGE),
-        new StreamEventSummaryDTO(NotificationStatusV26DTO.VIEWED, TimelineElementCategoryV27DTO.NOTIFICATION_VIEWED)
+        new StreamEventSummaryDTO(NotificationStatusV26DTO.DELIVERING, TimelineElementCategoryV27DTO.SEND_COURTESY_MESSAGE)
       ))
       // if it's not completed via courtesy message, the notification moves to a digital or analog domicile
       .deactivatingCounters(withTerminalCounters(Counters.Fields.digitalCompletionDigitalDomicile, Counters.Fields.analogicCompletion))
