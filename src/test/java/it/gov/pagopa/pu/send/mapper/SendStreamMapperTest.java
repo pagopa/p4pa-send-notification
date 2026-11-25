@@ -1,9 +1,9 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.send.dto.generated.StreamMetadataResponseV28DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendStreamDTO;
 import it.gov.pagopa.pu.send.model.SendStream;
 import it.gov.pagopa.pu.send.util.TestUtils;
+import it.gov.pagopa.send.dto.generated.StreamMetadataResponseV28DTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +16,7 @@ class SendStreamMapperTest {
   public static final StreamMetadataResponseV28DTO.EventTypeEnum EVENT_TYPE_ENUM = StreamMetadataResponseV28DTO.EventTypeEnum.STATUS;
   public static final String TITLE = "title";
   public static final String LAST_EVENT_ID = "lastEventId";
+  public static final String ORG_SUB_UNIT_CODE = "orgSubUnitCode";
   private final SendStreamMapper sendStreamMapper = new SendStreamMapper();
 
   @Test
@@ -54,10 +55,11 @@ class SendStreamMapperTest {
         .title(TITLE)
         .eventType(EVENT_TYPE_ENUM.getValue())
         .organizationId(ORGANIZATION_ID)
+        .orgSubUnitCode(ORG_SUB_UNIT_CODE)
         .build();
     //When
     SendStream actualResponse =
-      sendStreamMapper.mapToSendStream(streamMetadataResponse, ORGANIZATION_ID);
+      sendStreamMapper.mapToSendStream(streamMetadataResponse, ORGANIZATION_ID, ORG_SUB_UNIT_CODE);
     //Then
     Assertions.assertEquals(expectedResponse, actualResponse);
     TestUtils.checkNotNullFields(actualResponse, "lastEventId", "creationDate", "updateDate", "updateOperatorExternalId", "updateTraceId");
@@ -73,6 +75,7 @@ class SendStreamMapperTest {
         .organizationId(ORGANIZATION_ID)
         .eventType(EVENT_TYPE_ENUM.getValue())
         .lastEventId(LAST_EVENT_ID)
+        .orgSubUnitCode(ORG_SUB_UNIT_CODE)
         .build();
     SendStreamDTO expectedResponse =
       SendStreamDTO.builder()
@@ -81,6 +84,7 @@ class SendStreamMapperTest {
         .organizationId(ORGANIZATION_ID)
         .eventType(EVENT_TYPE_ENUM.getValue())
         .lastEventId(LAST_EVENT_ID)
+        .orgSubUnitCode(ORG_SUB_UNIT_CODE)
         .build();
 
     //When

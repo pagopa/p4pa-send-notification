@@ -4,6 +4,8 @@ import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.pdndservices.PdndService;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.send.dto.generated.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -33,6 +35,7 @@ class SendServiceTest {
 
   private final String accessToken = "ACCESSTOKEN";
   private final String voucherToken = "VOUCHERTOKEN";
+  private final String subUnitCode = "subUnitCode";
 
   @BeforeEach
   void init() {
@@ -54,14 +57,14 @@ class SendServiceTest {
     List<PreLoadRequestDTO> request = List.of();
     List<PreLoadResponseDTO> expectedResult = List.of();
 
-    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
         .thenReturn(organizationApiKeys);
-    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, subUnitCode, accessToken)).thenReturn(voucherToken);
     when(clientMock.preloadFiles(Mockito.same(request), Mockito.same(organizationApiKeys.getApiKey()), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
-    List<PreLoadResponseDTO> result = service.preloadFiles(request, organizationId, accessToken);
+    List<PreLoadResponseDTO> result = service.preloadFiles(request, organizationId, subUnitCode, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);
@@ -77,14 +80,14 @@ class SendServiceTest {
     NewNotificationRequestV25DTO request = new NewNotificationRequestV25DTO();
     NewNotificationResponseDTO expectedResult = new NewNotificationResponseDTO();
 
-    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
       .thenReturn(organizationApiKeys);
-    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, subUnitCode, accessToken)).thenReturn(voucherToken);
     when(clientMock.deliveryNotification(Mockito.same(request), Mockito.same(organizationApiKeys.getApiKey()), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
-    NewNotificationResponseDTO result = service.deliveryNotification(request, organizationId, accessToken);
+    NewNotificationResponseDTO result = service.deliveryNotification(request, organizationId, subUnitCode, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);
@@ -100,14 +103,14 @@ class SendServiceTest {
     String notificationRequestId = "NOTIFICATION_ID";
     NewNotificationRequestStatusResponseV25DTO expectedResult = new NewNotificationRequestStatusResponseV25DTO();
 
-    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
       .thenReturn(organizationApiKeys);
-    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, subUnitCode, accessToken)).thenReturn(voucherToken);
     when(clientMock.notificationStatus(Mockito.same(notificationRequestId), Mockito.same(organizationApiKeys.getApiKey()), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
-    NewNotificationRequestStatusResponseV25DTO result = service.notificationStatus(notificationRequestId, organizationId, accessToken);
+    NewNotificationRequestStatusResponseV25DTO result = service.notificationStatus(notificationRequestId, organizationId, subUnitCode, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);
@@ -124,14 +127,14 @@ class SendServiceTest {
     String nav = "NAV";
     NotificationPriceResponseV23DTO expectedResult = new NotificationPriceResponseV23DTO();
 
-    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
       .thenReturn(organizationApiKeys);
-    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, subUnitCode, accessToken)).thenReturn(voucherToken);
     when(clientMock.retrieveNotificationPrice(Mockito.same(paTaxId), Mockito.same(nav), Mockito.same(organizationApiKeys.getApiKey()), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
-    NotificationPriceResponseV23DTO result = service.retrieveNotificationPrice(paTaxId, nav, organizationId, accessToken);
+    NotificationPriceResponseV23DTO result = service.retrieveNotificationPrice(paTaxId, nav, organizationId, subUnitCode, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);
@@ -147,14 +150,14 @@ class SendServiceTest {
     String sendNotificationId = "SEND_NOTIFICATION_ID";
     List<LegalFactListElementV20DTO>  expectedResult = new ArrayList<>();
 
-    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
       .thenReturn(organizationApiKeys);
-    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, subUnitCode, accessToken)).thenReturn(voucherToken);
     when(clientMock.getLegalFacts(Mockito.same(sendNotificationId), Mockito.same(organizationApiKeys.getApiKey()), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
-    List<LegalFactListElementV20DTO> result = service.getLegalFacts(sendNotificationId, organizationId, accessToken);
+    List<LegalFactListElementV20DTO> result = service.getLegalFacts(sendNotificationId, organizationId, subUnitCode, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, result);
@@ -171,17 +174,33 @@ class SendServiceTest {
     String legalFactId = "LEGAL_FACT_ID";
     LegalFactDownloadMetadataResponseDTO expectedResult = new LegalFactDownloadMetadataResponseDTO();
 
-    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
       .thenReturn(organizationApiKeys);
-    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, subUnitCode, accessToken)).thenReturn(voucherToken);
     when(clientMock.getLegalFactDownloadMetadata(Mockito.same(sendNotificationId), Mockito.same(legalFactId), Mockito.same(organizationApiKeys.getApiKey()), Mockito.same(voucherToken)))
       .thenReturn(expectedResult);
 
     // When
-    LegalFactDownloadMetadataResponseDTO actualResult = service.getLegalFactDownloadMetadata(sendNotificationId, legalFactId, organizationId, accessToken);
+    LegalFactDownloadMetadataResponseDTO actualResult = service.getLegalFactDownloadMetadata(sendNotificationId, legalFactId, organizationId, subUnitCode, accessToken);
 
     // Then
     Assertions.assertSame(expectedResult, actualResult);
+  }
+
+  @Test
+  void givenMissingApiKeyWhenPreloadFilesThenThrowNotFoundException() {
+    // Given
+    long organizationId = 123L;
+
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
+      .thenReturn(null);
+
+    // When
+    NotFoundException result = Assertions.assertThrows(NotFoundException.class,
+      () -> service.preloadFiles(List.of(), organizationId, subUnitCode, accessToken));
+
+    // Then
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_SEND_API_KEY_NOT_FOUND, result.getCode());
   }
 
 }

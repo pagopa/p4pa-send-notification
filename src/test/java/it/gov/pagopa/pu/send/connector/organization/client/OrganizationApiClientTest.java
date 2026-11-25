@@ -3,10 +3,7 @@ package it.gov.pagopa.pu.send.connector.organization.client;
 import it.gov.pagopa.pu.organization.client.generated.OrganizationApi;
 import it.gov.pagopa.pu.organization.client.generated.OrganizationEntityControllerApi;
 import it.gov.pagopa.pu.organization.client.generated.OrganizationSearchControllerApi;
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
+import it.gov.pagopa.pu.organization.dto.generated.*;
 import it.gov.pagopa.pu.send.connector.organization.config.OrganizationApisHolder;
 import it.gov.pagopa.pu.send.exception.common.RestInvokeNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -17,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -46,6 +44,7 @@ class OrganizationApiClientTest {
   void givenValidRequestWhenGetOrganizationApiKeyThenVerifyResponse() {
     // Given
     Long organizationId = 1L;
+    String subUnitCode = "subUnitCode";
     String accessToken = "accessToken";
     OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
     organizationApiKeys.setApiKey("apiKey");
@@ -53,11 +52,11 @@ class OrganizationApiClientTest {
 
     when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
+    when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode))
       .thenReturn(organizationApiKeys);
 
     // When
-    OrganizationApiKeys result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
+    OrganizationApiKeys result = organizationApiClient.getOrganizationApiKey(organizationId, subUnitCode, accessToken);
 
     // Then
     assertSame(organizationApiKeys, result);
@@ -67,15 +66,16 @@ class OrganizationApiClientTest {
   void givenNotExistentOrganizationIdWhenGetOrganizationApiKeyThenReturnNull() {
     // Given
     Long organizationId = 1L;
+    String subUnitCode = "subUnitCode";
     String accessToken = "accessToken";
 
     when(apisHolder.getOrganizationApi(accessToken))
       .thenReturn(organizationApiMock);
-    when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null))
+    when(organizationApiMock.getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode))
       .thenThrow(new RestInvokeNotFoundException("APPNAME", HttpStatus.NOT_FOUND, "ERROR", "ERRORCODE", "ERRORMESSAGE", "BODY"));
 
     // When
-    OrganizationApiKeys result = organizationApiClient.getOrganizationApiKey(organizationId, accessToken);
+    OrganizationApiKeys result = organizationApiClient.getOrganizationApiKey(organizationId, subUnitCode, accessToken);
 
     // Then
     assertNull(result);
@@ -195,5 +195,25 @@ class OrganizationApiClientTest {
 
     // Then
     Assertions.assertNull(result);
+  }
+
+  @Test
+  void whenGetOrganizationApiKeysThenOk() {
+    // Given
+    String accessToken = "accessToken";
+    Long organizationId = 1L;
+    String subUnitCode = "subUnitCode";
+    List<OrganizationApiKey> expectedResult = List.of(new OrganizationApiKey(OrganizationApiKeyType.SEND, null));
+
+    when(apisHolder.getOrganizationApi(accessToken))
+      .thenReturn(organizationApiMock);
+    when(organizationApiMock.getOrganizationApiKeys(organizationId, subUnitCode))
+      .thenReturn(expectedResult);
+
+    // When
+    List<OrganizationApiKey> result = organizationApiClient.getOrganizationApiKeys(organizationId, subUnitCode, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
   }
 }

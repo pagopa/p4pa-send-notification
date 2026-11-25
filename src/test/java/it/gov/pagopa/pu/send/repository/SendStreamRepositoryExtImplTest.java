@@ -25,17 +25,18 @@ class SendStreamRepositoryExtImplTest extends BaseMongoRepositoryTest {
   void givenIdAndOrganizationIdThenVerify() {
     //GIVEN
     Long organizationId = 1L;
+    String orgSubUnitCode = "orgSubUnitCode";
 
     List<SendStream> expectedResponse = new ArrayList<>();
     expectedResponse.add(SendStream.builder().build());
 
-    Query query = Query.query(Criteria.where(SendStream.Fields.organizationId)
-      .is(organizationId));
+    Query query = Query.query(Criteria.where(SendStream.Fields.organizationId).is(organizationId)
+      .and(SendStream.Fields.orgSubUnitCode).is(orgSubUnitCode));
     Mockito.when(mongoTemplateMock.find(query, SendStream.class))
       .thenReturn(expectedResponse);
 
     //WHEN
-    List<SendStream> actualResult = repository.findByOrganizationId(organizationId);
+    List<SendStream> actualResult = repository.findByOrganizationIdAndOrgSubUnitCode(organizationId, orgSubUnitCode);
 
     //THEN
     Assertions.assertEquals(expectedResponse, actualResult);

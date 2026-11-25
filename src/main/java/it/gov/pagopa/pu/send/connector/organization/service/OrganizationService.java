@@ -1,15 +1,18 @@
 package it.gov.pagopa.pu.send.connector.organization.service;
 
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKey;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface OrganizationService {
 
-  OrganizationApiKeys getOrganizationApiKey(Long organizationId, String accessToken);
+  OrganizationApiKeys getOrganizationApiKey(Long organizationId, String subUnitCode, String accessToken);
   Organization getOrganization(Long organizationId, String accessToken);
   Optional<Organization> findByOrgFiscalCodeAndSegregationCode(String orgFiscalCode, String segregationCode, String accessToken);
   Optional<OrganizationStationDTO> findOrganizationStation(Long organizationId, String stationId, String accessToken);
+  List<OrganizationApiKey> getOrganizationApiKeys(Long organizationId, String subUnitCode, String accessToken);
 }

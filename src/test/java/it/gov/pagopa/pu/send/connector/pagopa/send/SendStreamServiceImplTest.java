@@ -5,6 +5,8 @@ import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.pagopa.send.client.SendClient;
 import it.gov.pagopa.pu.send.connector.pdndservices.PdndService;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import it.gov.pagopa.send.dto.generated.ProgressResponseElementV28DTO;
 import it.gov.pagopa.send.dto.generated.StreamCreationRequestV28DTO;
 import it.gov.pagopa.send.dto.generated.StreamListElementDTO;
@@ -19,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +38,7 @@ class SendStreamServiceImplTest {
 
   private final String accessToken = "ACCESSTOKEN";
   private final String voucherToken = "VOUCHERTOKEN";
+  private final String subUnitCode = "subUnitCode";
 
   @BeforeEach
   void init() {
@@ -60,13 +63,13 @@ class SendStreamServiceImplTest {
     StreamCreationRequestV28DTO request = new StreamCreationRequestV28DTO();
     StreamMetadataResponseV28DTO expectedResult = new StreamMetadataResponseV28DTO();
 
-    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
       .thenReturn(organizationApiKeys);
-    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, subUnitCode, accessToken)).thenReturn(voucherToken);
     when(clientMock.createStream(request, organizationApiKeys.getApiKey(), voucherToken)).thenReturn(expectedResult);
 
     //When
-    StreamMetadataResponseV28DTO result = service.createStream(request, organizationId, accessToken);
+    StreamMetadataResponseV28DTO result = service.createStream(request, organizationId, subUnitCode, accessToken);
 
     //Then
     assertSame(expectedResult, result);
@@ -81,13 +84,13 @@ class SendStreamServiceImplTest {
 
     List<StreamListElementDTO> expectedResult = List.of();
 
-    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
       .thenReturn(organizationApiKeys);
-    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, subUnitCode, accessToken)).thenReturn(voucherToken);
     when(clientMock.getStreams(organizationApiKeys.getApiKey(), voucherToken)).thenReturn(expectedResult);
 
     //When
-    List<StreamListElementDTO> result = service.getStreams(organizationId, accessToken);
+    List<StreamListElementDTO> result = service.getStreams(organizationId, subUnitCode, accessToken);
 
     //Then
     assertSame(expectedResult, result);
@@ -104,16 +107,33 @@ class SendStreamServiceImplTest {
 
     List<ProgressResponseElementV28DTO> expectedResult = List.of();
 
-    when(organizationServiceMock.getOrganizationApiKey(organizationId, accessToken))
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
       .thenReturn(organizationApiKeys);
-    when(pdndServiceMock.resolvePdndAccessToken(organizationId, accessToken)).thenReturn(voucherToken);
+    when(pdndServiceMock.resolvePdndAccessToken(organizationId, subUnitCode, accessToken)).thenReturn(voucherToken);
     when(clientMock.getStreamEvents(streamId, null, organizationApiKeys.getApiKey(), voucherToken))
       .thenReturn(expectedResult);
 
     //When
-    List<ProgressResponseElementV28DTO> result = service.getStreamEvents(streamId, null,organizationId, accessToken);
+    List<ProgressResponseElementV28DTO> result = service.getStreamEvents(streamId, null,organizationId, subUnitCode, accessToken);
 
     //Then
     assertSame(expectedResult, result);
   }
+
+  @Test
+  void givenMissingApiKeyWhenGetStreamsThenThrowNotFoundException() {
+    // Given
+    long organizationId = 123L;
+
+    when(organizationServiceMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
+      .thenReturn(null);
+
+    // When
+    NotFoundException result = assertThrows(NotFoundException.class,
+      () -> service.getStreams(organizationId, subUnitCode, accessToken));
+
+    // Then
+    assertEquals(ErrorCodeConstants.ERROR_CODE_SEND_API_KEY_NOT_FOUND, result.getCode());
+  }
+
 }

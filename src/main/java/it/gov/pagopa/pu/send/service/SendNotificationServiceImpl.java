@@ -4,6 +4,7 @@ import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
@@ -127,6 +128,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
         );
       }
     }
+    validateSendApiKey(organizationId, subUnitCode, accessToken);
 
     Campaign campaign = sendNotificationStatusHandlerService.handleNewSendNotification(createNotificationRequest);
     SendNotification sendNotification = sendNotificationPIIRepository.save(
@@ -196,7 +198,8 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     return sendNotificationDTOMapper.mapToSendNotificationDTO(findSendNotificationByNotificationRequestId(notificationRequestId));
   }
 
-  private SendNotificationNoPII findSendNotificationByNotificationRequestId(String notificationRequestId) {
+  @Override
+  public SendNotificationNoPII findSendNotificationByNotificationRequestId(String notificationRequestId) {
     return sendNotificationNoPIIRepository.findByNotificationRequestId(notificationRequestId)
       .orElseThrow(() -> new SendNotificationNotFoundException("Notification not found with notificationRequestId: " + notificationRequestId));
   }
@@ -330,5 +333,16 @@ public class SendNotificationServiceImpl implements SendNotificationService {
         "Error while deleting file %s for sendNotificationId %s.", filePath.getFileName(), sendNotificationId
       ));
     }
+  }
+
+  private void validateSendApiKey(Long organizationId, String subUnitCode, String accessToken) {
+    boolean hasSendApiKey = organizationService.getOrganizationApiKeys(organizationId, subUnitCode, accessToken)
+      .stream()
+      .anyMatch(apiKey -> OrganizationApiKeyType.SEND.equals(apiKey.getKeyType()));
+    if (hasSendApiKey) {
+      return;
+    }
+    throw new NotFoundException(ErrorCodeConstants.ERROR_CODE_SEND_API_KEY_NOT_FOUND,
+      String.format("SEND api key not found for organizationId %s and subUnitCode %s", organizationId, subUnitCode));
   }
 }

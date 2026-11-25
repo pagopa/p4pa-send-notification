@@ -3,7 +3,9 @@ package it.gov.pagopa.pu.send.connector.pdndservices;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
 import it.gov.pagopa.pu.pdndservices.dto.generated.PdndAuthData;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.util.Constants;
+import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +32,7 @@ class PdndServiceImplTest {
   private PdndServiceImpl pdndService;
 
   private static final String ACCESS_TOKEN = "AccessToken";
+  private static final String SUB_UNIT_CODE = "subUnitCode";
   private PdndAuthData pdndAuthData;
 
   @BeforeEach
@@ -56,11 +58,11 @@ class PdndServiceImplTest {
     pdndAuthData.setExpiration(offsetDateTime.plusHours(1));
     try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
       offsetDateTimeMock.when(() -> OffsetDateTime.now(Constants.ZONEID)).thenReturn(offsetDateTime);
-      when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN, organizationId, null)).thenReturn(pdndAuthData);
+      when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN, organizationId, SUB_UNIT_CODE)).thenReturn(pdndAuthData);
       when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
 
       // When
-      String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
+      String result = pdndService.resolvePdndAccessToken(organizationId, SUB_UNIT_CODE, ACCESS_TOKEN);
 
       // Then
       assertEquals(ACCESS_TOKEN, result);
@@ -77,16 +79,16 @@ class PdndServiceImplTest {
     pdndAuthData.setExpiration(offsetDateTime.minusHours(1));
     try(MockedStatic<OffsetDateTime> offsetDateTimeMock = Mockito.mockStatic(OffsetDateTime.class)) {
       offsetDateTimeMock.when(() -> OffsetDateTime.now(Constants.ZONEID)).thenReturn(offsetDateTime);
-      when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN, organizationId, null)).thenReturn(pdndAuthData);
-      doNothing().when(pdndCacheServiceMock).evictPdndAccessToken(ACCESS_TOKEN, organizationId, null);
+      when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN, organizationId, SUB_UNIT_CODE)).thenReturn(pdndAuthData);
+      doNothing().when(pdndCacheServiceMock).evictPdndAccessToken(ACCESS_TOKEN, organizationId, SUB_UNIT_CODE);
       when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
 
       // When
-      String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
+      String result = pdndService.resolvePdndAccessToken(organizationId, SUB_UNIT_CODE, ACCESS_TOKEN);
 
       // Then
       assertEquals(ACCESS_TOKEN, result);
-      verify(pdndCacheServiceMock, times(2)).getPdndAccessToken(ACCESS_TOKEN, organizationId, null);
+      verify(pdndCacheServiceMock, times(2)).getPdndAccessToken(ACCESS_TOKEN, organizationId, SUB_UNIT_CODE);
     }
   }
 
@@ -99,9 +101,26 @@ class PdndServiceImplTest {
     when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
 
     // When
-    String result = pdndService.resolvePdndAccessToken(organizationId, ACCESS_TOKEN);
+    String result = pdndService.resolvePdndAccessToken(organizationId, SUB_UNIT_CODE, ACCESS_TOKEN);
 
     // Then
     assertNull(result);
+  }
+
+  @Test
+  void givenMissingPdndVoucherWhenResolvePdndAccessTokenThenThrowNotFoundException() {
+    // Given
+    Long organizationId = 1L;
+    Organization organization = new Organization();
+    organization.setPdndEnabled(true);
+    when(organizationServiceMock.getOrganization(organizationId, ACCESS_TOKEN)).thenReturn(organization);
+    when(pdndCacheServiceMock.getPdndAccessToken(ACCESS_TOKEN, organizationId, SUB_UNIT_CODE)).thenReturn(null);
+
+    // When
+    NotFoundException result = assertThrows(NotFoundException.class,
+      () -> pdndService.resolvePdndAccessToken(organizationId, SUB_UNIT_CODE, ACCESS_TOKEN));
+
+    // Then
+    assertEquals(ErrorCodeConstants.ERROR_CODE_PDND_VOUCHER_NOT_FOUND, result.getCode());
   }
 }

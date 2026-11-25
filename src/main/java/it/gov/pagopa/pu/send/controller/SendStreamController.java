@@ -1,15 +1,16 @@
 package it.gov.pagopa.pu.send.controller;
 
-import it.gov.pagopa.send.dto.generated.ProgressResponseElementV28DTO;
 import it.gov.pagopa.pu.send.controller.generated.StreamsApi;
 import it.gov.pagopa.pu.send.dto.generated.SendStreamDTO;
 import it.gov.pagopa.pu.send.service.SendFacadeService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
-import java.util.List;
+import it.gov.pagopa.send.dto.generated.ProgressResponseElementV28DTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -22,11 +23,11 @@ public class SendStreamController implements StreamsApi {
   }
 
   @Override
-  public ResponseEntity<List<ProgressResponseElementV28DTO>> getStreamEvents(Long organizationId, String streamId) {
-    log.info("Retrieve stream events for organization with id {} from stream with id {}", organizationId, streamId);
+  public ResponseEntity<List<ProgressResponseElementV28DTO>> getStreamEvents(Long organizationId, String subUnitCode, String streamId) {
+    log.info("Retrieve stream events for organization with id {} and subUnitCode {} from stream with id {}", organizationId, subUnitCode, streamId);
     String accessToken = SecurityUtils.getAccessToken();
     return new ResponseEntity<>(
-      sendFacadeService.getStreamEvents(streamId, organizationId, accessToken),
+      sendFacadeService.getStreamEvents(streamId, organizationId, subUnitCode, accessToken),
       HttpStatus.OK);
   }
 

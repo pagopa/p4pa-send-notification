@@ -5,10 +5,10 @@ import it.gov.pagopa.send.dto.generated.*;
 import java.util.List;
 
 public interface SendService {
-  List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, Long organizationId, String accessToken);
-  NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV25DTO newNotificationRequestV25DTO, Long organizationId, String accessToken);
-  NewNotificationRequestStatusResponseV25DTO notificationStatus(String notificationRequestId, Long organizationId, String accessToken);
-  NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, Long organizationId, String accessToken);
-  List<LegalFactListElementV20DTO> getLegalFacts(String iun, Long organizationId, String accessToken);
-  LegalFactDownloadMetadataResponseDTO getLegalFactDownloadMetadata(String iun, String legalFactId, Long organizationId, String accessToken);
+  List<PreLoadResponseDTO> preloadFiles(List<PreLoadRequestDTO> preLoadRequestDTO, Long organizationId, String subUnitCode, String accessToken);
+  NewNotificationResponseDTO deliveryNotification(NewNotificationRequestV25DTO newNotificationRequestV25DTO, Long organizationId, String subUnitCode, String accessToken);
+  NewNotificationRequestStatusResponseV25DTO notificationStatus(String notificationRequestId, Long organizationId, String subUnitCode, String accessToken);
+  NotificationPriceResponseV23DTO retrieveNotificationPrice(String paTaxId, String noticeCode, Long organizationId, String subUnitCode, String accessToken);
+  List<LegalFactListElementV20DTO> getLegalFacts(String iun, Long organizationId, String subUnitCode, String accessToken);
+  LegalFactDownloadMetadataResponseDTO getLegalFactDownloadMetadata(String iun, String legalFactId, Long organizationId, String subUnitCode, String accessToken);
 }
