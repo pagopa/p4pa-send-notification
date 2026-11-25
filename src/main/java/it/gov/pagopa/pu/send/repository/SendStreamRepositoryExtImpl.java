@@ -24,9 +24,9 @@ public class SendStreamRepositoryExtImpl implements SendStreamRepositoryExt {
   }
 
   @Override
-  public List<SendStream> findByOrganizationId(Long organizationId) {
-    Query query = Query.query(Criteria.where(Fields.organizationId)
-      .is(organizationId));
+  public List<SendStream> findByOrganizationIdAndOrgSubUnitCode(Long organizationId, String orgSubUnitCode) {
+    Query query = Query.query(Criteria.where(Fields.organizationId).is(organizationId)
+      .and(Fields.orgSubUnitCode).is(orgSubUnitCode));
     return mongoTemplate.find(query, SendStream.class);
   }
 

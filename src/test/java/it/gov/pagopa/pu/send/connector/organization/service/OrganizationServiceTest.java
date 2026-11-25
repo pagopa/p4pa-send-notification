@@ -1,8 +1,6 @@
 package it.gov.pagopa.pu.send.connector.organization.service;
 
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
+import it.gov.pagopa.pu.organization.dto.generated.*;
 import it.gov.pagopa.pu.send.connector.organization.client.OrganizationApiClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -13,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -39,15 +38,16 @@ class OrganizationServiceTest {
   void whenGetOrganizationApiKeyThenInvokeClient(){
     // Given
     Long organizationId = 1L;
+    String subUnitCode = "subUnitCode";
     String accessToken = "accessToken";
     OrganizationApiKeys organizationApiKeys = new OrganizationApiKeys();
     organizationApiKeys.setApiKey("apiKey");
 
-    Mockito.when(organizationApiClientMock.getOrganizationApiKey(organizationId, accessToken))
+    Mockito.when(organizationApiClientMock.getOrganizationApiKey(organizationId, subUnitCode, accessToken))
       .thenReturn(organizationApiKeys);
 
     // When
-    OrganizationApiKeys result = service.getOrganizationApiKey(organizationId, accessToken);
+    OrganizationApiKeys result = service.getOrganizationApiKey(organizationId, subUnitCode, accessToken);
 
     // Then
     Assertions.assertSame(organizationApiKeys, result);
@@ -108,4 +108,21 @@ class OrganizationServiceTest {
     assertSame(expectedResult, result.get());
   }
 
+  @Test
+  void whenGetOrganizationApiKeysThenInvokeClient(){
+    // Given
+    Long organizationId = 1L;
+    String subUnitCode = "subUnitCode";
+    String accessToken = "accessToken";
+    List<OrganizationApiKey> expectedResult = List.of(new OrganizationApiKey(OrganizationApiKeyType.SEND, null));
+
+    Mockito.when(organizationApiClientMock.getOrganizationApiKeys(organizationId, subUnitCode, accessToken))
+      .thenReturn(expectedResult);
+
+    // When
+    List<OrganizationApiKey> result = service.getOrganizationApiKeys(organizationId, subUnitCode, accessToken);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
 }

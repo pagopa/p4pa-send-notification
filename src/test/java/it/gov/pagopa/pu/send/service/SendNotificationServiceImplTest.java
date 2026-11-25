@@ -5,6 +5,8 @@ import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
 import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKey;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
@@ -136,6 +138,8 @@ class SendNotificationServiceImplTest {
     when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
     when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
     doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+    when(organizationServiceMock.getOrganizationApiKeys(request.getOrganizationId(), null, accessToken))
+      .thenReturn(List.of(new OrganizationApiKey(OrganizationApiKeyType.SEND, null)));
     when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
     when(sendNotificationPaidServiceMock.handlePaidNotification(sendNotification.getNoPII())).thenReturn(Optional.ofNullable(sendNotification.getNoPII()));
 
@@ -217,6 +221,8 @@ class SendNotificationServiceImplTest {
 
     when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
       .thenReturn(subUnit);
+    when(organizationServiceMock.getOrganizationApiKeys(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+      .thenReturn(List.of(new OrganizationApiKey(OrganizationApiKeyType.SEND, null)));
 
     when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
     when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
@@ -482,6 +488,34 @@ class SendNotificationServiceImplTest {
 
     // When, Then
     Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId));
+  }
+
+  @Test
+  void givenExistentNotificationWhenFindSendNotificationByNotificationRequestIdThenReturnIt(){
+    // Given
+    String notificationRequestId = "NOTIFICATION_REQUEST_ID";
+    SendNotificationNoPII expectedResult = new SendNotificationNoPII();
+
+    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+      .thenReturn(Optional.of(expectedResult));
+
+    // When
+    SendNotificationNoPII result = sendNotificationService.findSendNotificationByNotificationRequestId(notificationRequestId);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNotExistentNotificationWhenFindSendNotificationThenThrowFoundException(){
+    // Given
+    String notificationRequestId = "NOTIFICATION_REQUEST_ID";
+
+    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+      .thenReturn(Optional.empty());
+
+    // When, Then
+    Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotificationByNotificationRequestId(notificationRequestId));
   }
 
   @Test
@@ -775,5 +809,34 @@ class SendNotificationServiceImplTest {
     // Then
     Assertions.assertSame(expectedResult, result);
     Assertions.assertNull(filters.getFiscalCodeHash());
+  }
+
+  @Test
+  void givenNoSendApiKeyWhenCreateSendNotificationThenThrowNotFoundException() {
+    // Given
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    request.setTaxonomyCode("0101");
+    request.setSubUnitCode("subUnitCode");
+    String accessToken = "accessToken";
+    Organization org = new Organization();
+    OrgSubUnit subUnit = new OrgSubUnit();
+
+    when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+      .thenReturn(org);
+    doNothing().when(taxonomyValidatorServiceMock)
+      .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+    when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+      .thenReturn(subUnit);
+    when(organizationServiceMock.getOrganizationApiKeys(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+      .thenReturn(List.of(new OrganizationApiKey(OrganizationApiKeyType.IO, true)));
+
+    // When
+    NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () ->
+      sendNotificationService.createSendNotification(request, accessToken)
+    );
+
+    // Then
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_SEND_API_KEY_NOT_FOUND, exception.getCode());
   }
 }

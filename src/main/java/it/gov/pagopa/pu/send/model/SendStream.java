@@ -27,4 +27,5 @@ public class SendStream extends BaseEntity {
   @NotNull
   private String eventType;
   private String lastEventId;
+  private String orgSubUnitCode;
 }
