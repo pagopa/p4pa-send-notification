@@ -1,14 +1,12 @@
 package it.gov.pagopa.pu.send.connector.organization.client;
 
-import it.gov.pagopa.pu.organization.dto.generated.Organization;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeys;
-import it.gov.pagopa.pu.organization.dto.generated.OrganizationStationDTO;
+import it.gov.pagopa.pu.organization.dto.generated.*;
 import it.gov.pagopa.pu.send.connector.organization.config.OrganizationApisHolder;
 import it.gov.pagopa.pu.send.exception.common.RestInvokeNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -21,12 +19,12 @@ public class OrganizationApiClient {
     this.organizationApisHolder = organizationApisHolder;
   }
 
-  public OrganizationApiKeys getOrganizationApiKey(Long organizationId, String accessToken) {
+  public OrganizationApiKeys getOrganizationApiKey(Long organizationId, String subUnitCode, String accessToken) {
     try{
       return organizationApisHolder.getOrganizationApi(accessToken)
-        .getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, null);
+        .getOrganizationApiKey(organizationId, OrganizationApiKeyType.SEND, subUnitCode);
     } catch (RestInvokeNotFoundException e){
-      log.info("Cannot find organization api key having organizationId {}", organizationId);
+      log.info("Cannot find organization api key having organizationId {} and subUnitCode {}", organizationId, subUnitCode);
       return null;
     }
   }
@@ -59,6 +57,11 @@ public class OrganizationApiClient {
       log.info("Cannot find OrganizationStation having organizationId {} and StationId {}", organizationId, stationId);
       return null;
     }
+  }
+
+  public List<OrganizationApiKey> getOrganizationApiKeys(Long organizationId, String subUnitCode, String accessToken) {
+    return organizationApisHolder.getOrganizationApi(accessToken)
+      .getOrganizationApiKeys(organizationId, subUnitCode);
   }
 
 }

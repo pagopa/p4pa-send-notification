@@ -1,10 +1,10 @@
 package it.gov.pagopa.pu.send.service;
 
+import it.gov.pagopa.pu.send.dto.generated.*;
+import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.send.dto.generated.NotificationPriceResponseV23DTO;
 import it.gov.pagopa.send.dto.generated.ProgressResponseElementV28DTO;
-import it.gov.pagopa.pu.send.dto.generated.*;
-import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,7 +24,7 @@ public interface SendFacadeService {
    * @return List&lt;ProgressResponseElementV28DTO&gt;
    * @throws NotFoundException if doesn't exist at leat one stream
    */
-  List<ProgressResponseElementV28DTO> getStreamEvents(String streamId, Long organizationId, String accessToken);
+  List<ProgressResponseElementV28DTO> getStreamEvents(String streamId, Long organizationId, String subUnitCode, String accessToken);
   void updateStreamLastEventId(String streamId, String lastEventId);
   SendStreamDTO getStream(String streamId, String accessToken);
   List<LegalFactListElementDTO> retrieveLegalFacts(String sendNotificationId, String accessToken);

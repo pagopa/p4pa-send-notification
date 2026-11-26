@@ -1,8 +1,8 @@
 package it.gov.pagopa.pu.send.mapper;
 
-import it.gov.pagopa.send.dto.generated.StreamMetadataResponseV28DTO;
 import it.gov.pagopa.pu.send.dto.generated.SendStreamDTO;
 import it.gov.pagopa.pu.send.model.SendStream;
+import it.gov.pagopa.send.dto.generated.StreamMetadataResponseV28DTO;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -18,10 +18,11 @@ public class SendStreamMapper {
     return streamMetadataResponseV28DTO;
   }
 
-  public SendStream mapToSendStream(StreamMetadataResponseV28DTO streamMetadataResponseV28DTO, Long organizationId) {
+  public SendStream mapToSendStream(StreamMetadataResponseV28DTO streamMetadataResponseV28DTO, Long organizationId, String orgSubUnitCode) {
     SendStream sendStream = new SendStream();
     sendStream.setStreamId(streamMetadataResponseV28DTO.getStreamId().toString());
     sendStream.setOrganizationId(organizationId);
+    sendStream.setOrgSubUnitCode(orgSubUnitCode);
     sendStream.setEventType(streamMetadataResponseV28DTO.getEventType().getValue());
     sendStream.setTitle(streamMetadataResponseV28DTO.getTitle());
     return sendStream;
@@ -34,6 +35,7 @@ public class SendStreamMapper {
     sendStreamDTO.setTitle(sendStream.getTitle());
     sendStreamDTO.setEventType(sendStream.getEventType());
     sendStreamDTO.setLastEventId(sendStream.getLastEventId());
+    sendStreamDTO.setOrgSubUnitCode(sendStream.getOrgSubUnitCode());
     return sendStreamDTO;
   }
 

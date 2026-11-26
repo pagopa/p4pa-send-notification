@@ -80,6 +80,10 @@ class SendNotificationStatusHandlerServiceImplTest {
     List<StreamEventSummaryDTO> oldHistory = Collections.emptyList();
     List<StreamEventSummaryDTO> eventToPush = List.of(new StreamEventSummaryDTO());
     List<StreamEventSummaryDTO> newHistory = List.of(new StreamEventSummaryDTO());
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId).campaignId(campaignId).history(oldHistory).build();
+    SendNotificationNoPII updatedNotification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId).campaignId(campaignId).history(newHistory).build();
 
     Set<String> oldCounters = Set.of(Counters.Fields.accepted);
     Set<String> newCounters = Set.of(Counters.Fields.accepted, Counters.Fields.delivered);
@@ -90,13 +94,13 @@ class SendNotificationStatusHandlerServiceImplTest {
       .build();
 
     when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush))
-      .thenReturn(newHistory);
-    when(campaignCountersServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
-    when(campaignCountersServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
+      .thenReturn(updatedNotification);
+    when(campaignCountersServiceMock.calculateActiveCounters(notification)).thenReturn(oldCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(updatedNotification)).thenReturn(newCounters);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-      sendNotificationId, campaignId, oldHistory, eventToPush));
+      notification, eventToPush));
   }
 
   @Test
@@ -107,6 +111,10 @@ class SendNotificationStatusHandlerServiceImplTest {
     List<StreamEventSummaryDTO> oldHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
     List<StreamEventSummaryDTO> eventToPush = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
     List<StreamEventSummaryDTO> newHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId).campaignId(campaignId).history(oldHistory).build();
+    SendNotificationNoPII updatedNotification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId).campaignId(campaignId).history(newHistory).build();
 
     Set<String> oldCounters = Set.of(Counters.Fields.delivered, Counters.Fields.analogicCompletion);
     Set<String> newCounters = Set.of();
@@ -116,13 +124,13 @@ class SendNotificationStatusHandlerServiceImplTest {
       .decrFields(Set.of(Counters.Fields.delivered, Counters.Fields.analogicCompletion))
       .build();
 
-    when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush)).thenReturn(newHistory);
-    when(campaignCountersServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
-    when(campaignCountersServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
+    when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush)).thenReturn(updatedNotification);
+    when(campaignCountersServiceMock.calculateActiveCounters(notification)).thenReturn(oldCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(updatedNotification)).thenReturn(newCounters);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-      sendNotificationId, campaignId, oldHistory, eventToPush));
+      notification, eventToPush));
   }
 
   @Test
@@ -133,6 +141,10 @@ class SendNotificationStatusHandlerServiceImplTest {
     List<StreamEventSummaryDTO> oldHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
     List<StreamEventSummaryDTO> eventToPush = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
     List<StreamEventSummaryDTO> newHistory = List.of(podamFactory.manufacturePojo(StreamEventSummaryDTO.class));
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId).campaignId(campaignId).history(oldHistory).build();
+    SendNotificationNoPII updatedNotification = SendNotificationNoPII.builder()
+      .sendNotificationId(sendNotificationId).campaignId(campaignId).history(newHistory).build();
 
     Set<String> oldCounters = Set.of(Counters.Fields.analogicCompletion);
     Set<String> newCounters = Set.of(Counters.Fields.analogicCompletion);
@@ -142,13 +154,13 @@ class SendNotificationStatusHandlerServiceImplTest {
       .decrFields(Set.of())
       .build();
 
-    when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush)).thenReturn(newHistory);
-    when(campaignCountersServiceMock.calculateActiveCounters(oldHistory)).thenReturn(oldCounters);
-    when(campaignCountersServiceMock.calculateActiveCounters(newHistory)).thenReturn(newCounters);
+    when(sendNotificationNoPIIRepositoryMock.pushStreamEventsHistory(sendNotificationId, eventToPush)).thenReturn(updatedNotification);
+    when(campaignCountersServiceMock.calculateActiveCounters(notification)).thenReturn(oldCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(updatedNotification)).thenReturn(newCounters);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
     Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleSendNotificationStatusUpdate(
-      sendNotificationId, campaignId, oldHistory, eventToPush));
+      notification, eventToPush));
   }
 
   @Test
@@ -156,6 +168,8 @@ class SendNotificationStatusHandlerServiceImplTest {
     String campaignId = "campaignId";
     LocalDate notificationCreationDate = LocalDate.of(2026, Month.JUNE, 30);
     List<StreamEventSummaryDTO> history = new ArrayList<>();
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .campaignId(campaignId).creationDate(notificationCreationDate.atStartOfDay()).history(history).build();
 
     Counters counters = new Counters();
     counters.setTotal(1L);
@@ -165,8 +179,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
     doNothing().when(campaignServiceMock).deleteCampaignById(campaignId);
 
-    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
-      campaignId, notificationCreationDate, history));
+    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(notification));
   }
 
   @Test
@@ -175,6 +188,8 @@ class SendNotificationStatusHandlerServiceImplTest {
     LocalDate notificationCreationDate = LocalDate.of(2026, Month.JUNE, 30);
     LocalDate endDate = LocalDate.of(2026, Month.JULY, 5);
     List<StreamEventSummaryDTO> history = new ArrayList<>();
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .campaignId(campaignId).creationDate(notificationCreationDate.atStartOfDay()).history(history).build();
 
     Counters counters = new Counters();
     counters.setTotal(2L);
@@ -184,7 +199,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     campaign.setEndDate(endDate);
 
     Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.analogicCompletion));
-    when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(notification)).thenReturn(calculatedCounters);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.analogicCompletion, Counters.Fields.total))
@@ -200,8 +215,7 @@ class SendNotificationStatusHandlerServiceImplTest {
       .thenReturn(sendNotification);
     doNothing().when(campaignServiceMock).updateStartDate(campaignId, newStartCreationDate.toLocalDate());
 
-    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
-      campaignId, notificationCreationDate, history));
+    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(notification));
   }
 
   @Test
@@ -210,6 +224,8 @@ class SendNotificationStatusHandlerServiceImplTest {
     LocalDate notificationCreationDate = LocalDate.of(2026, Month.JUNE, 30);
     LocalDate startDate = LocalDate.of(2026, Month.JUNE, 1);
     List<StreamEventSummaryDTO> history = new ArrayList<>();
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .campaignId(campaignId).creationDate(notificationCreationDate.atStartOfDay()).history(history).build();
 
     Counters counters = new Counters();
     counters.setTotal(2L);
@@ -219,7 +235,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     campaign.setEndDate(notificationCreationDate);
 
     Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompletionCourtesyMessage));
-    when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
+    when(campaignCountersServiceMock.calculateActiveCounters(notification)).thenReturn(calculatedCounters);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.delivered, Counters.Fields.digitalCompletionCourtesyMessage, Counters.Fields.total))
@@ -235,8 +251,7 @@ class SendNotificationStatusHandlerServiceImplTest {
       .thenReturn(sendNotification);
     doNothing().when(campaignServiceMock).updateEndDate(campaignId, newEndCreationDate.toLocalDate());
 
-    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
-      campaignId, notificationCreationDate, history));
+    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(notification));
   }
 
   @Test
@@ -246,6 +261,8 @@ class SendNotificationStatusHandlerServiceImplTest {
     LocalDate startDate = LocalDate.of(2026, Month.JUNE, 1);
     LocalDate endDate = LocalDate.of(2026, Month.JUNE, 30);
     List<StreamEventSummaryDTO> history = new ArrayList<>();
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .campaignId(campaignId).creationDate(notificationCreationDate.atStartOfDay()).history(history).build();
 
     Counters counters = new Counters();
     counters.setTotal(2L);
@@ -254,8 +271,8 @@ class SendNotificationStatusHandlerServiceImplTest {
     campaign.setStartDate(startDate);
     campaign.setEndDate(endDate);
 
-    Set<String> calculatedCounters = new HashSet<>(Set.of(Counters.Fields.accepted));
-    when(campaignCountersServiceMock.calculateActiveCounters(history)).thenReturn(calculatedCounters);
+    Set<String> calculatedCounters = Set.of(Counters.Fields.accepted);
+    when(campaignCountersServiceMock.calculateActiveCounters(notification)).thenReturn(calculatedCounters);
 
     NotificationStatusChangeDTO notificationStatusChangeDTO = NotificationStatusChangeDTO.builder()
       .decrFields(Set.of(Counters.Fields.accepted, Counters.Fields.total))
@@ -264,8 +281,7 @@ class SendNotificationStatusHandlerServiceImplTest {
     when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
-    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
-      campaignId, notificationCreationDate, history));
+    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(notification));
   }
 
   @Test
@@ -275,6 +291,8 @@ class SendNotificationStatusHandlerServiceImplTest {
     LocalDate startDate = LocalDate.of(2026, Month.JUNE, 1);
     LocalDate endDate = LocalDate.of(2026, Month.JUNE, 30);
     List<StreamEventSummaryDTO> history = null;
+    SendNotificationNoPII notification = SendNotificationNoPII.builder()
+      .campaignId(campaignId).creationDate(notificationCreationDate.atStartOfDay()).history(history).build();
 
     Counters counters = new Counters();
     counters.setTotal(2L);
@@ -288,9 +306,9 @@ class SendNotificationStatusHandlerServiceImplTest {
       .build();
 
     when(campaignServiceMock.getCampaignById(campaignId)).thenReturn(campaign);
+    when(campaignCountersServiceMock.calculateActiveCounters(notification)).thenReturn(Set.of());
     doNothing().when(campaignServiceMock).handleStatusChange(campaignId, notificationStatusChangeDTO);
 
-    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(
-      campaignId, notificationCreationDate, history));
+    Assertions.assertDoesNotThrow(() -> sendNotificationStatusHandlerService.handleDeletedSendNotification(notification));
   }
 }

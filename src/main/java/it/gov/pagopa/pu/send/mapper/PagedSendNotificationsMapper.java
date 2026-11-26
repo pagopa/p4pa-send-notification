@@ -14,7 +14,7 @@ public class PagedSendNotificationsMapper {
       .size((long) sendNotificationsPage.getSize())
       .totalPages((long) sendNotificationsPage.getTotalPages())
       .totalElements(sendNotificationsPage.getTotalElements())
-      .number(sendNotificationsPage.getNumber())
+      .number((long) sendNotificationsPage.getNumber())
       .build();
   }
 }

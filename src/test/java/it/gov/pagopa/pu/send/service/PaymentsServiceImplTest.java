@@ -55,7 +55,7 @@ class PaymentsServiceImplTest {
       .thenReturn(Optional.of(notification));
 
     when(sendNotificationPaidServiceMock.handlePaidNotification(notification))
-      .thenReturn(handledNotification);
+      .thenReturn(Optional.of(handledNotification));
 
     when(sendNotificationDTOMapperMock.mapToSendNotificationDTO(handledNotification))
       .thenReturn(expectedResult);

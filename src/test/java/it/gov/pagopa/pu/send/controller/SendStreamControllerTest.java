@@ -44,13 +44,14 @@ class SendStreamControllerTest {
   void givenOrganizationIdAndStreamIdWhenGetStreamEventsThenOk(){
     Long organizationId = 1L;
     String streamId = "STREAMID";
+    String subUnitCode = "subUnitCode";
     List<ProgressResponseElementV28DTO> expectedResult = List.of();
 
-    when(sendFacadeServiceMock.getStreamEvents(streamId, organizationId, accessToken))
+    when(sendFacadeServiceMock.getStreamEvents(streamId, organizationId, subUnitCode, accessToken))
       .thenReturn(expectedResult);
 
     ResponseEntity<List<ProgressResponseElementV28DTO>> response = sendStreamController
-      .getStreamEvents(organizationId, streamId);
+      .getStreamEvents(organizationId, subUnitCode, streamId);
 
     Assertions.assertNotNull(response);
     Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());

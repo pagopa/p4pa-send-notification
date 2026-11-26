@@ -3,8 +3,6 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.send.config.BaseEntityListener;
-import it.gov.pagopa.send.dto.generated.NotificationRequestRefusedProblemErrorDTO;
-import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
@@ -15,13 +13,16 @@ import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII.Fields;
 import it.gov.pagopa.pu.send.util.CampaignCounterRules;
 import it.gov.pagopa.pu.send.util.DateUtils;
+import it.gov.pagopa.pu.send.util.OrgSubUnitCriteriaUtils;
+import it.gov.pagopa.send.dto.generated.NotificationRequestRefusedProblemErrorDTO;
+import it.gov.pagopa.send.dto.generated.PreLoadResponseDTO;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
-import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -29,8 +30,13 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationNoPIIRepositoryExt {
 
@@ -255,7 +261,9 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   private AggregationExpression buildIsEligibleExpression(CampaignCounterRules.CounterRule rule) {
-    AggregationExpression matchesActivation = buildAnyMatchExpression(rule.getActivationConditions());
+    AggregationExpression matchesActivation = rule.getActivationConditions().isEmpty()
+      ? rule.getActivationExpressionSupplier().get()
+      : buildAnyMatchExpression(rule.getActivationConditions());
 
     if (rule.getDeactivationConditions().isEmpty()) {
       return matchesActivation;
@@ -304,16 +312,15 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
   }
 
   @Override
-  public List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
+  public SendNotificationNoPII pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents) {
     Query query = new Query(Criteria.where(Fields.sendNotificationId).is(sendNotificationId));
     Update update = BaseEntityListener.setTechFieldsOnDocumentUpdate(new Update().push(Fields.history).each(streamEvents));
-    SendNotificationNoPII updatedDoc = mongoTemplate.findAndModify(
+    return mongoTemplate.findAndModify(
       query,
       update,
       FindAndModifyOptions.options().returnNew(true),
       SendNotificationNoPII.class
     );
-    return updatedDoc.getHistory();
   }
 
   @Override
@@ -375,5 +382,34 @@ public class SendNotificationNoPIIRepositoryExtImpl implements SendNotificationN
       mongoTemplate.findAndModify(query, update, FindAndModifyOptions.options().returnNew(true), SendNotificationNoPII.class);
 
     return Optional.ofNullable(updatedNotification);
+  }
+
+  @Override
+  public Page<SendNotificationNoPII> findOrganizationSendNotificationsByFilters(SendNotificationRowFiltersDTO sendNotificationRowFiltersDTO, Pageable pageable) {
+    Query query = buildOrganizationSendNotificationQuery(sendNotificationRowFiltersDTO);
+    long count = mongoTemplate.count(query, SendNotificationNoPII.class);
+    query.with(pageable);
+    List<SendNotificationNoPII> sendNotifications = mongoTemplate.find(query, SendNotificationNoPII.class);
+    return new PageImpl<>(sendNotifications, pageable, count);
+  }
+
+  private static Query buildOrganizationSendNotificationQuery(SendNotificationRowFiltersDTO filters) {
+    Query query = Query.query(Criteria.where(Fields.organizationId).is(filters.getOrganizationId()));
+    OrgSubUnitCriteriaUtils.addOrgSubUnitCriteria(query, Fields.orgSubUnitCode, filters.getOrgSubUnitCodes(), filters.getFetchAll());
+    if(StringUtils.isNotBlank(filters.getIun())){
+      query.addCriteria(Criteria.where(Fields.iun).is(filters.getIun()));
+    }
+    if(filters.getDateFrom()!=null && filters.getDateTo()!=null){
+      query.addCriteria(Criteria.where(BaseEntity.Fields.creationDate)
+        .gte(filters.getDateFrom().atStartOfDay())
+        .lt(LocalDateTime.of(filters.getDateTo(), LocalTime.MAX.truncatedTo(java.time.temporal.ChronoUnit.MILLIS))));
+    }
+    if(!CollectionUtils.isEmpty(filters.getStatuses())){
+      query.addCriteria(Criteria.where(Fields.status).in(filters.getStatuses()));
+    }
+    if(filters.getFiscalCodeHash() != null && filters.getFiscalCodeHash().length > 0){
+      query.addCriteria(Criteria.where(FIELD_RECIPIENT_FISCAL_CODE_HASH).is(filters.getFiscalCodeHash()));
+    }
+    return query;
   }
 }

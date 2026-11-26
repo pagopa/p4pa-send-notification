@@ -2,30 +2,33 @@ package it.gov.pagopa.pu.send.service;
 
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.common.pii.citizen.model.PersonalData;
+import it.gov.pagopa.pu.common.pii.citizen.service.DataCipherService;
 import it.gov.pagopa.pu.organization.dto.generated.OrgSubUnit;
 import it.gov.pagopa.pu.organization.dto.generated.Organization;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKey;
+import it.gov.pagopa.pu.organization.dto.generated.OrganizationApiKeyType;
 import it.gov.pagopa.pu.send.connector.organization.service.OrgSubUnitService;
 import it.gov.pagopa.pu.send.connector.organization.service.OrganizationService;
-import it.gov.pagopa.pu.send.model.Campaign;
-import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import it.gov.pagopa.pu.send.connector.workflow.service.WorkflowService;
-import it.gov.pagopa.pu.send.dto.DocumentDTO;
-import it.gov.pagopa.pu.send.dto.PuPayment;
-import it.gov.pagopa.pu.send.dto.PuRecipientNoPIIDTO;
-import it.gov.pagopa.pu.send.dto.SendNotification;
+import it.gov.pagopa.pu.send.dto.*;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.FileStatus;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.exception.*;
 import it.gov.pagopa.pu.send.exception.common.NotFoundException;
 import it.gov.pagopa.pu.send.mapper.CreateNotificationRequest2SendNotificationMapper;
+import it.gov.pagopa.pu.send.mapper.PagedSendNotificationAndCampaignViewDTOMapper;
 import it.gov.pagopa.pu.send.mapper.SendNotification2SendNotificationDTOMapper;
+import it.gov.pagopa.pu.send.model.Campaign;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
+import it.gov.pagopa.pu.send.repository.CampaignRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationNoPIIRepository;
 import it.gov.pagopa.pu.send.repository.SendNotificationPIIRepository;
 import it.gov.pagopa.pu.send.util.Constants;
 import it.gov.pagopa.pu.send.util.ErrorCodeConstants;
+import it.gov.pagopa.pu.send.util.TestUtils;
 import it.gov.pagopa.pu.workflowhub.dto.generated.WorkflowCreatedDTO;
+import it.gov.pagopa.send.dto.generated.LegalFactCategoryDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,11 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import uk.co.jemos.podam.api.PodamFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,17 +52,14 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class SendNotificationServiceImplTest {
+  public static final PodamFactory podamFactory = TestUtils.getPodamFactory();
   @Mock
   private SendNotificationNoPIIRepository sendNotificationNoPIIRepositoryMock;
   @Mock
@@ -77,6 +82,12 @@ class SendNotificationServiceImplTest {
   private SendNotificationStatusHandlerService sendNotificationStatusHandlerServiceMock;
   @Mock
   private SendNotificationPaidService sendNotificationPaidServiceMock;
+  @Mock
+  private DataCipherService dataCipherServiceMock;
+  @Mock
+  private PagedSendNotificationAndCampaignViewDTOMapper pagedSendNotificationAndCampaignViewDTOMapperMock;
+  @Mock
+  private CampaignRepository campaignRepositoryMock;
 
   @InjectMocks
   private SendNotificationServiceImpl sendNotificationService;
@@ -94,7 +105,10 @@ class SendNotificationServiceImplTest {
       organizationServiceMock,
       orgSubUnitServiceMock,
       sendNotificationStatusHandlerServiceMock,
-      sendNotificationPaidServiceMock
+      sendNotificationPaidServiceMock,
+      dataCipherServiceMock,
+      pagedSendNotificationAndCampaignViewDTOMapperMock,
+      campaignRepositoryMock
     );
   }
 
@@ -124,8 +138,10 @@ class SendNotificationServiceImplTest {
     when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class))).thenReturn(sendNotification);
     when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken)).thenReturn(org);
     doNothing().when(taxonomyValidatorServiceMock).validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+    when(organizationServiceMock.getOrganizationApiKeys(request.getOrganizationId(), null, accessToken))
+      .thenReturn(List.of(new OrganizationApiKey(OrganizationApiKeyType.SEND, null)));
     when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
-    when(sendNotificationPaidServiceMock.handlePaidNotification(sendNotification.getNoPII())).thenReturn(sendNotification.getNoPII());
+    when(sendNotificationPaidServiceMock.handlePaidNotification(sendNotification.getNoPII())).thenReturn(Optional.ofNullable(sendNotification.getNoPII()));
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
       localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
@@ -205,12 +221,14 @@ class SendNotificationServiceImplTest {
 
     when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
       .thenReturn(subUnit);
+    when(organizationServiceMock.getOrganizationApiKeys(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+      .thenReturn(List.of(new OrganizationApiKey(OrganizationApiKeyType.SEND, null)));
 
     when(mapperMock.mapToModel(request, campaign.getCampaignId(), accessToken)).thenReturn(sendNotification);
     when(sendNotificationPIIRepositoryMock.save(Mockito.any(SendNotification.class)))
       .thenReturn(sendNotification);
     when(sendNotificationStatusHandlerServiceMock.handleNewSendNotification(request)).thenReturn(campaign);
-    when(sendNotificationPaidServiceMock.handlePaidNotification(sendNotification.getNoPII())).thenReturn(sendNotification.getNoPII());
+    when(sendNotificationPaidServiceMock.handlePaidNotification(sendNotification.getNoPII())).thenReturn(Optional.ofNullable(sendNotification.getNoPII()));
 
     try (MockedStatic<LocalDate> localDateMock = Mockito.mockStatic(LocalDate.class)) {
       localDateMock.when(() -> LocalDate.now(Constants.ZONEID)).thenReturn(expectedDate);
@@ -323,7 +341,7 @@ class SendNotificationServiceImplTest {
       Optional.of(notification));
     when(fileStorerServiceMock.buildRelativeSendPath(
       notification.getOrganizationId(), sendNotificationId)).thenReturn(relativePath);
-    Mockito.doNothing().when(sendNotificationStatusHandlerServiceMock).handleDeletedSendNotification(notification.getCampaignId(),notification.getCreationDate().toLocalDate(),notification.getHistory());
+    Mockito.doNothing().when(sendNotificationStatusHandlerServiceMock).handleDeletedSendNotification(notification);
     //Then
     sendNotificationService.deleteSendNotification(sendNotificationId);
     verify(sendNotificationPIIRepositoryMock).delete(notification);
@@ -470,6 +488,34 @@ class SendNotificationServiceImplTest {
 
     // When, Then
     Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotificationDTOByNotificationRequestId(notificationRequestId));
+  }
+
+  @Test
+  void givenExistentNotificationWhenFindSendNotificationByNotificationRequestIdThenReturnIt(){
+    // Given
+    String notificationRequestId = "NOTIFICATION_REQUEST_ID";
+    SendNotificationNoPII expectedResult = new SendNotificationNoPII();
+
+    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+      .thenReturn(Optional.of(expectedResult));
+
+    // When
+    SendNotificationNoPII result = sendNotificationService.findSendNotificationByNotificationRequestId(notificationRequestId);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+  }
+
+  @Test
+  void givenNotExistentNotificationWhenFindSendNotificationThenThrowFoundException(){
+    // Given
+    String notificationRequestId = "NOTIFICATION_REQUEST_ID";
+
+    when(sendNotificationNoPIIRepositoryMock.findByNotificationRequestId(notificationRequestId))
+      .thenReturn(Optional.empty());
+
+    // When, Then
+    Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotificationByNotificationRequestId(notificationRequestId));
   }
 
   @Test
@@ -689,5 +735,108 @@ class SendNotificationServiceImplTest {
     SendNotificationNotFoundException sendNotificationNotFoundException = Assertions.assertThrows(SendNotificationNotFoundException.class, () -> sendNotificationService.findSendNotification(sendNotificationId));
 
     Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_NOTIFICATION_NOT_FOUND, sendNotificationNotFoundException.getCode());
+  }
+
+  @Test
+  void whenGetSendNotificationsThenOk() {
+    // Given
+    String fiscalCode = "fiscalCode";
+    byte[] fiscalCodeHash = fiscalCode.getBytes();
+    SendNotificationRowFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationRowFiltersDTO.class);
+    Pageable pageable = PageRequest.of(0, 10);
+    Campaign campaign1 = podamFactory.manufacturePojo(Campaign.class);
+    Campaign campaign2 = podamFactory.manufacturePojo(Campaign.class);
+    Map<String,Campaign> campaignMap = Map.of(campaign1.getCampaignId(), campaign1, campaign2.getCampaignId(), campaign2);
+    SendNotificationNoPII notification1 = podamFactory.manufacturePojo(SendNotificationNoPII.class);
+    notification1.setCampaignId(campaign1.getCampaignId());
+    SendNotificationNoPII notification2 = podamFactory.manufacturePojo(SendNotificationNoPII.class);
+    notification2.setCampaignId(campaign1.getCampaignId());
+    SendNotificationNoPII notification3 = podamFactory.manufacturePojo(SendNotificationNoPII.class);
+    notification3.setCampaignId(campaign2.getCampaignId());
+    Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(notification1, notification2, notification3), pageable, 3L);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
+
+    when(dataCipherServiceMock.hash(fiscalCode)).thenReturn(fiscalCodeHash);
+    when(sendNotificationNoPIIRepositoryMock.findOrganizationSendNotificationsByFilters(filters, pageable)).thenReturn(notificationsPage);
+    when(campaignRepositoryMock.findAllById(campaignMap.keySet())).thenReturn(List.of(campaign1, campaign2));
+    when(pagedSendNotificationAndCampaignViewDTOMapperMock.map(notificationsPage, campaignMap)).thenReturn(expectedResult);
+
+    // When
+    PagedSendNotificationAndCampaignViewDTO result = sendNotificationService.getSendNotifications(filters, fiscalCode, pageable);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+    Assertions.assertArrayEquals(fiscalCodeHash, filters.getFiscalCodeHash());
+  }
+
+  @Test
+  void givenMissingCampaignWhenGetSendNotificationsThenOk() {
+    // Given
+    SendNotificationRowFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationRowFiltersDTO.class);
+    filters.setFiscalCodeHash(null);
+    Pageable pageable = PageRequest.of(0, 10);
+    SendNotificationNoPII notification = podamFactory.manufacturePojo(SendNotificationNoPII.class);
+    Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(notification), pageable, 1L);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
+
+    when(sendNotificationNoPIIRepositoryMock.findOrganizationSendNotificationsByFilters(filters, pageable)).thenReturn(notificationsPage);
+    when(campaignRepositoryMock.findAllById(Set.of(notification.getCampaignId()))).thenReturn(List.of());
+    when(pagedSendNotificationAndCampaignViewDTOMapperMock.map(notificationsPage, Map.of())).thenReturn(expectedResult);
+
+    // When
+    PagedSendNotificationAndCampaignViewDTO result = sendNotificationService.getSendNotifications(filters, null, pageable);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+    Assertions.assertNull(filters.getFiscalCodeHash());
+  }
+
+  @Test
+  void givenEmptyPageWhenGetSendNotificationsThenNoCampaignSearch() {
+    // Given
+    SendNotificationRowFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationRowFiltersDTO.class);
+    filters.setFiscalCodeHash(null);
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<SendNotificationNoPII> notificationsPage = new PageImpl<>(List.of(), pageable, 0L);
+    PagedSendNotificationAndCampaignViewDTO expectedResult = podamFactory.manufacturePojo(PagedSendNotificationAndCampaignViewDTO.class);
+
+    when(sendNotificationNoPIIRepositoryMock.findOrganizationSendNotificationsByFilters(filters, pageable)).thenReturn(notificationsPage);
+    when(pagedSendNotificationAndCampaignViewDTOMapperMock.map(notificationsPage, Map.of())).thenReturn(expectedResult);
+
+    // When
+    PagedSendNotificationAndCampaignViewDTO result = sendNotificationService.getSendNotifications(filters, null, pageable);
+
+    // Then
+    Assertions.assertSame(expectedResult, result);
+    Assertions.assertNull(filters.getFiscalCodeHash());
+  }
+
+  @Test
+  void givenNoSendApiKeyWhenCreateSendNotificationThenThrowNotFoundException() {
+    // Given
+    CreateNotificationRequest request = new CreateNotificationRequest();
+    request.setOrganizationId(1L);
+    request.setTaxonomyCode("0101");
+    request.setSubUnitCode("subUnitCode");
+    String accessToken = "accessToken";
+    Organization org = new Organization();
+    OrgSubUnit subUnit = new OrgSubUnit();
+
+    when(organizationServiceMock.getOrganization(request.getOrganizationId(), accessToken))
+      .thenReturn(org);
+    doNothing().when(taxonomyValidatorServiceMock)
+      .validateTaxonomyCode(org, request.getTaxonomyCode(), accessToken);
+    when(orgSubUnitServiceMock.getOrgSubUnitById(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+      .thenReturn(subUnit);
+    when(organizationServiceMock.getOrganizationApiKeys(request.getOrganizationId(), request.getSubUnitCode(), accessToken))
+      .thenReturn(List.of(new OrganizationApiKey(OrganizationApiKeyType.IO, true)));
+
+    // When
+    NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () ->
+      sendNotificationService.createSendNotification(request, accessToken)
+    );
+
+    // Then
+    Assertions.assertEquals(ErrorCodeConstants.ERROR_CODE_SEND_API_KEY_NOT_FOUND, exception.getCode());
   }
 }

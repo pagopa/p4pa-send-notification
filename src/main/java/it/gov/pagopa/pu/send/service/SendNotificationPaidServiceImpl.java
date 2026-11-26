@@ -1,7 +1,6 @@
 package it.gov.pagopa.pu.send.service;
 
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
-import it.gov.pagopa.pu.send.dto.PuPayment;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.model.SendNotificationNoPII;
 import it.gov.pagopa.send.dto.generated.NotificationStatusV26DTO;
@@ -21,13 +20,9 @@ public class SendNotificationPaidServiceImpl implements SendNotificationPaidServ
   private static final TimelineElementCategoryV27DTO INTERNAL_IUN_PAID_CATEGORY = TimelineElementCategoryV27DTO.PU_PAYMENT;
 
   @Override
-  public SendNotificationNoPII handlePaidNotification(SendNotificationNoPII notification) {
-    if (!areAllPaymentsPaid(notification)) {
-      return notification;
-    }
-
-    if (containsPuPaidHistory(notification)) {
-      return notification;
+  public Optional<SendNotificationNoPII> handlePaidNotification(SendNotificationNoPII notification) {
+    if (!isAnyPaymentPaid(notification) || containsPuPaidHistory(notification)) {
+      return Optional.empty();
     }
 
     StreamEventSummaryDTO puPaidEvent = buildPuPaidEvent();
@@ -36,27 +31,17 @@ public class SendNotificationPaidServiceImpl implements SendNotificationPaidServ
 
     appendHistory(notification, puPaidEvent);
 
-    return notification;
+    return Optional.of(notification);
   }
 
-  private boolean areAllPaymentsPaid(SendNotificationNoPII notification) {
-    List<PuPayment> payments = Optional
-      .ofNullable(notification.getRecipients())
+  private boolean isAnyPaymentPaid(SendNotificationNoPII notification) {
+    return Optional.ofNullable(notification.getRecipients())
       .orElseGet(Collections::emptyList)
       .stream()
       .filter(Objects::nonNull)
-      .flatMap(recipient ->
-        Optional.ofNullable(recipient.getPuPayments())
-          .orElseGet(Collections::emptyList)
-          .stream()
-      )
+      .flatMap(recipient -> Optional.ofNullable(recipient.getPuPayments()).orElseGet(Collections::emptyList).stream())
       .filter(Objects::nonNull)
-      .toList();
-
-    return !payments.isEmpty()
-      && payments.stream().allMatch(payment ->
-        InstallmentStatus.PAID.equals(payment.getStatus())
-      );
+      .anyMatch(payment -> InstallmentStatus.PAID.equals(payment.getStatus()));
   }
 
   private boolean containsPuPaidHistory(SendNotificationNoPII notification) {

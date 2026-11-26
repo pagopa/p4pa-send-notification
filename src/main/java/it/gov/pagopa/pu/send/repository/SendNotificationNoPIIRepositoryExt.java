@@ -4,6 +4,7 @@ import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.debtpositions.dto.generated.InstallmentStatus;
 import it.gov.pagopa.pu.send.dto.CampaignCountersAggregationResult;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
+import it.gov.pagopa.pu.send.dto.SendNotificationRowFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
@@ -34,8 +35,9 @@ public interface SendNotificationNoPIIRepositoryExt {
   UpdateResult addLegalFact(String sendNotificationId, LegalFactDTO legalFact);
   UpdateResult updateLegalFactStatus(String sendNotificationId, String fileName, FileStatus status);
   CampaignCountersAggregationResult calculateCampaignCounters(String campaignId);
-  List<StreamEventSummaryDTO> pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents);
+  SendNotificationNoPII pushStreamEventsHistory(String sendNotificationId, List<StreamEventSummaryDTO> streamEvents);
   Page<SendNotificationNoPII> findSendNotificationsByFilters(SendNotificationFiltersDTO sendNotificationFiltersDTO, Pageable pageable);
   List<String> findIdsOfUpdatedCampaignsByNotificationUpdateDate(OffsetDateTime latestRecalculationDate);
   Optional<SendNotificationNoPII> updatePaymentStatusByOrganizationIdAndNav(Long organizationId, String nav, InstallmentStatus status);
+  Page<SendNotificationNoPII> findOrganizationSendNotificationsByFilters(SendNotificationRowFiltersDTO sendNotificationRowFiltersDTO, Pageable pageable);
 }

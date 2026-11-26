@@ -2,6 +2,7 @@ package it.gov.pagopa.pu.send.controller;
 
 import it.gov.pagopa.pu.send.controller.generated.NotificationApi;
 import it.gov.pagopa.pu.send.dto.SendNotification;
+import it.gov.pagopa.pu.send.dto.SendNotificationRowFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.*;
 import it.gov.pagopa.pu.send.enums.NotificationStatus;
 import it.gov.pagopa.pu.send.mapper.pii.SendNotificationPIIMapper;
@@ -9,10 +10,12 @@ import it.gov.pagopa.pu.send.service.FileExpirationService;
 import it.gov.pagopa.pu.send.service.SendNotificationService;
 import it.gov.pagopa.pu.send.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -123,5 +126,21 @@ public class SendNotificationController implements NotificationApi {
   public ResponseEntity<FileExpirationResponseDTO> deleteExpiredDocuments(String sendNotificationId) {
     log.info("Deleting expired documents for send notification having sendNotificationId {}", sendNotificationId);
     return ResponseEntity.ok(fileExpirationService.deleteExpiredDocuments(sendNotificationId, SecurityUtils.getAccessToken()));
+  }
+
+  @Override
+  public ResponseEntity<PagedSendNotificationAndCampaignViewDTO> getSendNotifications(Long organizationId, List<String> orgSubUnitCodes, Boolean fetchAll, String iun, String fiscalCode, LocalDate dateFrom, LocalDate dateTo, List<NotificationStatus> statuses, Pageable pageable) {
+    log.info("Retrieving send notifications having organizationId {}", organizationId);
+    return ResponseEntity.ok(sendNotificationService.getSendNotifications(
+      SendNotificationRowFiltersDTO.builder()
+        .organizationId(organizationId)
+        .orgSubUnitCodes(orgSubUnitCodes)
+        .fetchAll(fetchAll)
+        .iun(iun)
+        .dateFrom(dateFrom)
+        .dateTo(dateTo)
+        .statuses(statuses)
+        .build(),
+      fiscalCode, pageable));
   }
 }

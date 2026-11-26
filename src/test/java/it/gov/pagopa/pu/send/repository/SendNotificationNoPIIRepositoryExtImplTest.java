@@ -3,6 +3,7 @@ package it.gov.pagopa.pu.send.repository;
 import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.pu.send.dto.CampaignCountersAggregationResult;
 import it.gov.pagopa.pu.send.dto.SendNotificationFiltersDTO;
+import it.gov.pagopa.pu.send.dto.SendNotificationRowFiltersDTO;
 import it.gov.pagopa.pu.send.dto.generated.LegalFactDTO;
 import it.gov.pagopa.pu.send.dto.generated.StreamEventSummaryDTO;
 import it.gov.pagopa.pu.send.enums.FileStatus;
@@ -31,8 +32,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import uk.co.jemos.podam.api.PodamFactory;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -341,9 +343,9 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
       Mockito.eq(SendNotificationNoPII.class))
     ).thenReturn(updatedSendNotification);
 
-    List<StreamEventSummaryDTO> result = repository.pushStreamEventsHistory(sendNotificationId, streamEvents);
+    SendNotificationNoPII result = repository.pushStreamEventsHistory(sendNotificationId, streamEvents);
 
-    assertEquals(streamEvents, result);
+    assertSame(updatedSendNotification, result);
   }
 
   @Test
@@ -437,5 +439,81 @@ class SendNotificationNoPIIRepositoryExtImplTest extends BaseMongoRepositoryTest
     //THEN
     Assertions.assertNotNull(actualCampaignIdList);
     Assertions.assertEquals(0, actualCampaignIdList.size());
+  }
+
+  @Test
+  void whenFindOrganizationSendNotificationsByFiltersThenOk() {
+    // Given
+    SendNotificationRowFiltersDTO filters = podamFactory.manufacturePojo(SendNotificationRowFiltersDTO.class);
+    filters.setFetchAll(true);
+    Document expectedQuery = new Document(SendNotificationNoPII.Fields.organizationId, filters.getOrganizationId())
+      .append("$or", Arrays.asList(
+        new Document(SendNotificationNoPII.Fields.orgSubUnitCode, new Document("$in", filters.getOrgSubUnitCodes())),
+        new Document(SendNotificationNoPII.Fields.orgSubUnitCode, null)))
+      .append(SendNotificationNoPII.Fields.iun, filters.getIun())
+      .append("creationDate", new Document("$gte", filters.getDateFrom().atStartOfDay()).append("$lt", LocalDateTime.of(filters.getDateTo(), LocalTime.MAX.truncatedTo(ChronoUnit.MILLIS))))
+      .append(SendNotificationNoPII.Fields.status, new Document("$in", filters.getStatuses()))
+      .append(SendNotificationNoPIIRepositoryExtImpl.FIELD_RECIPIENT_FISCAL_CODE_HASH, filters.getFiscalCodeHash());
+    List<SendNotificationNoPII> notifications = podamFactory.manufacturePojo(List.class, SendNotificationNoPII.class);
+    Pageable pageable = PageRequest.of(0, notifications.size());
+
+    when(mongoTemplateMock.count(Mockito.argThat(q -> expectedQuery.equals(q.getQueryObject())), Mockito.eq(SendNotificationNoPII.class))).thenReturn(10L);
+    when(mongoTemplateMock.find(Mockito.argThat(q ->
+      expectedQuery.equals(q.getQueryObject())
+        && q.getLimit() == pageable.getPageSize()), Mockito.eq(SendNotificationNoPII.class)))
+      .thenReturn(notifications);
+
+    // When
+    Page<SendNotificationNoPII> result = repository.findOrganizationSendNotificationsByFilters(filters, pageable);
+
+    // Then
+    assertEquals(10L, result.getTotalElements());
+    assertEquals(notifications, result.getContent());
+  }
+
+  @Test
+  void givenOnlyDateFromWhenFindOrganizationSendNotificationsByFiltersThenNoDateCriteria() {
+    // Given
+    LocalDate dateFrom = LocalDate.of(2026, Month.JANUARY, 1);
+    SendNotificationRowFiltersDTO filters = SendNotificationRowFiltersDTO.builder()
+      .organizationId(1L)
+      .dateFrom(dateFrom)
+      .build();
+    Document expectedQuery = new Document(SendNotificationNoPII.Fields.organizationId, 1L)
+      .append(SendNotificationNoPII.Fields.orgSubUnitCode, null);
+    Pageable pageable = PageRequest.of(0, 10);
+
+    when(mongoTemplateMock.count(Mockito.argThat(q -> expectedQuery.equals(q.getQueryObject())), Mockito.eq(SendNotificationNoPII.class))).thenReturn(0L);
+    when(mongoTemplateMock.find(Mockito.argThat(q -> expectedQuery.equals(q.getQueryObject())), Mockito.eq(SendNotificationNoPII.class))).thenReturn(List.of());
+
+    // When
+    Page<SendNotificationNoPII> result = repository.findOrganizationSendNotificationsByFilters(filters, pageable);
+
+    // Then
+    assertEquals(0L, result.getTotalElements());
+    assertTrue(result.getContent().isEmpty());
+  }
+
+  @Test
+  void givenOnlyDateToWhenFindOrganizationSendNotificationsByFiltersThenNoDateCriteria() {
+    // Given
+    LocalDate dateTo = LocalDate.of(2026, Month.JANUARY, 31);
+    SendNotificationRowFiltersDTO filters = SendNotificationRowFiltersDTO.builder()
+      .organizationId(1L)
+      .dateTo(dateTo)
+      .build();
+    Document expectedQuery = new Document(SendNotificationNoPII.Fields.organizationId, 1L)
+      .append(SendNotificationNoPII.Fields.orgSubUnitCode, null);
+    Pageable pageable = PageRequest.of(0, 10);
+
+    when(mongoTemplateMock.count(Mockito.argThat(q -> expectedQuery.equals(q.getQueryObject())), Mockito.eq(SendNotificationNoPII.class))).thenReturn(0L);
+    when(mongoTemplateMock.find(Mockito.argThat(q -> expectedQuery.equals(q.getQueryObject())), Mockito.eq(SendNotificationNoPII.class))).thenReturn(List.of());
+
+    // When
+    Page<SendNotificationNoPII> result = repository.findOrganizationSendNotificationsByFilters(filters, pageable);
+
+    // Then
+    assertEquals(0L, result.getTotalElements());
+    assertTrue(result.getContent().isEmpty());
   }
 }
